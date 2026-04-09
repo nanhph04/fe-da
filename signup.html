@@ -1,0 +1,175 @@
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "secondary-fixed-dim": "#f7ba00",
+                  "primary-fixed-dim": "#ff5b4c",
+                  "primary-fixed": "#ff7668",
+                  "on-primary-container": "#4f0002",
+                  "surface-container-highest": "#262528",
+                  "error": "#ff6e84",
+                  "surface-variant": "#262528",
+                  "on-surface-variant": "#adaaad",
+                  "on-error-container": "#ffb2b9",
+                  "on-tertiary-fixed-variant": "#7a0007",
+                  "tertiary": "#ff7165",
+                  "primary": "#ff8e80",
+                  "on-secondary-container": "#fff6ec",
+                  "on-background": "#f9f5f8",
+                  "on-primary-fixed": "#000000",
+                  "on-tertiary": "#4a0002",
+                  "surface-tint": "#ff8e80",
+                  "tertiary-fixed": "#ff9287",
+                  "secondary-dim": "#ecb200",
+                  "surface-container": "#19191c",
+                  "tertiary-fixed-dim": "#ff7b6f",
+                  "on-secondary": "#553e00",
+                  "error-dim": "#d73357",
+                  "on-tertiary-container": "#1f0000",
+                  "on-error": "#490013",
+                  "on-primary": "#650003",
+                  "surface-dim": "#0e0e10",
+                  "surface": "#0e0e10",
+                  "outline": "#767577",
+                  "error-container": "#a70138",
+                  "inverse-on-surface": "#565457",
+                  "surface-container-lowest": "#000000",
+                  "inverse-primary": "#c1000c",
+                  "tertiary-dim": "#ff7165",
+                  "on-secondary-fixed-variant": "#674c00",
+                  "on-secondary-fixed": "#443100",
+                  "secondary-fixed": "#ffca4d",
+                  "primary-dim": "#e80f16",
+                  "on-tertiary-fixed": "#3a0002",
+                  "on-surface": "#f9f5f8",
+                  "secondary": "#fdc003",
+                  "secondary-container": "#785900",
+                  "background": "#0e0e10",
+                  "inverse-surface": "#fcf8fb",
+                  "tertiary-container": "#fd5046",
+                  "surface-bright": "#2c2c2f",
+                  "on-primary-fixed-variant": "#610003",
+                  "surface-container-high": "#1f1f22",
+                  "primary-container": "#ff7668",
+                  "outline-variant": "#48474a",
+                  "surface-container-low": "#131315"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Manrope"],
+                  "body": ["Inter"],
+                  "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+<style>body {
+    font-family: "Inter", sans-serif;
+    background-color: #0e0e10
+    }
+.headline-font {
+    font-family: "Manrope", sans-serif
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.bokeh-bg {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCr8QKxm6IY5Hhlg_8RKY_QHi4BkzTjZ-Ez185srdjNMIjE-2-O3d8Z9OaW5L-3mKBFw9DOnGU7VLGRudvUf52Gd487_neP-6FG4ROU5CkVHvN5iDKM-62UC7p5qrjzvstELv1Hxt4eu58K3uzTum_RiISzn2-eecEJDUjm8hdia67pOdDmDCgY4VCUj_gaMGTLN_Sy4hTfM7jr8VyQ2dZOutRsK_iTfYN-YFowp1or7i8BRcvQY0HRZ_wD87QxcUQ9IqqqNjCfrf4H);
+    background-size: cover;
+    background-position: center;
+    filter: blur(8px) brightness(0.3)
+    }
+.glass-morphism {
+    background: rgba(25, 25, 28, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px)
+    }</style>
+</head>
+<body class="flex flex-col min-h-screen text-on-surface overflow-hidden">
+<!-- TopNavBar Suppressed for transactional screen as per logic -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-8 py-6 bg-transparent">
+<div class="text-2xl font-black text-red-600 dark:text-red-500 uppercase tracking-tighter headline-font">
+      Aura Cinematic
+    </div>
+<div class="text-zinc-400 font-['Inter'] text-xs font-medium uppercase tracking-widest">
+<span class="hover:text-white transition-colors duration-300 cursor-pointer">Help</span>
+</div>
+</header>
+<!-- Background Layer -->
+<div class="absolute inset-0 z-0">
+<div class="bokeh-bg w-full h-full" data-alt="extreme out of focus cinematic bokeh lights in deep red and amber tones over a dark atmospheric background"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-surface-dim/20 via-surface-dim/60 to-surface-dim"></div>
+</div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 flex-grow flex items-center justify-center px-6">
+<div class="w-full max-w-[480px] glass-morphism p-10 md:p-12 rounded-lg border border-white/5 shadow-2xl">
+<div class="space-y-2 mb-10">
+<h1 class="headline-font text-4xl font-extrabold tracking-tight text-on-surface">
+          Join the Gallery.
+        </h1>
+<p class="text-on-surface-variant font-body text-sm leading-relaxed">
+          Unlock a premium cinematic experience designed for the discerning viewer.
+        </p>
+</div>
+<form action="#" class="space-y-6" method="POST">
+<!-- Email Input -->
+<div class="space-y-2">
+<label class="font-label text-xs font-semibold uppercase tracking-widest text-secondary opacity-80" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-sm py-4 pl-12 pr-4 text-on-surface focus:ring-1 focus:ring-primary/50 placeholder:text-zinc-700 transition-all font-body" id="email" name="email" placeholder="name@example.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<label class="font-label text-xs font-semibold uppercase tracking-widest text-secondary opacity-80" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">lock</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-sm py-4 pl-12 pr-4 text-on-surface focus:ring-1 focus:ring-primary/50 placeholder:text-zinc-700 transition-all font-body" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Primary Action -->
+<div class="pt-4">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed py-4 rounded-sm headline-font font-bold text-sm uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/20" type="submit">
+            Create Account
+          </button>
+</div>
+</form>
+<!-- Secondary Links -->
+<div class="mt-10 pt-8 border-t border-white/5 space-y-4 text-center">
+<p class="text-on-surface-variant text-sm font-body">
+          Already have an account? 
+          <a class="text-primary hover:text-primary-fixed transition-colors font-semibold ml-1" href="#">Sign In</a>
+</p>
+<p class="text-zinc-600 text-[10px] uppercase tracking-widest font-label leading-loose">
+          By continuing, you agree to Aura Cinematic's <br/>
+<a class="underline underline-offset-4 hover:text-zinc-400 transition-colors" href="#">Terms of Service</a> &amp; 
+          <a class="underline underline-offset-4 hover:text-zinc-400 transition-colors" href="#">Privacy Policy</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Footer Shell (Reflecting Shared Component Logic) -->
+<footer class="fixed bottom-0 w-full z-40 opacity-50 flex justify-center gap-8 py-10 bg-transparent">
+<div class="font-['Inter'] text-xs font-medium uppercase tracking-widest text-zinc-600 flex gap-8">
+<a class="hover:text-zinc-300 transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-zinc-300 transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-zinc-300 transition-colors" href="#">Cookie Preferences</a>
+</div>
+</footer>
+</body></html>

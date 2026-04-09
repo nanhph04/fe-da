@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Change Password - Velvet Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ff9287",
+                    "on-primary-fixed": "#000000",
+                    "on-error": "#490013",
+                    "surface-dim": "#0e0e10",
+                    "on-background": "#f9f5f8",
+                    "inverse-on-surface": "#565457",
+                    "surface-bright": "#2c2c2f",
+                    "inverse-primary": "#c1000c",
+                    "on-primary-container": "#4f0002",
+                    "on-secondary-container": "#fff6ec",
+                    "secondary-fixed": "#ffca4d",
+                    "primary-fixed-dim": "#ff5b4c",
+                    "surface-tint": "#ff8e80",
+                    "inverse-surface": "#fcf8fb",
+                    "error": "#ff6e84",
+                    "on-surface-variant": "#adaaad",
+                    "on-tertiary": "#4a0002",
+                    "on-secondary-fixed-variant": "#674c00",
+                    "on-tertiary-container": "#1f0000",
+                    "error-dim": "#d73357",
+                    "on-error-container": "#ffb2b9",
+                    "secondary-fixed-dim": "#f7ba00",
+                    "secondary-container": "#785900",
+                    "on-primary-fixed-variant": "#610003",
+                    "primary": "#ff8e80",
+                    "surface-variant": "#262528",
+                    "on-surface": "#f9f5f8",
+                    "primary-container": "#ff7668",
+                    "surface-container-low": "#131315",
+                    "outline-variant": "#48474a",
+                    "on-secondary": "#553e00",
+                    "secondary-dim": "#ecb200",
+                    "surface-container-lowest": "#000000",
+                    "error-container": "#a70138",
+                    "tertiary-fixed-dim": "#ff7b6f",
+                    "surface-container-highest": "#262528",
+                    "surface-container": "#19191c",
+                    "surface": "#0e0e10",
+                    "secondary": "#fdc003",
+                    "primary-dim": "#e80f16",
+                    "on-tertiary-fixed-variant": "#7a0007",
+                    "on-secondary-fixed": "#443100",
+                    "tertiary": "#ff7165",
+                    "on-tertiary-fixed": "#3a0002",
+                    "background": "#0e0e10",
+                    "on-primary": "#650003",
+                    "primary-fixed": "#ff7668",
+                    "outline": "#767577",
+                    "tertiary-dim": "#ff7165",
+                    "tertiary-container": "#fd5046",
+                    "surface-container-high": "#1f1f22"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-effect { backdrop-filter: blur(24px); }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30">
+<!-- TopNavBar (Fixed) -->
+<nav class="fixed top-0 w-full z-50 bg-zinc-950/40 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full no-line-rule tonal-shift shadow-none">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black uppercase tracking-tighter text-red-600 dark:text-red-500 font-headline">Velvet Gallery</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-4 py-1.5 bg-surface-container rounded-full border border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="payments">payments</span>
+<span class="font-headline font-bold text-sm tracking-tight text-on-surface">1,240 <span class="text-[10px] text-secondary/70 uppercase ml-0.5">Coins</span></span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors cursor-pointer" data-icon="search">search</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors cursor-pointer" data-icon="notifications">notifications</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="Viewer Profile" data-alt="close-up portrait of a sophisticated man with a beard looking forward against a dark moody architectural background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5OSXj_d26McnQ9Vt9dKvZmgEowBn94TGmQIA-U-yczlzNB6DQWDkJkNuDIgSDC8piuBGRphpCZ5zEcCTkwTvKS9hPDOcTGurc2k7AsiFKTaRDcsMK3xv3-tUh4d02hVyW0SoTYCYqw9iTqeWs6u4q9O4gkZ2-PeoY4H5lOnRPfRDXo97txVb5xsWummgrB5z1Rgw-Y8MM_sfFTlg5nnlgE375j59xHYXl_B_uFV59Qp2mRJWDMj7TaHZYF7eEHS7LOABuKa_vXjnj"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex flex-col h-screen py-8 h-full w-64 fixed left-0 top-0 bg-zinc-950 bg-zinc-900/50 shadow-2xl z-40">
+<div class="px-8 mb-12 mt-16">
+<div class="flex flex-col gap-1">
+<span class="font-headline text-xl font-bold text-red-600">Alex Mercer</span>
+<span class="text-xs text-secondary tracking-widest uppercase opacity-80">Gold Member</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-4 py-3 transition-all duration-300 hover:bg-zinc-900 hover:text-white text-zinc-500 pl-5 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-4 py-3 transition-all duration-300 hover:bg-zinc-900 hover:text-white text-zinc-500 pl-5 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+<span>Movies</span>
+</a>
+<a class="flex items-center gap-4 py-3 transition-all duration-300 hover:bg-zinc-900 hover:text-white text-zinc-500 pl-5 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="tv">tv</span>
+<span>Series</span>
+</a>
+<a class="flex items-center gap-4 py-3 transition-all duration-300 hover:bg-zinc-900 hover:text-white text-zinc-500 pl-5 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span>My List</span>
+</a>
+<a class="flex items-center gap-4 py-3 transition-all duration-300 text-amber-400 font-bold border-l-4 border-amber-400 pl-4 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="px-6 mb-4">
+<button class="w-full py-3 rounded-lg bg-secondary/10 text-secondary border border-secondary/20 font-headline font-bold text-sm hover:bg-secondary/20 transition-colors">
+                Upgrade to 4K
+            </button>
+</div>
+<div class="mt-auto space-y-1">
+<a class="flex items-center gap-4 py-3 transition-all duration-300 hover:bg-zinc-900 hover:text-white text-zinc-500 pl-5 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Help</span>
+</a>
+<a class="flex items-center gap-4 py-3 transition-all duration-300 hover:bg-zinc-900 hover:text-white text-zinc-500 pl-5 font-headline" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 pt-24 pb-20 px-6 lg:px-12 min-h-screen flex flex-col items-center">
+<div class="w-full max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+<!-- Header Section -->
+<div class="mb-12">
+<h1 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface mb-3">Change Password</h1>
+<p class="text-on-surface-variant text-lg max-w-xl">Secure your account with a strong, unique password.</p>
+</div>
+<!-- Bento Layout Content -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Form -->
+<div class="lg:col-span-7 space-y-8">
+<form class="space-y-6">
+<!-- Current Password -->
+<div class="group">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">Current Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-0 focus:ring-1 focus:ring-primary rounded-sm py-4 px-5 text-on-surface placeholder:text-zinc-700 transition-all" placeholder="••••••••••••" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-on-surface cursor-pointer" data-icon="visibility">visibility</span>
+</div>
+</div>
+<div class="h-px bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+<!-- New Password -->
+<div class="group">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">New Password</label>
+<div class="relative mb-3">
+<input class="w-full bg-surface-container-lowest border-0 focus:ring-1 focus:ring-primary rounded-sm py-4 px-5 text-on-surface placeholder:text-zinc-700 transition-all" placeholder="Create new password" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-on-surface cursor-pointer" data-icon="visibility_off">visibility_off</span>
+</div>
+<!-- Strength Indicator -->
+<div class="flex gap-1.5 h-1 w-full rounded-full overflow-hidden">
+<div class="h-full w-1/4 bg-primary rounded-full"></div>
+<div class="h-full w-1/4 bg-primary rounded-full"></div>
+<div class="h-full w-1/4 bg-zinc-800 rounded-full"></div>
+<div class="h-full w-1/4 bg-zinc-800 rounded-full"></div>
+</div>
+<p class="mt-2 text-[10px] text-primary uppercase font-bold tracking-wider">Strength: Medium</p>
+</div>
+<!-- Confirm Password -->
+<div class="group">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 group-focus-within:text-primary transition-colors">Confirm New Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-0 focus:ring-1 focus:ring-primary rounded-sm py-4 px-5 text-on-surface placeholder:text-zinc-700 transition-all" placeholder="Repeat new password" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-on-surface cursor-pointer" data-icon="lock_reset">lock_reset</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-4 pt-6">
+<button class="flex-1 bg-primary hover:bg-primary-container text-on-primary-fixed font-headline font-extrabold uppercase tracking-widest py-4 px-8 rounded-sm shadow-[0_0_20px_rgba(255,142,128,0.2)] transition-all active:scale-95" type="submit">
+                                Update Password
+                            </button>
+<button class="flex-1 bg-surface-container border border-outline-variant/20 hover:bg-surface-bright text-on-surface font-headline font-bold py-4 px-8 rounded-sm transition-all" type="button">
+                                Cancel
+                            </button>
+</div>
+</form>
+</div>
+<!-- Right Column: Requirements & Info -->
+<div class="lg:col-span-5">
+<div class="bg-surface-container-low p-8 rounded-xl space-y-8 border border-outline-variant/10 shadow-xl">
+<div>
+<h3 class="font-headline font-bold text-secondary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="verified_user" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+                                Security Requirements
+                            </h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-3 group">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="text-sm text-on-surface font-medium">Minimum Length</p>
+<p class="text-xs text-on-surface-variant">At least 8 characters long.</p>
+</div>
+</li>
+<li class="flex items-start gap-3 group">
+<span class="material-symbols-outlined text-primary text-lg mt-0.5" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="text-sm text-on-surface font-medium">Character Variety</p>
+<p class="text-xs text-on-surface-variant">At least one number (0-9).</p>
+</div>
+</li>
+<li class="flex items-start gap-3 group">
+<span class="material-symbols-outlined text-zinc-600 text-lg mt-0.5" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<div>
+<p class="text-sm text-on-surface-variant font-medium">Special Characters</p>
+<p class="text-xs text-on-surface-variant">At least one special character (!, @, #, etc).</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="p-6 bg-surface-container-highest/30 rounded-lg border-l-2 border-secondary/50">
+<h4 class="text-xs font-bold uppercase text-secondary tracking-widest mb-2">Pro Tip</h4>
+<p class="text-xs leading-relaxed text-on-surface-variant/80 italic">Using a password manager? Make sure to update your saved credentials after changing your password here.</p>
+</div>
+<!-- Visual Flare -->
+<div class="relative h-24 w-full rounded-lg overflow-hidden grayscale opacity-30">
+<img class="w-full h-full object-cover" data-alt="close-up of electronic circuit board with glowing green and blue light paths in a dark server room setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYtEcII1weHwAdgfsnOIeFbROUFDg0EoT9G6mFXWTs7xrYr4wRIJV7kcaL17CyPRCC3ezPVSPOazC5SKH_c6JXcth55qbF4X3T8pic6myOTNHV8s2jS2PnUlbwwjW_Ow_2bou3GmMdHVYIG3i6KJJ0LrkQvPS5KiPhZ6YOEzphKcHgzRztT6--e0ODQ02mB6H-fIDTkNZgBFCvETCGy2WpStIU-7O4bZ3NIw4WL7Tkf12rXpL5b6wsw3sEnYF_xXMK-W8nyN5IdbNh"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-zinc-950/80 backdrop-blur-2xl z-50 bg-gradient-to-t from-black to-transparent shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+<a class="flex flex-col items-center justify-center text-zinc-500 tap-highlight-none active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Browse</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 tap-highlight-none active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 tap-highlight-none active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Purchases</span>
+</a>
+<a class="flex flex-col items-center justify-center text-red-500 scale-110 tap-highlight-none active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Profile</span>
+</a>
+</nav>
+</body></html>
