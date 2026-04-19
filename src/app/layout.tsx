@@ -27,6 +27,7 @@ export default function RootLayout({
       lang="en"
       className={`dark ${inter.variable} ${manrope.variable} h-full antialiased`}
       style={{ colorScheme: "dark" }}
+      suppressHydrationWarning
     >
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -36,7 +37,7 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      <body className="min-h-full flex flex-col bg-[#0e0e10] text-[#f9f5f8]">
+      <body className="min-h-full flex flex-col bg-[#0e0e10] text-[#f9f5f8]" suppressHydrationWarning>
         {children}
       </body>
     </html>
