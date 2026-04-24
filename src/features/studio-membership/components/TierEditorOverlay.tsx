@@ -1,9 +1,22 @@
 import { useState } from "react";
 
-export function TierEditorOverlay({ tier, onClose }: { tier: any, onClose: () => void }) {
+export function TierEditorOverlay({ tier, onClose, onSave }: { tier: any, onClose: () => void, onSave: (tier: any) => void }) {
   const [name, setName] = useState(tier?.name || "");
   const [price, setPrice] = useState(tier?.price || 500);
   const [perks, setPerks] = useState<string[]>(tier?.perks || ["Loyalty badges", "Custom emojis"]);
+
+  const handleSave = () => {
+    onSave({
+      ...tier,
+      name,
+      price,
+      perks,
+      // If it's a new tier, provide default stats
+      id: tier?.id || Date.now(),
+      subscribers: tier?.subscribers || 0,
+      revenue: tier?.revenue || "0",
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -76,7 +89,7 @@ export function TierEditorOverlay({ tier, onClose }: { tier: any, onClose: () =>
         <div className="p-6 border-t border-[#262528] bg-[#19191c] flex gap-4">
           <button onClick={onClose} className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:text-white transition-colors">Cancel</button>
           <button 
-            onClick={() => { alert("Tier Saved"); onClose(); }}
+            onClick={handleSave}
             className="flex-[2] py-3 bg-[#ff8e80] hover:bg-[#ff7668] text-black font-bold text-sm rounded-sm transition-colors font-headline"
           >
             Save Tier

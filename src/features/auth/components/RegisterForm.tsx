@@ -6,31 +6,49 @@ import * as z from "zod";
 import Link from "next/link";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { authService } from "@/features/auth/services/authService";
 
 const registerSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
   });
 
   const onSubmit = async (data: RegisterValues) => {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log("Registered:", data);
+    setServerError(null);
+    try {
+      const res = await authService.register({
+        email: data.email,
+        password: data.password,
+      });
+      
+      if (res.success) {
+        // Lưu tạm email/password vào sessionStorage để gửi tiếp lúc Verify OTP
+        sessionStorage.setItem("pendingVerify", JSON.stringify({
+          email: data.email,
+          password: data.password
+        }));
+        router.push("/verify-otp");
+      } else {
+        setServerError(res.mess || "Registration failed");
+      }
+    } catch (err: any) {
+      setServerError(err.mess || err.message || "An error occurred during registration");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -49,25 +67,6 @@ export function RegisterForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          {/* Full Name */}
-          <div className="group">
-            <label className="block text-[10px] uppercase tracking-[0.2em] text-[#adaaad] mb-2 ml-1" style={{ fontFamily: 'var(--font-headline)' }}>
-              Full Name
-            </label>
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="John Doe" 
-                className={`w-full bg-[#000000] border-none ring-1 ring-[#48474a]/30 focus:ring-[#ff8e80]/50 rounded-sm py-4 px-4 pr-12 text-[#f9f5f8] placeholder:text-zinc-700 transition-all font-sans focus:outline-none ${errors.fullName ? 'ring-[#ff6e84]' : ''}`}
-                {...register("fullName")}
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none flex items-center justify-center">
-                <span className="material-symbols-outlined">person</span>
-              </div>
-            </div>
-            {errors.fullName && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.fullName.message}</p>}
-          </div>
-
           {/* Email */}
           <div className="group">
             <label className="block text-[10px] uppercase tracking-[0.2em] text-[#adaaad] mb-2 ml-1" style={{ fontFamily: 'var(--font-headline)' }}>
@@ -106,30 +105,17 @@ export function RegisterForm() {
             {errors.password && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.password.message}</p>}
           </div>
 
-          {/* Confirm Password */}
-          <div className="group">
-            <label className="block text-[10px] uppercase tracking-[0.2em] text-[#adaaad] mb-2 ml-1" style={{ fontFamily: 'var(--font-headline)' }}>
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className={`w-full bg-[#000000] border-none ring-1 ring-[#48474a]/30 focus:ring-[#ff8e80]/50 rounded-sm py-4 px-4 pr-12 text-[#f9f5f8] placeholder:text-zinc-700 transition-all font-sans focus:outline-none ${errors.confirmPassword ? 'ring-[#ff6e84]' : ''}`}
-                {...register("confirmPassword")}
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none flex items-center justify-center">
-                <span className="material-symbols-outlined">lock</span>
-              </div>
+          {serverError && (
+            <div className="p-3 bg-[#ff6e84]/10 border border-[#ff6e84]/30 rounded-sm">
+              <p className="text-xs text-[#ff6e84] text-center font-medium">{serverError}</p>
             </div>
-            {errors.confirmPassword && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.confirmPassword.message}</p>}
-          </div>
+          )}
         </div>
 
         <button 
           type="submit"
           disabled={isLoading}
-          className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4"
+          className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4 disabled:opacity-50"
           style={{ fontFamily: 'var(--font-headline)' }}
         >
           {isLoading ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : null}

@@ -1,25 +1,46 @@
 import { useState } from "react";
 
-export function WithdrawFundsOverlay({ onClose }: { onClose: () => void }) {
+export function WithdrawFundsOverlay({ balance, onClose, onSuccess }: { balance: number, onClose: () => void, onSuccess: (amount: number) => void }) {
   const [amount, setAmount] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const conversionRate = 100; // 1 AC = 100 VND
+
+  const handleWithdraw = () => {
+    if (amount <= 0 || amount > balance) return;
+    setIsProcessing(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsProcessing(false);
+      onSuccess(amount);
+    }, 2500);
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#131315] w-full max-w-lg rounded-xl border border-[#262528] shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-[#131315] w-full max-w-lg rounded-xl border border-[#262528] shadow-2xl overflow-hidden flex flex-col relative">
+        {/* Processing State */}
+        {isProcessing && (
+           <div className="absolute inset-0 z-50 bg-[#0e0e10]/90 backdrop-blur-md flex flex-col items-center justify-center">
+             <div className="w-16 h-16 border-4 border-[#ff8e80] border-t-transparent rounded-full animate-spin mb-6"></div>
+             <h3 className="font-headline font-bold text-xl text-white">Processing Withdrawal</h3>
+             <p className="text-sm text-zinc-400 mt-2 text-center max-w-xs">Connecting to secure payment gateway. Please do not close this window.</p>
+           </div>
+        )}
+
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#262528] flex justify-between items-center bg-[#19191c]">
           <h3 className="text-xl font-headline font-bold text-white flex items-center gap-2">
             <span className="material-symbols-outlined text-[#ff8e80]">account_balance</span>
             Withdraw Funds
           </h3>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+          <button onClick={onClose} disabled={isProcessing} className="text-zinc-500 hover:text-white transition-colors disabled:opacity-50">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-8">
+        <div className={`p-8 space-y-8 ${isProcessing ? 'opacity-30 pointer-events-none' : ''}`}>
           {/* Amount Input */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">Withdraw Amount (AC)</label>
@@ -36,9 +57,9 @@ export function WithdrawFundsOverlay({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div className="flex justify-between items-center mt-2">
-              <span className="text-[10px] text-zinc-500">Available: <strong className="text-[#fdc003]">850,200 AC</strong></span>
+              <span className="text-[10px] text-zinc-500">Available: <strong className="text-[#fdc003]">{balance.toLocaleString()} AC</strong></span>
               <button 
-                onClick={() => setAmount(850200)}
+                onClick={() => setAmount(balance)}
                 className="text-[10px] font-bold text-[#ff8e80] uppercase hover:underline"
               >
                 Max
@@ -80,10 +101,10 @@ export function WithdrawFundsOverlay({ onClose }: { onClose: () => void }) {
 
         {/* Action Buttons */}
         <div className="p-6 border-t border-[#262528] bg-[#19191c] flex gap-4">
-          <button onClick={onClose} className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:text-white transition-colors">Cancel</button>
+          <button onClick={onClose} disabled={isProcessing} className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:text-white transition-colors disabled:opacity-50">Cancel</button>
           <button 
-            disabled={amount <= 0 || amount > 850200}
-            onClick={() => { alert("Withdrawal requested"); onClose(); }}
+            disabled={amount <= 0 || amount > balance || isProcessing}
+            onClick={handleWithdraw}
             className="flex-[2] py-3 bg-[#ff8e80] hover:bg-[#ff7668] text-black font-bold text-sm rounded-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-headline"
           >
             Confirm Withdrawal

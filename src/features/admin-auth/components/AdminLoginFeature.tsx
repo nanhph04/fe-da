@@ -2,16 +2,38 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { authService } from "@/features/auth/services/authService";
 
 export function AdminLoginFeature() {
-  const [adminId, setAdminId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passcode, setPasscode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  
+  const { setAuthData } = useAuth();
+  const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login logic, then route to Admin dashboard
-    console.log("Admin login attempted");
+    setIsLoading(true);
+    setServerError(null);
+
+    try {
+      const res = await authService.login({ email, password });
+      if (res.success && res.data?.accessToken) {
+        setAuthData(res.data.accessToken);
+        router.push("/admin");
+      } else {
+        setServerError(res.mess || "Login failed");
+      }
+    } catch (err: any) {
+      setServerError(err.mess || err.message || "Authentication failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,15 +57,15 @@ export function AdminLoginFeature() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Administrator UID</label>
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Administrator Email</label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-3.5 text-zinc-600 text-sm">badge</span>
+              <span className="material-symbols-outlined absolute left-3 top-3.5 text-zinc-600 text-sm">alternate_email</span>
               <input 
-                type="text" 
+                type="email" 
                 required
-                value={adminId}
-                onChange={e => setAdminId(e.target.value)}
-                placeholder="ADM-XXXX"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="admin@console.com"
                 className="w-full bg-[#111] border border-zinc-800 focus:border-red-600 focus:ring-1 focus:ring-red-600 focus:bg-black rounded-none py-3 pl-10 pr-4 text-white font-mono text-sm transition-all outline-none"
               />
             </div>
@@ -64,26 +86,19 @@ export function AdminLoginFeature() {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-red-500 uppercase tracking-widest block flex items-center gap-1">
-              <span className="material-symbols-outlined text-[12px]">security</span> 2FA Protocol
-            </label>
-            <input 
-              type="text" 
-              required
-              maxLength={6}
-              value={passcode}
-              onChange={e => setPasscode(e.target.value.replace(/\D/g, ''))}
-              placeholder="000000"
-              className="w-full bg-[#111] border border-zinc-800 focus:border-red-600 focus:ring-1 focus:ring-red-600 focus:bg-black rounded-none py-3 px-4 text-white font-mono text-center tracking-[1em] transition-all outline-none"
-            />
-          </div>
+          {serverError && (
+            <div className="p-3 bg-[#ff0000]/10 border border-[#ff0000]/30 rounded-none w-full">
+              <p className="text-xs text-[#ff0000] text-center font-mono">{serverError}</p>
+            </div>
+          )}
 
           <button 
             type="submit"
-            className="w-full bg-red-600 hover:bg-red-500 text-white font-black font-headline uppercase tracking-widest text-xs py-4 transition-all hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-[0.98]"
+            disabled={isLoading}
+            className="flex justify-center items-center w-full bg-red-600 hover:bg-red-500 text-white font-black font-headline uppercase tracking-widest text-xs py-4 transition-all hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-[0.98] disabled:opacity-50"
           >
-            Authenticate
+            {isLoading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
+            {isLoading ? "Authenticating..." : "Authenticate"}
           </button>
         </form>
 

@@ -1,9 +1,14 @@
+"use client";
+import { UploadFormData } from "./StudioUploadFeature";
+
 interface UploadStep2MonetizationProps {
+  formData: UploadFormData;
+  updateFormData: (data: Partial<UploadFormData>) => void;
   onPrev: () => void;
   onNext: () => void;
 }
 
-export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2MonetizationProps) {
+export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNext }: UploadStep2MonetizationProps) {
   return (
     <div className="max-w-6xl mx-auto p-8 pb-32 w-full animate-in fade-in slide-in-from-right-4 duration-500">
       {/* Page Header */}
@@ -20,7 +25,7 @@ export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2Monetizat
             <div className="flex justify-between items-end">
               <div>
                 <h3 className="text-lg font-bold font-headline text-white">Video Listing Price</h3>
-                <p className="text-sm text-zinc-400">Set the access fee in Aura Coins</p>
+                <p className="text-sm text-zinc-400">Set the access fee in Aura Coins (set to 0 for Free)</p>
               </div>
               <div className="text-right">
                 <span className="text-xs text-[#fdc003] font-bold uppercase tracking-widest">Premium Content</span>
@@ -33,7 +38,9 @@ export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2Monetizat
               </div>
               <input 
                 type="number" 
-                defaultValue="500"
+                value={formData.price}
+                onChange={e => updateFormData({ price: Number(e.target.value) })}
+                min={0}
                 className="w-full bg-black/50 border border-zinc-800 rounded-lg py-6 pl-16 pr-24 text-4xl font-extrabold font-headline text-white focus:ring-2 focus:ring-[#fdc003]/50 transition-all outline-none" 
               />
               <div className="absolute inset-y-0 right-6 flex items-center">
@@ -42,31 +49,29 @@ export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2Monetizat
             </div>
             
             <div className="flex gap-4">
-              <button className="bg-[#19191c] px-4 py-2 rounded text-xs font-bold text-zinc-400 hover:text-white transition-colors border border-zinc-800">100 AC</button>
-              <button className="bg-[#fdc003]/20 border-[#fdc003]/50 px-4 py-2 rounded text-xs font-bold text-[#fdc003] hover:text-[#fdc003] transition-colors border">500 AC</button>
-              <button className="bg-[#19191c] px-4 py-2 rounded text-xs font-bold text-zinc-400 hover:text-white transition-colors border border-zinc-800">1,000 AC</button>
-              <button className="bg-[#19191c] px-4 py-2 rounded text-xs font-bold text-zinc-400 hover:text-white transition-colors border border-zinc-800">Custom</button>
+              <button type="button" onClick={() => updateFormData({ price: 0 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 0 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>Free</button>
+              <button type="button" onClick={() => updateFormData({ price: 100 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 100 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>100 AC</button>
+              <button type="button" onClick={() => updateFormData({ price: 500 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 500 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>500 AC</button>
+              <button type="button" onClick={() => updateFormData({ price: 1000 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 1000 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>1,000 AC</button>
             </div>
           </section>
 
-          {/* Ad Sharing Toggle */}
-          <section className="bg-[#131315] p-8 rounded-xl border border-[#262528]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-red-950/30 rounded-lg">
-                  <span className="material-symbols-outlined text-[#ff8e80]">ads_click</span>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold font-headline">Ad Revenue Sharing</h3>
-                  <p className="text-sm text-zinc-500 max-w-sm mt-1">Allow non-paying users to watch with ads. You receive 40% of generated ad revenue.</p>
-                </div>
-              </div>
-              
-              <div className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ff8e80]"></div>
-              </div>
+          {/* Tier Required Section */}
+          <section className="bg-[#131315] p-8 rounded-xl border border-[#262528] space-y-4">
+            <div>
+               <h3 className="text-lg font-bold font-headline text-white">Required Membership Tier</h3>
+               <p className="text-sm text-zinc-400">Optional. Only allow users with this tier level to access.</p>
             </div>
+            <select 
+               value={formData.requiredTierLevel || ""}
+               onChange={e => updateFormData({ requiredTierLevel: e.target.value ? Number(e.target.value) : null })}
+               className="w-full bg-[#19191c] border-0 rounded-lg text-sm text-zinc-200 font-medium py-3 px-4 focus:ring-1 focus:ring-[#ff8e80] transition-all outline-none"
+            >
+               <option value="">None (Available to all)</option>
+               <option value="1">Tier Level 1</option>
+               <option value="2">Tier Level 2</option>
+               <option value="3">Tier Level 3</option>
+            </select>
           </section>
         </div>
 
@@ -79,8 +84,8 @@ export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2Monetizat
               
               <div className="space-y-6">
                 <div className="flex justify-between items-center text-zinc-400">
-                  <span className="text-sm">Gross Price (500 AC)</span>
-                  <span className="font-headline text-white">50,000 VND</span>
+                  <span className="text-sm">Gross Price ({formData.price} AC)</span>
+                  <span className="font-headline text-white">{formData.price * 100} VND</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
@@ -88,12 +93,7 @@ export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2Monetizat
                     <span className="text-sm text-zinc-400">Platform Fee</span>
                     <span className="px-1.5 py-0.5 bg-zinc-800 text-[10px] font-bold rounded text-zinc-400">10%</span>
                   </div>
-                  <span className="font-headline text-red-500">- 5,000 VND</span>
-                </div>
-                
-                <div className="flex justify-between items-center text-zinc-400">
-                  <span className="text-sm">Transaction Fee</span>
-                  <span className="font-headline text-red-500">- 1,000 VND</span>
+                  <span className="font-headline text-red-500">- {formData.price * 10} VND</span>
                 </div>
                 
                 <div className="h-[1px] bg-zinc-800"></div>
@@ -102,7 +102,7 @@ export function UploadStep2Monetization({ onPrev, onNext }: UploadStep2Monetizat
                   <div className="flex justify-between items-end">
                     <div>
                       <p className="text-xs font-bold text-[#fdc003] uppercase tracking-widest mb-1">Estimated Net</p>
-                      <p className="text-4xl font-extrabold font-headline text-white">44,000 VND</p>
+                      <p className="text-4xl font-extrabold font-headline text-white">{formData.price * 90} VND</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] text-zinc-500 italic">Per purchase</p>

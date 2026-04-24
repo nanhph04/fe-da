@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { DiscoveryFeature } from "@/features/discovery/components/DiscoveryFeature";
 
 export default function Home() {
-  redirect("/library");
+  return <DiscoveryFeature />;
 }

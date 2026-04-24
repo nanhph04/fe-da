@@ -5,8 +5,29 @@ import { UploadStep1Details } from "./UploadStep1Details";
 import { UploadStep2Monetization } from "./UploadStep2Monetization";
 import { UploadStep3Review } from "./UploadStep3Review";
 
+export interface UploadFormData {
+  title: string;
+  description: string;
+  categories: string[];
+  visibility: "public" | "private";
+  price: number;
+  requiredTierLevel: number | null;
+}
+
 export function StudioUploadFeature() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<UploadFormData>({
+    title: "The Ethereal Horizon: A Cinematic Journey Through Iceland",
+    description: "Exploring the southern coast of Iceland during the late autumn transition. This film captures the raw power of the Atlantic and the silent majesty of the glacial plateaus. All shots captured in 8K RAW.",
+    categories: ["Cinematic Travel"],
+    visibility: "public",
+    price: 0,
+    requiredTierLevel: null
+  });
+
+  const updateFormData = (data: Partial<UploadFormData>) => {
+    setFormData(prev => ({ ...prev, ...data }));
+  };
 
   return (
     <div className="min-h-screen bg-[#0e0e10]">
@@ -32,18 +53,27 @@ export function StudioUploadFeature() {
 
       {/* Render Steps */}
       {currentStep === 1 && (
-        <UploadStep1Details onNext={() => setCurrentStep(2)} />
+        <UploadStep1Details 
+          formData={formData}
+          updateFormData={updateFormData}
+          onNext={() => setCurrentStep(2)} 
+        />
       )}
       
       {currentStep === 2 && (
         <UploadStep2Monetization 
+          formData={formData}
+          updateFormData={updateFormData}
           onPrev={() => setCurrentStep(1)} 
           onNext={() => setCurrentStep(3)} 
         />
       )}
       
       {currentStep === 3 && (
-        <UploadStep3Review onPrev={() => setCurrentStep(2)} />
+        <UploadStep3Review 
+          formData={formData}
+          onPrev={() => setCurrentStep(2)} 
+        />
       )}
     </div>
   );

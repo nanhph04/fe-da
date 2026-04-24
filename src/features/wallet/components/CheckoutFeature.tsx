@@ -1,6 +1,31 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function CheckoutFeature() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // In a real app, we'd fetch package details by ID. Mocking here.
+  const packId = searchParams?.get('pack') || "1";
+  
+  const handlePayment = () => {
+    setIsProcessing(true);
+    // Simulate API Call
+    setTimeout(() => {
+      setIsProcessing(false);
+      setIsSuccess(true);
+      // Simulate Success Delay and redirect back to wallet
+      setTimeout(() => {
+        router.push("/wallet");
+      }, 2000);
+    }, 2000);
+  };
+
   return (
     <main className="md:pl-64 max-w-7xl mx-auto px-6 py-12 md:py-24 flex flex-col md:flex-row gap-12 min-h-screen">
       {/* Left Column: Package Summary */}
@@ -19,7 +44,7 @@ export function CheckoutFeature() {
           </div>
           <div className="relative z-10 space-y-6">
             <div className="space-y-1">
-              <span className="text-[#fdc003] text-xs font-bold uppercase tracking-widest">Selected Package</span>
+              <span className="text-[#fdc003] text-xs font-bold uppercase tracking-widest">Selected Package ID: {packId}</span>
               <h3 className="text-4xl font-black text-[#f9f5f8] font-headline">5,000 AC</h3>
             </div>
             <div className="flex items-center gap-3 bg-[#785900]/20 py-2 px-4 rounded-lg w-fit">
@@ -54,10 +79,32 @@ export function CheckoutFeature() {
       </aside>
 
       {/* Right Column: Checkout Area */}
-      <section className="flex-1 space-y-8">
+      <section className="flex-1 space-y-8 relative">
         
+        {/* Processing / Success Overlay */}
+        {(isProcessing || isSuccess) && (
+          <div className="absolute inset-0 z-50 bg-[#131315]/80 backdrop-blur-sm rounded-xl flex items-center justify-center min-h-[500px]">
+             <div className="text-center space-y-4 animate-in zoom-in duration-300">
+               {isProcessing ? (
+                 <>
+                   <div className="w-16 h-16 border-4 border-[#ff8e80] border-t-transparent rounded-full animate-spin mx-auto"></div>
+                   <h3 className="font-headline font-bold text-xl text-white">Processing Payment...</h3>
+                 </>
+               ) : (
+                 <>
+                   <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                     <span className="material-symbols-outlined text-green-500 text-5xl">check_circle</span>
+                   </div>
+                   <h3 className="font-headline font-bold text-xl text-white pt-2">Payment Successful!</h3>
+                   <p className="text-zinc-400 text-sm">Updating your wallet...</p>
+                 </>
+               )}
+             </div>
+          </div>
+        )}
+
         {/* QR Code Section */}
-        <div className="bg-[#19191c] rounded-xl overflow-hidden shadow-2xl">
+        <div className={`bg-[#19191c] rounded-xl overflow-hidden shadow-2xl transition-all ${isProcessing || isSuccess ? 'opacity-20 blur-sm pointer-events-none' : ''}`}>
           <div className="bg-[#2c2c2f] px-8 py-4 flex justify-between items-center">
             <h3 className="font-bold text-[#f9f5f8] tracking-tight">Scan to Pay</h3>
             <div className="flex gap-2">
@@ -102,7 +149,7 @@ export function CheckoutFeature() {
         </div>
 
         {/* Manual Transfer Details */}
-        <div className="bg-[#131315] rounded-xl p-8 space-y-8">
+        <div className={`bg-[#131315] rounded-xl p-8 space-y-8 transition-all ${isProcessing || isSuccess ? 'opacity-20 blur-sm pointer-events-none' : ''}`}>
           <div className="flex items-center justify-between border-b border-[#48474a]/20 pb-4">
             <h3 className="font-bold text-xl text-[#f9f5f8]">Manual Bank Transfer</h3>
             <span className="text-xs bg-[#262528] px-3 py-1 rounded text-zinc-400 font-bold tracking-wider">SECURE LINK</span>
@@ -160,7 +207,10 @@ export function CheckoutFeature() {
           </div>
 
           <div className="pt-4 space-y-4">
-            <Button className="w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] hover:from-[#ff7668] hover:to-[#ff5b4c] py-8 text-[#650003] font-black text-lg tracking-widest uppercase transition-all shadow-[0px_10px_30px_rgba(255,142,128,0.3)]">
+            <Button 
+              onClick={handlePayment}
+              className="w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] hover:from-[#ff7668] hover:to-[#ff5b4c] py-8 text-[#650003] font-black text-lg tracking-widest uppercase transition-all shadow-[0px_10px_30px_rgba(255,142,128,0.3)]"
+            >
               <span className="material-symbols-outlined mr-3" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
               I have paid
             </Button>

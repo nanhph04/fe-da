@@ -6,6 +6,7 @@ import * as z from "zod";
 import Link from "next/link";
 import { useState } from "react";
 import { Loader2, ArrowLeft } from "lucide-react";
+import { authService } from "@/features/auth/services/authService";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -16,6 +17,7 @@ type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -23,11 +25,19 @@ export function ForgotPasswordForm() {
 
   const onSubmit = async (data: ForgotPasswordValues) => {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log("Send recovery email to:", data);
+    setServerError(null);
+    try {
+      const res = await authService.forgotPassword(data);
+      if (res.success) {
+        setIsSent(true);
+      } else {
+        setServerError(res.mess || "Failed to send recovery email");
+      }
+    } catch (err: any) {
+      setServerError(err.mess || err.message || "An error occurred");
+    } finally {
       setIsLoading(false);
-      setIsSent(true);
-    }, 1500);
+    }
   };
 
   return (
@@ -83,10 +93,16 @@ export function ForgotPasswordForm() {
             </div>
           </div>
 
+          {serverError && (
+            <div className="p-3 bg-[#ff6e84]/10 border border-[#ff6e84]/30 rounded-sm w-full mt-4">
+              <p className="text-xs text-[#ff6e84] text-center font-medium">{serverError}</p>
+            </div>
+          )}
+
           <button 
             type="submit"
             disabled={isLoading}
-            className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4"
+            className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4 disabled:opacity-50"
             style={{ fontFamily: 'var(--font-headline)' }}
           >
             {isLoading ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : null}

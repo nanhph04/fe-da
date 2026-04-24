@@ -1,6 +1,15 @@
+"use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function MembershipTiers({ onSelectTier }: { onSelectTier?: () => void }) {
+export function MembershipTiers({ onSelectTier }: { onSelectTier?: (tier: string) => void }) {
+  const [activeTier, setActiveTier] = useState<string>("Premium");
+
+  const handleSelect = (tier: string) => {
+    setActiveTier(tier);
+    if(onSelectTier) onSelectTier(tier);
+  };
+
   return (
     <div className="mb-24">
       <div className="mb-12">
@@ -13,10 +22,13 @@ export function MembershipTiers({ onSelectTier }: { onSelectTier?: () => void })
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Level 1: Standard */}
-        <div className="group relative bg-[#131315] rounded-xl p-8 flex flex-col transition-all duration-300 hover:bg-[#19191c] border border-transparent hover:border-[#48474a]/20">
+        <div className={`group relative bg-[#131315] rounded-xl p-8 flex flex-col transition-all duration-300 ease-in-out cursor-pointer
+            ${activeTier === 'Standard' ? 'border-2 border-[#ff8e80] shadow-[0_0_30px_rgba(255,142,128,0.15)] ring-1 ring-[#ff8e80]' : 'border border-[#48474a]/20 hover:border-[#ff8e80]/50'}`}
+          onClick={() => handleSelect("Standard")}
+        >
           <div className="mb-8">
             <h3 className="font-headline text-sm font-bold text-zinc-500 tracking-[0.2em] uppercase mb-1">Level 1</h3>
-            <div className="text-2xl font-headline font-black text-[#f9f5f8] uppercase">Standard</div>
+            <div className={`text-2xl font-headline font-black uppercase ${activeTier === 'Standard' ? 'text-[#ff8e80]' : 'text-[#f9f5f8]'}`}>Standard</div>
           </div>
           <div className="mb-10">
             <div className="flex items-baseline gap-1">
@@ -40,16 +52,17 @@ export function MembershipTiers({ onSelectTier }: { onSelectTier?: () => void })
             </div>
           </div>
           <Button 
-            onClick={onSelectTier}
-            variant="secondary" 
-            className="w-full bg-[#262528] text-white hover:bg-[#48474a] font-bold py-6 rounded-sm uppercase tracking-widest text-xs"
+            className={`w-full font-bold py-6 rounded-sm uppercase tracking-widest text-xs transition-colors ${activeTier === 'Standard' ? 'bg-[#ff8e80] text-[#650003] hover:bg-[#ff7668]' : 'bg-[#262528] text-white hover:bg-[#48474a]'}`}
           >
-            Join Now
+            {activeTier === 'Standard' ? 'Proceeding...' : 'Join Now'}
           </Button>
         </div>
 
         {/* Level 2: Premium (Featured) */}
-        <div className="relative bg-[#19191c] rounded-xl p-8 flex flex-col shadow-[0px_20px_60px_rgba(255,142,128,0.08)] border border-[#ff8e80]/20 scale-105 z-10">
+        <div className={`relative bg-[#19191c] rounded-xl p-8 flex flex-col transition-all duration-300 ease-in-out cursor-pointer scale-105 z-10
+            ${activeTier === 'Premium' ? 'border-2 border-[#ff8e80] shadow-[0px_20px_60px_rgba(255,142,128,0.2)]' : 'border border-[#ff8e80]/20 shadow-[0px_20px_60px_rgba(255,142,128,0.08)]'}`}
+            onClick={() => handleSelect("Premium")}
+        >
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#ff8e80] text-black text-[10px] font-black uppercase tracking-[0.3em] px-4 py-1.5 rounded-sm">
             Most Popular
           </div>
@@ -83,18 +96,20 @@ export function MembershipTiers({ onSelectTier }: { onSelectTier?: () => void })
             </div>
           </div>
           <Button 
-            onClick={onSelectTier}
-            className="w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] hover:from-[#ff7668] hover:to-[#ff5b4c] font-black py-6 rounded-sm uppercase tracking-widest text-xs"
+            className={`w-full font-black py-6 rounded-sm uppercase tracking-widest text-xs transition-colors ${activeTier === 'Premium' ? 'bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] hover:from-[#ff7668] hover:to-[#ff5b4c]' : 'bg-[#262528] text-white hover:bg-[#48474a]'}`}
           >
-            Join Now
+            {activeTier === 'Premium' ? 'Proceeding...' : 'Join Now'}
           </Button>
         </div>
 
         {/* Level 3: Exclusive */}
-        <div className="group relative bg-[#131315] rounded-xl p-8 flex flex-col transition-all duration-300 hover:bg-[#19191c] border border-transparent hover:border-[#48474a]/20">
+        <div className={`group relative bg-[#131315] rounded-xl p-8 flex flex-col transition-all duration-300 ease-in-out cursor-pointer
+            ${activeTier === 'Exclusive' ? 'border-2 border-[#fdc003] shadow-[0_0_30px_rgba(253,192,3,0.15)] ring-1 ring-[#fdc003]' : 'border border-[#48474a]/20 hover:border-[#fdc003]/50'}`}
+          onClick={() => handleSelect("Exclusive")}
+        >
           <div className="mb-8">
             <h3 className="font-headline text-sm font-bold text-[#fdc003] tracking-[0.2em] uppercase mb-1">Level 3</h3>
-            <div className="text-2xl font-headline font-black text-[#f9f5f8] uppercase">Exclusive</div>
+            <div className={`text-2xl font-headline font-black uppercase ${activeTier === 'Exclusive' ? 'text-[#fdc003]' : 'text-[#f9f5f8]'}`}>Exclusive</div>
           </div>
           <div className="mb-10">
             <div className="flex items-baseline gap-1">
@@ -122,11 +137,9 @@ export function MembershipTiers({ onSelectTier }: { onSelectTier?: () => void })
             </div>
           </div>
           <Button 
-            onClick={onSelectTier}
-            variant="secondary" 
-            className="w-full bg-[#262528] text-white hover:bg-[#48474a] font-bold py-6 rounded-sm uppercase tracking-widest text-xs"
+            className={`w-full font-bold py-6 rounded-sm uppercase tracking-widest text-xs transition-colors ${activeTier === 'Exclusive' ? 'bg-[#fdc003] text-[#650003] hover:bg-[#e6a800]' : 'bg-[#262528] text-white hover:bg-[#48474a]'}`}
           >
-            Join Now
+            {activeTier === 'Exclusive' ? 'Proceeding...' : 'Join Now'}
           </Button>
         </div>
 

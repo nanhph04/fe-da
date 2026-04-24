@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/features/auth/context/AuthContext";
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   const navItems = [
     { name: "Overview", path: "/admin", icon: "dashboard" },
@@ -58,10 +60,13 @@ export function AdminSidebar() {
           <span className="material-symbols-outlined text-[18px]">settings</span>
           <span>Config</span>
         </Link>
-        <Link href="/admin/login" className="flex items-center gap-3 px-3 py-2 text-zinc-500 hover:text-red-500 font-headline text-xs uppercase tracking-widest">
+        <button 
+          onClick={logout}
+          className="flex w-full items-center gap-3 px-3 py-2 text-zinc-500 hover:text-red-500 font-headline text-xs uppercase tracking-widest cursor-pointer"
+        >
           <span className="material-symbols-outlined text-[18px]">logout</span>
           <span>Terminate</span>
-        </Link>
+        </button>
       </footer>
     </aside>
   );

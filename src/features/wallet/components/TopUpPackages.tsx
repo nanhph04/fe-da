@@ -1,6 +1,9 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const PACKAGES = [
   {
@@ -37,6 +40,8 @@ const PACKAGES = [
 ];
 
 export function TopUpPackages() {
+  const router = useRouter();
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mt-8">
@@ -73,6 +78,7 @@ export function TopUpPackages() {
               <div className="mt-auto w-full pt-4 border-t border-white/5 flex flex-col gap-4">
                 <span className="font-headline font-bold text-lg text-white">{pkg.price}</span>
                 <Button 
+                  onClick={() => router.push(`/wallet/checkout?pack=${pkg.id}`)}
                   className={`w-full font-bold transition-colors active:scale-95 ${pkg.isPopular ? 'bg-[#fdc003] hover:bg-[#ecb200] text-[#553e00]' : 'bg-[#ff8e80] hover:bg-[#e80f16] text-[#650003]'}`}
                 >
                   Buy Now

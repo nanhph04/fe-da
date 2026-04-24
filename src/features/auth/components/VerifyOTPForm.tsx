@@ -5,8 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { authService } from "@/features/auth/services/authService";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const otpSchema = z.object({
   pin: z.string().min(6, { message: "OTP must be 6 digits" }),
@@ -16,6 +19,23 @@ type OTPValues = z.infer<typeof otpSchema>;
 
 export function VerifyOTPForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [pendingData, setPendingData] = useState<{email: string, password: string} | null>(null);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
+  
+  const router = useRouter();
+  const { setAuthData } = useAuth();
+
+  useEffect(() => {
+    const data = sessionStorage.getItem("pendingVerify");
+    if (data) {
+      setPendingData(JSON.parse(data));
+    } else {
+      // Nếu không có dữ liệu, bắt về đăng ký
+      router.push("/register");
+    }
+  }, [router]);
+
   const { handleSubmit, setValue, watch, formState: { errors } } = useForm<OTPValues>({
     resolver: zodResolver(otpSchema),
     defaultValues: { pin: "" }
@@ -24,11 +44,61 @@ export function VerifyOTPForm() {
   const pin = watch("pin");
 
   const onSubmit = async (data: OTPValues) => {
+    if (!pendingData) return;
+    
     setIsLoading(true);
-    setTimeout(() => {
-      console.log("Verify OTP:", data);
+    setServerError(null);
+    setResendStatus(null);
+    
+    try {
+      // 1. Verify OTP
+      const verifyRes = await authService.verifyEmail({
+        email: pendingData.email,
+        password: pendingData.password,
+        otp: data.pin
+      });
+
+      if (verifyRes.success) {
+        // 2. Auto Login
+        const loginRes = await authService.login({
+          email: pendingData.email,
+          password: pendingData.password
+        });
+        
+        if (loginRes.success && loginRes.data?.accessToken) {
+          sessionStorage.removeItem("pendingVerify");
+          setAuthData(loginRes.data.accessToken);
+          router.push("/library");
+        } else {
+          router.push("/login"); // Lỡ login lỗi thì ném ra ngoài để user tự login
+        }
+      } else {
+        setServerError(verifyRes.mess || "Verification failed");
+      }
+    } catch (err: any) {
+      setServerError(err.mess || err.message || "An error occurred during verification");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!pendingData) return;
+    setServerError(null);
+    setResendStatus(null);
+    try {
+      const res = await authService.resendOtp({
+        email: pendingData.email,
+        type: "register"
+      });
+      if (res.success) {
+        setResendStatus("OTP has been resent to your email.");
+      } else {
+        setServerError(res.mess || "Failed to resend OTP");
+      }
+    } catch (err: any) {
+      setServerError(err.mess || "Failed to resend OTP");
+    }
   };
 
   return (
@@ -65,12 +135,24 @@ export function VerifyOTPForm() {
             </InputOTPGroup>
           </InputOTP>
           {errors.pin && <p className="text-xs text-[#ff6e84] mt-3 text-center md:text-left">{errors.pin.message}</p>}
+          
+          {serverError && (
+            <div className="mt-4 p-3 bg-[#ff6e84]/10 border border-[#ff6e84]/30 rounded-sm w-full">
+              <p className="text-xs text-[#ff6e84] text-center font-medium">{serverError}</p>
+            </div>
+          )}
+
+          {resendStatus && (
+            <div className="mt-4 p-3 bg-[#4ade80]/10 border border-[#4ade80]/30 rounded-sm w-full">
+              <p className="text-xs text-[#4ade80] text-center font-medium">{resendStatus}</p>
+            </div>
+          )}
         </div>
 
         <button 
           type="submit"
-          disabled={isLoading}
-          className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4"
+          disabled={isLoading || !pendingData}
+          className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4 disabled:opacity-50"
           style={{ fontFamily: 'var(--font-headline)' }}
         >
           {isLoading ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : null}
@@ -79,10 +161,8 @@ export function VerifyOTPForm() {
       </form>
 
       <div className="mt-8 pt-8 border-t border-[#48474a]/10 w-full flex flex-col items-center gap-4">
-        <div className="flex items-center gap-2 group cursor-pointer">
+        <div onClick={handleResend} className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity">
           <span className="text-[#adaaad] text-xs uppercase tracking-widest font-medium" style={{ fontFamily: 'var(--font-headline)' }}>Resend Code</span>
-          <span className="w-8 h-[1px] bg-[#48474a]"></span>
-          <span className="text-[#fdc003] text-xs font-bold" style={{ fontFamily: 'var(--font-headline)' }}>01:59</span>
         </div>
       </div>
       

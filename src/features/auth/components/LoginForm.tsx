@@ -6,6 +6,9 @@ import * as z from "zod";
 import Link from "next/link";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { authService } from "@/features/auth/services/authService";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -16,6 +19,9 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
+  
   const {
     register,
     handleSubmit,
@@ -24,12 +30,24 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
+  const { setAuthData } = useAuth();
+
   const onSubmit = async (data: LoginValues) => {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log(data);
+    setServerError(null);
+    try {
+      const res = await authService.login(data);
+      if (res.success && res.data?.accessToken) {
+        setAuthData(res.data.accessToken);
+        router.push("/library");
+      } else {
+        setServerError(res.mess || "Login failed");
+      }
+    } catch (err: any) {
+      setServerError(err.mess || err.message || "An error occurred during login. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -102,12 +120,18 @@ export function LoginForm() {
             </div>
             {errors.password && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.password.message}</p>}
           </div>
+          
+          {serverError && (
+            <div className="p-3 bg-[#ff6e84]/10 border border-[#ff6e84]/30 rounded-sm">
+              <p className="text-xs text-[#ff6e84] text-center font-medium">{serverError}</p>
+            </div>
+          )}
         </div>
 
         <button 
           type="submit"
           disabled={isLoading}
-          className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200"
+          className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
           style={{ fontFamily: 'var(--font-headline)' }}
         >
           {isLoading ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : null}
