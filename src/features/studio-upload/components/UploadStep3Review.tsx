@@ -26,9 +26,8 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
     setError(null);
     
     try {
-      // Gọi API initUpload (MOCK CHANNEL ID for now)
+      // Gọi API initUpload (channelId được tự động nhận dạng bởi backend qua Auth Token)
       const res = await mediaService.initUpload({
-        channelId: "mock-channel-id",
         title: formData.title,
         description: formData.description,
         categories: formData.categories,

@@ -12,6 +12,10 @@ import { authService } from "@/features/auth/services/authService";
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -103,6 +107,25 @@ export function RegisterForm() {
               </div>
             </div>
             {errors.password && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.password.message}</p>}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="group">
+            <label className="block text-[10px] uppercase tracking-[0.2em] text-[#adaaad] mb-2 ml-1" style={{ fontFamily: 'var(--font-headline)' }}>
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                className={`w-full bg-[#000000] border-none ring-1 ring-[#48474a]/30 focus:ring-[#ff8e80]/50 rounded-sm py-4 px-4 pr-12 text-[#f9f5f8] placeholder:text-zinc-700 transition-all font-sans focus:outline-none ${errors.confirmPassword ? 'ring-[#ff6e84]' : ''}`}
+                {...register("confirmPassword")}
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none flex items-center justify-center">
+                <span className="material-symbols-outlined">lock</span>
+              </div>
+            </div>
+            {errors.confirmPassword && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.confirmPassword.message}</p>}
           </div>
 
           {serverError && (

@@ -54,8 +54,8 @@ export function VerifyOTPForm() {
       // 1. Verify OTP
       const verifyRes = await authService.verifyEmail({
         email: pendingData.email,
-        password: pendingData.password,
-        otp: data.pin
+        otp: data.pin,
+        password: pendingData.password
       });
 
       if (verifyRes.success) {

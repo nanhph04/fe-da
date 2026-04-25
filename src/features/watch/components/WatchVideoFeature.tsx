@@ -27,15 +27,15 @@ export function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
         const infoRes = await mediaService.getVideoMetadata(videoId);
         if (infoRes.success && infoRes.data) {
           setTitle(infoRes.data.title);
-          setPoster(infoRes.data.thumbnailUrl);
+          setPoster(infoRes.data.thumbnailUrl || undefined);
         }
 
         // 2. Fetch Playback Token
         const tokenRes = await mediaService.getPlaybackInfo(videoId);
         if (tokenRes.success && tokenRes.data) {
-          // Gắn token vào URL nếu backend yêu cầu hoặc backend trả về streamUrl đã có token
-          const streamUrl = tokenRes.data.streamUrl;
-          const token = tokenRes.data.token;
+          // Gắn token vào URL nếu backend yêu cầu hoặc backend trả về playbackUrl đã có token
+          const streamUrl = tokenRes.data.playbackUrl;
+          const token = tokenRes.data.playbackToken;
           
           // Giả sử streamUrl đã kèm token (thông thường HLS proxy URL hoặc presigned URL)
           // Hoặc ta nối ?token= vào streamUrl:

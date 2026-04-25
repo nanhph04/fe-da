@@ -4,7 +4,9 @@
  * và cơ chế tự động gọi refresh token khi nhận lỗi 401.
  */
 
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8080";
+const GATEWAY_URL = typeof window !== "undefined" 
+  ? "" 
+  : (process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8080");
 
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];

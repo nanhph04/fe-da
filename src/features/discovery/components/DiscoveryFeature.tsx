@@ -4,20 +4,11 @@ import { useEffect, useState } from "react";
 import { mediaService } from "@/features/watch/services/mediaService";
 import Link from "next/link";
 
-interface Video {
-  id: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string;
-  price: number;
-  channel: { name: string };
-  metrics: { viewsCount: number };
-  createdAt: string;
-}
+import { DiscoveryVideoResponse } from "@/features/watch/services/mediaService";
 
 export function DiscoveryFeature() {
-  const [latestVideos, setLatestVideos] = useState<Video[]>([]);
-  const [subscribedVideos, setSubscribedVideos] = useState<Video[]>([]);
+  const [latestVideos, setLatestVideos] = useState<DiscoveryVideoResponse[]>([]);
+  const [subscribedVideos, setSubscribedVideos] = useState<DiscoveryVideoResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

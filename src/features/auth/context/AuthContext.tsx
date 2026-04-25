@@ -5,14 +5,9 @@ import { api } from "@/shared/utils/apiClient";
 import { authService } from "../services/authService";
 import { useRouter } from "next/navigation";
 
-interface UserProfile {
-  userId: string;
-  email: string;
-  displayName?: string;
-  avatarUrl?: string;
-  isCreator: boolean;
-  [key: string]: any;
-}
+import { UserProfileResponse } from "../services/authService";
+
+export type UserProfile = UserProfileResponse;
 
 interface AuthContextProps {
   user: UserProfile | null;

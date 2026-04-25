@@ -92,6 +92,7 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
             <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 group-focus-within:text-[#ff8e80] transition-colors">Video Title</label>
             <input 
               type="text" 
+              maxLength={200}
               value={formData.title}
               onChange={e => updateFormData({ title: e.target.value })}
               className="w-full bg-transparent border-0 border-b-2 border-zinc-700 focus:border-[#ff8e80] focus:ring-0 text-xl font-semibold font-headline py-4 px-0 transition-all placeholder-zinc-700 text-[#f9f5f8] outline-none" 
