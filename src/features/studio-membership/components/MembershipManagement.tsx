@@ -1,4 +1,11 @@
-export function MembershipManagement({ tiers, onEditTier }: { tiers: any[], onEditTier: (tier: any) => void }) {
+import { StudioTier } from "./StudioMembershipFeature";
+
+interface MembershipManagementProps {
+  tiers: StudioTier[];
+  onEditTier: (tier: StudioTier | null) => void;
+}
+
+export function MembershipManagement({ tiers, onEditTier }: MembershipManagementProps) {
   const totalRevenue = tiers.reduce((acc, tier) => acc + parseInt(tier.revenue.replace(/,/g, '')), 0).toLocaleString();
   const totalSubscribers = tiers.reduce((acc, tier) => acc + tier.subscribers, 0);
 
@@ -10,7 +17,7 @@ export function MembershipManagement({ tiers, onEditTier }: { tiers: any[], onEd
           <h2 className="text-xl font-bold font-headline text-white mb-2">Membership is Active</h2>
           <p className="text-sm text-zinc-400">You currently have <strong className="text-[#ff8e80]">{totalSubscribers} active members</strong> generating <strong className="text-[#fdc003]">{totalRevenue} AC</strong> monthly.</p>
         </div>
-        <button onClick={() => onEditTier({})} className="px-6 py-2 bg-[#ff8e80] text-black font-bold text-sm rounded-sm shadow-lg shadow-[#ff8e80]/20 hover:scale-105 transition-transform flex items-center gap-2">
+        <button onClick={() => onEditTier(null)} className="px-6 py-2 bg-[#ff8e80] text-black font-bold text-sm rounded-sm shadow-lg shadow-[#ff8e80]/20 hover:scale-105 transition-transform flex items-center gap-2">
           <span className="material-symbols-outlined text-[18px]">add</span> Add Tier
         </button>
       </div>

@@ -1,11 +1,12 @@
 import { WatchVideoFeature } from "@/features/watch/components/WatchVideoFeature";
 
 interface WatchPageProps {
-  params: {
+  params: Promise<{
     videoId: string;
-  };
+  }>;
 }
 
-export default function WatchPage({ params }: WatchPageProps) {
-  return <WatchVideoFeature videoId={params.videoId} />;
+export default async function WatchPage({ params }: WatchPageProps) {
+  const { videoId } = await params;
+  return <WatchVideoFeature videoId={videoId} />;
 }

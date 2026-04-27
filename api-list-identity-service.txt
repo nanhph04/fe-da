@@ -1,6 +1,6 @@
 IDENTITY SERVICE API LIST - FRONTEND CONTRACT
 
-Last updated: 2026-04-23
+Last updated: 2026-04-26
 
 Muc dich
 ========
@@ -539,7 +539,57 @@ FE flow:
 2. PROFILE APIs
 ==================================================
 
-2.1) PATCH /api/user/users/profile
+2.1) GET /api/user/users/profile
+
+Muc dich:
+
+- Lay ho so cua user hien tai.
+
+Auth:
+
+- Protected.
+- Required header:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Body:
+
+- Khong gui body.
+
+System fields:
+
+- userId lay tu accessToken qua CurrentUserId, FE khong gui userId.
+
+Response:
+
+- HTTP status: 200
+- Body CO boc ApiResponse.
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Profile fetched successfully",
+  "data": {
+    "userId": "user-id",
+    "email": "user@example.com",
+    "displayName": "Nguyen Van A",
+    "avatarUrl": "https://cdn.example.com/avatars/user-1.png",
+    "bio": "I create short-form media content.",
+    "phone": 84901234567,
+    "gender": "male",
+    "birthday": "1998-05-20T00:00:00.000Z",
+    "isCreator": false,
+    "createdAt": "2026-04-23T00:00:00.000Z",
+    "updatedAt": "2026-04-23T00:00:00.000Z"
+  }
+}
+```
+
+
+2.2) PATCH /api/user/users/profile
 
 Muc dich:
 
@@ -628,6 +678,7 @@ Protected, can Authorization Bearer:
 
 - POST /api/auth/change-password
 - POST /api/auth/logout
+- GET /api/user/users/profile
 - PATCH /api/user/users/profile
 
 

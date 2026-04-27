@@ -11,10 +11,10 @@ export function StudioSidebar() {
   const navItems = [
     { name: "Dashboard", path: "/studio", icon: "dashboard" },
     { name: "Content", path: "/studio/content", icon: "video_library" },
-    { name: "Analytics", path: "/studio/analytics", icon: "analytics" },
+    { name: "Analytics", path: "/studio/analytics", icon: "analytics", disabled: true },
     { name: "Monetization", path: "/studio/wallet", icon: "payments" },
     { name: "Memberships", path: "/studio/memberships", icon: "stars" },
-    { name: "Settings", path: "/studio/settings", icon: "settings" }
+    { name: "Settings", path: "/studio/settings", icon: "settings", disabled: true }
   ];
 
   return (
@@ -27,17 +27,36 @@ export function StudioSidebar() {
       <nav className="flex-1 px-4 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.path || (item.path !== '/studio' && pathname?.startsWith(item.path));
+          const className = `flex items-center gap-3 px-4 py-3 rounded-sm transition-transform font-headline text-sm ${
+            item.disabled
+              ? "text-zinc-700 border border-dashed border-[#262528] cursor-not-allowed"
+              : isActive
+                ? "text-[#ff8e80] font-bold bg-[#1f1f22]/80 border-r-2 border-[#ff8e80]"
+                : "text-zinc-400 hover:text-zinc-100 hover:bg-[#19191c]/50 transition-colors duration-300"
+          }`;
+
+          const content = (
+            <>
+              <span className="material-symbols-outlined">{item.icon}</span>
+              {item.name}
+            </>
+          );
+
+          if (item.disabled) {
+            return (
+              <div key={item.path} aria-disabled="true" className={className}>
+                {content}
+              </div>
+            );
+          }
+
           return (
             <Link 
               key={item.path} 
               href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-sm transition-transform font-headline text-sm
-                ${isActive 
-                  ? "text-[#ff8e80] font-bold bg-[#1f1f22]/80 border-r-2 border-[#ff8e80]" 
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-[#19191c]/50 transition-colors duration-300"}`}
+              className={className}
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
-              {item.name}
+              {content}
             </Link>
           );
         })}

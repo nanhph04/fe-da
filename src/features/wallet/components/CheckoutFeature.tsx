@@ -215,7 +215,7 @@ export function CheckoutFeature() {
               I have paid
             </Button>
             <p className="text-center text-zinc-400 text-xs">
-              By clicking "I have paid", our system will begin the automated verification of your transfer.
+              By clicking &quot;I have paid&quot;, our system will begin the automated verification of your transfer.
             </p>
           </div>
         </div>

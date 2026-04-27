@@ -1,11 +1,16 @@
 import type { NextConfig } from "next";
 
+const apiGatewayUrl =
+  process.env.NEXT_PUBLIC_GATEWAY_URL ??
+  "http://localhost:4000";
+
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*', // Proxy to API Gateway
+        source: "/api/:path*",
+        destination: `${apiGatewayUrl}/api/:path*`,
       },
     ];
   },

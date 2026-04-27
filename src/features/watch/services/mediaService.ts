@@ -20,6 +20,20 @@ export interface ChannelResponse {
   updatedAt: string;
 }
 
+export interface ChannelDetailResponse extends ChannelResponse {
+  membershipTiers?: MembershipTierResponse[];
+  publicVideos?: Array<{
+    id: string;
+    title: string;
+    categories: string[];
+    status: string;
+    thumbnailUrl: string | null;
+    publishedAt: string | null;
+  }>;
+  subscriberCount?: number;
+  videoCount?: number;
+}
+
 // Membership Tier
 export interface MembershipTierResponse {
   id: string;
@@ -34,6 +48,7 @@ export interface MembershipTierResponse {
 
 // Video Interfaces
 export interface InitUploadBody {
+  channelId: string;
   title: string;
   description?: string;
   categories?: string[];
@@ -60,7 +75,22 @@ export interface PlaybackInfoResponse {
   description: string;
   playbackToken: string;
   playbackUrl: string; // The URL to the stream /api/media/stream/:id/master.m3u8?token=
+  resumePositionSeconds: number;
+  isResumeAvailable: boolean;
+  resolutions?: string[];
   streamUrl?: string; // Fallback
+}
+
+export interface SaveVideoProgressBody {
+  positionSeconds: number;
+  durationSeconds?: number | null;
+  state?: "watching" | "paused" | "completed";
+}
+
+export interface SaveVideoProgressResponse {
+  videoId: string;
+  positionSeconds: number;
+  completed: boolean;
 }
 
 export interface VideoMetadataResponse {
@@ -94,6 +124,18 @@ export interface DiscoveryVideoResponse {
   metrics?: { viewsCount: number };
 }
 
+export interface ContinueWatchingVideoResponse {
+  videoId: string;
+  channelId: string;
+  title: string;
+  thumbnailUrl: string | null;
+  durationSeconds: number | null;
+  resumePositionSeconds: number;
+  remainingSeconds: number | null;
+  lastWatchedAt: string;
+  viewCount: number;
+}
+
 // Category Interface
 export interface CategoryResponse {
   id: string;
@@ -119,7 +161,7 @@ export const mediaService = {
     return api.patch<ChannelResponse>(`/api/media/channels/${id}`, data, { requireAuth: true });
   },
   getChannel: async (id: string) => {
-    return api.get<any>(`/api/media/channels/${id}`);
+    return api.get<ChannelDetailResponse>(`/api/media/channels/${id}`);
   },
   getMembershipStatus: async (id: string) => {
     return api.get<{ isActive: boolean; membershipId: string | null; expiryDate: string | null }>(`/api/media/channels/${id}/membership-status`, { requireAuth: true });
@@ -149,8 +191,15 @@ export const mediaService = {
   getPlaybackInfo: async (id: string) => {
     return api.get<PlaybackInfoResponse>(`/api/media/videos/${id}/play`, { requireAuth: true });
   },
+  saveVideoProgress: async (id: string, data: SaveVideoProgressBody) => {
+    return api.post<SaveVideoProgressResponse>(`/api/media/videos/${id}/progress`, data, { requireAuth: true });
+  },
   refreshPlaybackToken: async (id: string) => {
     return api.post<{ videoId: string; playbackToken: string; playbackUrl: string }>(`/api/media/videos/${id}/playback-token/refresh`, {}, { requireAuth: true });
+  },
+  getContinueWatching: async (params?: PaginationParams) => {
+    const qs = params?.limit ? `?limit=${params.limit}` : "";
+    return api.get<ContinueWatchingVideoResponse[]>(`/api/media/videos/continue-watching${qs}`, { requireAuth: true });
   },
   getVideoMetadata: async (id: string) => {
     return api.get<VideoMetadataResponse>(`/api/media/videos/${id}/metadata`);

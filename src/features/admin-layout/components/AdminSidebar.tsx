@@ -14,7 +14,7 @@ export function AdminSidebar() {
     { name: "Verification", path: "/admin/verifications", icon: "verified" },
     { name: "Content Review", path: "/admin/content", icon: "movie" },
     { name: "Payouts & Revenue", path: "/admin/payouts", icon: "payments" },
-    { name: "Audit Logs", path: "/admin/audit", icon: "history" }
+    { name: "Audit Logs", path: "/admin/audit", icon: "history", disabled: true }
   ];
 
   return (
@@ -27,19 +27,37 @@ export function AdminSidebar() {
       <nav className="flex-1 px-3 space-y-2 relative">
         {navItems.map((item) => {
           const isActive = pathname === item.path || (item.path !== '/admin' && pathname?.startsWith(item.path));
-          return (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex items-center gap-3 px-3 py-3 rounded transition-all ease-in-out font-headline tracking-wide text-xs uppercase
-                ${isActive 
-                  ? "text-red-500 border-r-2 border-red-600 bg-gradient-to-r from-red-600/10 to-transparent font-bold" 
-                  : "text-zinc-500 hover:text-zinc-200 hover:bg-[#19191c]"}`}
-            >
+          const className = `flex items-center gap-3 px-3 py-3 rounded transition-all ease-in-out font-headline tracking-wide text-xs uppercase ${
+            item.disabled
+              ? "text-zinc-700 border border-dashed border-[#262528] cursor-not-allowed"
+              : isActive
+                ? "text-red-500 border-r-2 border-red-600 bg-gradient-to-r from-red-600/10 to-transparent font-bold"
+                : "text-zinc-500 hover:text-zinc-200 hover:bg-[#19191c]"
+          }`;
+          const content = (
+            <>
               <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
                 {item.icon}
               </span>
               <span>{item.name}</span>
+            </>
+          );
+
+          if (item.disabled) {
+            return (
+              <div key={item.path} aria-disabled="true" className={className}>
+                {content}
+              </div>
+            );
+          }
+
+          return (
+            <Link 
+              key={item.path} 
+              href={item.path}
+              className={className}
+            >
+              {content}
             </Link>
           );
         })}
@@ -56,10 +74,10 @@ export function AdminSidebar() {
       </div>
 
       <footer className="px-3 space-y-1 pt-4 border-t border-[#262528]">
-        <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-zinc-500 hover:text-zinc-200 font-headline text-xs uppercase tracking-widest">
+        <div aria-disabled="true" className="flex items-center gap-3 px-3 py-2 text-zinc-700 border border-dashed border-[#262528] font-headline text-xs uppercase tracking-widest cursor-not-allowed">
           <span className="material-symbols-outlined text-[18px]">settings</span>
           <span>Config</span>
-        </Link>
+        </div>
         <button 
           onClick={logout}
           className="flex w-full items-center gap-3 px-3 py-2 text-zinc-500 hover:text-red-500 font-headline text-xs uppercase tracking-widest cursor-pointer"

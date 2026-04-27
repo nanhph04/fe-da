@@ -28,8 +28,8 @@ export function CommentsSection() {
     }
     const newComment = {
       id: Date.now(),
-      author: user.name,
-      avatar: user.avatar,
+      author: user.displayName || user.email || "User",
+      avatar: user.avatarUrl || "",
       text: commentText,
       time: "Just now",
       likes: 0
@@ -51,8 +51,8 @@ export function CommentsSection() {
       {/* Comment Input */}
       <div className="flex gap-6">
         <Avatar className="w-12 h-12 border border-[#48474a]/20">
-          <AvatarImage src={user?.avatar || ""} alt="User avatar" />
-          <AvatarFallback>{user ? user.name[0] : 'U'}</AvatarFallback>
+          <AvatarImage src={user?.avatarUrl || ""} alt="User avatar" />
+          <AvatarFallback>{user ? (user.displayName || user.email || 'U')[0] : 'U'}</AvatarFallback>
         </Avatar>
         
         <div className="flex-grow space-y-4">
@@ -95,7 +95,7 @@ export function CommentsSection() {
             
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <span className={`font-bold text-sm ${c.author === user?.name ? 'text-[#ff8e80]' : 'text-[#f9f5f8]'}`}>{c.author}</span>
+                <span className={`font-bold text-sm ${c.author === (user?.displayName || user?.email) ? 'text-[#ff8e80]' : 'text-[#f9f5f8]'}`}>{c.author}</span>
                 <span className="text-zinc-600 text-xs">{c.time}</span>
               </div>
               <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">

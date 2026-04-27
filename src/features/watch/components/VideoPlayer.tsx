@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-
 export function VideoPlayer() {
   return (
     <div className="relative aspect-video rounded-xl overflow-hidden bg-black shadow-2xl group border border-[#48474a]/10">

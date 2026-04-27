@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local working artifacts and imported skill packs:
+    "temp-skills/**",
   ]),
 ]);
 

@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { StudioTier } from "./StudioMembershipFeature";
 
-export function TierEditorOverlay({ tier, onClose, onSave }: { tier: any, onClose: () => void, onSave: (tier: any) => void }) {
+interface TierEditorOverlayProps {
+  tier: StudioTier | null;
+  onClose: () => void;
+  onSave: (tier: StudioTier) => void;
+}
+
+export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayProps) {
   const [name, setName] = useState(tier?.name || "");
   const [price, setPrice] = useState(tier?.price || 500);
   const [perks, setPerks] = useState<string[]>(tier?.perks || ["Loyalty badges", "Custom emojis"]);
+  const newPerkRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     onSave({
@@ -15,6 +23,7 @@ export function TierEditorOverlay({ tier, onClose, onSave }: { tier: any, onClos
       id: tier?.id || Date.now(),
       subscribers: tier?.subscribers || 0,
       revenue: tier?.revenue || "0",
+      badgeColor: tier?.badgeColor || "bg-zinc-500",
     });
   };
 
@@ -71,11 +80,16 @@ export function TierEditorOverlay({ tier, onClose, onSave }: { tier: any, onClos
               ))}
             </ul>
             <div className="flex gap-2">
-               <input type="text" placeholder="Add a new perk" className="flex-1 bg-transparent border-b border-zinc-700 py-2 text-sm text-white focus:border-[#ff8e80] outline-none" id="new-perk" />
+               <input ref={newPerkRef} type="text" placeholder="Add a new perk" className="flex-1 bg-transparent border-b border-zinc-700 py-2 text-sm text-white focus:border-[#ff8e80] outline-none" />
                <button 
                   onClick={() => {
-                    const el = document.getElementById("new-perk") as HTMLInputElement;
-                    if (el.value) { setPerks([...perks, el.value]); el.value = ""; }
+                    const newPerk = newPerkRef.current?.value?.trim();
+                    if (newPerk) {
+                      setPerks([...perks, newPerk]);
+                      if (newPerkRef.current) {
+                        newPerkRef.current.value = "";
+                      }
+                    }
                   }}
                   className="px-4 py-2 bg-[#19191c] text-[#ff8e80] text-xs font-bold rounded-sm border border-zinc-800 hover:border-[#ff8e80]"
                >

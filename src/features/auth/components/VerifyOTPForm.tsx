@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { authService } from "@/features/auth/services/authService";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 const otpSchema = z.object({
   pin: z.string().min(6, { message: "OTP must be 6 digits" }),
@@ -67,7 +68,7 @@ export function VerifyOTPForm() {
         
         if (loginRes.success && loginRes.data?.accessToken) {
           sessionStorage.removeItem("pendingVerify");
-          setAuthData(loginRes.data.accessToken);
+          await setAuthData(loginRes.data.accessToken);
           router.push("/library");
         } else {
           router.push("/login"); // Lỡ login lỗi thì ném ra ngoài để user tự login
@@ -75,8 +76,8 @@ export function VerifyOTPForm() {
       } else {
         setServerError(verifyRes.mess || "Verification failed");
       }
-    } catch (err: any) {
-      setServerError(err.mess || err.message || "An error occurred during verification");
+    } catch (err: unknown) {
+      setServerError(getErrorMessage(err, "An error occurred during verification"));
     } finally {
       setIsLoading(false);
     }
@@ -96,8 +97,8 @@ export function VerifyOTPForm() {
       } else {
         setServerError(res.mess || "Failed to resend OTP");
       }
-    } catch (err: any) {
-      setServerError(err.mess || "Failed to resend OTP");
+    } catch (err: unknown) {
+      setServerError(getErrorMessage(err, "Failed to resend OTP"));
     }
   };
 

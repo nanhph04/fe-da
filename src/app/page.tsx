@@ -1,5 +1,5 @@
-import { DiscoveryFeature } from "@/features/discovery/components/DiscoveryFeature";
+import { HomeFeature } from "@/features/home/components/HomeFeature";
 
 export default function Home() {
-  return <DiscoveryFeature />;
+  return <HomeFeature />;
 }

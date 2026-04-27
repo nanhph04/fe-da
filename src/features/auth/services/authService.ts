@@ -5,56 +5,87 @@ export interface TokenResponse {
   expiresIn: number;
 }
 
+export type UserRole = "viewer" | "creator" | "admin";
+
+export interface MessageResponse {
+  message: string;
+}
+
 export interface UserProfileResponse {
-  id: string;
+  userId: string;
   email: string;
   displayName?: string;
   avatarUrl?: string;
+  bio?: string;
+  phone?: number;
+  gender?: "male" | "women" | "female";
+  birthday?: string;
+  role: UserRole;
   isCreator: boolean;
-  status: string;
   createdAt: string;
-  [key: string]: any;
+  updatedAt: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
 }
 
 export const authService = {
   // 1.1) Register
-  register: async (data: Record<string, any>) => {
-    return api.post<null>("/api/auth/register", data);
+  register: async (data: RegisterRequest) => {
+    return api.post<MessageResponse>("/api/auth/register", data);
   },
 
   // 1.2) Verify Email
-  verifyEmail: async (data: { email: string; otp: string; password?: string }) => {
-    return api.post<null>("/api/auth/verify-email", data);
+  verifyEmail: async (data: { email: string; otp: string; password: string }) => {
+    return api.post<MessageResponse>("/api/auth/verify-email", data);
   },
 
   // 1.3) Login
-  login: async (data: Record<string, any>) => {
+  login: async (data: LoginRequest) => {
     return api.post<TokenResponse>("/api/auth/login", data);
   },
 
   // 1.5) Resend OTP
-  resendOtp: async (data: { email: string; type?: string }) => {
-    return api.post<null>("/api/auth/resend-otp", data);
+  resendOtp: async (data: { email: string; type: "register" | "forgot" }) => {
+    return api.post<MessageResponse>("/api/auth/resend-otp", data);
   },
 
   // 1.6) Forgot Password
   forgotPassword: async (data: { email: string }) => {
-    return api.post<null>("/api/auth/forgot-password", data);
+    return api.post<MessageResponse>("/api/auth/forgot-password", data);
   },
 
   // 1.7) Reset Password
-  resetPassword: async (data: Record<string, any>) => {
-    return api.post<null>("/api/auth/reset-password", data);
+  resetPassword: async (data: ResetPasswordRequest) => {
+    return api.post<MessageResponse>("/api/auth/reset-password", data);
   },
 
   // 1.8) Change Password
-  changePassword: async (data: Record<string, any>) => {
-    return api.post<null>("/api/auth/change-password", data, { requireAuth: true });
+  changePassword: async (data: ChangePasswordRequest) => {
+    return api.post<MessageResponse>("/api/auth/change-password", data, { requireAuth: true });
   },
 
   // 1.9) Logout
   logout: async () => {
-    return api.post<null>("/api/auth/logout", {}, { requireAuth: true });
+    return api.post<MessageResponse>("/api/auth/logout", {}, { requireAuth: true });
   },
 
   // Lấy Profile hiện tại (để load User Context)

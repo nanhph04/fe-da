@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadFormData } from "./StudioUploadFeature";
 import { mediaService } from "@/features/watch/services/mediaService";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 interface UploadStep3ReviewProps {
   formData: UploadFormData;
@@ -28,6 +29,7 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
     try {
       // Gọi API initUpload (channelId được tự động nhận dạng bởi backend qua Auth Token)
       const res = await mediaService.initUpload({
+        channelId: formData.channelId,
         title: formData.title,
         description: formData.description,
         categories: formData.categories,
@@ -44,8 +46,8 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
       } else {
         setError(res.mess || "Failed to initialize upload");
       }
-    } catch (err: any) {
-      setError(err.mess || err.message || "An error occurred during upload");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "An error occurred during upload"));
     } finally {
       setIsPublishing(false);
     }
@@ -57,8 +59,8 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
         <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
           <span className="material-symbols-outlined text-green-500 text-6xl">check_circle</span>
         </div>
-        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Video Upload Initialized!</h1>
-        <p className="text-zinc-400">Your video is now being processed by Aura Studio.</p>
+        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Upload Draft Created</h1>
+        <p className="text-zinc-400">Thong tin video va cau hinh upload da duoc gui sang media service.</p>
         <p className="text-zinc-500 text-sm mt-4">Redirecting to Dashboard...</p>
       </div>
     );
@@ -99,6 +101,10 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
               
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#262528]">
                 <div>
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">Channel ID</span>
+                  <span className="text-sm font-bold text-white break-all">{formData.channelId}</span>
+                </div>
+                <div>
                   <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">Access Level</span>
                   <span className="text-sm font-bold text-white flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px] text-[#ff8e80]">{formData.visibility === 'public' ? 'public' : 'lock'}</span> 
@@ -110,6 +116,10 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
                   <span className="text-sm font-bold text-[#fdc003] flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">monetization_on</span> {formData.price} AC
                   </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">Resolutions</span>
+                  <span className="text-sm font-bold text-white">{formData.resolutions.join(", ")}</span>
                 </div>
               </div>
             </div>

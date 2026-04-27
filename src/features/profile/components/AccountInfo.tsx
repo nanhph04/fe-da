@@ -1,6 +1,13 @@
 import { Input } from "@/components/ui/input";
-
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 export function AccountInfo() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <Skeleton className="w-full h-48 rounded-xl" />;
+  }
+
   return (
     <section>
       <h2 className="text-xl font-bold mb-6 font-headline flex items-center gap-3 text-[#f9f5f8]">
@@ -15,7 +22,7 @@ export function AccountInfo() {
             <Input 
               className="w-full bg-black/50 border-[#48474a]/20 rounded-lg py-6 px-5 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" 
               type="email" 
-              defaultValue="alex.rivera@cinema.studio" 
+              defaultValue={user?.email || ""} 
               readOnly 
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-zinc-600 group-hover:text-[#ff8e80] cursor-pointer text-xl">edit</span>
@@ -28,7 +35,7 @@ export function AccountInfo() {
             <Input 
               className="w-full bg-black/50 border-[#48474a]/20 rounded-lg py-6 px-5 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" 
               type="text" 
-              defaultValue="+1 (555) 902-4412" 
+              defaultValue={user?.phone ? `+${user.phone}` : "Not provided"} 
               readOnly 
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-zinc-600 group-hover:text-[#ff8e80] cursor-pointer text-xl">edit</span>

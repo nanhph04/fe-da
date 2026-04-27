@@ -13,9 +13,9 @@ interface AuthContextProps {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setAuthData: (token: string, userData?: UserProfile) => void;
+  setAuthData: (token: string, userData?: UserProfile) => Promise<UserProfile | null>;
   logout: () => Promise<void>;
-  fetchProfile: () => Promise<void>;
+  fetchProfile: () => Promise<UserProfile | null>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -30,12 +30,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const res = await authService.getProfile();
       if (res.success && res.data) {
         setUser(res.data);
+        return res.data;
       }
     } catch (error) {
       console.error("Failed to load profile:", error);
       api.clearToken();
       setUser(null);
     }
+    return null;
   };
 
   useEffect(() => {
@@ -50,13 +52,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initAuth();
   }, []);
 
-  const setAuthData = (token: string, userData?: UserProfile) => {
+  const setAuthData = async (token: string, userData?: UserProfile) => {
     api.setToken(token);
     if (userData) {
       setUser(userData);
-    } else {
-      fetchProfile();
+      return userData;
     }
+    return fetchProfile();
   };
 
   const logout = async () => {

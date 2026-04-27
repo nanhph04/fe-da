@@ -5,7 +5,17 @@ import { EligibilityChecker } from "./EligibilityChecker";
 import { MembershipManagement } from "./MembershipManagement";
 import { TierEditorOverlay } from "./TierEditorOverlay";
 
-const INITIAL_TIERS = [
+export interface StudioTier {
+  id: number;
+  name: string;
+  price: number;
+  subscribers: number;
+  revenue: string;
+  badgeColor?: string;
+  perks: string[];
+}
+
+const INITIAL_TIERS: StudioTier[] = [
   { id: 1, name: "Silver Vongola", price: 500, subscribers: 124, revenue: "62,000", badgeColor: "bg-zinc-400", perks: ["Loyalty badges", "Custom emojis"] },
   { id: 2, name: "Gold Arcobaleno", price: 1500, subscribers: 45, revenue: "67,500", badgeColor: "bg-[#fdc003]", perks: ["Early access to videos", "Members-only chat"] },
   { id: 3, name: "Platinum Boss", price: 5000, subscribers: 12, revenue: "60,000", badgeColor: "bg-[#ff8e80]", perks: ["Exclusive live streams", "Direct message access"] },
@@ -13,11 +23,20 @@ const INITIAL_TIERS = [
 
 export function StudioMembershipFeature() {
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [editingTier, setEditingTier] = useState<any>(null);
+  const [editingTier, setEditingTier] = useState<StudioTier | null>(null);
   const [tiers, setTiers] = useState(INITIAL_TIERS);
 
-  const handleSaveTier = (updatedTier: any) => {
-    setTiers(tiers.map(t => t.id === updatedTier.id ? { ...t, ...updatedTier } : t));
+  const handleSaveTier = (updatedTier: StudioTier) => {
+    setTiers((currentTiers) => {
+      const existingTier = currentTiers.find((tier) => tier.id === updatedTier.id);
+      if (!existingTier) {
+        return [...currentTiers, updatedTier];
+      }
+
+      return currentTiers.map((tier) =>
+        tier.id === updatedTier.id ? { ...tier, ...updatedTier } : tier
+      );
+    });
     setEditingTier(null);
   };
 

@@ -61,7 +61,7 @@ export function VerificationDetailFeature() {
           <div className="bg-[#0a0a0a] p-6 border border-zinc-800 rounded-sm">
              <h3 className="font-headline text-lg font-bold text-white mb-4">Application Statement</h3>
              <p className="text-zinc-400 text-sm leading-relaxed font-mono">
-              "I am applying for Velvet verification to unlock the Premier tier benefits. As a full-time digital artist and creative director based in London, my work focuses on high-fidelity visual storytelling. I intend to use the platform for exclusive behind-the-scenes content and direct art commissions. I have a clean track record across all major social platforms and maintain a professional presence."
+              &ldquo;I am applying for Velvet verification to unlock the Premier tier benefits. As a full-time digital artist and creative director based in London, my work focuses on high-fidelity visual storytelling. I intend to use the platform for exclusive behind-the-scenes content and direct art commissions. I have a clean track record across all major social platforms and maintain a professional presence.&rdquo;
              </p>
           </div>
         </div>

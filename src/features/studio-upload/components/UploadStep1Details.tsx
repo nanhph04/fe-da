@@ -12,6 +12,11 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const resolutionOptions = ["360p", "480p", "720p", "1080p", "1440p", "2160p"];
+  const canContinue =
+    uploadComplete &&
+    formData.channelId.trim().length > 0 &&
+    formData.resolutions.length > 0;
 
   // Fake upload progress (Mocking file reading)
   useEffect(() => {
@@ -87,6 +92,17 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
         
         {/* Primary Details Column */}
         <div className="lg:col-span-8 space-y-8">
+          <div className="group">
+            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 group-focus-within:text-[#ff8e80] transition-colors">Channel ID</label>
+            <input
+              type="text"
+              value={formData.channelId}
+              onChange={e => updateFormData({ channelId: e.target.value })}
+              placeholder="Nhập channelId sẽ nhận video này"
+              className="w-full bg-transparent border-0 border-b-2 border-zinc-700 focus:border-[#ff8e80] focus:ring-0 text-base font-semibold py-4 px-0 transition-all placeholder-zinc-700 text-[#f9f5f8] outline-none"
+            />
+          </div>
+
           {/* Video Title */}
           <div className="group">
             <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 group-focus-within:text-[#ff8e80] transition-colors">Video Title</label>
@@ -162,6 +178,38 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
               </label>
             </div>
           </section>
+
+          <section className="space-y-4 rounded-xl border border-[#262528] bg-[#131315] p-6">
+            <div>
+              <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Processing Resolutions</h3>
+              <p className="mt-2 text-sm text-zinc-400">Các độ phân giải này khớp với body `resolutions` của API xử lý video.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {resolutionOptions.map((resolution) => {
+                const isSelected = formData.resolutions.includes(resolution);
+
+                return (
+                  <label key={resolution} className="cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={isSelected}
+                      onChange={() =>
+                        updateFormData({
+                          resolutions: isSelected
+                            ? formData.resolutions.filter(item => item !== resolution)
+                            : [...formData.resolutions, resolution],
+                        })
+                      }
+                    />
+                    <div className="rounded-lg border border-[#262528] bg-[#19191c] px-4 py-3 text-sm font-bold text-zinc-300 transition-all peer-checked:border-[#ff8e80] peer-checked:bg-[#ff8e80]/10 peer-checked:text-[#ffb2aa]">
+                      {resolution}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </section>
         </div>
 
         {/* Secondary Metadata Column */}
@@ -232,8 +280,8 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
         <div className="flex gap-4">
           <button 
             onClick={onNext}
-            disabled={!uploadComplete}
-            className={`px-8 py-2.5 font-bold text-sm rounded-sm transition-all active:scale-95 ${uploadComplete ? 'bg-gradient-to-r from-[#ff8e80] to-[#ff7668] text-[#650003] hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]' : 'bg-zinc-800 text-zinc-500 pointer-events-none'}`}
+            disabled={!canContinue}
+            className={`px-8 py-2.5 font-bold text-sm rounded-sm transition-all active:scale-95 ${canContinue ? 'bg-gradient-to-r from-[#ff8e80] to-[#ff7668] text-[#650003] hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]' : 'bg-zinc-800 text-zinc-500 pointer-events-none'}`}
           >
             Next: Pricing & Monetization
           </button>

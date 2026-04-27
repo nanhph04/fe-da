@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 export function AdminLoginFeature() {
   const [email, setEmail] = useState("");
@@ -24,13 +25,21 @@ export function AdminLoginFeature() {
     try {
       const res = await authService.login({ email, password });
       if (res.success && res.data?.accessToken) {
-        setAuthData(res.data.accessToken);
-        router.push("/admin");
+        const profile = await setAuthData(res.data.accessToken);
+        if (!profile) {
+          setServerError("Failed to load your profile after login.");
+          return;
+        }
+        if (profile?.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/library");
+        }
       } else {
         setServerError(res.mess || "Login failed");
       }
-    } catch (err: any) {
-      setServerError(err.mess || err.message || "Authentication failed");
+    } catch (err: unknown) {
+      setServerError(getErrorMessage(err, "Authentication failed"));
     } finally {
       setIsLoading(false);
     }

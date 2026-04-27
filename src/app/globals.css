@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -55,9 +56,9 @@
   --card-foreground: #0e0e0e;
   --popover: #ffffff;
   --popover-foreground: #0e0e0e;
-  --primary: #8d00e6;
+  --primary: #e11d48;
   --primary-foreground: #ffffff;
-  --secondary: #bc004b;
+  --secondary: #f59e0b;
   --secondary-foreground: #ffffff;
   --muted: #f1f1f1;
   --muted-foreground: #565555;
@@ -66,21 +67,21 @@
   --destructive: #a70138;
   --border: #767575;
   --input: #e4e4e4;
-  --ring: #8d00e6;
-  --radius: 0.75rem;
-  --chart-1: #8d00e6;
+  --ring: #e11d48;
+  --radius: 0.35rem;
+  --chart-1: #e11d48;
   --chart-2: #bc004b;
   --chart-3: #59002e;
   --chart-4: #37005f;
   --chart-5: #690939;
   --sidebar: #fcf9f8;
   --sidebar-foreground: #0e0e0e;
-  --sidebar-primary: #8d00e6;
+  --sidebar-primary: #e11d48;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f1f1f1;
   --sidebar-accent-foreground: #0e0e0e;
   --sidebar-border: #767575;
-  --sidebar-ring: #8d00e6;
+  --sidebar-ring: #e11d48;
 }
 
 .dark {
@@ -90,10 +91,10 @@
   --card-foreground: #ffffff;
   --popover: #262626;
   --popover-foreground: #ffffff;
-  --primary: #cf96ff;
-  --primary-foreground: #480079;
-  --secondary: #ff6d8d;
-  --secondary-foreground: #480018;
+  --primary: #fb7185;
+  --primary-foreground: #4c0519;
+  --secondary: #fbbf24;
+  --secondary-foreground: #451a03;
   --muted: #262626;
   --muted-foreground: #adaaaa;
   --accent: #262626;
@@ -101,20 +102,24 @@
   --destructive: #ff6e84;
   --border: #484847;
   --input: #1a1a1a;
-  --ring: #cf96ff;
-  --chart-1: #cf96ff;
+  --ring: #fb7185;
+  --chart-1: #fb7185;
   --chart-2: #ff6d8d;
   --chart-3: #ff96bb;
   --chart-4: #c683ff;
   --chart-5: #bc004b;
   --sidebar: #0e0e0e;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #cf96ff;
-  --sidebar-primary-foreground: #480079;
+  --sidebar-primary: #fb7185;
+  --sidebar-primary-foreground: #4c0519;
   --sidebar-accent: #262626;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #484847;
-  --sidebar-ring: #cf96ff;
+  --sidebar-ring: #fb7185;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 @layer base {

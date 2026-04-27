@@ -1,72 +1,152 @@
-import Link from "next/link";
-import Image from "next/image";
+"use client";
 
-const WATCH_HISTORY = [
-  {
-    id: 1,
-    title: "Neon Dreams: Vol II",
-    remaining: "24m remaining",
-    quality: "4K HDR",
-    progress: 75,
-    cover: "https://lh3.googleusercontent.com/aida-public/AB6AXuBraWyxtIOyJ4X5MMdU1JszScFUpU9Z5ppJqB7ce16hwl1KfUMeEFVkuOUhnPUdgWqD8344tvFAXJWDc3OikRTxAB_0RCi-7QBHSNyDg38UCEQrmx7vslmRLgovPqrlm7pPz0cqSDrcIfB7FKAVUVE3jGLkBOBxZNHzsFSe02AIdx_Dt366Au9eSCaz2Y2gxVH6oPg6eu9-f4Kt5TP6e9vSo0do757sIfUjv_zaQTTsvRh-PUtS5GA4mklfhEG4oi_nXmlbns921MAr"
-  },
-  {
-    id: 2,
-    title: "The Architect's Silence",
-    remaining: "1h 12m remaining",
-    quality: "8K",
-    progress: 40,
-    cover: "https://lh3.googleusercontent.com/aida-public/AB6AXuD-_ww0K4i5UW9K1vvlAYP-0PcyAusS2cROQfg0uLd70Z0UnQp30a6Bz_DfuqNJuJGd5gGZWaB5YmwFzQInYbwlU2Lltp3UIokNeIpZKxIVFvtwa8_ZiXB94two8d2xfjM4KHFI8IdnPRkoDXfOiOgOA2F9ZWJgYP3cMGNvEonvHiPtRnK5OwkSZZgyhndMnYdtYtkXih9MVmVjrs1zJyExZBC0YJzbV4DrwWGLz-lAu_-mbdLow97xOHC-AaXv1CRj6e645wJpeEoR"
-  },
-  {
-    id: 3,
-    title: "Void Horizon",
-    remaining: "5m remaining",
-    quality: "Dolby Vision",
-    progress: 90,
-    cover: "https://lh3.googleusercontent.com/aida-public/AB6AXuBfxQAR7CXTp4p-sFYaB2Olz-gK1gZYmAO-noAkOOEEPHx2UOtnuVwopr6qZK2cmxkxtotI4_X7ZWmiU2tasrCRCSJuDKFOPGqBDp6YnChkoa4dTtM13kCr_2vWiykLA_r6E-HcBZMuIzQhzyYUlB1T4grdCbgB-U3oYL0VO6Ko72XKh3qmLQP0w7EzdW9LwQVPFXpV3iuptYP9ZIFA2brBSPw2DgiHXO7rCVINNy8sh_jMzJPfAr5kEdfmioy5iiY48nfKCx7R5i_U"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import {
+  mediaService,
+  type ContinueWatchingVideoResponse,
+} from "@/features/watch/services/mediaService";
+
+function formatRemainingTime(value: number | null) {
+  if (value === null || value <= 0) {
+    return "Sap xem xong";
   }
-];
+
+  const hours = Math.floor(value / 3600);
+  const minutes = Math.ceil((value % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m con lai`;
+  }
+
+  return `${minutes}m con lai`;
+}
 
 export function RecentlyWatched() {
+  const { user } = useAuth();
+  const [items, setItems] = useState<ContinueWatchingVideoResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadContinueWatching() {
+      if (!user) {
+        setItems([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await mediaService.getContinueWatching({ limit: 10 });
+        if (isMounted && res.success && res.data) {
+          setItems(res.data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error("Failed to load continue-watching videos", error);
+          setItems([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadContinueWatching();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
   return (
     <section>
-      <div className="flex justify-between items-end mb-8">
-        <h2 className="text-3xl font-headline font-bold text-[#f9f5f8]">Recently Watched</h2>
-        <Link href="#" className="text-[#ff8e80] text-sm font-bold hover:underline">
-          View All
-        </Link>
+      <div className="mb-8 flex items-end justify-between">
+        <h2 className="text-3xl font-headline font-bold text-[#f9f5f8]">
+          Recently Watched
+        </h2>
       </div>
 
-      <div className="flex gap-6 overflow-x-auto hide-scrollbar pb-4 snap-x">
-        {WATCH_HISTORY.map((item) => (
-          <div key={item.id} className="min-w-[320px] group cursor-pointer snap-start">
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-[#19191c] mb-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                alt={item.title} 
-                src={item.cover}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
-              
-              <div className="absolute bottom-0 left-0 w-full h-1.5 bg-zinc-800">
-                <div className="h-full bg-[#ff8e80]" style={{ width: `${item.progress}%` }}></div>
-              </div>
-              
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-                  <span className="material-symbols-outlined text-white text-3xl fill-current" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    play_arrow
-                  </span>
+      {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="min-w-[320px] animate-pulse">
+              <div className="mb-3 aspect-video rounded-lg bg-[#19191c]" />
+              <div className="h-5 w-3/4 rounded bg-[#19191c]" />
+              <div className="mt-2 h-4 w-1/2 rounded bg-[#19191c]" />
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {!isLoading && items.length === 0 ? (
+        <div className="rounded-xl border border-[#262528] bg-[#131315] p-6 text-sm text-zinc-400">
+          Chua co video nao de xem tiep.
+        </div>
+      ) : null}
+
+      <div className="hide-scrollbar flex gap-6 overflow-x-auto pb-4 snap-x">
+        {items.map((item) => {
+          const progress =
+            item.durationSeconds && item.durationSeconds > 0
+              ? Math.min(
+                  100,
+                  Math.round(
+                    (item.resumePositionSeconds / item.durationSeconds) * 100
+                  )
+                )
+              : 0;
+
+          return (
+            <Link
+              href={`/watch/${item.videoId}`}
+              key={item.videoId}
+              className="group min-w-[320px] cursor-pointer snap-start"
+            >
+              <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-[#19191c]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt={item.title}
+                  src={
+                    item.thumbnailUrl ||
+                    "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=600"
+                  }
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+
+                <div className="absolute bottom-0 left-0 h-1.5 w-full bg-zinc-800">
+                  <div
+                    className="h-full bg-[#ff8e80]"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-md">
+                    <span
+                      className="material-symbols-outlined fill-current text-3xl text-white"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      play_arrow
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <h3 className="font-headline font-bold text-lg group-hover:text-[#ff8e80] transition-colors">{item.title}</h3>
-            <p className="text-zinc-500 text-sm">{item.remaining} &bull; {item.quality}</p>
-          </div>
-        ))}
+
+              <h3 className="font-headline text-lg font-bold transition-colors group-hover:text-[#ff8e80]">
+                {item.title}
+              </h3>
+              <p className="text-sm text-zinc-500">
+                {formatRemainingTime(item.remainingSeconds)} •{" "}
+                {item.viewCount.toLocaleString()} luot xem
+              </p>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

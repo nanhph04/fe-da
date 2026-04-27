@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -38,13 +39,13 @@ export function LoginForm() {
     try {
       const res = await authService.login(data);
       if (res.success && res.data?.accessToken) {
-        setAuthData(res.data.accessToken);
+        await setAuthData(res.data.accessToken);
         router.push("/library");
       } else {
         setServerError(res.mess || "Login failed");
       }
-    } catch (err: any) {
-      setServerError(err.mess || err.message || "An error occurred during login. Please try again.");
+    } catch (err: unknown) {
+      setServerError(getErrorMessage(err, "An error occurred during login. Please try again."));
     } finally {
       setIsLoading(false);
     }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 export function CreateChannelFeature() {
   const [name, setName] = useState("");
@@ -29,8 +30,8 @@ export function CreateChannelFeature() {
       } else {
         setError(res.mess || "Failed to create channel.");
       }
-    } catch (err: any) {
-      setError(err.mess || err.message || "An error occurred");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "An error occurred"));
     } finally {
       setIsLoading(false);
     }

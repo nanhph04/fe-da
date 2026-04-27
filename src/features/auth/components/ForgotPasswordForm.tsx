@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { authService } from "@/features/auth/services/authService";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -33,8 +34,8 @@ export function ForgotPasswordForm() {
       } else {
         setServerError(res.mess || "Failed to send recovery email");
       }
-    } catch (err: any) {
-      setServerError(err.mess || err.message || "An error occurred");
+    } catch (err: unknown) {
+      setServerError(getErrorMessage(err, "An error occurred"));
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +62,7 @@ export function ForgotPasswordForm() {
           </div>
           <h3 className="text-2xl font-bold text-[#f9f5f8]" style={{ fontFamily: 'var(--font-headline)' }}>Email Sent!</h3>
           <p className="text-[#adaaad] font-sans">
-            We've sent an email with password recovery instructions. Please check your inbox.
+            We&apos;ve sent an email with password recovery instructions. Please check your inbox.
           </p>
           <button 
             type="button"

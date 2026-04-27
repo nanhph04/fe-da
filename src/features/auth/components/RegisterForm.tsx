@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/features/auth/services/authService";
+import { getErrorMessage } from "@/shared/utils/apiClient";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -48,8 +49,8 @@ export function RegisterForm() {
       } else {
         setServerError(res.mess || "Registration failed");
       }
-    } catch (err: any) {
-      setServerError(err.mess || err.message || "An error occurred during registration");
+    } catch (err: unknown) {
+      setServerError(getErrorMessage(err, "An error occurred during registration"));
     } finally {
       setIsLoading(false);
     }
