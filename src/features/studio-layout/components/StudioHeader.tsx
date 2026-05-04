@@ -1,13 +1,32 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { studioQuickLinks } from "./navigation";
 
 export function StudioHeader() {
+  const pathname = usePathname();
+
   return (
     <header className="flex justify-between items-center w-full px-8 h-16 sticky top-0 z-40 bg-[#0e0e10]/80 backdrop-blur-xl border-b border-[#262528]">
       <div className="flex items-center gap-8">
         <nav className="flex gap-6 font-headline text-sm tracking-wide">
-          <a className="text-zinc-400 hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Live Stream</a>
-          <a className="text-zinc-400 hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Subscribers</a>
-          <a className="text-zinc-400 hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Comments</a>
+          {studioQuickLinks.map((item) => {
+            const isActive = pathname === item.path || pathname?.startsWith(item.path);
+
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`transition-colors duration-300 ${
+                  isActive ? "text-zinc-100" : "text-zinc-400 hover:text-zinc-100"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
       
@@ -22,7 +41,7 @@ export function StudioHeader() {
         </div>
         
         <div className="flex items-center gap-4">
-          <button className="text-zinc-400 hover:text-white transition-colors">
+          <button type="button" className="text-zinc-400 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-[20px]">notifications</span>
           </button>
           <div className="h-8 w-8 rounded-full overflow-hidden border border-[#262528] cursor-pointer">

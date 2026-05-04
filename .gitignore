@@ -44,5 +44,6 @@ next-env.d.ts
 .agent
 mcp.json
 .vscode
+.worktrees
 
 stitch_media_commerce_platform/*

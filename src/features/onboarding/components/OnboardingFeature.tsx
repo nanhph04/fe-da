@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PublicHeader } from "@/components/layout/public/PublicHeader";
 
 export function OnboardingFeature() {
   return (
@@ -16,15 +17,7 @@ export function OnboardingFeature() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,142,128,0.08)_0%,transparent_70%)]"></div>
       </div>
 
-      {/* Navigation Shell */}
-      <nav className="fixed top-0 w-full flex justify-between items-center px-8 py-6 z-50">
-        <div className="text-2xl font-bold tracking-tighter text-red-600 font-headline">Aura Stream</div>
-        <div className="flex gap-6 items-center">
-          <button className="text-zinc-500 hover:text-[#ff8e80] transition-colors">
-            <span className="material-symbols-outlined">help</span>
-          </button>
-        </div>
-      </nav>
+      <PublicHeader currentPath="/onboarding" subtitle="Auth / Onboarding" showAuthActions={false} />
 
       {/* Main Content Canvas */}
       <main className="relative z-10 w-full max-w-2xl px-6">

@@ -1,32 +1,26 @@
 "use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { studioSidebarItems } from "./navigation";
 
 export function StudioSidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
 
-  const navItems = [
-    { name: "Dashboard", path: "/studio", icon: "dashboard" },
-    { name: "Content", path: "/studio/content", icon: "video_library" },
-    { name: "Analytics", path: "/studio/analytics", icon: "analytics", disabled: true },
-    { name: "Monetization", path: "/studio/wallet", icon: "payments" },
-    { name: "Memberships", path: "/studio/memberships", icon: "stars" },
-    { name: "Settings", path: "/studio/settings", icon: "settings", disabled: true }
-  ];
-
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 border-r-0 bg-[#0a0a0a] shadow-2xl shadow-black z-50 flex flex-col hidden md:flex">
       <div className="p-8">
-        <h1 className="text-2xl font-black tracking-tighter text-[#ff1a1a] uppercase font-headline">Aura Studio</h1>
-        <p className="text-xs text-zinc-500 font-headline uppercase tracking-widest mt-1">Creator Hub</p>
+        <h1 className="text-2xl font-black tracking-tighter text-[#ff1a1a] uppercase font-headline">Velvet Gallery</h1>
+        <p className="text-xs text-zinc-500 font-headline uppercase tracking-widest mt-1">Creator Studio</p>
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.path || (item.path !== '/studio' && pathname?.startsWith(item.path));
+        {studioSidebarItems.map((item) => {
+          const isActive =
+            pathname === item.path ||
+            (!!item.matchStartsWith && pathname?.startsWith(item.path));
           const className = `flex items-center gap-3 px-4 py-3 rounded-sm transition-transform font-headline text-sm ${
             item.disabled
               ? "text-zinc-700 border border-dashed border-[#262528] cursor-not-allowed"
@@ -38,7 +32,7 @@ export function StudioSidebar() {
           const content = (
             <>
               <span className="material-symbols-outlined">{item.icon}</span>
-              {item.name}
+              {item.label}
             </>
           );
 
@@ -63,11 +57,12 @@ export function StudioSidebar() {
       </nav>
 
       <div className="px-6 py-6">
-        <Link href="/studio/upload">
-          <button className="w-full bg-[#ff8e80] hover:bg-[#ff7668] text-[#650003] py-3 rounded-sm font-headline font-black flex items-center justify-center gap-2 transition-colors shadow-lg shadow-[#ff8e80]/20 uppercase text-xs tracking-widest">
-            <span className="material-symbols-outlined">add_circle</span>
-            Upload
-          </button>
+        <Link
+          href="/studio/upload"
+          className="flex w-full items-center justify-center gap-2 rounded-sm bg-[#ff8e80] py-3 font-headline text-xs font-black uppercase tracking-widest text-[#650003] shadow-lg shadow-[#ff8e80]/20 transition-colors hover:bg-[#ff7668]"
+        >
+          <span className="material-symbols-outlined">add_circle</span>
+          Upload
         </Link>
       </div>
 

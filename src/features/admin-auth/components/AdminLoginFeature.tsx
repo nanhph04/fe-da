@@ -60,7 +60,7 @@ export function AdminLoginFeature() {
         {/* System Header */}
         <div className="text-center mb-10">
           <span className="material-symbols-outlined text-4xl text-red-600 mb-2">admin_panel_settings</span>
-          <h1 className="text-3xl font-black text-white font-headline tracking-tighter uppercase">V-Console</h1>
+          <h1 className="text-3xl font-black text-white font-headline tracking-tighter uppercase">Velvet Gallery</h1>
           <p className="text-[10px] text-red-500/70 font-bold tracking-[0.3em] uppercase mt-1">Classified Access Only</p>
         </div>
 
@@ -127,7 +127,7 @@ export function AdminLoginFeature() {
         <span>VER: 4.2.1-BETA</span>
       </div>
       <div className="absolute top-4 right-6 text-[10px] text-zinc-700 font-mono">
-        AURA CINEMATIC CORE
+        VELVET GALLERY CORE
       </div>
     </div>
   );

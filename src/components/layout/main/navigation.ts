@@ -1,4 +1,5 @@
 import type { UserRole } from "@/features/auth/services/authService";
+import { platformBrand } from "@/shared/navigation/branding";
 
 export type MainNavRole = UserRole | "guest";
 
@@ -41,6 +42,8 @@ export const sideNavFooterItems: NavItem[] = [
   { label: "Settings", icon: "settings", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Help", icon: "help_outline", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
 ];
+
+export { platformBrand };
 
 export const isNavItemVisible = (item: NavItem, role: MainNavRole) => {
   return !item.roles || item.roles.includes(role);

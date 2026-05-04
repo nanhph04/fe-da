@@ -162,7 +162,7 @@ export function LoginForm() {
 
       <footer className="mt-12 text-center">
         <p className="font-sans text-[#adaaad] text-sm">
-          New to Aura Cinematic? 
+          New to Velvet Gallery? 
           <Link href="/register" className="text-[#f9f5f8] font-bold hover:text-[#ff8e80] transition-colors ml-1">
             Create an account
           </Link>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Velvet Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#785900",
+                    "background": "#0e0e10",
+                    "tertiary-container": "#fd5046",
+                    "surface": "#0e0e10",
+                    "on-error": "#490013",
+                    "surface-container-low": "#131315",
+                    "inverse-primary": "#c1000c",
+                    "tertiary-fixed-dim": "#ff7b6f",
+                    "surface-container-highest": "#262528",
+                    "primary-fixed": "#ff7668",
+                    "on-primary-fixed-variant": "#610003",
+                    "secondary-fixed": "#ffca4d",
+                    "surface-container-high": "#1f1f22",
+                    "on-tertiary-container": "#1f0000",
+                    "on-secondary": "#553e00",
+                    "surface-variant": "#262528",
+                    "on-primary": "#650003",
+                    "error": "#ff6e84",
+                    "primary-fixed-dim": "#ff5b4c",
+                    "on-primary-container": "#4f0002",
+                    "secondary": "#fdc003",
+                    "surface-bright": "#2c2c2f",
+                    "outline-variant": "#48474a",
+                    "tertiary": "#ff7165",
+                    "tertiary-fixed": "#ff9287",
+                    "on-tertiary-fixed": "#3a0002",
+                    "on-error-container": "#ffb2b9",
+                    "on-tertiary": "#4a0002",
+                    "tertiary-dim": "#ff7165",
+                    "inverse-on-surface": "#565457",
+                    "error-container": "#a70138",
+                    "on-secondary-container": "#fff6ec",
+                    "primary-dim": "#e80f16",
+                    "primary-container": "#ff7668",
+                    "secondary-dim": "#ecb200",
+                    "on-secondary-fixed-variant": "#674c00",
+                    "on-background": "#f9f5f8",
+                    "on-tertiary-fixed-variant": "#7a0007",
+                    "surface-container-lowest": "#000000",
+                    "surface-tint": "#ff8e80",
+                    "on-secondary-fixed": "#443100",
+                    "surface-dim": "#0e0e10",
+                    "error-dim": "#d73357",
+                    "on-surface": "#f9f5f8",
+                    "on-surface-variant": "#adaaad",
+                    "secondary-fixed-dim": "#f7ba00",
+                    "on-primary-fixed": "#000000",
+                    "primary": "#ff8e80",
+                    "surface-container": "#19191c",
+                    "outline": "#767577",
+                    "inverse-surface": "#fcf8fb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope", "sans-serif"],
+                    "display": ["Manrope", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-neutral-950/40 backdrop-blur-2xl bg-gradient-to-b from-black/80 to-transparent shadow-none">
+<div class="flex justify-between items-center px-8 py-4 w-full max-w-[1920px] mx-auto">
+<div class="text-2xl font-black text-red-600 tracking-tighter uppercase font-headline">Velvet Gallery</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-white border-b-2 border-red-600 pb-1 font-['Manrope'] tracking-[-0.02em] font-bold hover:opacity-80 transition-all duration-300 active:scale-95" href="#">Browse</a>
+<a class="text-neutral-400 font-medium hover:text-white transition-colors font-['Manrope'] tracking-[-0.02em] hover:opacity-80 transition-all duration-300 active:scale-95" href="#">Pricing</a>
+</div>
+<div class="flex items-center space-x-4">
+<button class="hidden md:block px-6 py-2 rounded-sm text-sm font-label font-medium text-on-surface hover:text-primary transition-colors duration-300 active:scale-95">Sign In</button>
+<button class="px-6 py-2 rounded-sm text-sm font-label font-medium bg-gradient-to-br from-primary to-primary-container text-on-primary hover:brightness-110 shadow-[0_10px_30px_rgba(255,142,128,0.2)] transition-all duration-300 active:scale-95">Sign Up</button>
+</div>
+</div>
+</nav>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center pt-24 pb-16 overflow-hidden">
+<!-- Background Image -->
+<div class="absolute inset-0 z-0">
+<img alt="Cinematic Background" class="w-full h-full object-cover opacity-40" data-alt="Cinematic abstract dark room with soft red ambient light bleeding through velvet textured walls creating a deep moody atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUQ0fun5kut_Ws_0zai8ZJDfT4AdAL-teKKTVnHGJkfvEUPYrpdJKiQYrlYSbmBlhryP6TTKKQ37U0UITAFEK4PdbDNerZSo0a2cmSh9xSbxnnMnbG-I6a5nLKpLqyj18p8e9Ti4ihYnq_HXcXkT_ZyzuJK96qxDmUsXhlwbf62D8ZPlBxlOQcmIel6O1UV41it9Y_A5E7aAdCfWlds3fXBOkvAx-9laWutXGK0m52doN6m3VRsAXHjNmBqkBGNq5rQPsDiP4_riXf"/>
+<div class="absolute inset-0 bg-gradient-to-b from-surface/20 via-surface/80 to-surface"></div>
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,142,128,0.1)_0%,transparent_60%)]"></div>
+</div>
+<div class="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-12 flex flex-col items-center md:items-start text-center md:text-left">
+<div class="inline-flex items-center space-x-2 bg-surface-variant/40 backdrop-blur-md px-4 py-1.5 rounded-full mb-8 border-[0.5px] border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-label font-medium text-secondary-fixed tracking-wider uppercase">Premium Access Pass Now Live</span>
+</div>
+<h1 class="font-display text-5xl md:text-7xl lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] max-w-4xl mb-6">
+                    The Velvet Gallery:<br/>
+<span class="bg-clip-text text-transparent bg-gradient-to-r from-white via-on-surface to-on-surface-variant">Cinematic Immersion Redefined</span>
+</h1>
+<p class="font-body text-lg md:text-xl text-on-surface-variant max-w-2xl mb-10 leading-relaxed">
+                    Step into the dark room. Experience decentralized, high-fidelity media powered by the Aura Coin economy. Where curation meets creator empowerment.
+                </p>
+<div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+<button class="w-full sm:w-auto px-8 py-4 rounded-sm bg-gradient-to-br from-primary to-primary-container text-on-primary font-label font-semibold tracking-wide hover:brightness-110 shadow-[0_20px_40px_rgba(255,142,128,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center space-x-2 relative overflow-hidden group">
+<span class="relative z-10">Explore the Vault</span>
+<span class="material-symbols-outlined text-xl relative z-10 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+</button>
+<button class="w-full sm:w-auto px-8 py-4 rounded-sm bg-surface-variant/40 backdrop-blur-xl border border-outline-variant/15 text-on-surface font-label font-semibold tracking-wide hover:bg-surface-bright transition-all duration-300 active:scale-95 flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span>Watch Trailer</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="py-24 bg-surface-container-low relative">
+<div class="max-w-7xl mx-auto px-8 md:px-12">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Feature 1 -->
+<div class="group p-8 rounded-lg bg-surface-container hover:bg-surface-bright border-[0.5px] border-outline-variant/15 transition-colors duration-500 flex flex-col justify-between min-h-[320px] relative overflow-hidden">
+<div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
+<span class="material-symbols-outlined text-8xl text-secondary">local_activity</span>
+</div>
+<div>
+<div class="w-12 h-12 rounded-sm bg-secondary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary text-2xl" style="font-variation-settings: 'FILL' 1;">local_activity</span>
+</div>
+<h3 class="font-display text-2xl font-bold mb-4 tracking-[-0.01em]">Exclusive Levels (Lv1-Lv3)</h3>
+<p class="font-body text-on-surface-variant text-base leading-relaxed">
+                                Unlock tiered access to premium content. Ascend from standard viewing to director's cut exclusives and private screenings.
+                            </p>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="group p-8 rounded-lg bg-gradient-to-b from-surface-container to-surface-container-lowest border-[0.5px] border-secondary/20 hover:border-secondary/40 shadow-[0_10px_30px_rgba(253,192,3,0.05)] transition-all duration-500 flex flex-col justify-between min-h-[320px] relative overflow-hidden">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(253,192,3,0.1)_0%,transparent_70%)]"></div>
+<div>
+<div class="w-12 h-12 rounded-sm bg-secondary/20 flex items-center justify-center mb-6 relative z-10">
+<span class="material-symbols-outlined text-secondary text-2xl" style="font-variation-settings: 'FILL' 1;">monetization_on</span>
+</div>
+<h3 class="font-display text-2xl font-bold text-secondary-fixed mb-4 tracking-[-0.01em] relative z-10">Aura Economy</h3>
+<p class="font-body text-on-surface-variant text-base leading-relaxed relative z-10">
+                                Transact securely with Aura Coins. Support creators directly, purchase viewing rights, and participate in the decentrali ed economy.
+                            </p>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="group p-8 rounded-lg bg-surface-container hover:bg-surface-bright border-[0.5px] border-outline-variant/15 transition-colors duration-500 flex flex-col justify-between min-h-[320px] relative overflow-hidden">
+<div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
+<span class="material-symbols-outlined text-8xl text-primary">movie</span>
+</div>
+<div>
+<div class="w-12 h-12 rounded-sm bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">movie</span>
+</div>
+<h3 class="font-display text-2xl font-bold mb-4 tracking-[-0.01em]">Creator Studio</h3>
+<p class="font-body text-on-surface-variant text-base leading-relaxed">
+                                Empowering the next generation of filmmakers with high-fidelity hosting, transparent analytics, and direct audience engagement.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-32 relative overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="CTA Background" class="w-full h-full object-cover opacity-20" data-alt="Abstract cinematic light leaks in deep red and magenta hues over a dark textured surface creating a dramatic and high-energy feel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCmyxzPMAq4BFAbmsepWVeeZG3o4L6BZVAY1FPxEc9N6uw6Z9NBcjT4PThJ5I_V7Ozj-szuDOPymSGJj5VeuANzZqCTtfyWmaJZthoxx9os8ZNjoO7jULhsF-eAXw5UGM-qw9vgZefNh-D7oOfEBIOzgRDjZbKCu7J6KwfPmpVvQXn57PsLCQY3CeaHLIF3zLhGY_FkOhNu76jD1C6JnmbJINxs3ueabHJlOwKgzL00EDvT6X0QUCWS-O0f8vnetyA1D95n7Bz93jN"/>
+<div class="absolute inset-0 bg-surface/80 backdrop-blur-sm"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-surface"></div>
+</div>
+<div class="relative z-10 max-w-4xl mx-auto px-8 text-center flex flex-col items-center">
+<h2 class="font-display text-4xl md:text-6xl font-extrabold tracking-[-0.02em] mb-6">
+                    Join the Cinematic Revolution Today
+                </h2>
+<p class="font-body text-lg text-on-surface-variant mb-12 max-w-2xl">
+                    Secure your place in The Velvet Gallery. Claim your Aura wallet and start exploring a new era of decentralized entertainment.
+                </p>
+<button class="px-10 py-5 rounded-sm bg-gradient-to-br from-primary to-primary-container text-on-primary font-label font-bold text-lg tracking-wide hover:brightness-110 shadow-[0_20px_50px_rgba(255,142,128,0.4)] transition-all duration-300 active:scale-95">
+                    Sign Up Now
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-16 px-8 mt-auto bg-neutral-950 bg-neutral-900/50 shadow-inner shadow-black relative z-10">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+<div class="flex flex-col space-y-4 col-span-1 lg:col-span-2">
+<span class="text-lg font-bold text-neutral-200 font-headline uppercase tracking-tighter">Velvet Gallery</span>
+<p class="font-['Inter'] text-sm text-neutral-500 max-w-md leading-relaxed">
+                    © 2024 Velvet Gallery. The Velvet Gallery philosophy and branding are trademarks of Cinematic Immersion.
+                </p>
+</div>
+<div class="flex flex-col space-y-3">
+<span class="font-label font-semibold text-on-surface mb-2">Platform</span>
+<a class="font-['Inter'] text-sm text-neutral-500 hover:text-red-500 transition-colors cursor-pointer transition-all w-fit" href="#">About</a>
+<a class="font-['Inter'] text-sm text-neutral-500 hover:text-red-500 transition-colors cursor-pointer transition-all w-fit" href="#">Creators</a>
+<a class="font-['Inter'] text-sm text-neutral-500 hover:text-red-500 transition-colors cursor-pointer transition-all w-fit" href="#">Help Center</a>
+</div>
+<div class="flex flex-col space-y-3">
+<span class="font-label font-semibold text-on-surface mb-2">Legal</span>
+<a class="font-['Inter'] text-sm text-neutral-500 hover:text-red-500 transition-colors cursor-pointer transition-all w-fit" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-sm text-neutral-500 hover:text-red-500 transition-colors cursor-pointer transition-all w-fit" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+</body></html>
