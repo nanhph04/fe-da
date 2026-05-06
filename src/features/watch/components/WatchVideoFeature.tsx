@@ -17,12 +17,18 @@ interface WatchVideoFeatureProps {
 export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let title = "Unknown Video";
   let poster = undefined;
+  let viewCount = 0;
+  let publishedAt: string | null = null;
+  let description = "";
 
   try {
     const infoRes = await getVideoMetadataCached(videoId);
     if (infoRes.success && infoRes.data) {
       title = infoRes.data.title;
       poster = infoRes.data.thumbnailUrl || undefined;
+      viewCount = infoRes.data.viewCount;
+      publishedAt = infoRes.data.publishedAt;
+      description = infoRes.data.description;
     }
   } catch (err: unknown) {
     const apiError = err as PublicApiError;
@@ -42,8 +48,8 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
       {/* Main Content (Left) */}
       <div className="flex-grow xl:w-2/3">
         <PlayerContainerClient videoId={videoId} poster={poster} title={title} />
-        <VideoInfo />
-        <CreatorSection />
+        <VideoInfo title={title} viewCount={viewCount} publishedAt={publishedAt} />
+        <CreatorSection description={description} />
         <CommentsSection />
       </div>
 

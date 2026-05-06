@@ -29,7 +29,6 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
     try {
       // Gọi API initUpload (channelId được tự động nhận dạng bởi backend qua Auth Token)
       const res = await mediaService.initUpload({
-        channelId: formData.channelId,
         title: formData.title,
         description: formData.description,
         categories: formData.categories,
@@ -101,8 +100,8 @@ export function UploadStep3Review({ formData, onPrev }: UploadStep3ReviewProps) 
               
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#262528]">
                 <div>
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">Channel ID</span>
-                  <span className="text-sm font-bold text-white break-all">{formData.channelId}</span>
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">Categories</span>
+                  <span className="text-sm font-bold text-white break-all">{formData.categories.join(", ")}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-1">Access Level</span>

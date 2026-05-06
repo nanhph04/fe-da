@@ -2,7 +2,7 @@
   "mcpServers": {
     "stitch": {
       "command": "npx",
-      "args": ["-y", "@stitch-mcp/stitch-mcp"],
+      "args": ["@davideast/stitch-mcp", "proxy"],
       "env": {
         "STITCH_API_KEY": "AQ.Ab8RN6LW554p44y0rH0OaWp_TZU-zsxksafef0xy8HRgcVA2Lg"
       }

@@ -6,7 +6,6 @@ import { UploadStep2Monetization } from "./UploadStep2Monetization";
 import { UploadStep3Review } from "./UploadStep3Review";
 
 export interface UploadFormData {
-  channelId: string;
   title: string;
   description: string;
   categories: string[];
@@ -19,10 +18,9 @@ export interface UploadFormData {
 export function StudioUploadFeature() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<UploadFormData>({
-    channelId: "",
     title: "The Ethereal Horizon: A Cinematic Journey Through Iceland",
     description: "Exploring the southern coast of Iceland during the late autumn transition. This film captures the raw power of the Atlantic and the silent majesty of the glacial plateaus. All shots captured in 8K RAW.",
-    categories: ["Cinematic Travel"],
+    categories: [],
     resolutions: ["720p", "1080p"],
     visibility: "public",
     price: 0,

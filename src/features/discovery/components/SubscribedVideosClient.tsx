@@ -98,6 +98,11 @@ export function SubscribedVideosClient() {
             <p className="mt-1 text-xs text-zinc-400">
               {video.categories.join(" • ") || "Uncategorized"}
             </p>
+            <div className="mt-1.5 flex items-center gap-2 text-[10px] font-medium text-zinc-500">
+              <span>{video.viewCount.toLocaleString()} views</span>
+              <span>•</span>
+              <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+            </div>
           </div>
         </Link>
       ))}

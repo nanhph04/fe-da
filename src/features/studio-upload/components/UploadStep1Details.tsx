@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { mediaService, CategoryResponse } from "@/features/watch/services/mediaService";
 import { UploadFormData } from "./StudioUploadFeature";
 
 interface UploadStep1DetailsProps {
@@ -12,11 +13,28 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const resolutionOptions = ["360p", "480p", "720p", "1080p", "1440p", "2160p"];
   const canContinue =
     uploadComplete &&
-    formData.channelId.trim().length > 0 &&
+    formData.title.trim().length > 0 &&
+    formData.categories.length > 0 &&
     formData.resolutions.length > 0;
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await mediaService.getCategories();
+        if (res.success && res.data) {
+          setCategories(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to load categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Fake upload progress (Mocking file reading)
   useEffect(() => {
@@ -92,17 +110,6 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
         
         {/* Primary Details Column */}
         <div className="lg:col-span-8 space-y-8">
-          <div className="group">
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 group-focus-within:text-[#ff8e80] transition-colors">Channel ID</label>
-            <input
-              type="text"
-              value={formData.channelId}
-              onChange={e => updateFormData({ channelId: e.target.value })}
-              placeholder="Nhập channelId sẽ nhận video này"
-              className="w-full bg-transparent border-0 border-b-2 border-zinc-700 focus:border-[#ff8e80] focus:ring-0 text-base font-semibold py-4 px-0 transition-all placeholder-zinc-700 text-[#f9f5f8] outline-none"
-            />
-          </div>
-
           {/* Video Title */}
           <div className="group">
             <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 group-focus-within:text-[#ff8e80] transition-colors">Video Title</label>
@@ -236,17 +243,33 @@ export function UploadStep1Details({ formData, updateFormData, onNext }: UploadS
           {/* Category & Tags */}
           <div className="space-y-6 bg-[#131315] p-6 rounded-xl border border-[#262528]">
             <div>
-              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Category</label>
-              <select 
-                value={formData.categories[0] || ""}
-                onChange={e => updateFormData({ categories: [e.target.value] })}
-                className="w-full bg-[#19191c] border-0 rounded-lg text-sm text-zinc-200 font-medium py-3 px-4 focus:ring-1 focus:ring-[#ff8e80] transition-all outline-none"
-              >
-                <option value="Cinematic Travel">Cinematic Travel</option>
-                <option value="Documentary">Documentary</option>
-                <option value="Experimental">Experimental</option>
-                <option value="Vlog">Vlog</option>
-              </select>
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Categories</label>
+              <p className="text-xs text-zinc-400 mb-3">Select at least one category</p>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.length > 0 ? categories.map(cat => {
+                  const isSelected = formData.categories.includes(cat.slug);
+                  return (
+                    <label key={cat.id} className="cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="peer sr-only" 
+                        checked={isSelected}
+                        onChange={() => {
+                          const newCats = isSelected 
+                            ? formData.categories.filter(c => c !== cat.slug)
+                            : [...formData.categories, cat.slug];
+                          updateFormData({ categories: newCats });
+                        }}
+                      />
+                      <div className={`p-2 rounded-lg text-xs font-bold transition-all border ${isSelected ? 'bg-[#ff8e80]/10 border-[#ff8e80] text-[#ff8e80]' : 'bg-[#19191c] border-[#262528] text-zinc-400 hover:bg-[#262528]'}`}>
+                        {cat.name}
+                      </div>
+                    </label>
+                  );
+                }) : (
+                  <div className="col-span-2 text-xs text-zinc-500 py-2">Loading categories...</div>
+                )}
+              </div>
             </div>
 
             {/* Tạm ẩn: API hiện tại không có tags */}

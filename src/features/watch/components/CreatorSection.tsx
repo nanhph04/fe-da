@@ -6,7 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/context/AuthContext";
 
-export function CreatorSection() {
+interface CreatorSectionProps {
+  description: string;
+}
+
+export function CreatorSection({ description }: CreatorSectionProps) {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { user } = useAuth();
@@ -50,8 +54,8 @@ export function CreatorSection() {
 
       {/* Description Box */}
       <div className="bg-zinc-950/30 p-8 rounded-xl border border-[#48474a]/10 transition-all duration-300">
-        <p className={`text-zinc-400 leading-relaxed text-sm font-medium ${isExpanded ? '' : 'line-clamp-2'}`}>
-          Dive deep into the mesmerizing urban landscapes of neo-Tokyo 2099. This cinematic exploration uses advanced neural rendering techniques to visualize a future defined by light, density, and technological sprawl. Unlock full access with Aura Coins to join the exclusive community of futurists. Special thanks to our Platinum tier members for funding this project.
+        <p className={`text-zinc-400 leading-relaxed text-sm font-medium ${isExpanded ? '' : 'line-clamp-2'} whitespace-pre-wrap`}>
+          {description || "No description provided."}
         </p>
         <button 
           onClick={() => setIsExpanded(!isExpanded)}

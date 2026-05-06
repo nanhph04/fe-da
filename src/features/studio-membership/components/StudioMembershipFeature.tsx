@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EligibilityChecker } from "./EligibilityChecker";
 import { MembershipManagement } from "./MembershipManagement";
 import { TierEditorOverlay } from "./TierEditorOverlay";
+import { mediaService, ChannelDetailResponse } from "@/features/watch/services/mediaService";
 
 export interface StudioTier {
   id: number;
@@ -25,6 +26,41 @@ export function StudioMembershipFeature() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [editingTier, setEditingTier] = useState<StudioTier | null>(null);
   const [tiers, setTiers] = useState(INITIAL_TIERS);
+  const [channelDetail, setChannelDetail] = useState<ChannelDetailResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMembershipData = async () => {
+      try {
+        const myChannelRes = await mediaService.getMyChannel();
+        if (myChannelRes.success && myChannelRes.data?.channelId) {
+          const detailRes = await mediaService.getChannel(myChannelRes.data.channelId);
+          if (detailRes.success && detailRes.data) {
+            setChannelDetail(detailRes.data);
+            if (detailRes.data.membershipTiers && detailRes.data.membershipTiers.length > 0) {
+              // Map API tiers to StudioTier
+              const mappedTiers = detailRes.data.membershipTiers.map(t => ({
+                id: parseInt(t.id) || Math.floor(Math.random() * 1000), // Note: UI uses number id, API uses string
+                name: t.name,
+                price: t.priceCoin,
+                subscribers: 0, // Mock for now until API supports subscriber count per tier
+                revenue: "0",
+                badgeColor: t.level === 3 ? "bg-[#ff8e80]" : t.level === 2 ? "bg-[#fdc003]" : "bg-zinc-400",
+                perks: t.level === 3 ? ["Exclusive live streams"] : t.level === 2 ? ["Early access"] : ["Loyalty badges"],
+              }));
+              setTiers(mappedTiers);
+              setIsUnlocked(true);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load channel membership data", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMembershipData();
+  }, []);
 
   const handleSaveTier = (updatedTier: StudioTier) => {
     setTiers((currentTiers) => {
@@ -47,8 +83,10 @@ export function StudioMembershipFeature() {
         <p className="text-zinc-400">Offer exclusive perks, custom emojis, and loyalty badges to your most dedicated fans.</p>
       </div>
 
-      {!isUnlocked ? (
-        <EligibilityChecker onUnlock={() => setIsUnlocked(true)} />
+      {isLoading ? (
+        <div className="text-center text-zinc-500 py-12">Loading membership details...</div>
+      ) : !isUnlocked ? (
+        <EligibilityChecker onUnlock={() => setIsUnlocked(true)} eligibility={channelDetail?.membershipEligibility} />
       ) : (
         <MembershipManagement tiers={tiers} onEditTier={setEditingTier} />
       )}

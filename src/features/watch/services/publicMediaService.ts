@@ -19,6 +19,7 @@ export interface PublicDiscoveryVideo {
   thumbnailUrl: string | null;
   durationSeconds: number | null;
   resolutions: string[];
+  errorMessage: string | null;
   viewCount: number;
   publishedAt: string | null;
   createdAt: string;
@@ -32,8 +33,10 @@ export interface PublicVideoMetadata {
   title: string;
   description: string;
   thumbnailUrl: string | null;
+  viewCount: number;
   status: string;
   visibility: string;
+  errorMessage: string | null;
   publishedAt: string | null;
   updatedAt: string;
 }

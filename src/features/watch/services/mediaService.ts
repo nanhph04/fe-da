@@ -21,6 +21,14 @@ export interface ChannelResponse {
 }
 
 export interface ChannelDetailResponse extends ChannelResponse {
+  membershipEligibility?: {
+    isEligible: boolean;
+    readyVideoCount: number;
+    minReadyVideoCount: number;
+    totalVideoViews: number;
+    minTotalVideoViews: number;
+    missingRequirements: string[];
+  };
   membershipTiers?: MembershipTierResponse[];
   publicVideos?: Array<{
     id: string;
@@ -48,7 +56,6 @@ export interface MembershipTierResponse {
 
 // Video Interfaces
 export interface InitUploadBody {
-  channelId: string;
   title: string;
   description?: string;
   categories?: string[];
@@ -98,8 +105,10 @@ export interface VideoMetadataResponse {
   title: string;
   description: string;
   thumbnailUrl: string | null;
+  viewCount: number;
   status: string;
   visibility: string;
+  errorMessage: string | null;
   publishedAt: string | null;
   updatedAt: string;
 }
@@ -111,11 +120,13 @@ export interface DiscoveryVideoResponse {
   description: string;
   categories: string[];
   status: string;
+  visibility: string;
   price: number;
   requiredTierLevel: number | null;
   thumbnailUrl: string | null;
   durationSeconds: number | null;
   resolutions: string[];
+  errorMessage: string | null;
   viewCount: number;
   publishedAt: string | null;
   createdAt: string;
@@ -163,6 +174,9 @@ export const mediaService = {
   getChannel: async (id: string) => {
     return api.get<ChannelDetailResponse>(`/api/media/channels/${id}`);
   },
+  getMyChannel: async () => {
+    return api.get<{ channelId: string; userId: string; status: string; isEligibleForMembership: boolean }>("/api/media/channels/me", { requireAuth: true });
+  },
   getMembershipStatus: async (id: string) => {
     return api.get<{ isActive: boolean; membershipId: string | null; expiryDate: string | null }>(`/api/media/channels/${id}/membership-status`, { requireAuth: true });
   },
@@ -194,6 +208,21 @@ export const mediaService = {
   saveVideoProgress: async (id: string, data: SaveVideoProgressBody) => {
     return api.post<SaveVideoProgressResponse>(`/api/media/videos/${id}/progress`, data, { requireAuth: true });
   },
+  getVideoProgress: async (id: string) => {
+    return api.get<{
+      videoId: string;
+      stage: string;
+      percent: number;
+      message: string;
+      terminal: boolean;
+      updatedAt: string;
+      detail: any | null;
+      errorCode: string | null;
+    }>(`/api/media/videos/${id}/progress`, { requireAuth: true });
+  },
+  getVideoProgressStreamUrl: (id: string) => {
+    return `/api/media/videos/${id}/progress/stream`;
+  },
   refreshPlaybackToken: async (id: string) => {
     return api.post<{ videoId: string; playbackToken: string; playbackUrl: string }>(`/api/media/videos/${id}/playback-token/refresh`, {}, { requireAuth: true });
   },
@@ -220,6 +249,14 @@ export const mediaService = {
   getSubscribedVideos: async (params?: PaginationParams) => {
     const qs = params?.limit ? `?limit=${params.limit}` : "";
     return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/subscribed${qs}`, { requireAuth: true });
+  },
+  getOwnerVideos: async (params?: PaginationParams & { status?: string; visibility?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.status) searchParams.append("status", params.status);
+    if (params?.visibility) searchParams.append("visibility", params.visibility);
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/me${qs}`, { requireAuth: true });
   },
 
   // 6. CATEGORIES

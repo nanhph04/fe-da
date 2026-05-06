@@ -220,3 +220,117 @@ export const api = {
   getToken: getLocalAccessToken,
   clearToken: clearLocalAccessToken,
 };
+
+export const fetchSSE = async (
+  endpoint: string,
+  options: CustomRequestInit = {},
+  onMessage: (data: any) => void,
+  onEnd?: () => void,
+  onError?: (err: any) => void
+) => {
+  const url = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
+  
+  const headers = new Headers(options.headers || {});
+  headers.set("Accept", "text/event-stream");
+
+  if (options.requireAuth) {
+    const token = getLocalAccessToken();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+  }
+
+  const config: RequestInit = {
+    ...options,
+    headers,
+    credentials: "include",
+  };
+
+  try {
+    let response = await fetch(url, config);
+
+    if (response.status === 401 && options.requireAuth) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          const refreshRes = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const refreshData = await parseResponseBody(refreshRes);
+          if (refreshData?.success && refreshData.data?.accessToken) {
+            const newToken = refreshData.data.accessToken;
+            setLocalAccessToken(newToken);
+            isRefreshing = false;
+            onRefreshed(newToken);
+
+            headers.set("Authorization", `Bearer ${newToken}`);
+            response = await fetch(url, { ...config, headers });
+          } else {
+            throw new Error("Refresh failed");
+          }
+        } catch (error) {
+          isRefreshing = false;
+          clearLocalAccessToken();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          throw error;
+        }
+      } else {
+        await new Promise<void>(resolve => {
+          addRefreshSubscriber(token => {
+            headers.set("Authorization", `Bearer ${token}`);
+            fetch(url, { ...config, headers }).then(res => {
+              response = res;
+              resolve();
+            });
+          });
+        });
+      }
+    }
+
+    if (!response.ok) {
+      throw new Error(`SSE HTTP Error: ${response.status}`);
+    }
+
+    if (!response.body) throw new Error("ReadableStream not supported.");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        if (onEnd) onEnd();
+        break;
+      }
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (line.startsWith("data:")) {
+          const dataStr = line.slice(5).trim();
+          if (dataStr) {
+            try {
+              onMessage(JSON.parse(dataStr));
+            } catch (e) {
+              onMessage(dataStr);
+            }
+          }
+        }
+      }
+    }
+  } catch (err: unknown) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      if (onEnd) onEnd();
+      return;
+    }
+    if (onError) onError(err);
+  }
+};

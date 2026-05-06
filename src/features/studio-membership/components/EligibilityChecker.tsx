@@ -1,12 +1,22 @@
-export function EligibilityChecker({ onUnlock }: { onUnlock: () => void }) {
-  // Mock data for Eligibility
-  const requirements = [
-    { label: "Subscribers", current: 42910, required: 10000, met: true },
-    { label: "Total Views", current: 1284502, required: 500000, met: true },
-    { label: "Community Violations", current: 0, required: 0, met: true },
-  ];
+import { ChannelDetailResponse } from "@/features/watch/services/mediaService";
 
-  const isEligible = requirements.every(r => r.met);
+export function EligibilityChecker({ onUnlock, eligibility }: { onUnlock: () => void, eligibility?: ChannelDetailResponse["membershipEligibility"] }) {
+  const isEligible = eligibility?.isEligible || false;
+
+  const requirements = [
+    { 
+      label: "Ready Videos", 
+      current: eligibility?.readyVideoCount || 0, 
+      required: eligibility?.minReadyVideoCount || 1, 
+      met: (eligibility?.readyVideoCount || 0) >= (eligibility?.minReadyVideoCount || 1) 
+    },
+    { 
+      label: "Total Views", 
+      current: eligibility?.totalVideoViews || 0, 
+      required: eligibility?.minTotalVideoViews || 1, 
+      met: (eligibility?.totalVideoViews || 0) >= (eligibility?.minTotalVideoViews || 1) 
+    },
+  ];
 
   return (
     <div className="bg-[#131315] p-12 rounded-xl border border-[#262528] flex flex-col items-center text-center max-w-3xl mx-auto mt-12 shadow-2xl">

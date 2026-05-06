@@ -35,7 +35,7 @@ export function TopNav() {
   return (
     <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-zinc-950/40 backdrop-blur-xl bg-gradient-to-b from-zinc-900 to-transparent">
       <Link href="/" className="text-2xl font-black text-red-600 tracking-tighter font-headline">
-        {platformBrand.name}
+        Aura
       </Link>
 
       {!isLoading && (

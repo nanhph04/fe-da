@@ -1,60 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-
-interface VideoItem {
-  id: string;
-  title: string;
-  thumbnail: string;
-  date: string;
-  views: string;
-  comments: string;
-  likes: string;
-  visibility: "Public" | "Private" | "Premium";
-  status: "Published" | "Draft";
-}
-
-const MOCK_VIDEOS: VideoItem[] = [
-  {
-    id: "1",
-    title: "The Ethereal Horizon: A Cinematic Journey Through Iceland",
-    thumbnail: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=200",
-    date: "Oct 24, 2023",
-    views: "1.2M",
-    comments: "4.5K",
-    likes: "89K",
-    visibility: "Public",
-    status: "Published"
-  },
-  {
-    id: "2",
-    title: "Neon City Nights - Cyberpunk B-Roll",
-    thumbnail: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=200",
-    date: "Oct 18, 2023",
-    views: "850K",
-    comments: "2.1K",
-    likes: "45K",
-    visibility: "Premium",
-    status: "Published"
-  },
-  {
-    id: "3",
-    title: "Echoes of Silence (Short Film)",
-    thumbnail: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=200",
-    date: "Oct 10, 2023",
-    views: "--",
-    comments: "--",
-    likes: "--",
-    visibility: "Private",
-    status: "Draft"
-  }
-];
+import { mediaService, DiscoveryVideoResponse } from "@/features/watch/services/mediaService";
+import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 
 export function StudioContentFeature() {
-  const [videos, setVideos] = useState<VideoItem[]>(MOCK_VIDEOS);
+  const [videos, setVideos] = useState<DiscoveryVideoResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchVideos = async () => {
+    try {
+      const res = await mediaService.getOwnerVideos();
+      if (res.success && res.data) {
+        setVideos(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to load owner videos", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this video?")) {
+      // NOTE: API Delete chưa được định nghĩa trong API docs hiện tại
+      // Tạm thời chỉ filter UI
       setVideos(videos.filter(v => v.id !== id));
     }
   };
@@ -93,50 +67,65 @@ export function StudioContentFeature() {
 
         {/* Table Body */}
         <div className="divide-y divide-[#262528]">
-          {videos.length === 0 ? (
+          {isLoading ? (
+            <div className="p-12 text-center text-zinc-500">Loading videos...</div>
+          ) : videos.length === 0 ? (
             <div className="p-12 text-center text-zinc-500">
               No videos found. Upload a video to get started.
             </div>
           ) : (
-            videos.map(video => (
+            videos.map(video => {
+              const isDraftOrProcessing = ["draft", "processing", "pending_moderation"].includes(video.status);
+              const visibilityLabel = video.visibility.charAt(0).toUpperCase() + video.visibility.slice(1);
+              const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString() : "--";
+              const thumbUrl = video.thumbnailUrl || "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=200";
+
+              return (
               <div key={video.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#19191c] transition-colors group">
                 {/* Video Info */}
                 <div className="col-span-5 flex gap-4 pl-4 items-center">
-                  <div className="w-24 aspect-video rounded bg-zinc-800 overflow-hidden flex-shrink-0 border border-[#262528]">
+                  <div className="w-24 aspect-video rounded bg-zinc-800 overflow-hidden flex-shrink-0 border border-[#262528] self-start mt-1">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={video.thumbnail} alt="thumb" className="w-full h-full object-cover" />
+                    <img src={thumbUrl} alt="thumb" className="w-full h-full object-cover" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 w-full flex-1 pr-4">
                     <h3 className="font-headline font-bold text-sm text-white truncate group-hover:text-[#ff8e80] transition-colors cursor-pointer">{video.title}</h3>
                     <div className="flex gap-2 mt-1">
-                      {video.status === 'Draft' ? (
-                        <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">DRAFT</span>
+                      {isDraftOrProcessing ? (
+                        <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">{video.status.toUpperCase()}</span>
                       ) : (
-                        <span className="text-[10px] font-bold text-zinc-500">{video.status}</span>
+                        <span className="text-[10px] font-bold text-zinc-500">{video.status.toUpperCase()}</span>
                       )}
                     </div>
+                    {["pending_moderation", "moderating", "processing"].includes(video.status) && (
+                      <ProcessingProgressTracker
+                        videoId={video.id}
+                        initialStatus={video.status}
+                        onComplete={fetchVideos}
+                      />
+                    )}
                   </div>
                 </div>
 
                 {/* Visibility */}
                 <div className="col-span-2 flex items-center">
                   <span className={`flex items-center gap-1.5 text-xs font-bold ${
-                    video.visibility === 'Public' ? 'text-green-500' : 
-                    video.visibility === 'Premium' ? 'text-[#fdc003]' : 'text-zinc-500'
+                    video.visibility === 'public' ? 'text-green-500' : 
+                    (video.price > 0 || video.requiredTierLevel) ? 'text-[#fdc003]' : 'text-zinc-500'
                   }`}>
                     <span className="material-symbols-outlined text-[14px]">
-                      {video.visibility === 'Public' ? 'public' : video.visibility === 'Premium' ? 'workspace_premium' : 'visibility_off'}
+                      {video.visibility === 'public' ? 'public' : (video.price > 0 || video.requiredTierLevel) ? 'workspace_premium' : 'visibility_off'}
                     </span>
-                    {video.visibility}
+                    {visibilityLabel}
                   </span>
                 </div>
 
                 {/* Date */}
-                <div className="col-span-1 text-center text-xs text-zinc-400">{video.date}</div>
+                <div className="col-span-1 text-center text-xs text-zinc-400">{formattedDate}</div>
 
                 {/* Metrics */}
-                <div className="col-span-1 text-center text-xs text-white font-medium">{video.views}</div>
-                <div className="col-span-1 text-center text-xs text-white font-medium">{video.likes}</div>
+                <div className="col-span-1 text-center text-xs text-white font-medium">{video.viewCount?.toLocaleString() || "0"}</div>
+                <div className="col-span-1 text-center text-xs text-white font-medium">--</div>
 
                 {/* Actions */}
                 <div className="col-span-2 flex justify-end gap-2 pr-4">
@@ -151,7 +140,7 @@ export function StudioContentFeature() {
                   </Button>
                 </div>
               </div>
-            ))
+            )})
           )}
         </div>
       </div>
