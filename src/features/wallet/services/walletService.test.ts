@@ -1,10 +1,10 @@
 // Note: This test is for demonstration as the environment has mock limitations
 // In a real environment, you would need to properly mock apiClient
 import { WalletService } from "./walletService";
-import { api } from "@/shared/utils/apiClient";
+import { api } from "@/shared/api/client";
 
 // Mock api client - simplified version for testing
-jest.mock("@/shared/utils/apiClient", () => ({
+jest.mock("@/shared/api/client", () => ({
   api: {
     get: jest.fn(),
   }

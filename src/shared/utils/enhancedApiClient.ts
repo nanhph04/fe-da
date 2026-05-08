@@ -1,4 +1,10 @@
-import { ApiResponse, ApiError } from './apiClient';
+import {
+  buildApiUrl,
+  fetchWrapper,
+  type ApiError,
+  type ApiRequestInit,
+  type ApiResponse,
+} from "@/shared/api";
 
 export interface RetryConfig {
   maxRetries?: number;
@@ -225,9 +231,10 @@ export class EnhancedApiClient {
 
   async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: ApiRequestInit = {}
   ): Promise<ApiResponse<T>> {
     const startTime = Date.now();
+    const url = buildApiUrl(endpoint);
 
     try {
       const result = await this.circuitBreaker.execute(async () => {
@@ -236,25 +243,13 @@ export class EnhancedApiClient {
           const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
           try {
-            const response = await fetch(endpoint, {
+            const response = await fetchWrapper<T>(url, {
               ...options,
               signal: controller.signal,
             });
 
             clearTimeout(timeoutId);
-
-            const data: ApiResponse<T> = await response.json().catch(() => ({
-              success: false,
-              code: response.status,
-              data: null,
-              mess: response.statusText,
-            }));
-
-            if (!response.ok) {
-              throw data;
-            }
-
-            return data;
+            return response;
           } catch (error) {
             clearTimeout(timeoutId);
             throw error;
@@ -263,21 +258,21 @@ export class EnhancedApiClient {
       });
 
       const duration = Date.now() - startTime;
-      this.logger.logResponse(endpoint, result, duration, true);
+      this.logger.logResponse(url, result, duration, true);
 
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.logError(endpoint, error, duration);
+      this.logger.logError(url, error, duration);
       throw error;
     }
   }
 
-  async get<T>(url: string, options?: RequestInit): Promise<ApiResponse<T>> {
+  async get<T>(url: string, options?: ApiRequestInit): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
-  async post<T>(url: string, body: any, options?: RequestInit): Promise<ApiResponse<T>> {
+  async post<T>(url: string, body: any, options?: ApiRequestInit): Promise<ApiResponse<T>> {
     return this.request<T>(url, {
       ...options,
       method: 'POST',
@@ -289,7 +284,7 @@ export class EnhancedApiClient {
     });
   }
 
-  async put<T>(url: string, body: any, options?: RequestInit): Promise<ApiResponse<T>> {
+  async put<T>(url: string, body: any, options?: ApiRequestInit): Promise<ApiResponse<T>> {
     return this.request<T>(url, {
       ...options,
       method: 'PUT',
@@ -301,7 +296,7 @@ export class EnhancedApiClient {
     });
   }
 
-  async patch<T>(url: string, body: any, options?: RequestInit): Promise<ApiResponse<T>> {
+  async patch<T>(url: string, body: any, options?: ApiRequestInit): Promise<ApiResponse<T>> {
     return this.request<T>(url, {
       ...options,
       method: 'PATCH',
@@ -313,7 +308,7 @@ export class EnhancedApiClient {
     });
   }
 
-  async delete<T>(url: string, options?: RequestInit): Promise<ApiResponse<T>> {
+  async delete<T>(url: string, options?: ApiRequestInit): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...options, method: 'DELETE' });
   }
 }

@@ -1,13 +1,13 @@
 import { EarningsService } from "./earningsService";
 
 // Mock the api client
-jest.mock("@/shared/utils/apiClient", () => ({
+jest.mock("@/shared/api/client", () => ({
   api: {
     get: jest.fn(),
   },
 }));
 
-const mockApi = require("@/shared/utils/apiClient").api;
+const mockApi = require("@/shared/api/client").api;
 
 describe("EarningsService", () => {
   beforeEach(() => {
