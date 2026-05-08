@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
+import { ThemeProvider } from "@/design-system/theme-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,6 +17,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Media Commerce Platform",
   description: "The Cinematic Canvas",
+  keywords: ["video monetization", "creator platform", "studio wallet", "media distribution"],
 };
 
 export default function RootLayout({
@@ -31,9 +33,16 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-[#0e0e10] text-[#f9f5f8]" suppressHydrationWarning>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

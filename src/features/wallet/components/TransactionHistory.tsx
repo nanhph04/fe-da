@@ -1,12 +1,33 @@
-import { Badge } from "@/components/ui/badge";
+"use client";
 
-const TRANSACTIONS = [
-  { id: 1, date: "May 12, 2024", desc: "Standard Pack (500 AC)", method: "Credit Card •••• 4242", amount: "450,000 VND", status: "success" },
-  { id: 2, date: "May 01, 2024", desc: "Starter Pack (100 AC)", method: "Momo Wallet", amount: "100,000 VND", status: "success" },
-  { id: 3, date: "April 24, 2024", desc: "Pro Pack (1,000 AC)", method: "Credit Card •••• 4242", amount: "900,000 VND", status: "failed" },
-];
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { TransactionService } from "../services/transactionService";
+import { Transaction } from "../types/wallet.types";
 
 export function TransactionHistory() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const data = await TransactionService.getMyTransactions();
+        // Sort by date descending
+        setTransactions(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
+
+  const formatDate = (dateStr: string) => {
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(dateStr));
+  };
+
   return (
     <section className="mt-20">
       <div className="flex items-center justify-between mb-8">
@@ -23,36 +44,52 @@ export function TransactionHistory() {
               <tr className="bg-zinc-900 border-b border-zinc-800">
                 <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Date</th>
                 <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Description</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Method</th>
                 <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Amount</th>
                 <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
-              {TRANSACTIONS.map((tx) => (
-                <tr key={tx.id} className="hover:bg-zinc-800/50 transition-colors">
-                  <td className="px-6 py-5 text-sm font-medium text-zinc-300">{tx.date}</td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#fdc003]/10 flex items-center justify-center text-[#fdc003]">
-                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
-                      </div>
-                      <span className="font-bold text-white">{tx.desc}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-sm text-zinc-400">{tx.method}</td>
-                  <td className="px-6 py-5">
-                    <span className="font-headline font-bold text-[#fdc003]">{tx.amount}</span>
-                  </td>
-                  <td className="px-6 py-5">
-                    {tx.status === 'success' ? (
-                      <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Successful</Badge>
-                    ) : (
-                      <Badge className="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Failed</Badge>
-                    )}
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">Loading transactions...</td>
                 </tr>
-              ))}
+              ) : transactions.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">No transactions found.</td>
+                </tr>
+              ) : (
+                transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-zinc-800/50 transition-colors">
+                    <td className="px-6 py-5 text-sm font-medium text-zinc-300">
+                      {formatDate(tx.createdAt)}
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#fdc003]/10 flex items-center justify-center text-[#fdc003]">
+                          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                            {tx.type === 'DEPOSIT' ? 'add_circle' : (tx.type === 'WITHDRAWAL' ? 'account_balance' : 'receipt_long')}
+                          </span>
+                        </div>
+                        <span className="font-bold text-white">{tx.description || tx.type}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className={`font-headline font-bold ${['DEPOSIT', 'CHANNEL_REVENUE', 'SYSTEM_REVENUE'].includes(tx.type) ? 'text-[#fdc003]' : 'text-zinc-300'}`}>
+                        {['DEPOSIT', 'CHANNEL_REVENUE', 'SYSTEM_REVENUE'].includes(tx.type) ? '+' : '-'}{tx.amount.toLocaleString()} {tx.assetType}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      {tx.status === 'COMPLETED' ? (
+                        <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Successful</Badge>
+                      ) : tx.status === 'PENDING' ? (
+                        <Badge className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Pending</Badge>
+                      ) : (
+                        <Badge className="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Failed</Badge>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

@@ -1,33 +1,21 @@
-import { apiClient } from "@/shared/utils/apiClient";
-
-export interface WalletResponse {
-  success: boolean;
-  code: number;
-  data: {
-    id: string;
-    userId: string;
-    type: "USER";
-    balance: number;
-    frozenBalance: number;
-    status: "ACTIVE" | "INACTIVE" | "FROZEN";
-    createdAt: string;
-    updatedAt: string;
-  };
-  mess?: string;
-}
+import { api } from "@/shared/utils/apiClient";
+import { Wallet } from "../types/wallet.types";
 
 export class WalletService {
   /**
    * Get current user's wallet information
-   * Requires authentication and x-user-id header
+   * API Gateway will automatically attach x-user-id header
    */
-  static async getMyWallet(): Promise<WalletResponse> {
-    return apiClient.get<WalletResponse>("/api/wallets/me", {
-      headers: {
-        "x-user-id": "current_user_id", // This should be replaced with actual user ID from auth context
-      },
-    });
+  static async getMyWallet(): Promise<Wallet> {
+    const response = await api.get<Wallet>("/api/wallets/me", { requireAuth: true });
+    return response.data;
+  }
+
+  /**
+   * Get wallet by user ID
+   */
+  static async getWalletByUserId(userId: string): Promise<Wallet> {
+    const response = await api.get<Wallet>(`/api/wallets/user/${userId}`, { requireAuth: true });
+    return response.data;
   }
 }
-
-export default WalletService;

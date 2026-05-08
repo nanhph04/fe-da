@@ -1,8 +1,30 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { TopUpPackages } from "./TopUpPackages";
 import { PaymentMethods } from "./PaymentMethods";
 import { TransactionHistory } from "./TransactionHistory";
+import { WalletService } from "../services/walletService";
+import { Wallet } from "../types/wallet.types";
 
 export function WalletDashboard() {
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        const data = await WalletService.getMyWallet();
+        setWallet(data);
+      } catch (error) {
+        console.error("Failed to fetch wallet:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWallet();
+  }, []);
+
   return (
     <main className="flex-1 md:pl-64 p-8 pt-24 min-h-screen bg-[#0e0e10]">
       {/* Header Section */}
@@ -21,7 +43,13 @@ export function WalletDashboard() {
           <span className="text-xs font-bold text-[#fdc003] uppercase tracking-widest mb-1">Current Balance</span>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-4xl text-[#fdc003]" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
-            <span className="font-headline text-5xl font-black text-[#f9f5f8]">120</span>
+            {loading ? (
+              <span className="font-headline text-5xl font-black text-[#f9f5f8] animate-pulse">...</span>
+            ) : (
+              <span className="font-headline text-5xl font-black text-[#f9f5f8]">
+                {wallet ? wallet.balance.toLocaleString() : "0"}
+              </span>
+            )}
             <span className="font-headline text-xl font-bold text-[#fdc003]">AC</span>
           </div>
         </div>

@@ -1,13 +1,16 @@
 // Note: This test is for demonstration as the environment has mock limitations
 // In a real environment, you would need to properly mock apiClient
 import { WalletService } from "./walletService";
+import { api } from "@/shared/utils/apiClient";
 
 // Mock api client - simplified version for testing
 jest.mock("@/shared/utils/apiClient", () => ({
-  get: jest.fn(),
+  api: {
+    get: jest.fn(),
+  }
 }));
 
-const { get } = require("@/shared/utils/apiClient");
+const mockedApi = api as jest.Mocked<typeof api>;
 
 describe("WalletService", () => {
   const mockWalletResponse = {
@@ -36,12 +39,8 @@ describe("WalletService", () => {
 
       const result = await WalletService.getMyWallet();
 
-      expect(result).toEqual(mockWalletResponse);
-      expect(mockedApi.get).toHaveBeenCalledWith("/api/wallets/me", {
-        headers: {
-          "x-user-id": "current_user_id",
-        },
-      });
+      expect(result).toEqual(mockWalletResponse.data);
+      expect(mockedApi.get).toHaveBeenCalledWith("/api/wallets/me", { requireAuth: true });
     });
 
     it("should handle API errors", async () => {

@@ -1,16 +1,6 @@
-export type WalletStatus = "ACTIVE" | "INACTIVE" | "FROZEN";
-export type WalletType = "USER";
+import { WalletStatus, WalletType, UserWallet } from "./base-wallet.types";
 
-export interface Wallet {
-  id: string;
-  userId: string;
-  type: WalletType;
-  balance: number;
-  frozenBalance: number;
-  status: WalletStatus;
-  createdAt: string;
-  updatedAt: string;
-}
+export interface Wallet extends UserWallet {}
 
 export interface WalletResponse {
   success: boolean;

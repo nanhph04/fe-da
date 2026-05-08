@@ -1,48 +1,190 @@
-const PAYOUTS = [
-  { id: "TRX-8921", date: "Oct 12, 2024", amount: "150,000 AC", status: "Completed", method: "Techcombank **** 8829" },
-  { id: "TRX-7842", date: "Sep 28, 2024", amount: "220,000 AC", status: "Completed", method: "Techcombank **** 8829" },
-  { id: "TRX-6102", date: "Sep 15, 2024", amount: "50,000 AC", status: "Failed", method: "PayPal alex.design@..." },
-  { id: "TRX-5531", date: "Aug 30, 2024", amount: "400,000 AC", status: "Completed", method: "Techcombank **** 8829" },
-];
+"use client";
 
-export function PayoutHistory() {
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { Payout, PayoutHistoryFilters } from "../types/payout.types";
+import { PayoutService } from "../services/payoutService";
+
+interface PayoutHistoryProps {
+  className?: string;
+  initialItems?: Payout[];
+  initialPagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export function PayoutHistory({
+  className = "",
+  initialItems = [],
+  initialPagination,
+}: PayoutHistoryProps) {
+  const [items, setItems] = useState<Payout[]>(initialItems);
+  const [pagination, setPagination] = useState(
+    initialPagination ?? {
+      page: 1,
+      limit: 10,
+      total: initialItems.length,
+      totalPages: initialItems.length > 0 ? 1 : 0,
+    }
+  );
+  const [filters, setFilters] = useState<PayoutHistoryFilters>({
+    status: "ALL",
+    page: initialPagination?.page ?? 1,
+    limit: initialPagination?.limit ?? 10,
+  });
+  const [isLoading, setIsLoading] = useState(initialItems.length === 0);
+  const [error, setError] = useState<string | null>(null);
+  const skipInitialFetchRef = useRef(initialItems.length > 0);
+
+  useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
+    const loadHistory = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await PayoutService.getPayoutHistory(filters);
+        setItems(response.payouts);
+        setPagination(response.pagination);
+      } catch {
+        setError("Failed to load payout history.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadHistory();
+  }, [filters]);
+
+  const handleStatusChange = (status: PayoutHistoryFilters["status"]) => {
+    setFilters(previous => ({
+      ...previous,
+      status,
+      page: 1,
+    }));
+  };
+
+  const handlePageChange = (page: number) => {
+    setFilters(previous => ({
+      ...previous,
+      page,
+    }));
+  };
+
   return (
-    <div className="bg-[#131315] rounded-xl border border-[#262528] p-8 overflow-hidden">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold font-headline text-white">Payout History</h3>
-        <button className="text-sm font-bold text-[#ff8e80] hover:underline">Download CSV</button>
+    <section className={`rounded-md border border-zinc-800 bg-zinc-950/80 p-6 ${className}`}>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="font-headline text-2xl font-bold text-white">Payout History</h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Review withdrawal requests and payout processing states.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          {(["ALL", "PENDING", "PROCESSING", "COMPLETED", "FAILED"] as const).map(status => (
+            <Button
+              key={status}
+              type="button"
+              variant="outline"
+              className={`rounded-md border-zinc-800 ${
+                filters.status === status
+                  ? "bg-[#2a0d12] text-white"
+                  : "bg-transparent text-zinc-400 hover:bg-zinc-900"
+              }`}
+              onClick={() => handleStatusChange(status)}
+            >
+              {status}
+            </Button>
+          ))}
+        </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[700px]">
-          <thead>
-            <tr className="border-b border-[#262528]">
-              <th className="py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest w-1/4">Transaction ID</th>
-              <th className="py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest w-1/4">Date</th>
-              <th className="py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest w-1/4">Method</th>
-              <th className="py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest w-1/6">Amount</th>
-              <th className="py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest w-1/6 text-right">Status</th>
+      {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
+
+      <div className="mt-6 overflow-x-auto">
+        <table className="min-w-full text-left text-sm">
+          <thead className="border-b border-zinc-800 text-zinc-500">
+            <tr>
+              <th className="pb-3 pr-4 font-medium">Requested</th>
+              <th className="pb-3 pr-4 font-medium">Method</th>
+              <th className="pb-3 pr-4 font-medium">Amount</th>
+              <th className="pb-3 pr-4 font-medium">Net</th>
+              <th className="pb-3 pr-4 font-medium">Status</th>
             </tr>
           </thead>
           <tbody>
-            {PAYOUTS.map((item) => (
-              <tr key={item.id} className="border-b border-[#262528]/50 hover:bg-[#19191c] transition-colors">
-                <td className="py-4 text-sm font-bold text-[#ff8e80]">{item.id}</td>
-                <td className="py-4 text-sm text-zinc-300">{item.date}</td>
-                <td className="py-4 text-sm text-zinc-400">{item.method}</td>
-                <td className="py-4 text-sm font-bold text-[#fdc003]">{item.amount}</td>
-                <td className="py-4 text-right">
-                  <span className={`inline-block px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${
-                    item.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
-                  }`}>
-                    {item.status}
-                  </span>
+            {isLoading ? (
+              <tr>
+                <td className="py-6 text-zinc-400" colSpan={5}>
+                  Loading payout history...
                 </td>
               </tr>
-            ))}
+            ) : items.length === 0 ? (
+              <tr>
+                <td className="py-6 text-zinc-500" colSpan={5}>
+                  No payout records found.
+                </td>
+              </tr>
+            ) : (
+              items.map(item => (
+                <tr key={item.id} className="border-b border-zinc-900/80 text-zinc-200">
+                  <td className="py-4 pr-4">{new Date(item.requestedAt).toLocaleDateString()}</td>
+                  <td className="py-4 pr-4">
+                    {item.method.bankInfo?.bankName || item.method.eWalletInfo?.provider || item.method.type}
+                  </td>
+                  <td className="py-4 pr-4">{item.amount.toLocaleString()} AC</td>
+                  <td className="py-4 pr-4">{item.netAmount.toLocaleString()} AC</td>
+                  <td className="py-4 pr-4">
+                    <span className="rounded-sm border border-zinc-800 px-2 py-1 text-xs uppercase tracking-wide text-zinc-300">
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-    </div>
+
+      {pagination.totalPages > 1 ? (
+        <div className="mt-6 flex items-center justify-between text-sm text-zinc-400">
+          <span>
+            Page {pagination.page} / {pagination.totalPages}
+          </span>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-zinc-800 bg-transparent text-zinc-200 hover:bg-zinc-900"
+              onClick={() => handlePageChange(Math.max(1, pagination.page - 1))}
+              disabled={pagination.page <= 1}
+            >
+              Previous
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-zinc-800 bg-transparent text-zinc-200 hover:bg-zinc-900"
+              onClick={() =>
+                handlePageChange(Math.min(pagination.totalPages, pagination.page + 1))
+              }
+              disabled={pagination.page >= pagination.totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </section>
   );
 }
+
+export default PayoutHistory;
