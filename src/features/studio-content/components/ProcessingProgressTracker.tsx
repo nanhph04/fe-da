@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { mediaService } from "@/features/watch/services/mediaService";
-import { fetchSSE } from "@/shared/utils/apiClient";
+import { fetchSSE } from "@/shared/api/client";
 
 interface ProcessingProgressTrackerProps {
   videoId: string;

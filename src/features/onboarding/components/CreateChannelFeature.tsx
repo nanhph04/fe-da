@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
 
 export function CreateChannelFeature() {

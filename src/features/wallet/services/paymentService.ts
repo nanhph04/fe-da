@@ -1,4 +1,4 @@
-import { api } from "@/shared/utils/apiClient";
+import { api } from "@/shared/api/client";
 import { PaymentRequest, PaymentResponse } from "../types/wallet.types";
 
 export class PaymentService {

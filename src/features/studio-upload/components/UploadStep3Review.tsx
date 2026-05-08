@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadFormData } from "./StudioUploadFeature";
 import { mediaService } from "@/features/watch/services/mediaService";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 interface UploadStep3ReviewProps {
   formData: UploadFormData;

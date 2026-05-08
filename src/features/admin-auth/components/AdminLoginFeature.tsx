@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 export function AdminLoginFeature() {
   const [email, setEmail] = useState("");

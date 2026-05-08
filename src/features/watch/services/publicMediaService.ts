@@ -3,9 +3,9 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import {
   fetchPublicApi,
-  type PublicApiError,
-  type PublicApiResponse,
-} from "@/shared/server/publicApi";
+  type ApiError as PublicApiError,
+  type ApiResponse as PublicApiResponse,
+} from "@/shared/api";
 
 export interface PublicDiscoveryVideo {
   id: string;

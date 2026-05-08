@@ -1,4 +1,4 @@
-import { api } from "@/shared/utils/apiClient";
+import { api } from "@/shared/api/client";
 import { StudioWallet, WalletStats, EarningsData, TotalRevenueData } from "../types/studio-wallet.types";
 
 export class StudioWalletService {

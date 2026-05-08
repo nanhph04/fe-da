@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "next/navigation";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/features/auth/services/authService";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),

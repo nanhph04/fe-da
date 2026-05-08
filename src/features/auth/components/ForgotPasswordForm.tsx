@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { authService } from "@/features/auth/services/authService";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),

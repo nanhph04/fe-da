@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authService } from "@/features/auth/services/authService";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 const changePasswordSchema = z.object({
   oldPassword: z.string().min(6, "Password must be at least 6 characters"),

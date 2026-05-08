@@ -1,4 +1,4 @@
-import { api } from "@/shared/utils/apiClient";
+import { api } from "@/shared/api/client";
 import { DepositPackage } from "@/features/wallet/types/wallet.types";
 
 export interface CreatePackagePayload {

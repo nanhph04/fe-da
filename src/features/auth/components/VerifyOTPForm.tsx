@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import { authService } from "@/features/auth/services/authService";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 const otpSchema = z.object({
   pin: z.string().min(6, { message: "OTP must be 6 digits" }),

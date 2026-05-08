@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { CinematicPlayer } from "./CinematicPlayer";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 
 interface PlayerContainerClientProps {
   videoId: string;

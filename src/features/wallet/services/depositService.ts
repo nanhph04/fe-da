@@ -1,4 +1,4 @@
-import { api } from "@/shared/utils/apiClient";
+import { api } from "@/shared/api/client";
 import { Deposit, DepositPackage } from "../types/wallet.types";
 
 export class DepositService {

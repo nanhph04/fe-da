@@ -7,7 +7,7 @@ import {
   getVideoMetadataCached,
   type PublicApiError,
 } from "../services/publicMediaService";
-import { getErrorMessage } from "@/shared/utils/apiClient";
+import { getErrorMessage } from "@/shared/api/client";
 import { notFound } from "next/navigation";
 
 interface WatchVideoFeatureProps {
