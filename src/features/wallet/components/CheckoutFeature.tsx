@@ -1,46 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { DepositService } from "../services/depositService";
-import { DepositPackage } from "../types/wallet.types";
+import type { DepositPackage } from "../types/wallet.types";
 
-export function CheckoutFeature() {
+interface CheckoutFeatureProps {
+  initialPackage: DepositPackage;
+}
+
+export function CheckoutFeature({ initialPackage }: CheckoutFeatureProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  const [pkg, setPkg] = useState<DepositPackage | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const packId = searchParams?.get('pack');
-
-  useEffect(() => {
-    const fetchPackage = async () => {
-      if (!packId) {
-        router.push("/wallet");
-        return;
-      }
-      try {
-        const packages = await DepositService.getDepositPackages();
-        const found = packages.find(p => p.id === packId || p.code === packId);
-        if (found) {
-          setPkg(found);
-        } else {
-          router.push("/wallet");
-        }
-      } catch (error) {
-        console.error("Failed to fetch package:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPackage();
-  }, [packId, router]);
+  const pkg = initialPackage;
   
   const handlePayment = async () => {
-    if (!pkg) return;
     setIsProcessing(true);
     try {
       const deposit = await DepositService.createDeposit(pkg.id);
@@ -55,16 +30,6 @@ export function CheckoutFeature() {
       alert("Failed to create payment. Please try again.");
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-[#fdc003] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!pkg) return null;
 
   return (
     <main className="md:pl-64 max-w-7xl mx-auto px-6 py-12 md:py-24 flex flex-col md:flex-row gap-12 min-h-screen">

@@ -1,29 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { TopUpPackages } from "./TopUpPackages";
 import { PaymentMethods } from "./PaymentMethods";
 import { TransactionHistory } from "./TransactionHistory";
-import { WalletService } from "../services/walletService";
-import { Wallet } from "../types/wallet.types";
+import type { DepositPackage, Transaction, Wallet } from "../types/wallet.types";
 
-export function WalletDashboard() {
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [loading, setLoading] = useState(true);
+interface WalletDashboardProps {
+  initialWallet: Wallet;
+  initialTransactions: Transaction[];
+  initialPackages: DepositPackage[];
+}
 
-  useEffect(() => {
-    const fetchWallet = async () => {
-      try {
-        const data = await WalletService.getMyWallet();
-        setWallet(data);
-      } catch (error) {
-        console.error("Failed to fetch wallet:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchWallet();
-  }, []);
+export function WalletDashboard({
+  initialWallet,
+  initialTransactions,
+  initialPackages,
+}: WalletDashboardProps) {
+  const wallet = initialWallet;
 
   return (
     <main className="flex-1 md:pl-64 p-8 pt-24 min-h-screen bg-[#0e0e10]">
@@ -43,13 +36,9 @@ export function WalletDashboard() {
           <span className="text-xs font-bold text-[#fdc003] uppercase tracking-widest mb-1">Current Balance</span>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-4xl text-[#fdc003]" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
-            {loading ? (
-              <span className="font-headline text-5xl font-black text-[#f9f5f8] animate-pulse">...</span>
-            ) : (
-              <span className="font-headline text-5xl font-black text-[#f9f5f8]">
-                {wallet ? wallet.balance.toLocaleString() : "0"}
-              </span>
-            )}
+            <span className="font-headline text-5xl font-black text-[#f9f5f8]">
+              {wallet.balance.toLocaleString()}
+            </span>
             <span className="font-headline text-xl font-bold text-[#fdc003]">AC</span>
           </div>
         </div>
@@ -57,7 +46,7 @@ export function WalletDashboard() {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-4 gap-12">
         <div className="xl:col-span-3">
-          <TopUpPackages />
+          <TopUpPackages initialPackages={initialPackages} />
         </div>
         <div className="xl:col-span-1">
           <PaymentMethods />
@@ -65,7 +54,7 @@ export function WalletDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <TransactionHistory />
+        <TransactionHistory initialTransactions={initialTransactions} />
       </div>
     </main>
   );

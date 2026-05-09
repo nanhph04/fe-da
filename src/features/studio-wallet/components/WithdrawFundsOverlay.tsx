@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { WithdrawalService } from "../services/withdrawalService";
-import { colorSchemes } from "@/design-system/utils/theme-utils";
+import { colorSchemes } from "@/shared/utils/theme-utils";
 
 export function WithdrawFundsOverlay({ balance, onClose, onSuccess }: { balance: number, onClose: () => void, onSuccess: (amount: number) => void }) {
   const [amount, setAmount] = useState<number>(0);

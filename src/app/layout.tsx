@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
-import { ThemeProvider } from "@/design-system/theme-provider";
+import { ThemeProvider } from "@/shared/providers/theme-provider";
 import "./globals.css";
 
 const inter = Inter({

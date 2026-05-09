@@ -25,7 +25,11 @@ export type {
   Withdrawal,
   WithdrawalStatus,
   Deposit,
-  DepositStatus
+  DepositStatus,
+  DepositPackage,
+  BankInfo,
+  PaymentRequest,
+  PaymentResponse,
 } from './types/wallet.types';
 
 // Utilities

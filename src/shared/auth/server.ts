@@ -25,18 +25,22 @@ export async function getServerUserProfile() {
   return response.data;
 }
 
-export async function requireStudioAccess(redirectPath: string) {
+export async function requireAuthenticatedUser(redirectPath: string) {
   try {
-    const profile = await getServerUserProfile();
-    const canAccessStudio =
-      profile.role === "admin" || profile.role === "creator" || profile.isCreator;
-
-    if (!canAccessStudio) {
-      redirect("/unauthorized");
-    }
-
-    return profile;
+    return await getServerUserProfile();
   } catch {
     redirect(`/auth/login?redirect=${encodeURIComponent(redirectPath)}`);
   }
+}
+
+export async function requireStudioAccess(redirectPath: string) {
+  const profile = await requireAuthenticatedUser(redirectPath);
+  const canAccessStudio =
+    profile.role === "admin" || profile.role === "creator" || profile.isCreator;
+
+  if (!canAccessStudio) {
+    redirect("/unauthorized");
+  }
+
+  return profile;
 }

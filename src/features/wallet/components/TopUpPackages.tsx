@@ -6,27 +6,39 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { DepositService } from "../services/depositService";
-import { DepositPackage } from "../types/wallet.types";
+import type { DepositPackage } from "../types/wallet.types";
 
-export function TopUpPackages() {
+interface TopUpPackagesProps {
+  initialPackages?: DepositPackage[];
+}
+
+const sortPackages = (packages: DepositPackage[]) =>
+  [...packages].sort((a, b) => a.sortOrder - b.sortOrder);
+
+export function TopUpPackages({ initialPackages }: TopUpPackagesProps) {
   const router = useRouter();
-  const [packages, setPackages] = useState<DepositPackage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [packages, setPackages] = useState<DepositPackage[]>(
+    initialPackages ? sortPackages(initialPackages) : []
+  );
+  const [loading, setLoading] = useState(!initialPackages);
 
   useEffect(() => {
+    if (initialPackages) {
+      return;
+    }
+
     const fetchPackages = async () => {
       try {
         const data = await DepositService.getDepositPackages();
-        // Sort by sortOrder
-        setPackages(data.sort((a, b) => a.sortOrder - b.sortOrder));
+        setPackages(sortPackages(data));
       } catch (error) {
         console.error("Failed to fetch deposit packages:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchPackages();
-  }, []);
+    void fetchPackages();
+  }, [initialPackages]);
 
   if (loading) {
     return (

@@ -3,26 +3,42 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { TransactionService } from "../services/transactionService";
-import { Transaction } from "../types/wallet.types";
+import type { Transaction } from "../types/wallet.types";
 
-export function TransactionHistory() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+interface TransactionHistoryProps {
+  initialTransactions?: Transaction[];
+}
+
+const sortTransactions = (transactions: Transaction[]) =>
+  [...transactions].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+export function TransactionHistory({
+  initialTransactions,
+}: TransactionHistoryProps) {
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    initialTransactions ? sortTransactions(initialTransactions) : []
+  );
+  const [loading, setLoading] = useState(!initialTransactions);
 
   useEffect(() => {
+    if (initialTransactions) {
+      return;
+    }
+
     const fetchTransactions = async () => {
       try {
         const data = await TransactionService.getMyTransactions();
-        // Sort by date descending
-        setTransactions(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        setTransactions(sortTransactions(data));
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchTransactions();
-  }, []);
+    void fetchTransactions();
+  }, [initialTransactions]);
 
   const formatDate = (dateStr: string) => {
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(dateStr));
