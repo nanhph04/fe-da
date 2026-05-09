@@ -96,12 +96,12 @@ jest.mock('@radix-ui/react-dialog', () => ({
   DialogTitle: ({ children }) => <h3>{children}</h3>,
   DialogDescription: ({ children }) => <p>{children}</p>,
   DialogClose: ({ children }) => <button>{children}</button>,
-}));
+}), { virtual: true });
 
 // Mock @radix-ui/react-slot
 jest.mock('@radix-ui/react-slot', () => ({
   Slot: ({ children, ...props }) => <div {...props}>{children}</div>,
-}));
+}), { virtual: true });
 
 // Mock @radix-ui/react-select
 jest.mock('@radix-ui/react-select', () => ({
@@ -110,7 +110,7 @@ jest.mock('@radix-ui/react-select', () => ({
   SelectValue: ({ children, ...props }) => <span {...props}>{children}</span>,
   SelectContent: ({ children, ...props }) => <div {...props}>{children}</div>,
   SelectItem: ({ children, ...props }) => <div {...props}>{children}</div>,
-}));
+}), { virtual: true });
 
 // Mock @radix-ui/react-dropdown-menu
 jest.mock('@radix-ui/react-dropdown-menu', () => ({
@@ -119,7 +119,7 @@ jest.mock('@radix-ui/react-dropdown-menu', () => ({
   DropdownMenuContent: ({ children, ...props }) => <div {...props}>{children}</div>,
   DropdownMenuItem: ({ children, ...props }) => <div {...props}>{children}</div>,
   DropdownMenuSeparator: ({ children, ...props }) => <div {...props}>{children}</div>,
-}));
+}), { virtual: true });
 
 // Mock @radix-ui/react-calendar
 jest.mock('@radix-ui/react-calendar', () => ({
@@ -130,21 +130,21 @@ jest.mock('@radix-ui/react-calendar', () => ({
   CalendarGridRow: ({ children }) => children,
   CalendarHeading: ({ children }) => children,
   CalendarCell: ({ children, ...props }) => <div {...props}>{children}</div>,
-}));
+}), { virtual: true });
 
 // Mock @radix-ui/react-popover
 jest.mock('@radix-ui/react-popover', () => ({
   Popover: ({ children, ...props }) => <div {...props}>{children}</div>,
   PopoverTrigger: ({ children }) => children,
   PopoverContent: ({ children, ...props }) => <div {...props}>{children}</div>,
-}));
+}), { virtual: true });
 
 // Mock @radix-ui/react-tooltip
 jest.mock('@radix-ui/react-tooltip', () => ({
   Tooltip: ({ children, ...props }) => <div {...props}>{children}</div>,
   TooltipTrigger: ({ children }) => children,
   TooltipContent: ({ children, ...props }) => <div {...props}>{children}</div>,
-}));
+}), { virtual: true });
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
@@ -153,7 +153,7 @@ jest.mock('next-themes', () => ({
     theme: 'dark',
     setTheme: jest.fn(),
   }),
-}));
+}), { virtual: true });
 
 // Global test utilities
 global.fetch = jest.fn();
