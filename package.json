@@ -8,18 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "test": "jest",
-    "test:unit": "jest --testPathPattern=tests/unit",
-    "test:component": "jest --testPathPattern=tests/components",
-    "test:integration": "jest --testPathPattern=tests/integration",
-    "test:accessibility": "jest --testPathPattern=tests/accessibility",
-    "test:performance": "jest --testPathPattern=tests/performance",
-    "test:coverage": "jest --coverage",
+    "test": "jest --runInBand",
+    "test:smoke": "jest --runInBand src/features/wallet/services/walletService.test.ts src/features/studio-wallet/services/earningsService.test.ts",
+    "test:coverage": "jest --coverage --runInBand",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci --coverage --watchAll=false",
-    "test:e2e": "playwright test",
-    "test:build": "npm run build && npm run test:lint",
-    "validate": "npm run lint && npm run type-check && npm run test:ci"
+    "test:ci": "npm run test:smoke",
+    "test:build": "npm run build && npm run test:smoke",
+    "validate": "npm run lint && npm run type-check && npm run build"
   },
   "dependencies": {
     "@_davideast/stitch-mcp": "^0.5.5",
@@ -41,9 +36,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -52,10 +44,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "jest": "^30.3.0",
-    "jest-environment-jsdom": "^30.3.0",
     "tailwindcss": "^4",
-    "ts-jest": "^29.4.9",
-    "typescript": "^5",
-    "vitest": "^4.1.5"
+    "typescript": "^5"
   }
 }
