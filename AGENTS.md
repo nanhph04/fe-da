@@ -16,6 +16,22 @@ Before writing or modifying code, the AI must:
 
 Dự án này tuân thủ nghiêm ngặt các quy tắc Frontend dưới đây. AI và developer không được tự ý phá vỡ kiến trúc, style, rendering strategy hoặc API contract.
 
+## ⚠️ Mandatory Context Files
+
+> **BẮT BUỘC ĐỌC** trước khi code bất kỳ feature nào. Đây là các tài liệu nền tảng:
+
+| File | Vai trò | Khi nào đọc |
+|------|---------|-------------|
+| **`PRODUCT.md`** | Business spec, user roles, workflows, vòng đời dữ liệu, quy tắc nghiệp vụ | Trước khi code **bất kỳ feature nào** — để hiểu domain, luồng dữ liệu, và các edge case nghiệp vụ |
+| **`DESIGN.md`** | Design system, bảng màu, typography, component specs, CSS variable mapping | Trước khi tạo/sửa **bất kỳ UI component nào** — để đảm bảo visual consistency |
+| **`AGENTS.md`** (file này) | Quy tắc kỹ thuật frontend, kiến trúc, rendering, API integration | Luôn tuân thủ |
+
+### Quy tắc sử dụng
+
+- **PRODUCT.md** là nguồn sự thật duy nhất cho **nghiệp vụ**. Không bịa luồng nghiệp vụ. Nếu thiếu thông tin, hỏi lại.
+- **DESIGN.md** là nguồn sự thật duy nhất cho **visual**. Luôn dùng CSS variable, không hardcode hex.
+- Khi có xung đột giữa 3 file, ưu tiên: `PRODUCT.md` (nghiệp vụ) > `AGENTS.md` (kỹ thuật) > `DESIGN.md` (visual).
+
 ---
 
 ## 1. Expert Routing
@@ -133,6 +149,11 @@ Dự án sử dụng:
 - Không dùng `any` nếu không thật sự cần.
 - Không dùng Axios.
 - Không dùng thư viện UI ngoài nếu Shadcn UI hoặc component nội bộ đã đủ, nếu cần thư viện icon có thể hỏi ý kiến trước khi dùng.
+- Ưu tiên dùng thư viện icon đã có sẵn trong project trước khi thêm mới.
+- Icon library mặc định hiện tại của project là `lucide-react` theo cấu hình `components.json` (`iconLibrary: "lucide"`).
+- Với UI hoặc component mới, mặc định dùng icon từ `lucide-react` để đồng bộ với Shadcn UI và codebase hiện tại.
+- Không tạo UI mới bằng icon dạng text/font thủ công nếu cùng nhu cầu đã có thể giải quyết bằng `lucide-react`.
+- Chỉ dùng icon package khác khi `lucide-react` không đáp ứng được và phải nêu rõ lý do.
 - Không tự thêm package mới khi chưa có lý do rõ ràng.
 - Không tự ý thay đổi config lớn như `next.config`, `tsconfig`, Tailwind config nếu task không yêu cầu.
 
@@ -284,120 +305,68 @@ fetch("http://localhost:3001/api/videos");
 
 ## 7. UI Style: Cinematic Canvas
 
-Phong cách giao diện của dự án là **Cinematic Canvas**.
+> 📖 **Tài liệu đầy đủ:** Xem `DESIGN.md` — Single Source of Truth cho toàn bộ design system.
 
-Tức là:
+Phong cách giao diện của dự án là **Cinematic Canvas** ("The Velvet Gallery").
 
-- Dark mode.
-- Cao cấp, sắc nét.
-- Ít bo tròn.
-- Tương phản tốt.
-- Không generic AI.
-- Không glassmorphism rẻ tiền.
+### Nguyên tắc nhanh (Quick Guards)
 
-### Bảng màu
+- Dark mode mặc định. Chưa hỗ trợ light mode.
+- Primary: `#E50914`. Secondary (Gold): `#f59e0b`.
+- Font: **Manrope** (heading) + **Inter** (body).
+- Spacing: Grid 8px. Không `p-[13px]` tùy tiện.
+- Border-radius: Ưu tiên `rounded-sm`, `rounded-md`, `rounded-lg`. Hạn chế `rounded-2xl` trở lên.
+- Luôn dùng CSS variable (`bg-primary`, `text-muted-foreground`) thay vì hardcode hex.
 
-Được ưu tiên:
-
-- Matte Black
-- Charcoal
-- Deep Crimson
-- Gold
-- Ivory
-- Warm Gray
-- Muted Red
-- Slate
-
-Không được dùng màu tím/violet làm màu chủ đạo.
-
-### Cấm làm primary color
-
-Không dùng các tone sau làm màu chính:
+### Cấm tuyệt đối
 
 ```txt
-#8d00e6
-#cf96ff
-violet
-purple
-fuchsia
+❌ Màu tím/violet/purple/fuchsia làm primary
+❌ Glassmorphism trên card, button, input, badge, dropdown, tooltip
+❌ Gradient loè loẹt
+❌ rounded-2xl, rounded-3xl cho card/container
 ```
 
-Có thể dùng rất ít ở trạng thái phụ nếu asset gốc bắt buộc, nhưng không được làm identity chính.
+### Glassmorphism — Chỉ dùng có kiểm soát
 
-### Hình khối
+Chỉ được phép trên **element cố định (fixed)**:
 
-Ưu tiên:
+| Element | Cho phép |
+|---------|----------|
+| Top Navbar | ✅ `backdrop-filter: blur(12px)` |
+| Sidebar | ✅ `backdrop-filter: blur(8px)` |
+| Modal overlay | ✅ `backdrop-filter: blur(4px)` |
+| Mọi thứ khác | ❌ Không |
 
-```txt
-rounded-sm
-rounded-md
-border
-solid background
-subtle shadow
-```
-
-Hạn chế:
-
-```txt
-rounded-2xl
-rounded-3xl
-glassmorphism
-blur quá nhiều
-gradient loè loẹt
-```
-
-### Typography
-
-Ưu tiên:
-
-- Manrope cho heading/title/hero.
-- Inter cho body/content.
-
-### Spacing
-
-- Tuân thủ grid 8px.
-- UI cần breathing room.
-- Không nhồi quá nhiều card sát nhau.
-- Không dùng spacing tùy tiện kiểu `p-[13px]` nếu không cần.
+> Chi tiết bảng màu, typography scale, component specs, CSS variable mapping → **`DESIGN.md`** Section 2–6, 12.
 
 ---
 
-## 8. Animation & Performance
+## 8. Animation & Motion
+
+> 📖 **Chi tiết đầy đủ:** `DESIGN.md` — Section 9.
+
+### Quy tắc cốt lõi
+
+Chỉ animate thuộc tính **rẻ** (không gây layout thrashing):
+
+```txt
+✅ transform, opacity, filter (nhẹ)
+❌ width, height, margin, padding, top, left
+```
 
 ### Được dùng
 
-- CSS transition.
-- Hover/focus state nhẹ.
-- Fade-in.
-- Slide-up nhẹ.
-- Transform.
-- Opacity.
+- CSS transition (`ease-in-out`, 300ms).
+- Hover/focus state nhẹ: `hover:opacity-90`, `hover:-translate-y-0.5`.
+- Fade-in, slide-up nhẹ khi mount.
+- Scale nhẹ: hover `1.02x`, active `0.98x`.
 
-Ví dụ:
-
-```tsx
-className="transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:opacity-90"
-```
-
-### Không nên dùng
+### Cấm
 
 - JavaScript animation cho hiệu ứng đơn giản.
-- Animate `width`, `height`, `margin`, `padding`.
-- Lạm dụng `animate-spin`.
-- Lạm dụng `animate-pulse`.
-- Motion quá nhiều làm UI giống template rẻ tiền.
-
-### Quy tắc
-
-Chỉ animate các thuộc tính rẻ:
-
-```txt
-transform
-opacity
-filter nhẹ nếu cần
-```
-
-Tránh gây layout thrashing.
+- Lạm dụng `animate-spin`, `animate-pulse`.
+- Motion quá nhiều → UI giống template rẻ tiền.
 
 ---
 
@@ -405,6 +374,7 @@ Tránh gây layout thrashing.
 
 - Dùng Shadcn UI cho primitive/component phổ biến.
 - Không tự viết lại Button/Input/Dialog nếu project đã có Shadcn UI tương ứng.
+- Với icon trong component/UI mới, mặc định dùng `lucide-react`.
 - Có thể custom `className` để khớp Cinematic Canvas.
 - Không biến Shadcn UI thành giao diện generic mặc định.
 - Không lạm dụng component nếu HTML đơn giản hơn.
@@ -596,48 +566,31 @@ features/
 
 ## 14. Error, Loading, Empty State
 
-Mỗi UI có dữ liệu nên cân nhắc đủ 4 trạng thái:
+> 📖 **Chi tiết visual specs:** `DESIGN.md` — Section 10.
 
-1. Loading.
-2. Empty.
-3. Error.
-4. Success.
+Mỗi UI có dữ liệu **phải** xử lý đủ 4 trạng thái:
 
-Không render màn hình trắng khi lỗi.
+1. **Loading** — Skeleton shimmer (không lạm dụng `animate-pulse`). Dùng `<Suspense>` khi phù hợp.
+2. **Empty** — Message rõ ràng + CTA nếu user có thể hành động. Ví dụ: *"Chưa có giao dịch nào."*
+3. **Error** — Message rõ, không expose stack trace. Có retry action nếu applicable.
+4. **Success** — Render data bình thường.
 
-### Loading
-
-Ưu tiên:
-
-- Skeleton nhẹ.
-- Text loading rõ ràng.
-- Suspense fallback nếu phù hợp.
-
-Không lạm dụng `animate-pulse`.
-
-### Empty state
-
-Phải có message rõ:
-
-```txt
-Chưa có giao dịch nào.
-```
-
-### Error state
-
-Phải có message rõ, không expose stack trace cho user.
+Không bao giờ render màn hình trắng khi lỗi.
 
 ---
 
 ## 15. Accessibility
 
-- Button phải là `<button>`, không dùng `<div onClick>`.
-- Link điều hướng phải dùng `<Link>`.
-- Image phải có `alt`.
-- Input phải có label hoặc aria-label.
+> 📖 **Contrast ratios & chi tiết:** `DESIGN.md` — Section 11.
+
+- `<button>` cho action, không `<div onClick>`.
+- `<Link>` cho navigation.
+- `<img>` phải có `alt`.
+- `<input>` phải có `<label>` hoặc `aria-label`.
 - Icon-only button phải có `aria-label`.
-- Không dùng contrast quá thấp.
-- Focus state không được bị xoá hoàn toàn.
+- Focus state không được xóa hoàn toàn — dùng `--ring` (`#E50914`).
+- Contrast tối thiểu WCAG AA (≥ 4.5:1). Kiểm tra với nền `#0E0E10`.
+- Touch target tối thiểu 44×44px cho mobile.
 
 ---
 
@@ -781,10 +734,15 @@ Self-check:
 - Data lặp đã được tách sang constants.
 - Props và API response đã có type.
 - Không dùng tím/violet làm màu chủ đạo.
+- Màu sắc dùng CSS variable (bg-primary) thay vì hardcode hex.
 - Animation chỉ dùng transform/opacity nếu có.
+- Glassmorphism chỉ trên navbar/sidebar/modal overlay.
+- Border-radius không vượt quá rounded-lg cho card.
+- Font heading dùng Manrope, body dùng Inter.
 - Fetch auth có credentials: "include" khi cần.
 - API đi qua NEXT_PUBLIC_GATEWAY_URL.
 - Không tạo global component nếu không thật sự shared.
+- Tuân thủ DESIGN.md cho mọi visual decision.
 ```
 
 Nếu có rule bị vi phạm vì lý do bắt buộc, AI phải ghi rõ lý do.
@@ -795,19 +753,30 @@ Nếu có rule bị vi phạm vì lý do bắt buộc, AI phải ghi rõ lý do.
 
 Khi review code, AI phải kiểm tra:
 
+**Kiến trúc:**
 - Kiến trúc feature-based có đúng không.
 - Có component nào quá lớn không.
 - Có lạm dụng Client Component không.
 - Có fetch trong `useEffect` không cần thiết không.
+
+**API & Data:**
 - Có dùng Axios không.
 - Có hardcode URL không.
 - Có field API bịa không.
+
+**Hydration & SSR:**
 - Có lỗi hydration tiềm ẩn không.
 - Có dùng `Date.now()`, `Math.random()`, locale date trực tiếp khi SSR không.
 - Có nested HTML sai không.
+
+**Design (theo DESIGN.md):**
 - Có animation gây layout thrashing không.
 - Có màu tím/violet làm primary không.
-- Có accessibility cơ bản không.
+- Có dùng CSS variable thay vì hardcode hex không.
+- Glassmorphism chỉ trên navbar/sidebar/modal không.
+- Border-radius có vượt quá `rounded-lg` cho card không.
+- Font heading (Manrope) và body (Inter) có đúng không.
+- Có accessibility cơ bản không (contrast, aria-label, focus ring).
 
 ---
 

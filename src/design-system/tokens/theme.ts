@@ -1,18 +1,18 @@
 // @ts-nocheck
 export const theme = {
   colors: {
-    // Primary palette - Crimson theme (#ff8e80)
+    // Primary palette - Canonical #E50914 (Velvet Gallery Red)
     primary: {
       50: '#fff5f5',
       100: '#ffe4e6',
       200: '#fecaca',
       300: '#fca5a5',
       400: '#f87171',
-      500: '#fb7185',
-      600: '#f43f5e',  // Closest to #ff8e80
-      700: '#ef4444',
-      800: '#dc2626',
-      900: '#b91c1c',
+      500: '#E50914',  // Canonical primary
+      600: '#dc143c',
+      700: '#b91c1c',
+      800: '#991b1b',
+      900: '#7f1d1d',
     },
 
     // Secondary palette - Gold theme (#fdc003)
@@ -143,7 +143,7 @@ export const theme = {
   typography: {
     fontFamily: {
       sans: ['Inter', 'system-ui', 'sans-serif'],
-      serif: ['Manrope', 'Georgia', 'serif'],
+      heading: ['Manrope', 'system-ui', 'sans-serif'],
       mono: ['JetBrains Mono', 'Consolas', 'monospace'],
     },
 
@@ -269,7 +269,6 @@ export const theme = {
     30: '30',
     40: '40',
     50: '50',
-    auto: 'auto',
   },
 
   opacity: {

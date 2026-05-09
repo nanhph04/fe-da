@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@fontsource/material-symbols-outlined";
 import { Inter, Manrope } from "next/font/google";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
