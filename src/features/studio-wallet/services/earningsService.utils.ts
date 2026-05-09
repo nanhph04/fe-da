@@ -1,5 +1,4 @@
 import { api } from "@/shared/api/client";
-import type { EarningsFilters } from "../types/earnings.types";
 
 type QueryValue = string | number | boolean | undefined | null;
 type QueryParams = Record<string, QueryValue>;

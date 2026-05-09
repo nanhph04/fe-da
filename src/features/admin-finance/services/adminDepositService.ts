@@ -14,6 +14,13 @@ export interface CreatePackagePayload {
 
 export type UpdatePackagePayload = Partial<CreatePackagePayload>;
 
+export interface ReconcileDepositResponse {
+  success: boolean;
+  depositId?: string;
+  status?: string;
+  message?: string;
+}
+
 export class AdminDepositService {
   /**
    * Get all deposit packages including inactive ones
@@ -42,8 +49,12 @@ export class AdminDepositService {
   /**
    * Reconcile a pending deposit
    */
-  static async reconcileDeposit(depositId: string): Promise<any> {
-    const response = await api.post<any>(`/api/deposits/admin/${depositId}/reconcile`, {}, { requireAuth: true });
+  static async reconcileDeposit(depositId: string): Promise<ReconcileDepositResponse> {
+    const response = await api.post<ReconcileDepositResponse>(
+      `/api/deposits/admin/${depositId}/reconcile`,
+      {},
+      { requireAuth: true }
+    );
     return response.data;
   }
 }

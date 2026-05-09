@@ -1,21 +1,26 @@
 'use client';
 
+import type { EarningsSummary, MonthlyEarnings } from "../../types/earnings.types";
 import { lazy, Suspense } from 'react';
 
 // Lazy load EarningsOverview component
 const EarningsOverview = lazy(() => import('../EarningsOverview'));
 
 interface LazyEarningsOverviewProps {
-  filters?: any;
-  className?: string;
+  initialSummary?: EarningsSummary;
+  initialMonthly?: MonthlyEarnings;
 }
 
 export const LazyEarningsOverview: React.FC<LazyEarningsOverviewProps> = ({
-  className: _className,
+  initialSummary,
+  initialMonthly,
 }) => {
   return (
     <Suspense fallback={<WalletEarningsSkeleton />}>
-      <EarningsOverview />
+      <EarningsOverview
+        initialSummary={initialSummary}
+        initialMonthly={initialMonthly}
+      />
     </Suspense>
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export interface ThemeProviderProps {
   children: React.ReactNode;
@@ -15,22 +15,19 @@ export function ThemeProvider({
   attribute = 'class',
   defaultTheme = 'dark',
 }: ThemeProviderProps) {
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-
     if (attribute === 'class') {
       document.documentElement.classList.add(defaultTheme);
-      return;
+      return () => {
+        document.documentElement.classList.remove(defaultTheme);
+      };
     }
 
     document.documentElement.setAttribute(attribute, defaultTheme);
+    return () => {
+      document.documentElement.removeAttribute(attribute);
+    };
   }, [attribute, defaultTheme]);
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return <>{children}</>;
 }

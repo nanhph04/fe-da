@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react";
 import { Withdrawal } from "../types/withdrawal.types";
 

@@ -216,7 +216,7 @@ export const WalletErrorFallback = ({ error }: { error: Error }) => (
         Wallet Error
       </h2>
       <p className="text-gray-400 mb-6">
-        We're having trouble loading your wallet information. Please try again.
+        We&apos;re having trouble loading your wallet information. Please try again.
       </p>
       {error && (
         <div className="bg-[#262528] rounded-lg p-4 text-sm text-gray-400">

@@ -3,7 +3,7 @@ export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "VIDEO_PURCHASE" | "CHA
 export type DepositStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
 export type WithdrawalStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED" | "CANCELLED";
 
-import { WalletStatus, WalletType, UserWallet } from "./base-wallet.types";
+import { WalletStatus, WalletType } from "./base-wallet.types";
 
 export interface Wallet {
   id: string;
@@ -28,7 +28,7 @@ export interface Transaction {
   referenceId: string | null;
   description: string | null;
   failureReason: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   completedAt: string | null;
   failedAt: string | null;
   cancelledAt: string | null;

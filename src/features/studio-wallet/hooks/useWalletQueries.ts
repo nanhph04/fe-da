@@ -28,7 +28,7 @@ export const useEarningsData = () => ({
   refetch: () => EarningsService.getEarningsSummary(),
 });
 
-export const useVideoEarnings = (_videoId: string) => ({
+export const useVideoEarnings = () => ({
   data: undefined,
   isLoading: false,
 });

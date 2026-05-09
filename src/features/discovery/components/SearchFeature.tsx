@@ -19,7 +19,7 @@ const mockResults = {
 };
 
 export function SearchFeature({ initialQuery = "" }: { initialQuery?: string }) {
-  const [query, setQuery] = useState(initialQuery || mockResults.query);
+  const [query] = useState(initialQuery || mockResults.query);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedDuration, setSelectedDuration] = useState("Any");
   const [sortBy, setSortBy] = useState("relevance");
@@ -33,7 +33,7 @@ export function SearchFeature({ initialQuery = "" }: { initialQuery?: string }) 
             Search Results
           </h1>
           <p className="text-zinc-500">
-            Found <span className="text-[#ff8e80] font-bold">{mockResults.results.length}</span> results for "{query}"
+            Found <span className="text-[#ff8e80] font-bold">{mockResults.results.length}</span> results for &quot;{query}&quot;
           </p>
         </div>
 

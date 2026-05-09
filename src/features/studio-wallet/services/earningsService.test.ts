@@ -1,3 +1,4 @@
+import { api } from "@/shared/api/client";
 import { EarningsService } from "./earningsService";
 
 jest.mock("@/shared/api/client", () => ({
@@ -6,7 +7,7 @@ jest.mock("@/shared/api/client", () => ({
   },
 }));
 
-const mockApi = require("@/shared/api/client").api as {
+const mockApi = api as unknown as {
   get: jest.Mock;
 };
 

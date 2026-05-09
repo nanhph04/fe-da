@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export interface MediaCardProps {
   title: string;
   creator: string;
@@ -11,10 +13,12 @@ export function MediaCard({ title, creator, views, imageUrl, duration }: MediaCa
     <div className="group relative w-64 flex-shrink-0 cursor-pointer">
       {/* Image Container */}
       <div className="relative aspect-[16/9] overflow-hidden rounded-sm bg-[#1a1a1a]">
-        <img
+        <Image
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          fill
+          sizes="256px"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         
         {/* Duration Badge */}

@@ -45,9 +45,9 @@ jest.mock('next/router', () => ({
 
 // Mock next/image
 jest.mock('next/image', () => ({
-  Image: (props) => {
-    return <img {...props} />;
-  },
+  __esModule: true,
+  // eslint-disable-next-line @next/next/no-img-element
+  default: ({ alt = '', ...props }) => <img alt={alt} {...props} />,
 }));
 
 // Mock next/font
@@ -148,7 +148,7 @@ jest.mock('@radix-ui/react-tooltip', () => ({
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
-  ThemeProvider: ({ children, ...props }) => children,
+  ThemeProvider: ({ children }) => children,
   useTheme: () => ({
     theme: 'dark',
     setTheme: jest.fn(),
@@ -202,7 +202,11 @@ beforeAll(() => {
     // Filter out common React warnings
     if (
       typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      (args[0].includes('Warning: ReactDOM.render is no longer supported') ||
+       args[0].includes('The above error occurred in the') ||
+       args[0].includes('React will try to recreate this component tree') ||
+       args[0].includes('Uncaught error: Error: Test error') ||
+       args[0].includes('Uncaught error: Error: Triggered error'))
     ) {
       return;
     }

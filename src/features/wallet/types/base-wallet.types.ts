@@ -4,6 +4,7 @@
 
 export type WalletStatus = "ACTIVE" | "INACTIVE" | "FROZEN" | "SUSPENDED";
 export type WalletType = "USER" | "STUDIO" | "SYSTEM" | "CHANNEL";
+type WalletAugmentation = Record<string, unknown>;
 
 export interface BaseWallet {
   // Core fields - all wallet types share these
@@ -60,7 +61,10 @@ export interface SystemWallet extends BaseWallet {
 export type AnyWallet = UserWallet | StudioWallet | ChannelWallet | SystemWallet;
 
 // Factory function to create wallet based on type
-export function createWallet(type: WalletType, baseData: Omit<BaseWallet, 'type'> & Partial<Record<string, any>>): AnyWallet {
+export function createWallet(
+  type: WalletType,
+  baseData: Omit<BaseWallet, 'type'> & Partial<WalletAugmentation>
+): AnyWallet {
   const base = {
     ...baseData,
     type,

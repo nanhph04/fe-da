@@ -10,12 +10,6 @@ interface WalletOverviewProps {
 }
 
 export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletOverviewProps) {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: wallet.currency || 'USD'
-    }).format(amount);
-  };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Main Balance Card */}

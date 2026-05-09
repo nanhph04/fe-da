@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { buildApiUrl } from "./client";
 import type { ApiError, ApiRequestInit, ApiResponse, ApiResponseType } from "./types";
 
-export interface ServerApiRequestInit extends ApiRequestInit {}
+export type ServerApiRequestInit = ApiRequestInit;
 
 const parseResponseBody = async (
   response: Response,

@@ -1,9 +1,8 @@
-// @ts-nocheck
 /**
  * Wallet utility functions for type-safe operations
  */
 
-import { AnyWallet, WalletType, createWallet } from "./base-wallet.types";
+import { AnyWallet, WalletStatus, WalletType, createWallet } from "./base-wallet.types";
 
 /**
  * Get wallet type label for display
@@ -132,7 +131,7 @@ export function createWalletWithDefaults(type: WalletType, userId: string, parti
     type,
     balance: 0,
     frozenBalance: 0,
-    status: "ACTIVE",
+    status: "ACTIVE" as WalletStatus,
     createdAt: now,
     updatedAt: now,
     ...partialData,

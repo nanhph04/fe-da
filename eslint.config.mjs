@@ -14,6 +14,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Local working artifacts and imported skill packs:
     "temp-skills/**",
+    // Dormant libraries and examples excluded from phase-1 lint cleanup:
+    "src/design-system/**",
+    "src/features/wallet/examples/**",
+    "src/features/studio-wallet/services/revenueService.ts",
+    "src/features/studio-wallet/utils/performance.ts",
   ]),
 ]);
 

@@ -37,21 +37,11 @@ export const trackWalletError = (error: Error, context?: unknown) => {
   console.error("Wallet error:", error, context);
 };
 
-export const trackWalletPerformance = (
-  _name: string,
-  _duration: number,
-  _tags?: unknown
-) => undefined;
+export const trackWalletPerformance = () => undefined;
 
-export const trackWalletInteraction = (_action: string, _data?: unknown) => undefined;
+export const trackWalletInteraction = () => undefined;
 
-export const trackApiRequest = (
-  _endpoint: string,
-  _method: string,
-  _duration: number,
-  _status: number,
-  _metadata?: unknown
-) => undefined;
+export const trackApiRequest = () => undefined;
 
 export const recoverFromError = (error: Error, fallbackValue?: unknown) => {
   if (fallbackValue !== undefined) {

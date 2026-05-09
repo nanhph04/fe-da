@@ -1,3 +1,5 @@
+import type { Transaction } from "./wallet.types";
+
 export interface PaymentRequest {
   serviceType: "VIDEO" | "MEMBERSHIP";
   serviceId: string;
@@ -18,5 +20,5 @@ export interface PaymentResponse {
   splitPercent: number;
   creatorCoins: number;
   systemCoins: number;
-  transactions: any[];
+  transactions: Transaction[];
 }

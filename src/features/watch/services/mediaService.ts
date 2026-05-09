@@ -100,6 +100,17 @@ export interface SaveVideoProgressResponse {
   completed: boolean;
 }
 
+export interface VideoProgressResponse {
+  videoId: string;
+  stage: string;
+  percent: number;
+  message: string;
+  terminal: boolean;
+  updatedAt: string;
+  detail: Record<string, unknown> | null;
+  errorCode: string | null;
+}
+
 export interface VideoMetadataResponse {
   id: string;
   title: string;
@@ -209,16 +220,7 @@ export const mediaService = {
     return api.post<SaveVideoProgressResponse>(`/api/media/videos/${id}/progress`, data, { requireAuth: true });
   },
   getVideoProgress: async (id: string) => {
-    return api.get<{
-      videoId: string;
-      stage: string;
-      percent: number;
-      message: string;
-      terminal: boolean;
-      updatedAt: string;
-      detail: any | null;
-      errorCode: string | null;
-    }>(`/api/media/videos/${id}/progress`, { requireAuth: true });
+    return api.get<VideoProgressResponse>(`/api/media/videos/${id}/progress`, { requireAuth: true });
   },
   getVideoProgressStreamUrl: (id: string) => {
     return `/api/media/videos/${id}/progress/stream`;

@@ -13,7 +13,7 @@ const INITIAL_CATEGORIES = [
 ];
 
 export function CategoryManagementFeature() {
-  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
+  const [categories] = useState(INITIAL_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredCategories = categories.filter(c => 

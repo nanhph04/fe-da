@@ -1,6 +1,5 @@
 import { api } from "@/shared/api/client";
 import {
-  BankInfo,
   Withdrawal,
   CreateWithdrawalRequest,
   WithdrawalHistoryFilters,

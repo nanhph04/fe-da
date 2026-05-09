@@ -1,6 +1,6 @@
 // Global types shared across the application
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -48,7 +48,7 @@ export interface Video {
 export interface ErrorWithMessage {
   message: string;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';

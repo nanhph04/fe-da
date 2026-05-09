@@ -1,6 +1,6 @@
-import { WalletStatus, WalletType, UserWallet } from "./base-wallet.types";
+import type { UserWallet } from "./base-wallet.types";
 
-export interface Wallet extends UserWallet {}
+export type Wallet = UserWallet;
 
 export interface WalletResponse {
   success: boolean;

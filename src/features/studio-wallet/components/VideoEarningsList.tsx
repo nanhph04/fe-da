@@ -1,5 +1,5 @@
 import { VideoEarning } from "../types/studio-wallet.types";
-import { formatCurrency, formatDate } from "@/shared/utils/formatters";
+import { formatCurrency } from "@/shared/utils/formatters";
 
 interface VideoEarningsListProps {
   videos: VideoEarning[];

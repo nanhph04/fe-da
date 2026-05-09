@@ -1,17 +1,27 @@
 import {
   buildApiUrl,
   fetchWrapper,
-  type ApiError,
   type ApiRequestInit,
   type ApiResponse,
 } from "@/shared/api";
+
+type RetryableError = {
+  status?: number;
+  config?: {
+    headers?: HeadersInit;
+  };
+};
+
+const getResponseStatus = (
+  response: { status?: number } | ApiResponse<unknown>
+) => ("status" in response ? response.status : undefined);
 
 export interface RetryConfig {
   maxRetries?: number;
   delayMs?: number;
   maxDelayMs?: number;
   backoffFactor?: number;
-  retryCondition?: (error: any) => boolean;
+  retryCondition?: (error: unknown) => boolean;
 }
 
 export interface CircuitBreakerConfig {
@@ -110,17 +120,22 @@ export class ApiLogger {
     });
   }
 
-  logResponse(url: string, response: any, duration: number, success: boolean) {
+  logResponse(
+    url: string,
+    response: { status?: number } | ApiResponse<unknown>,
+    duration: number,
+    success: boolean
+  ) {
     if (!this.config.enableResponseLogging) return;
 
     console.log(`[API Response] ${url}`, {
-      status: response?.status,
+      status: getResponseStatus(response),
       duration: `${duration}ms`,
       success,
     });
   }
 
-  logError(url: string, error: any, duration: number) {
+  logError(url: string, error: unknown, duration: number) {
     if (!this.config.enableErrorLogging) return;
 
     console.error(`[API Error] ${url}`, {
@@ -144,10 +159,14 @@ export class ApiLogger {
     return sanitized;
   }
 
-  private sanitizeError(error: any) {
+  private sanitizeError(error: unknown) {
     if (!this.config.sanitizeHeaders) return error;
 
-    const sanitized = { ...error };
+    if (!error || typeof error !== "object") {
+      return error;
+    }
+
+    const sanitized = { ...(error as RetryableError) };
     if (sanitized.config?.headers) {
       const headers = new Headers(sanitized.config.headers);
       const authHeader = headers.get('Authorization');
@@ -174,7 +193,7 @@ export class RetryHandler {
   }
 
   async execute<T>(operation: () => Promise<T>): Promise<T> {
-    let lastError: any;
+    let lastError: unknown;
 
     for (let attempt = 0; attempt <= this.config.maxRetries; attempt++) {
       try {
@@ -198,10 +217,12 @@ export class RetryHandler {
     throw lastError;
   }
 
-  private defaultRetryCondition(error: any): boolean {
-    if (error?.status) {
-      return [408, 429, 500, 502, 503, 504].includes(error.status);
+  private defaultRetryCondition(error: unknown): boolean {
+    if (error && typeof error === "object" && "status" in error) {
+      const retryableError = error as RetryableError;
+      return [408, 429, 500, 502, 503, 504].includes(retryableError.status ?? 0);
     }
+
     return false;
   }
 
@@ -272,7 +293,11 @@ export class EnhancedApiClient {
     return this.request<T>(url, { ...options, method: 'GET' });
   }
 
-  async post<T>(url: string, body: any, options?: ApiRequestInit): Promise<ApiResponse<T>> {
+  async post<T, TBody = unknown>(
+    url: string,
+    body: TBody,
+    options?: ApiRequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(url, {
       ...options,
       method: 'POST',
@@ -284,7 +309,11 @@ export class EnhancedApiClient {
     });
   }
 
-  async put<T>(url: string, body: any, options?: ApiRequestInit): Promise<ApiResponse<T>> {
+  async put<T, TBody = unknown>(
+    url: string,
+    body: TBody,
+    options?: ApiRequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(url, {
       ...options,
       method: 'PUT',
@@ -296,7 +325,11 @@ export class EnhancedApiClient {
     });
   }
 
-  async patch<T>(url: string, body: any, options?: ApiRequestInit): Promise<ApiResponse<T>> {
+  async patch<T, TBody = unknown>(
+    url: string,
+    body: TBody,
+    options?: ApiRequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(url, {
       ...options,
       method: 'PATCH',

@@ -45,7 +45,7 @@ describe('Error Boundary Components', () => {
     });
 
     it('should catch component errors and show fallback', () => {
-      const { container } = render(
+      render(
         <BasicErrorBoundary>
           <ErrorComponent />
         </BasicErrorBoundary>
@@ -71,7 +71,7 @@ describe('Error Boundary Components', () => {
 
     it('should show custom fallback if provided', () => {
       const customFallback = jest.fn(() => <div>Custom Error</div>);
-      const { container } = render(
+      render(
         <BasicErrorBoundary fallback={customFallback}>
           <ErrorComponent />
         </BasicErrorBoundary>

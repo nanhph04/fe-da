@@ -1,21 +1,34 @@
 'use client';
 
+import type { Payout } from "../../types/payout.types";
 import { lazy, Suspense } from 'react';
 
 // Lazy load PayoutHistory component
 const PayoutHistory = lazy(() => import('../PayoutHistory'));
 
 interface LazyPayoutHistoryProps {
-  filters?: any;
+  initialItems?: Payout[];
+  initialPagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
   className?: string;
 }
 
 export const LazyPayoutHistory: React.FC<LazyPayoutHistoryProps> = ({
   className,
+  initialItems,
+  initialPagination,
 }) => {
   return (
     <Suspense fallback={<WalletHistorySkeleton />}>
-      <PayoutHistory className={className} />
+      <PayoutHistory
+        className={className}
+        initialItems={initialItems}
+        initialPagination={initialPagination}
+      />
     </Suspense>
   );
 };
