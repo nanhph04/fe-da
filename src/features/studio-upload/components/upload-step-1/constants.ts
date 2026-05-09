@@ -1,0 +1,8 @@
+export const RESOLUTION_OPTIONS = [
+  "360p",
+  "480p",
+  "720p",
+  "1080p",
+  "1440p",
+  "2160p",
+];

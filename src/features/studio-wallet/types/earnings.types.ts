@@ -109,6 +109,12 @@ export interface EarningsAnalytics {
   estimatedMonthlyPayout: number;
 }
 
+export interface EarningsStatusSummary {
+  pending: number;
+  confirmed: number;
+  paid: number;
+}
+
 export interface EarningsMetrics {
   earnings: {
     currentPeriod: number;
@@ -141,6 +147,12 @@ export interface EarningsMetrics {
   };
 }
 
+export interface EarningsMetricsFilters {
+  period?: "monthly" | "quarterly" | "yearly";
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface ExportEarningsRequest extends EarningsFilters {
   format: "csv" | "xlsx" | "json";
   includeVideoDetails: boolean;
@@ -154,4 +166,43 @@ export interface ExportEarningsResponse {
   recordCount: number;
   format: string;
   expiresAt: string;
+}
+
+export interface TopEarningVideosFilters {
+  period?: "daily" | "weekly" | "monthly" | "yearly";
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface CumulativeEarningsFilters {
+  interval: "daily" | "weekly" | "monthly";
+  points?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface CumulativeEarningsPoint {
+  date: string;
+  cumulativeEarnings: number;
+  periodEarnings: number;
+  views: number;
+}
+
+export interface EarningsPredictionsFilters {
+  period: "7days" | "30days" | "90days";
+  confidence?: "low" | "medium" | "high";
+}
+
+export interface EarningsPredictionPoint {
+  date: string;
+  predictedEarnings: number;
+  confidence: number;
+}
+
+export interface EarningsPredictionsResponse {
+  predictions: EarningsPredictionPoint[];
+  totalPredicted: number;
+  method: string;
+  modelVersion: string;
 }

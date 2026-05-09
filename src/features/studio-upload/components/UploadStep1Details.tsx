@@ -1,7 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
-import { mediaService, CategoryResponse } from "@/features/watch/services/mediaService";
-import { UploadFormData } from "./StudioUploadFeature";
+
+import type { UploadFormData } from "./StudioUploadFeature";
+import { AccessLevelSection } from "./upload-step-1/AccessLevelSection";
+import { CategorySection } from "./upload-step-1/CategorySection";
+import { ResolutionSection } from "./upload-step-1/ResolutionSection";
+import { UploadProgressCard } from "./upload-step-1/UploadProgressCard";
+import { useUploadStep1State } from "./upload-step-1/use-upload-step1-state";
 
 interface UploadStep1DetailsProps {
   formData: UploadFormData;
@@ -9,302 +13,143 @@ interface UploadStep1DetailsProps {
   onNext: () => void;
 }
 
-export function UploadStep1Details({ formData, updateFormData, onNext }: UploadStep1DetailsProps) {
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const resolutionOptions = ["360p", "480p", "720p", "1080p", "1440p", "2160p"];
+export function UploadStep1Details({
+  formData,
+  updateFormData,
+  onNext,
+}: UploadStep1DetailsProps) {
+  const {
+    categories,
+    uploadProgress,
+    isUploading,
+    uploadComplete,
+    handleStartUpload,
+  } = useUploadStep1State();
+
   const canContinue =
     uploadComplete &&
     formData.title.trim().length > 0 &&
     formData.categories.length > 0 &&
     formData.resolutions.length > 0;
 
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await mediaService.getCategories();
-        if (res.success && res.data) {
-          setCategories(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to load categories", err);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  // Fake upload progress (Mocking file reading)
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isUploading && uploadProgress < 100) {
-      interval = setInterval(() => {
-        setUploadProgress(prev => {
-          const next = prev + Math.floor(Math.random() * 10) + 5;
-          if (next >= 100) {
-            setUploadComplete(true);
-            setIsUploading(false);
-            return 100;
-          }
-          return next;
-        });
-      }, 500);
-    }
-    return () => clearInterval(interval);
-  }, [isUploading, uploadProgress]);
-
-  const handleStartUpload = () => {
-    setIsUploading(true);
-    setUploadProgress(0);
-    setUploadComplete(false);
-  };
-
   return (
-    <div className="max-w-6xl mx-auto p-8 pb-32 w-full animate-in fade-in slide-in-from-right-4 duration-500">
-      {/* Header & Progress Section */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div className="mx-auto w-full max-w-6xl animate-in fade-in slide-in-from-right-4 p-8 pb-32 duration-500">
+      <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <span className="text-secondary font-headline font-bold text-xs uppercase tracking-[0.2em] mb-2 block">New Upload</span>
-          <h1 className="text-4xl md:text-5xl font-extrabold font-headline text-[#f9f5f8] tracking-tighter">Video Details</h1>
+          <span className="mb-2 block font-headline text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+            New Upload
+          </span>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tighter text-[#f9f5f8] md:text-5xl">
+            Video Details
+          </h1>
         </div>
-        
-        {/* Upload Progress Card */}
-        <div className="w-full md:w-80 bg-[#131315] p-5 rounded-lg border border-[#262528] shadow-xl">
-          {(!isUploading && !uploadComplete) && (
-            <div className="flex flex-col gap-3">
-              <span className="text-sm font-medium font-headline text-zinc-400 text-center">Select file to begin</span>
-              <button onClick={handleStartUpload} className="w-full bg-[#262528] hover:bg-[#3d3d40] text-white text-xs font-bold py-2 rounded transition-colors uppercase tracking-widest border border-dashed border-zinc-600">
-                Browse Files
-              </button>
-            </div>
-          )}
-          
-          {(isUploading || uploadComplete) && (
-            <>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-sm font-medium font-headline text-zinc-400 truncate w-3/4">cinematic_sequence_v2.mp4</span>
-                <span className="text-sm font-bold text-[#ff8e80] font-headline">{uploadProgress}%</span>
-              </div>
-              <div className="w-full bg-[#19191c] h-1.5 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-300 ${uploadComplete ? 'bg-green-500' : 'bg-gradient-to-r from-[#ff8e80] to-[#ff7668]'}`} 
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-              </div>
-              <p className="text-[10px] text-zinc-500 mt-2 flex items-center gap-1">
-                {uploadComplete ? (
-                  <><span className="material-symbols-outlined text-[12px] text-green-500">check_circle</span> Upload complete</>
-                ) : (
-                  <><span className="material-symbols-outlined text-[12px]">timer</span> Processing...</>
-                )}
-              </p>
-            </>
-          )}
-        </div>
+
+        <UploadProgressCard
+          isUploading={isUploading}
+          uploadComplete={uploadComplete}
+          uploadProgress={uploadProgress}
+          onStartUpload={handleStartUpload}
+        />
       </header>
 
-      {/* Bento Layout for Content Inputs */}
-      <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 transition-opacity duration-500 ${!uploadComplete && !isUploading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-        
-        {/* Primary Details Column */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Video Title */}
+      <div
+        className={`grid grid-cols-1 gap-8 transition-opacity duration-500 lg:grid-cols-12 ${
+          !uploadComplete && !isUploading
+            ? "pointer-events-none opacity-40"
+            : "opacity-100"
+        }`}
+      >
+        <div className="space-y-8 lg:col-span-8">
           <div className="group">
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 group-focus-within:text-[#ff8e80] transition-colors">Video Title</label>
-            <input 
-              type="text" 
+            <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-zinc-500 transition-colors group-focus-within:text-[#ff8e80]">
+              Video Title
+            </label>
+            <input
+              type="text"
               maxLength={200}
               value={formData.title}
               onChange={e => updateFormData({ title: e.target.value })}
-              className="w-full bg-transparent border-0 border-b-2 border-zinc-700 focus:border-[#ff8e80] focus:ring-0 text-xl font-semibold font-headline py-4 px-0 transition-all placeholder-zinc-700 text-[#f9f5f8] outline-none" 
+              className="w-full border-0 border-b-2 border-zinc-700 bg-transparent px-0 py-4 font-headline text-xl font-semibold text-[#f9f5f8] outline-none transition-all placeholder-zinc-700 focus:border-[#ff8e80] focus:ring-0"
             />
-            <div className="flex justify-end mt-1">
-              <span className="text-[10px] text-zinc-600">{formData.title.length} / 200</span>
+            <div className="mt-1 flex justify-end">
+              <span className="text-[10px] text-zinc-600">
+                {formData.title.length} / 200
+              </span>
             </div>
           </div>
 
-          {/* Description (Rich Text Simulation) */}
-          <div className="bg-[#131315] rounded-xl p-6 border border-[#262528]">
-            <div className="flex items-center justify-between mb-4 border-b border-[#262528] pb-4">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Description</label>
+          <div className="rounded-xl border border-[#262528] bg-[#131315] p-6">
+            <div className="mb-4 flex items-center justify-between border-b border-[#262528] pb-4">
+              <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                Description
+              </label>
             </div>
-            <textarea 
-              className="w-full bg-transparent border-0 focus:ring-0 text-zinc-300 font-body leading-relaxed min-h-[200px] resize-none outline-none" 
+            <textarea
+              className="min-h-[200px] w-full resize-none border-0 bg-transparent font-body leading-relaxed text-zinc-300 outline-none focus:ring-0"
               placeholder="Tell viewers about your video..."
               value={formData.description}
               onChange={e => updateFormData({ description: e.target.value })}
             />
           </div>
 
-          {/* Access Level Selection */}
-          <section className="space-y-6">
-            <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#fdc003]">lock_open</span> Video Access Level
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label className="relative cursor-pointer group">
-                <input 
-                  type="radio" 
-                  name="access_level" 
-                  className="peer sr-only" 
-                  checked={formData.visibility === "public"} 
-                  onChange={() => updateFormData({ visibility: "public" })} 
-                />
-                <div className="h-full p-6 rounded-xl bg-[#131315] border border-[#262528] peer-checked:border-[#ff8e80] peer-checked:bg-[#19191c] transition-all hover:bg-[#19191c]/50">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="material-symbols-outlined text-zinc-500 peer-checked:text-[#ff8e80]">public</span>
-                    <div className="w-4 h-4 rounded-full border-2 border-zinc-600 peer-checked:border-[#ff8e80] peer-checked:bg-[#ff8e80] flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-black"></div>
-                    </div>
-                  </div>
-                  <h4 className="font-headline font-bold text-white mb-1">Public</h4>
-                  <p className="text-xs text-zinc-400">Available to everyone on your public feed.</p>
-                </div>
-              </label>
-              
-              <label className="relative cursor-pointer group">
-                <input 
-                  type="radio" 
-                  name="access_level" 
-                  className="peer sr-only" 
-                  checked={formData.visibility === "private"} 
-                  onChange={() => updateFormData({ visibility: "private" })} 
-                />
-                <div className="h-full p-6 rounded-xl bg-[#131315] border border-[#262528] peer-checked:border-zinc-400 peer-checked:bg-[#19191c] transition-all hover:bg-[#19191c]/50">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="material-symbols-outlined text-zinc-400" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                    <div className="w-4 h-4 rounded-full border-2 border-zinc-600 peer-checked:border-zinc-400 peer-checked:bg-zinc-400 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-black hidden peer-checked:block"></div>
-                    </div>
-                  </div>
-                  <h4 className="font-headline font-bold text-white mb-1">Private</h4>
-                  <p className="text-xs text-zinc-400">Only visible to you or those with link.</p>
-                </div>
-              </label>
-            </div>
-          </section>
+          <AccessLevelSection
+            visibility={formData.visibility}
+            updateFormData={updateFormData}
+          />
 
-          <section className="space-y-4 rounded-xl border border-[#262528] bg-[#131315] p-6">
-            <div>
-              <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Processing Resolutions</h3>
-              <p className="mt-2 text-sm text-zinc-400">Các độ phân giải này khớp với body `resolutions` của API xử lý video.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              {resolutionOptions.map((resolution) => {
-                const isSelected = formData.resolutions.includes(resolution);
-
-                return (
-                  <label key={resolution} className="cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="peer sr-only"
-                      checked={isSelected}
-                      onChange={() =>
-                        updateFormData({
-                          resolutions: isSelected
-                            ? formData.resolutions.filter(item => item !== resolution)
-                            : [...formData.resolutions, resolution],
-                        })
-                      }
-                    />
-                    <div className="rounded-lg border border-[#262528] bg-[#19191c] px-4 py-3 text-sm font-bold text-zinc-300 transition-all peer-checked:border-[#ff8e80] peer-checked:bg-[#ff8e80]/10 peer-checked:text-[#ffb2aa]">
-                      {resolution}
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </section>
+          <ResolutionSection
+            resolutions={formData.resolutions}
+            updateFormData={updateFormData}
+          />
         </div>
 
-        {/* Secondary Metadata Column */}
-        <div className="lg:col-span-4 space-y-8">
-          
-          {/* Tạm ẩn: Chưa có API hỗ trợ thumbnail rời lúc init-upload */}
-          {/* 
-          <div className="bg-[#19191c] rounded-xl overflow-hidden shadow-2xl border border-[#262528]">
-            <div className="aspect-video relative group bg-zinc-800 flex items-center justify-center">
-              {uploadComplete ? (
-                <>
-                  <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=600" alt="Thumbnail preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-white/30 hover:bg-white/30 transition-colors">Change Thumbnail</button>
-                  </div>
-                </>
-              ) : (
-                <span className="material-symbols-outlined text-zinc-600 text-4xl">video_file</span>
-              )}
-            </div>
-          </div> 
-          */}
-
-          {/* Category & Tags */}
-          <div className="space-y-6 bg-[#131315] p-6 rounded-xl border border-[#262528]">
-            <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Categories</label>
-              <p className="text-xs text-zinc-400 mb-3">Select at least one category</p>
-              <div className="grid grid-cols-2 gap-2">
-                {categories.length > 0 ? categories.map(cat => {
-                  const isSelected = formData.categories.includes(cat.slug);
-                  return (
-                    <label key={cat.id} className="cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        className="peer sr-only" 
-                        checked={isSelected}
-                        onChange={() => {
-                          const newCats = isSelected 
-                            ? formData.categories.filter(c => c !== cat.slug)
-                            : [...formData.categories, cat.slug];
-                          updateFormData({ categories: newCats });
-                        }}
-                      />
-                      <div className={`p-2 rounded-lg text-xs font-bold transition-all border ${isSelected ? 'bg-[#ff8e80]/10 border-[#ff8e80] text-[#ff8e80]' : 'bg-[#19191c] border-[#262528] text-zinc-400 hover:bg-[#262528]'}`}>
-                        {cat.name}
-                      </div>
-                    </label>
-                  );
-                }) : (
-                  <div className="col-span-2 text-xs text-zinc-500 py-2">Loading categories...</div>
-                )}
-              </div>
-            </div>
-
-            {/* Tạm ẩn: API hiện tại không có tags */}
-            {/*
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Tags</label>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className="bg-[#1f1f22] text-zinc-300 px-3 py-1 rounded-full text-[10px] flex items-center gap-1">Iceland <span className="material-symbols-outlined text-[12px] cursor-pointer">close</span></span>
-              </div>
-              <input type="text" placeholder="Add more tags..." className="w-full bg-transparent border-b border-zinc-700 focus:border-[#ff8e80] focus:ring-0 text-sm py-2 text-white outline-none" />
-            </div>
-            */}
-          </div>
+        <div className="space-y-8 lg:col-span-4">
+          <CategorySection
+            categories={categories}
+            selectedCategories={formData.categories}
+            onChange={selectedCategories =>
+              updateFormData({ categories: selectedCategories })
+            }
+          />
         </div>
       </div>
 
-      {/* Footer Action Bar */}
-      <div className="fixed bottom-0 left-0 md:left-64 right-0 h-20 bg-[#131315]/80 backdrop-blur-2xl border-t border-[#262528] z-50 px-8 flex items-center justify-between">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-20 items-center justify-between border-t border-[#262528] bg-[#131315]/80 px-8 backdrop-blur-2xl md:left-64">
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex flex-col">
-            <span className="text-[10px] text-zinc-500 uppercase tracking-widest">Status</span>
-            <span className={`text-xs font-bold flex items-center gap-1 ${uploadComplete ? 'text-green-500' : isUploading ? 'text-[#ff8e80]' : 'text-zinc-500'}`}>
+          <div className="hidden flex-col sm:flex">
+            <span className="text-[10px] uppercase tracking-widest text-zinc-500">
+              Status
+            </span>
+            <span
+              className={`flex items-center gap-1 text-xs font-bold ${
+                uploadComplete
+                  ? "text-green-500"
+                  : isUploading
+                    ? "text-[#ff8e80]"
+                    : "text-zinc-500"
+              }`}
+            >
               {!uploadComplete && !isUploading && "Draft"}
-              {isUploading && <span className="w-2 h-2 rounded-full bg-[#ff8e80] animate-pulse"></span>}
+              {isUploading && (
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff8e80]" />
+              )}
               {isUploading && "Uploading..."}
-              {uploadComplete && <span className="material-symbols-outlined text-[14px]">check</span>}
+              {uploadComplete && (
+                <span className="material-symbols-outlined text-[14px]">check</span>
+              )}
               {uploadComplete && "Saved"}
             </span>
           </div>
         </div>
         <div className="flex gap-4">
-          <button 
+          <button
             onClick={onNext}
             disabled={!canContinue}
-            className={`px-8 py-2.5 font-bold text-sm rounded-sm transition-all active:scale-95 ${canContinue ? 'bg-gradient-to-r from-[#ff8e80] to-[#ff7668] text-[#650003] hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]' : 'bg-zinc-800 text-zinc-500 pointer-events-none'}`}
+            className={`rounded-sm px-8 py-2.5 text-sm font-bold transition-all active:scale-95 ${
+              canContinue
+                ? "bg-gradient-to-r from-[#ff8e80] to-[#ff7668] text-[#650003] hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]"
+                : "pointer-events-none bg-zinc-800 text-zinc-500"
+            }`}
           >
             Next: Pricing & Monetization
           </button>
