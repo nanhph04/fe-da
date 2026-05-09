@@ -1,6 +1,16 @@
-# CLAUDE.md
+# CLAUDE-RULES.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+File này cung cấp hướng dẫn tổng hợp cho AI khi làm việc với dự án này, kết hợp kiến trúc hiện có và quy tắc phát triển.
+
+## Tổng quan dự án
+
+Đây là một nền tảng video chia sẻ với tính năng:
+- Upload video (Studio Upload)
+- Xem video (Watch)
+- Ví điện tử & thanh toán (Wallet)
+- Membership (Gói thành viên)
+- Admin Dashboard
+- Discovery & Library
 
 ## Commands
 
@@ -13,101 +23,125 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Testing
 - No test framework is currently configured in this project.
 
-### Environment
-- API Gateway URL: `NEXT_PUBLIC_GATEWAY_URL` (defaults to `http://localhost:4000`)
-- Revalidation secret: `NEXT_REVALIDATE_SECRET` (required for cache revalidation)
+## Kiến trúc thư mục (Bắt buộc tuân thủ)
 
-## Architecture Overview
+### Feature-Sliced Design (FSD)
+- **Tất cả code phải tổ chức theo tính năng** trong `src/features/`
+- Mỗi feature có cấu trúc:
+  ```
+  src/features/{feature-name}/
+  ├── components/     # Components riêng của feature
+  ├── services/       # API calls, business logic
+  ├── context/       # React contexts (nếu cần)
+  ├── types/         # TypeScript interfaces
+  └── index.ts       # Export chính
+  ```
+- **Cấm** nhét components vào `src/components/` trừ khi là Shared UI/Shadcn
 
-### Technology Stack
+### Các features hiện có:
+- `auth` - Authentication
+- `studio-upload` - Upload video (3-step wizard)
+- `watch` - Video player + comments + related
+- `wallet` - Payment methods, top-up, transactions
+- `membership` - Membership tiers, checkout
+- `admin` - Dashboard quản lý
+- `library` - Personal video collection
+- `discovery` - Content discovery
+
+## Công nghệ & Quy tắc (Bắt buộc)
+
+### Core Stack
 - **Framework**: Next.js 16.2.3 with App Router
 - **Language**: TypeScript
 - **Styling**: TailwindCSS v4 + Shadcn UI
 - **Form Handling**: React Hook Form + Zod validation
-- **Data Fetching**: Native fetch API with custom wrapper
+- **Data Fetching**: Native `fetch` API + custom wrapper
 
-### Core Principles
+### QUY TẮC CỨC ĐỘNG
 
-#### Feature-Sliced Design (FSD)
-The codebase follows strict feature-based architecture:
-- All features are organized in `src/features/` directory
-- Each feature has its own directory with subfolders for components, services, contexts, etc.
-- No global "bucket" components in `src/components/` except for shared UI components
+#### 1. Render Strategy
+- **SSR là mặc định**: Server components render static data
+- CSR chỉ khi cần: Interactive elements (forms, buttons)
+- **Dùng `<Suspense>`** thay vì `useEffect` cho loading
+- **Cấm** `"use client"` ở root level (page.tsx)
 
-#### Rendering Strategy
-- **SSR is the default**: Server components render static data and layouts
-- **CSR when needed**: Client components for interactive elements (forms, buttons)
-- Use `<Suspense>` for loading states instead of `useEffect`
-- Avoid `"use client"` at the root level (page.tsx)
+#### 2. API Integration
+- **TUYỆT ĐỐI KHÔNG DÙNG AXIOS**
+- Luôn qua API Gateway: `NEXT_PUBLIC_GATEWAY_URL`
+- JWT authentication với auto-refresh
+- `refresh_token` là httpOnly cookie
 
-#### Authentication & API
-- API calls go through the API Gateway (`NEXT_PUBLIC_GATEWAY_URL`)
-- Authentication uses JWT tokens with automatic refresh
-- `apiClient.ts` handles token management and refresh logic
-- `refresh_token` is stored as httpOnly cookie (handled automatically)
-
-#### Styling System
-- **Dark mode**: "Cinematic Canvas" aesthetic
-- **Color palette**: Crimson, Gold, Matte Black, Ivory (NO violet/purple)
+#### 3. Design System (Phong cách "Cinematic Canvas")
+- **Dark mode** cao cấp, tránh "Generic AI"
+- **Màu cấm**: Tím/Violet (#8d00e6, #cf96ff)
+- **Màu cho phép**: Crimson, Gold, Matte Black, Ivory
 - **Typography**: Manrope (headings) + Inter (body)
-- **Spacing**: 8px grid with breathing room
-- **Edges**: Minimal rounding (`rounded-sm`/`rounded-md`), avoid excessive glassmorphism
+- **Edges**: Bo nhẹ (`rounded-sm`/`rounded-md`), hạn chế glassmorphism
+- **Spacing**: 8px grid với breathing room
 
-#### UI Components
-- Built with Shadcn UI components
-- Custom components follow the same design system
-- Use CSS transitions for animations (no JS for simple effects)
+#### 4. Animations
+- **Chỉ dùng CSS transitions** (`transition-all duration-300 ease-in-out`)
+- **Cấm** JS cho animations đơn giản
+- **Chỉ animate**: `transform`, `opacity`
+- **Cấm animate**: `width`, `height`, `margin`, `padding`
 
-## Key Files & Patterns
+#### 5. Form Handling
+- React Hook Form + Zod validation
+- Ưu tiên `<Form>` từ `next/form` cho GET requests
 
-### API Layer
-- `src/shared/utils/apiClient.ts` - Central API client with auth handling
-- Feature-specific services in `src/features/{feature}/services/`
+## Quy tắc phát triển
 
-### Authentication
-- `src/features/auth/context/AuthContext.tsx` - Global auth state
-- `src/features/auth/services/authService.ts` - Auth API calls
+### 1. Luôn check existing code trước khi viết mới
+- Theo dõi patterns hiện có trong features
+- Không viết code trùng lặp
 
-### Layouts
-- `src/app/layout.tsx` - Root layout with providers
-- Feature layouts in `src/features/{feature}-layout/`
+### 2. Tính năng mới phải:
+- Đặt trong `src/features/{new-feature}/`
+- Tuân thủ FSD structure
+- Sử dụng components từ Shadcn UI khi có thể
 
-### Feature Structure
-Each feature typically contains:
-- `components/` - Feature-specific UI components
-- `services/` - API calls and business logic
-- `context/` - React contexts if needed
-- `types/` - TypeScript interfaces for the feature
+### 3. Khi làm việc với features hiện có:
+- Studio Upload: 3-step wizard (details → monetization → review)
+- Watch: CinematicPlayer, CommentsSection, CreatorSection
+- Wallet: CheckoutFeature, PaymentMethods, TopUpPackages
+- Membership: MembershipTiers, JoinMembershipFeature
+- Admin: Dashboard with tabs (users, content, finance, payouts)
 
-### Error Handling
-- Consistent error handling through `apiClient.ts`
-- Graceful fallbacks for failed API calls
-- User-friendly error messages
+### 4. Performance
+- Sử dụng Next.js caching
+- Lazy loading components khi cần
+- Ảnh phải được optimize
 
 ## Environment Variables
 
-Required environment variables:
-- `NEXT_PUBLIC_GATEWAY_URL` - Backend API gateway URL
-- `NEXT_REVALIDATE_SECRET` - Secret for cache revalidation
+```bash
+NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000  # API Gateway
+NEXT_REVALIDATE_SECRET=your-secret-here         # Cache revalidation
+```
 
-## Special Considerations
+## Các file quan trọng
 
-### API Gateway Integration
-- All API requests must go through the gateway
-- Backend services are not called directly from the frontend
-- Authentication tokens are managed by the API client
+- `src/shared/utils/apiClient.ts` - API client với auth handling
+- `src/app/layout.tsx` - Root layout
+- `src/app/globals.css` - Global styles
+- `tailwind.config.ts` - Tailwind configuration
+- `next.config.ts` - Next.js configuration
 
-### Next.js App Router Patterns
-- Use Server Components for data fetching and layouts
-- Client Components should be as small as possible
-- Route groups for organizing features
+## Checklist trước khi commit
 
-### Form Patterns
-- Always use React Hook Form with Zod validation
-- Submit forms through API client with proper auth
-- Handle loading states during form submission
+- [ ] Đã lint code (`npm run lint`)
+- [ ] Code tuân thủ FSD
+- [ ] Không dùng axios
+- [ ] SSR cho static data
+- [ ] Design system đúng (Crimson/Gold/Black/Ivory)
+- [ ] No violet/purple colors
+- [ ] Components được optimize
+- [ ] Đã test functionality
 
-### Performance
-- Use Next.js caching with revalidate tags
-- Implement proper loading states with Suspense
-- Optimize images and static assets
+## Lưu ý quan trọng
+
+- Đây là dự án thực tế, không phải demo
+- Code phải production-ready
+- Tương thích với backend đã có
+- UX/UI phải cao cấp, không "generic AI"
+- Always assume users are using the app in production
