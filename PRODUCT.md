@@ -1,3 +1,7 @@
+File này không phải coding style guide.
+File này chỉ mô tả ngữ cảnh sản phẩm, nghiệp vụ, vai trò người dùng và các hành vi UI quan trọng.
+Về kiến trúc thư mục, naming convention, component structure, API client và code style, hãy tuân theo file AGENTS.md.
+
 # PRODUCT CONTEXT & BUSINESS SPECIFICATION
 
 ## 1. Ứng dụng này là gì? (Project Overview)
@@ -63,7 +67,7 @@ Video trong hệ thống phải tuân thủ nghiêm ngặt các trạng thái sa
 ## 5. Quy tắc & Hướng dẫn Trải nghiệm (UI/UX & Technical Rules)
 
 * **Rule 1 - Tối ưu hóa API Calls (Idempotency):** 
-  Với mọi thao tác liên quan đến Tiền bạc (Nạp coin, Mua membership), FE **BẮT BUỘC** phải tự sinh ra một mã UUID (`Idempotency-Key`) và gắn vào Header của request. Nếu request bị timeout, FE có thể tự tin gọi lại (Retry) mà không sợ user bị trừ tiền 2 lần.
+  Với mọi thao tác liên quan đến Tiền bạc (Nạp coin, Mua membership), Với một hành động giao dịch duy nhất, FE phải sinh một (`Idempotency-Key`).   Không sinh key mới cho mỗi lần retry của cùng một giao dịch. và gắn vào Header của request. Nếu request bị timeout, FE có thể tự tin gọi lại (Retry) mà không sợ user bị trừ tiền 2 lần. **KHÔNG** được tự sinh Idempotency-Key cho các API đọc dữ liệu (GET).
 
 * **Rule 2 - Bảo mật Upload (Zero-Payload Backend):**
   Tuyệt đối không stream/upload file Media trực tiếp xuyên qua Backend Node.js để tránh sập RAM (OOM). Frontend bắt buộc phải xin Presigned URL và thực hiện thao tác PUT thẳng file media lên MinIO/S3. Backend chỉ làm nhiệm vụ lưu Metadata và quản lý Message Queue.
@@ -81,4 +85,4 @@ Video trong hệ thống phải tuân thủ nghiêm ngặt các trạng thái sa
   Khi load danh sách video hay chi tiết kênh, chú ý đến các cờ như `isMembershipClosedByAdmin` hay `canRenew`. Nếu cờ này là `false`, không được hiển thị UI cho phép thao tác (Tránh việc user bấm vào rồi mới báo lỗi 403 từ server).
 
 * **Rule 7 - Chống Spam View (View Anti-cheat):**
-  Lượt xem (View) phải được quản lý chặt chẽ thông qua cơ chế "Đóng băng" (Cooldown) trên Memory Cache (Redis). Mỗi tài khoản (hoặc IP) chỉ được cộng 1 view cho 1 video trong một khoảng thời gian quy định (VD: 1 giờ). Hơn nữa, Frontend chỉ được phép gọi API đếm view khi video đã được phát tối thiểu từ 10 - 30 giây để đảm bảo người dùng xem thật.
+  Lượt xem (View) phải được quản lý chặt chẽ thông qua cơ chế "Đóng băng" (Cooldown) trên Memory Cache (Redis). Mỗi tài khoản (hoặc IP) chỉ được cộng 1 view cho 1 video trong một khoảng thời gian quy định (VD: 1 giờ). Hơn nữa, Frontend chỉ được phép gọi API đếm view khi video đã được phát tối thiểu từ 10 - 30 giây để đảm bảo người dùng xem thật.

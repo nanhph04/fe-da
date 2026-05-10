@@ -1,0 +1,95 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - navigation [ref=e7]:
+      - generic [ref=e8]: Velvet Gallery
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: payments
+          - generic [ref=e12]: 1,240 Coins
+        - generic [ref=e13] [cursor=pointer]: search
+        - generic [ref=e14] [cursor=pointer]: notifications
+    - complementary [ref=e17]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: Alex Mercer
+        - generic [ref=e21]: Gold Member
+      - navigation [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: home
+          - generic [ref=e25]: Home
+        - generic [ref=e26]:
+          - generic [ref=e27]: movie
+          - generic [ref=e28]: Movies
+        - generic [ref=e29]:
+          - generic [ref=e30]: tv
+          - generic [ref=e31]: Series
+        - generic [ref=e32]:
+          - generic [ref=e33]: bookmark
+          - generic [ref=e34]: My List
+        - generic [ref=e35]:
+          - generic [ref=e36]: settings
+          - generic [ref=e37]: Settings
+      - button "Upgrade to 4K" [ref=e39]
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]: help
+          - generic [ref=e43]: Help
+        - generic [ref=e44]:
+          - generic [ref=e45]: logout
+          - generic [ref=e46]: Logout
+    - main [ref=e47]:
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - heading "Change Password" [level=1] [ref=e50]
+          - paragraph [ref=e51]: Secure your account with a strong, unique password.
+        - generic [ref=e52]:
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Current Password
+              - generic [ref=e57]:
+                - textbox "••••••••••••" [ref=e58]
+                - generic: visibility
+            - generic [ref=e60]:
+              - generic [ref=e61]: New Password
+              - generic [ref=e62]:
+                - textbox "Create new password" [ref=e63]
+                - generic: visibility_off
+              - paragraph [ref=e69]: "Strength: Medium"
+            - generic [ref=e70]:
+              - generic [ref=e71]: Confirm New Password
+              - generic [ref=e72]:
+                - textbox "Repeat new password" [ref=e73]
+                - generic: lock_reset
+            - generic [ref=e74]:
+              - button "Update Password" [ref=e75]
+              - button "Cancel" [ref=e76]
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - heading "verified_user Security Requirements" [level=3] [ref=e80]:
+                - generic [ref=e81]: verified_user
+                - text: Security Requirements
+              - list [ref=e82]:
+                - listitem [ref=e83]:
+                  - generic [ref=e84]: check_circle
+                  - generic [ref=e85]:
+                    - paragraph [ref=e86]: Minimum Length
+                    - paragraph [ref=e87]: At least 8 characters long.
+                - listitem [ref=e88]:
+                  - generic [ref=e89]: check_circle
+                  - generic [ref=e90]:
+                    - paragraph [ref=e91]: Character Variety
+                    - paragraph [ref=e92]: At least one number (0-9).
+                - listitem [ref=e93]:
+                  - generic [ref=e94]: radio_button_unchecked
+                  - generic [ref=e95]:
+                    - paragraph [ref=e96]: Special Symbol
+                    - paragraph [ref=e97]: At least one special symbol (!@#$%).
+            - generic [ref=e98]:
+              - paragraph [ref=e99]: Security Tip
+              - paragraph [ref=e100]: Use a password you don't reuse elsewhere and store it in a trusted password manager.
+            - link "keyboard_backspace Back to Library" [ref=e101] [cursor=pointer]:
+              - /url: /library
+              - generic [ref=e102]: keyboard_backspace
+              - text: Back to Library
+  - button "Open Next.js Dev Tools" [ref=e108] [cursor=pointer]:
+    - img [ref=e109]
+  - alert [ref=e112]

@@ -27,24 +27,24 @@ export function ProfileFeature() {
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
-    <main className="md:pl-64 pt-24 pb-12 px-8 min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <main className="min-h-screen bg-background px-8 pt-24 pb-12 md:pl-64">
+      <div className="mx-auto max-w-6xl space-y-8">
         <HeroProfile />
         
         {/* Profile Tabs Navigation */}
-        <div className="flex border-b border-zinc-800 gap-8">
+        <div className="flex gap-8 border-b border-border/20">
            <button 
              onClick={() => setActiveTab('overview')}
-             className={`pb-4 font-headline uppercase tracking-widest text-sm font-bold border-b-2 transition-colors ${activeTab === 'overview' ? 'border-[#ff8e80] text-[#ff8e80]' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
-           >
-             Overview
-           </button>
-           <button 
-             onClick={() => setActiveTab('videos')}
-             className={`pb-4 font-headline uppercase tracking-widest text-sm font-bold border-b-2 transition-colors ${activeTab === 'videos' ? 'border-[#ff8e80] text-[#ff8e80]' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
-           >
-             Videos
-           </button>
+             className={`border-b-2 pb-4 font-headline text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'overview' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+            >
+              Overview
+            </button>
+            <button 
+              onClick={() => setActiveTab('videos')}
+              className={`border-b-2 pb-4 font-headline text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'videos' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+            >
+              Videos
+            </button>
         </div>
 
         {activeTab === 'overview' ? (

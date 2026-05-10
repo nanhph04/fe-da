@@ -44,7 +44,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   }
 
   return (
-    <div className="xl:pl-64 pt-24 pb-12 px-4 md:px-8 max-w-[1700px] mx-auto flex flex-col xl:flex-row gap-10 min-h-screen">
+    <div className="mx-auto flex min-h-screen max-w-[1700px] flex-col gap-10 bg-background px-4 pt-24 pb-12 md:px-8 xl:flex-row xl:pl-64">
       {/* Main Content (Left) */}
       <div className="flex-grow xl:w-2/3">
         <PlayerContainerClient videoId={videoId} poster={poster} title={title} />

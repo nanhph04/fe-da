@@ -22,7 +22,15 @@ export function CheckoutFeature({ initialPackage }: CheckoutFeatureProps) {
       if (deposit.checkoutUrl) {
         window.location.href = deposit.checkoutUrl;
       } else {
-        router.push("/wallet/success"); // Fallback if no URL
+        const params = new URLSearchParams({
+          amount: String(pkg.totalCoinAmount),
+          bonus: String(pkg.bonusCoinAmount),
+          paid: String(pkg.moneyAmount),
+          packageName: pkg.name,
+          referenceId: deposit.paymentCode || deposit.id,
+        });
+
+        router.push(`/wallet/success?${params.toString()}`);
       }
     } catch (error) {
       console.error("Payment failed:", error);

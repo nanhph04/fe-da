@@ -1,0 +1,65 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - img "Cinematic Background" [ref=e4]
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - link "play_arrow Velvet Gallery" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e11]: play_arrow
+          - generic [ref=e13]: Velvet Gallery
+        - navigation [ref=e15]:
+          - link "Discover" [ref=e16] [cursor=pointer]:
+            - /url: /landing
+          - link "Library" [ref=e17] [cursor=pointer]:
+            - /url: /library
+          - link "Creator Studio" [ref=e18] [cursor=pointer]:
+            - /url: /onboarding
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - heading "Complete Your Profile" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Curate your cinematic identity for the gallery.
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e28] [cursor=pointer]: person
+            - generic [ref=e29]: Change Portrait
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - generic [ref=e32]: Display Name
+              - textbox "e.g. CinemaLover99" [ref=e33]
+            - generic [ref=e34]:
+              - generic [ref=e35]: Full Name
+              - textbox "e.g. Julian Vane" [ref=e36]
+            - generic [ref=e37]:
+              - generic [ref=e38]: Bio
+              - textbox "Tell us about your cinematic taste..." [ref=e39]
+            - generic [ref=e40]:
+              - generic [ref=e41]: Phone Number
+              - textbox "+1 (555) 000-0000" [ref=e42]
+            - generic [ref=e43]:
+              - generic [ref=e44]: Date of Birth
+              - textbox [ref=e45]
+          - generic [ref=e46]:
+            - generic [ref=e49]: Content Preferences
+            - generic [ref=e51]:
+              - button "Action" [ref=e52]
+              - button "Drama" [ref=e53]
+              - button "Sci-Fi" [ref=e54]
+              - button "Noir" [ref=e55]
+              - button "Documentary" [ref=e56]
+              - button "Horror" [ref=e57]
+              - button "Indie" [ref=e58]
+              - button "Comedy" [ref=e59]
+          - generic [ref=e60]:
+            - button "SAVE & CONTINUE" [ref=e61]
+            - button "Skip for now" [ref=e62]
+    - contentinfo [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]: lock
+        - generic [ref=e66]: Secure Session
+      - generic [ref=e67]:
+        - generic [ref=e68]: verified_user
+        - generic [ref=e69]: Vault Protected
+  - button "Open Next.js Dev Tools" [ref=e75] [cursor=pointer]:
+    - img [ref=e76]
+  - alert [ref=e79]

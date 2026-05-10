@@ -16,18 +16,18 @@ export default function LibraryPage() {
 
   if (!user) {
     return (
-      <main className="md:pl-64 pt-20 min-h-screen flex items-center justify-center">
-        <div className="max-w-md w-full text-center space-y-6 p-8 bg-[#111] rounded-xl border border-[#222]">
+      <main className="flex min-h-screen items-center justify-center pt-20 md:pl-64">
+        <div className="w-full max-w-md space-y-6 rounded-lg border border-border/20 bg-card p-8 text-center">
            <span className="material-symbols-outlined text-zinc-600 text-6xl">video_library</span>
            <div className="space-y-2">
-             <h2 className="text-2xl font-bold font-headline text-white">Your Personal Library</h2>
-             <p className="text-zinc-400 text-sm">Sign in to access your purchased movies, subscriptions, and viewing history.</p>
-           </div>
-           <Link href="/login" className="block w-full">
-             <Button className="w-full bg-[#ff8e80] text-black font-bold uppercase tracking-widest hover:bg-[#ff7668]">
-               Sign In Now
-             </Button>
-           </Link>
+              <h2 className="font-headline text-2xl font-bold text-foreground">Your Personal Library</h2>
+              <p className="text-sm text-muted-foreground">Sign in to access your purchased movies, subscriptions, and viewing history.</p>
+            </div>
+            <Link href="/login" className="block w-full">
+              <Button className="w-full bg-primary font-bold uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
+                Sign In Now
+              </Button>
+            </Link>
         </div>
       </main>
     );
@@ -36,22 +36,22 @@ export default function LibraryPage() {
   // To do a Tab Navigation, we'll keep it simple for now, rendering them directly
   // or we could add local state to switch. The design has them all on dashboard.
   return (
-    <main className="md:pl-64 pt-20 min-h-screen">
-      <div className="max-w-7xl mx-auto px-8 py-12 space-y-16 animate-in fade-in duration-500">
+    <main className="min-h-screen bg-background pt-20 md:pl-64">
+      <div className="mx-auto max-w-7xl space-y-16 px-8 py-12 animate-in fade-in duration-500">
         <ProfileHeader />
         
         {/* Fake Library Tabs Navigation - Mock */}
-        <div className="flex items-center gap-6 border-b border-[#222] pb-4">
-          <button className="text-[#ff8e80] border-b-2 border-[#ff8e80] font-headline font-bold text-sm uppercase tracking-widest pb-4 -mb-[18px]">
+        <div className="flex items-center gap-6 border-b border-border/20 pb-4">
+          <button className="-mb-[18px] border-b-2 border-primary pb-4 font-headline text-sm font-bold uppercase tracking-widest text-primary">
              Dashboard
-          </button>
-          <button className="text-zinc-500 hover:text-white font-headline font-bold text-sm uppercase tracking-widest pb-4 -mb-[18px] transition-colors">
+           </button>
+           <button className="-mb-[18px] pb-4 font-headline text-sm font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-white">
              Purchased
-          </button>
-          <button className="text-zinc-500 hover:text-white font-headline font-bold text-sm uppercase tracking-widest pb-4 -mb-[18px] transition-colors">
+           </button>
+           <button className="-mb-[18px] pb-4 font-headline text-sm font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-white">
              History
-          </button>
-        </div>
+           </button>
+         </div>
 
         <RecentlyWatched />
         <PurchasedLibrary />

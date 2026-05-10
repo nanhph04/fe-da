@@ -3,50 +3,116 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export function TopUpSuccessFeature({ amount = 5000, referenceId = "TXN-9821-VLT" }: { amount?: number, referenceId?: string }) {
+type TopUpSuccessFeatureProps = {
+  amount?: number;
+  bonusAmount?: number;
+  paidAmount?: number;
+  packageName?: string;
+  referenceId?: string;
+};
+
+function formatCoinPackage(amount?: number, bonusAmount?: number) {
+  if (typeof amount !== "number") {
+    return "Aura Coin package";
+  }
+
+  const formattedAmount = `${amount.toLocaleString()} AC`;
+
+  if (typeof bonusAmount === "number" && bonusAmount > 0) {
+    return `${formattedAmount} + ${bonusAmount.toLocaleString()} Bonus`;
+  }
+
+  return formattedAmount;
+}
+
+export function TopUpSuccessFeature({
+  amount,
+  bonusAmount,
+  paidAmount,
+  packageName,
+  referenceId,
+}: TopUpSuccessFeatureProps) {
+  const packageLabel = packageName?.trim() || formatCoinPackage(amount, bonusAmount);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0e0e0e] p-4 font-body text-[#f9f5f8] relative overflow-hidden">
-      
-      {/* Background glow effect */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#f59e0b]/10 blur-[100px] rounded-full pointer-events-none"></div>
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background font-body text-foreground antialiased">
+      <header className="fixed top-0 z-50 flex w-full items-center justify-between bg-zinc-950/40 px-6 py-4 backdrop-blur-xl">
+        <div className="font-headline text-2xl font-extrabold tracking-tight text-primary">Velvet Gallery</div>
+        <div className="flex items-center gap-4">
+          <span className="material-symbols-outlined text-2xl text-muted-foreground">account_circle</span>
+        </div>
+      </header>
 
-      <div className="bg-[#131313] border border-[#262626] rounded-2xl p-10 max-w-lg w-full text-center relative z-10 shadow-[0_20px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom-8 fade-in duration-700">
-        
-        {/* Success Icon */}
-        <div className="mx-auto w-24 h-24 bg-[#1a1a1a] rounded-full flex items-center justify-center border border-[#f59e0b]/30 mb-8 relative">
-          <div className="absolute inset-0 rounded-full border border-[#f59e0b] animate-ping opacity-20"></div>
-          <span className="material-symbols-outlined text-5xl text-[#f59e0b]">check_circle</span>
+      <main className="relative flex flex-1 items-center justify-center px-4 pt-24 pb-12">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-[10%] -left-[10%] h-[50%] w-[50%] rounded-full bg-primary/5 blur-[120px]" />
+          <div className="absolute -right-[10%] -bottom-[10%] h-[40%] w-[40%] rounded-full bg-secondary/5 blur-[100px]" />
         </div>
 
-        <h1 className="text-4xl font-black font-headline tracking-tighter mb-2">Payment Successful</h1>
-        <p className="text-[#adaaaa] text-lg mb-8">Your Aura Coins have been credited to your wallet.</p>
-
-        {/* Transaction Details */}
-        <div className="bg-[#1a1a1a] rounded-xl p-6 mb-8 border border-[#262626] text-left">
-          <div className="flex justify-between items-center mb-4 pb-4 border-b border-[#262626]">
-            <span className="text-[#adaaaa]">Amount Credited</span>
-            <span className="text-2xl font-bold text-[#f59e0b]">+{amount.toLocaleString()} AC</span>
+        <div className="z-10 mx-auto flex w-full max-w-xl flex-col items-center">
+          <div className="relative mb-8">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/10 shadow-[0_0_50px_rgba(229,9,20,0.18)]">
+              <span className="material-symbols-outlined text-6xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            </div>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-[#adaaaa]">Reference ID</span>
-            <span className="font-mono text-sm text-[#f9f5f8] bg-[#131313] px-2 py-1 rounded">{referenceId}</span>
+
+          <div className="mb-10 text-center">
+            <h1 className="mb-3 font-headline text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">Payment Successful!</h1>
+            <p className="text-lg text-muted-foreground">Your Aura Coins have been added to your wallet.</p>
+          </div>
+
+          <div className="relative mb-6 flex w-full flex-col items-center justify-center overflow-hidden rounded-lg border-t border-primary/10 bg-card p-6">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
+            <span className="mb-1 font-headline text-xs font-bold uppercase tracking-widest text-secondary">Coins Added</span>
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-3xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+              <span className="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
+                {typeof amount === "number" ? `${amount.toLocaleString()} AC` : "Completed"}
+              </span>
+            </div>
+          </div>
+
+          <div className="mb-12 w-full rounded-lg bg-card/80 p-6 shadow-2xl">
+            <h3 className="mb-6 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground">Transaction Details</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-2">
+                <span className="font-medium text-muted-foreground">Package</span>
+                <span className="font-headline font-semibold text-foreground">{packageLabel}</span>
+              </div>
+              {typeof paidAmount === "number" ? (
+                <div className="flex items-center justify-between py-2">
+                  <span className="font-medium text-muted-foreground">Amount Paid</span>
+                  <span className="font-headline font-semibold text-foreground">{paidAmount.toLocaleString()} VND</span>
+                </div>
+              ) : null}
+              {referenceId ? (
+                <div className="flex items-center justify-between py-2">
+                  <span className="font-medium text-muted-foreground">Order ID</span>
+                  <span className="font-mono text-sm text-foreground">#{referenceId}</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col gap-4">
+            <Link href="/library" passHref>
+              <Button className="w-full rounded-sm bg-gradient-to-br from-primary to-primary/75 py-4 font-headline font-bold text-primary-foreground transition-all hover:brightness-110 active:scale-95">
+                <span className="material-symbols-outlined mr-2">explore</span>
+                Explore Content
+              </Button>
+            </Link>
+            <Link href="/wallet" passHref>
+              <Button variant="outline" className="w-full rounded-sm border-border bg-transparent py-4 font-headline font-bold text-foreground transition-all hover:bg-muted active:scale-95">
+                View Wallet History
+              </Button>
+            </Link>
           </div>
         </div>
+      </main>
 
-        {/* Actions */}
-        <div className="space-y-4">
-          <Link href="/wallet" passHref>
-            <Button className="w-full bg-gradient-to-r from-[#e11d48] to-[#be123c] hover:from-[#be123c] hover:to-[#9f1239] text-white py-6 rounded-md font-bold text-lg shadow-[0_0_20px_rgba(225,29,72,0.4)] transition-all">
-              Return to Wallet
-            </Button>
-          </Link>
-          <Link href="/library" passHref>
-            <Button variant="outline" className="w-full py-6 rounded-md font-bold border-[#262626] text-[#adaaaa] hover:text-white hover:bg-[#1a1a1a] bg-transparent transition-all">
-              Browse Content
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <footer className="mt-auto py-8 text-center">
+        <p className="text-xs text-muted-foreground">Transaction processed securely via Aura Pay. Receipt sent to your email.</p>
+      </footer>
     </div>
   );
 }

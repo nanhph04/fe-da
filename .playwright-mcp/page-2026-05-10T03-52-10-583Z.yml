@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Aura" [ref=e4] [cursor=pointer]:
+        - /url: /
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e9]: stars
+          - generic [ref=e10]:
+            - generic [ref=e11]: Visitor Access
+            - generic [ref=e12]: Browse Mode
+        - generic [ref=e13]: Sign in for more
+      - navigation [ref=e14]:
+        - link "video_library Library" [ref=e15] [cursor=pointer]:
+          - /url: /library
+          - generic [ref=e16]: video_library
+          - generic [ref=e17]: Library
+        - generic [ref=e18]:
+          - generic [ref=e19]: payments
+          - generic [ref=e20]: Purchased
+        - generic [ref=e21]:
+          - generic [ref=e22]: subscriptions
+          - generic [ref=e23]: Subscriptions
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: settings
+          - generic [ref=e27]: Settings
+        - generic [ref=e28]:
+          - generic [ref=e29]: help_outline
+          - generic [ref=e30]: Help
+    - generic [ref=e31]:
+      - banner [ref=e32]:
+        - generic [ref=e33]: Velvet Gallery
+        - generic [ref=e35]: account_circle
+      - main [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e40]: check_circle
+          - generic [ref=e41]:
+            - heading "Payment Successful!" [level=1] [ref=e42]
+            - paragraph [ref=e43]: Your Aura Coins have been added to your wallet.
+          - generic [ref=e44]:
+            - generic [ref=e45]: New Balance
+            - generic [ref=e46]:
+              - generic [ref=e47]: monetization_on
+              - generic [ref=e48]: 6,250 AC
+          - generic [ref=e49]:
+            - heading "Transaction Details" [level=3] [ref=e50]
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - generic [ref=e53]: Package
+                - generic [ref=e54]: 5,000 AC + 300 Bonus
+              - generic [ref=e55]:
+                - generic [ref=e56]: Amount Paid
+                - generic [ref=e57]: 5,000,000 VND
+              - generic [ref=e58]:
+                - generic [ref=e59]: Order ID
+                - generic [ref=e60]: "#TXN-9821-VLT"
+          - generic [ref=e61]:
+            - link "explore Explore Content" [ref=e62] [cursor=pointer]:
+              - /url: /library
+              - button "explore Explore Content" [ref=e63]:
+                - generic [ref=e64]: explore
+                - text: Explore Content
+            - link "View Wallet History" [ref=e65] [cursor=pointer]:
+              - /url: /wallet
+              - button "View Wallet History" [ref=e66]
+      - contentinfo [ref=e67]:
+        - paragraph [ref=e68]: Transaction processed securely via Aura Pay. Receipt sent to your email.
+  - button "Open Next.js Dev Tools" [ref=e74] [cursor=pointer]:
+    - img [ref=e75]
+  - alert [ref=e78]

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TopNav } from "@/components/layout/main/TopNav";
 import { SideNav } from "@/components/layout/main/SideNav";
 import { MobileNav } from "@/components/layout/main/MobileNav";
+import { ProfileGuard } from "@/components/guards/ProfileGuard";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,7 +11,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <SideNav />
       
       {/* Content Canvas */}
-      {children}
+      <ProfileGuard>
+        {children}
+      </ProfileGuard>
       
       <MobileNav />
     </div>

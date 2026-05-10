@@ -156,9 +156,9 @@ export function PlayerContainerClient({
 
   if (isLoading) {
     return (
-      <div className="relative aspect-video animate-pulse overflow-hidden rounded-xl border border-[#262528] bg-[#131315] shadow-2xl">
+      <div className="relative aspect-video animate-pulse overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1f1f22] shadow-lg">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted shadow-lg">
             <span className="material-symbols-outlined text-3xl text-zinc-500">
               play_arrow
             </span>
@@ -170,11 +170,11 @@ export function PlayerContainerClient({
 
   if (error) {
     return (
-      <div className="flex aspect-video flex-col items-center justify-center gap-4 rounded-xl border border-[#262528] bg-[#131315]">
-        <span className="material-symbols-outlined text-6xl text-red-500">
+      <div className="flex aspect-video flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card">
+        <span className="material-symbols-outlined text-6xl text-destructive">
           error
         </span>
-        <p className="font-headline text-xl font-bold text-white">{error}</p>
+        <p className="font-headline text-xl font-bold text-foreground">{error}</p>
       </div>
     );
   }

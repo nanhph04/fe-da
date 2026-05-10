@@ -13,6 +13,8 @@ interface AuthContextProps {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isProfileIncomplete: boolean;
+  getPostAuthRedirect: () => string;
   setAuthData: (token: string, userData?: UserProfile) => Promise<UserProfile | null>;
   logout: () => Promise<void>;
   fetchProfile: () => Promise<UserProfile | null>;
@@ -24,6 +26,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  const isProfileIncomplete = !!user && !user.displayName;
+
+  const getPostAuthRedirect = () => {
+    if (!user) return "/login";
+    if (!user.displayName) return "/onboarding/profile";
+    return "/library";
+  };
 
   const fetchProfile = async () => {
     try {
@@ -79,6 +89,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user,
         isAuthenticated: !!user,
         isLoading,
+        isProfileIncomplete,
+        getPostAuthRedirect,
         setAuthData,
         logout,
         fetchProfile,

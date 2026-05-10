@@ -1,0 +1,105 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Aura" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link "Library" [ref=e7] [cursor=pointer]:
+          - /url: /library
+        - generic [ref=e9]:
+          - link "Sign In" [ref=e10] [cursor=pointer]:
+            - /url: /login
+          - link "Sign Up" [ref=e11] [cursor=pointer]:
+            - /url: /register
+    - complementary [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e16]: stars
+          - generic [ref=e17]:
+            - generic [ref=e18]: Visitor Access
+            - generic [ref=e19]: Browse Mode
+        - generic [ref=e20]: Sign in for more
+      - navigation [ref=e21]:
+        - link "video_library Library" [ref=e22] [cursor=pointer]:
+          - /url: /library
+          - generic [ref=e23]: video_library
+          - generic [ref=e24]: Library
+        - generic [ref=e25]:
+          - generic [ref=e26]: payments
+          - generic [ref=e27]: Purchased
+        - generic [ref=e28]:
+          - generic [ref=e29]: subscriptions
+          - generic [ref=e30]: Subscriptions
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: settings
+          - generic [ref=e34]: Settings
+        - generic [ref=e35]:
+          - generic [ref=e36]: help_outline
+          - generic [ref=e37]: Help
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - img "Category Hero" [ref=e41]
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]: "Lv3: Exclusive"
+            - generic [ref=e46]: Action Collection
+          - heading "ACTION" [level=1] [ref=e47]
+          - paragraph [ref=e48]: High-octane action films that keep you on the edge of your seat.
+          - generic [ref=e49]:
+            - button "play_arrow Watch Now" [ref=e50]:
+              - generic [ref=e51]: play_arrow
+              - text: Watch Now
+            - button "View Details" [ref=e52]
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - heading "Exclusive Gallery" [level=2] [ref=e57]
+            - paragraph [ref=e58]: Available for Gold Members or per-view unlock.
+          - generic [ref=e59]: View All
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - img "Action-packed" [ref=e62]
+            - generic [ref=e65]: "Lv3: Exclusive"
+            - generic [ref=e67]:
+              - text: lock
+              - generic [ref=e68]: Unlock for 150 AC
+              - generic [ref=e69]: Lifetime access
+            - generic [ref=e70]:
+              - heading "Action-packed" [level=3] [ref=e71]
+              - generic [ref=e72]: Studio Velvet • 1:45:30 • 2.4M
+          - generic [ref=e73]:
+            - img "The Chase" [ref=e74]
+            - generic [ref=e76]:
+              - generic [ref=e77]: "Lv3: Exclusive"
+              - generic [ref=e78]: Unlocked
+            - generic [ref=e79]:
+              - heading "The Chase" [level=3] [ref=e80]
+              - generic [ref=e81]: Film Academy • 52:18 • 890K
+          - generic [ref=e82]:
+            - img "Velocity" [ref=e83]
+            - generic [ref=e86]: "Lv3: Exclusive"
+            - generic [ref=e87]:
+              - heading "Velocity" [level=3] [ref=e88]
+              - generic [ref=e89]: Travel Films • 1:12:45 • 1.2M
+          - generic [ref=e90]:
+            - img "Adrenaline" [ref=e91]
+            - generic [ref=e94]: "Lv3: Exclusive"
+            - generic [ref=e95]:
+              - heading "Adrenaline" [level=3] [ref=e96]
+              - generic [ref=e97]: Indie Pro • 48:32 • 567K
+          - generic [ref=e98]:
+            - img "Rush Hour" [ref=e99]
+            - generic [ref=e102]: "Lv3: Exclusive"
+            - generic [ref=e103]:
+              - heading "Rush Hour" [level=3] [ref=e104]
+              - generic [ref=e105]: Storytelling Co • 2:15:00 • 3.1M
+          - generic [ref=e106]:
+            - img "Explosion" [ref=e107]
+            - generic [ref=e110]: "Lv3: Exclusive"
+            - generic [ref=e111]:
+              - heading "Explosion" [level=3] [ref=e112]
+              - generic [ref=e113]: Animation Lab • 1:38:22 • 780K
+  - button "Open Next.js Dev Tools" [ref=e119] [cursor=pointer]:
+    - img [ref=e120]
+  - alert [ref=e123]

@@ -19,27 +19,27 @@ export function WalletDashboard({
   const wallet = initialWallet;
 
   return (
-    <main className="flex-1 md:pl-64 p-8 pt-24 min-h-screen bg-[#0e0e10]">
+    <main className="flex-1 min-h-screen bg-background p-8 pt-24 md:pl-64">
       {/* Header Section */}
       <section className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-7xl mx-auto">
         <div>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tighter mb-2 text-[#f9f5f8]">
+          <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tighter text-foreground">
             My Wallet
           </h1>
-          <p className="text-zinc-400 max-w-md text-sm">
+          <p className="max-w-md text-sm text-muted-foreground">
             Fuel your favorite creators and unlock exclusive cinematic experiences with Aura Coins.
           </p>
         </div>
 
         {/* Current Balance Card */}
-        <div className="bg-zinc-950/40 backdrop-blur-2xl px-8 py-6 rounded-xl border border-[#fdc003]/20 flex flex-col items-center justify-center min-w-[240px] shadow-[0px_10px_30px_rgba(253,192,3,0.1)]">
-          <span className="text-xs font-bold text-[#fdc003] uppercase tracking-widest mb-1">Current Balance</span>
+        <div className="flex min-w-[240px] flex-col items-center justify-center rounded-lg border border-secondary/20 bg-card px-8 py-6 shadow-[0px_10px_30px_rgba(251,191,36,0.08)]">
+          <span className="mb-1 text-xs font-bold uppercase tracking-widest text-secondary">Current Balance</span>
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-4xl text-[#fdc003]" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
-            <span className="font-headline text-5xl font-black text-[#f9f5f8]">
+            <span className="material-symbols-outlined text-4xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+            <span className="font-headline text-5xl font-black text-foreground">
               {wallet.balance.toLocaleString()}
             </span>
-            <span className="font-headline text-xl font-bold text-[#fdc003]">AC</span>
+            <span className="font-headline text-xl font-bold text-secondary">AC</span>
           </div>
         </div>
       </section>

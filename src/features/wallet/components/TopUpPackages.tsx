@@ -55,9 +55,9 @@ export function TopUpPackages({ initialPackages }: TopUpPackagesProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mt-8">
-        <h2 className="font-headline text-xl font-bold text-[#f9f5f8]">Top-up Packages</h2>
-        <Badge className="bg-[#785900] text-[#fff6ec] rounded-full text-xs font-bold uppercase tracking-tight hover:bg-[#785900]/80">
+      <div className="mt-8 flex items-center justify-between">
+        <h2 className="font-headline text-xl font-bold text-foreground">Top-up Packages</h2>
+        <Badge className="rounded-full bg-secondary/20 text-secondary-foreground text-xs font-bold uppercase tracking-tight hover:bg-secondary/30">
           Best Value
         </Badge>
       </div>
@@ -66,30 +66,30 @@ export function TopUpPackages({ initialPackages }: TopUpPackagesProps) {
         {packages.map((pkg, index) => {
           const isPopular = pkg.code.includes('PRO') || index === 2; // Temporary logic for popular highlighting
           return (
-            <Card key={pkg.id} className={`group bg-zinc-950/40 border-[#48474a]/20 hover:bg-[#19191c] transition-all duration-300 relative overflow-hidden ${isPopular ? 'border-[#fdc003]/30 ring-1 ring-[#fdc003]/20 shadow-[0px_10px_30px_rgba(253,192,3,0.1)]' : ''}`}>
+            <Card key={pkg.id} className={`group relative overflow-hidden border-border/20 bg-card/60 transition-all duration-300 hover:bg-card ${isPopular ? 'border-secondary/30 ring-1 ring-secondary/20 shadow-[0px_10px_30px_rgba(251,191,36,0.1)]' : ''}`}>
               {isPopular && (
-                <div className="absolute top-0 right-0 bg-[#fdc003] text-[#553e00] px-3 py-1 rounded-bl-lg text-[10px] font-black uppercase z-10">
+                <div className="absolute top-0 right-0 z-10 rounded-bl-lg bg-secondary px-3 py-1 text-[10px] font-black uppercase text-secondary-foreground">
                   Most Popular
                 </div>
               )}
               <CardContent className="p-6 flex flex-col items-center text-center h-full">
-                <h3 className="font-headline font-bold text-lg mb-1 text-white">{pkg.name}</h3>
-                <p className="text-[#fdc003] font-bold text-2xl mb-4">
+                <h3 className="mb-1 font-headline text-lg font-bold text-foreground">{pkg.name}</h3>
+                <p className="mb-4 text-2xl font-bold text-secondary">
                   {pkg.totalCoinAmount.toLocaleString()} AC
-                  {pkg.bonusCoinAmount > 0 && <span className="text-xs text-[#adaaad] font-medium ml-1">+ {pkg.bonusCoinAmount} bonus</span>}
+                  {pkg.bonusCoinAmount > 0 && <span className="ml-1 text-xs font-medium text-muted-foreground">+ {pkg.bonusCoinAmount} bonus</span>}
                 </p>
                 
                 <div className="mb-6 h-32 flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#fdc003]/20 to-transparent border border-[#fdc003]/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <span className="material-symbols-outlined text-4xl text-[#fdc003]" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full border border-secondary/30 bg-gradient-to-br from-secondary/20 to-transparent transition-transform duration-500 group-hover:scale-110">
+                    <span className="material-symbols-outlined text-4xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
                   </div>
                 </div>
 
-                <div className="mt-auto w-full pt-4 border-t border-white/5 flex flex-col gap-4">
-                  <span className="font-headline font-bold text-lg text-white">{pkg.moneyAmount.toLocaleString()} VND</span>
+                <div className="mt-auto flex w-full flex-col gap-4 border-t border-white/5 pt-4">
+                  <span className="font-headline text-lg font-bold text-foreground">{pkg.moneyAmount.toLocaleString()} VND</span>
                   <Button 
                     onClick={() => router.push(`/wallet/checkout?pack=${pkg.id}`)}
-                    className={`w-full font-bold transition-colors active:scale-95 ${isPopular ? 'bg-[#fdc003] hover:bg-[#ecb200] text-[#553e00]' : 'bg-[#ff8e80] hover:bg-[#e80f16] text-[#650003]'}`}
+                    className={`w-full font-bold transition-colors active:scale-95 ${isPopular ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
                   >
                     Buy Now
                   </Button>

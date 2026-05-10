@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { authService } from "@/features/auth/services/authService";
 import { getErrorMessage } from "@/shared/api/client";
+import { PublicBrand } from "@/components/layout/public/PublicBrand";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -42,82 +43,107 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <>
-      <div className="mb-12 text-center md:text-left">
-        <h1 
-          className="text-5xl font-extrabold tracking-tighter text-[#f9f5f8] mb-2 leading-none"
-          style={{ fontFamily: 'var(--font-headline)' }}
-        >
-          Recover Password
-        </h1>
-        <p className="font-sans text-[#adaaad] text-sm tracking-wide">
-          Enter your email to receive recovery instructions.
-        </p>
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+      <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-black/35 px-6 py-6 backdrop-blur-xl md:px-8">
+        <PublicBrand href="/landing" />
+        <button type="button" className="font-headline text-sm font-bold tracking-tight text-zinc-400 transition-colors hover:text-white">
+          Help
+        </button>
       </div>
 
-      {isSent ? (
-        <div className="flex flex-col items-center justify-center text-center space-y-6 py-4">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-2 ring-1 ring-[#ff8e80]/30 shadow-[0_0_30px_rgba(255,142,128,0.2)]">
-            <span className="material-symbols-outlined text-4xl text-[#ff8e80]">mail</span>
-          </div>
-          <h3 className="text-2xl font-bold text-[#f9f5f8]" style={{ fontFamily: 'var(--font-headline)' }}>Email Sent!</h3>
-          <p className="text-[#adaaad] font-sans">
-            We&apos;ve sent an email with password recovery instructions. Please check your inbox.
-          </p>
-          <button 
-            type="button"
-            className="mt-6 w-full py-5 rounded-sm ring-1 ring-[#48474a] text-[#adaaad] hover:text-[#f9f5f8] hover:ring-[#ff8e80]/50 transition-all font-headline tracking-widest uppercase text-sm"
-            onClick={() => setIsSent(false)}
-          >
-            Try another email
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-4">
-            <div className="group">
-              <label className="block text-[10px] uppercase tracking-[0.2em] text-[#adaaad] mb-2 ml-1" style={{ fontFamily: 'var(--font-headline)' }}>
-                Email Address
-              </label>
-              <div className="relative">
-                <input 
-                  type="email" 
-                  placeholder="name@domain.com" 
-                  className={`w-full bg-[#000000] border-none ring-1 ring-[#48474a]/30 focus:ring-[#ff8e80]/50 rounded-sm py-4 px-4 pr-12 text-[#f9f5f8] placeholder:text-zinc-700 transition-all font-sans focus:outline-none ${errors.email ? 'ring-[#ff6e84]' : ''}`}
-                  {...register("email")}
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none flex items-center justify-center">
-                  <span className="material-symbols-outlined">alternate_email</span>
-                </div>
+      <div className="pointer-events-none fixed inset-0 -z-10 opacity-20">
+        <div className="absolute inset-0 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuC6L2gIFE9e98uTGvg6q3dnynuMUCYu8-xAitkbIeF8CGD-eqwXqpItOokDjY_rOTQYxEilBlwNZuUeLzI7g_0EOi_Vx74cNNiMKMCOQqtC0X2RudWppaQinlL1RCjq2Z9LtDQldIzXUGa0CqaF2U61ezMoyY5Rs3X0x1mJqnnF--jIyQH9BrjQiseEbEFPDnpJYkFVkHSUqzFFZ6uoORNI5Rnq6lkA6Gs5XIIyGwuBThEnsMQdXDuxHZMvgCV1raBi6AUCg7snk-W7')] bg-cover bg-center grayscale" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+      </div>
+
+      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-24 pb-16">
+        <div className="w-full max-w-[440px]">
+          <div className="relative overflow-hidden rounded-lg bg-card p-8 shadow-2xl md:p-12">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-40" />
+            <header className="mb-10 text-center">
+              <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <span className="material-symbols-outlined text-3xl text-primary">lock_reset</span>
               </div>
-              {errors.email && <p className="text-xs text-[#ff6e84] mt-1 ml-1">{errors.email.message}</p>}
+              <h1 className="mb-3 font-headline text-3xl font-extrabold tracking-[-0.02em] text-foreground">Forgot Password?</h1>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Enter the email address associated with your Velvet Gallery account and we&apos;ll send you a link to reset your password.
+              </p>
+            </header>
+
+            {isSent ? (
+              <div className="space-y-6 text-center">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full ring-1 ring-primary/30 shadow-[0_0_30px_rgba(229,9,20,0.18)]">
+                  <span className="material-symbols-outlined text-4xl text-primary">mail</span>
+                </div>
+                <h3 className="font-headline text-2xl font-bold text-foreground">Email Sent</h3>
+                <p className="text-muted-foreground">
+                  We&apos;ve sent an email with password recovery instructions. Please check your inbox.
+                </p>
+                <button
+                  type="button"
+                  className="w-full rounded-sm py-4 font-headline text-sm font-bold uppercase tracking-widest text-muted-foreground ring-1 ring-border transition-all hover:text-foreground hover:ring-primary/50"
+                  onClick={() => setIsSent(false)}
+                >
+                  Try another email
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="ml-1 block text-xs font-bold uppercase tracking-widest text-muted-foreground" htmlFor="email">
+                    Email Address
+                  </label>
+                  <div className="group relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <span className="material-symbols-outlined text-xl text-muted-foreground group-focus-within:text-primary transition-colors">mail</span>
+                    </div>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="name@example.com"
+                      className={`w-full rounded-sm bg-black py-4 pr-4 pl-12 text-foreground placeholder:text-zinc-600 ring-1 transition-all outline-none focus:ring-2 focus:ring-primary ${errors.email ? "ring-destructive" : "ring-border/30"}`}
+                      {...register("email")}
+                    />
+                  </div>
+                  {errors.email ? <p className="text-xs text-destructive">{errors.email.message}</p> : null}
+                </div>
+
+                {serverError ? (
+                  <div className="rounded-sm border border-destructive/30 bg-destructive/10 p-3">
+                    <p className="text-center text-xs font-medium text-destructive">{serverError}</p>
+                  </div>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex w-full items-center justify-center rounded-sm bg-gradient-to-br from-primary to-primary/75 py-4 font-headline text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                  {isLoading ? "Sending..." : "Send Reset Link"}
+                </button>
+              </form>
+            )}
+
+            <div className="mt-8 border-t border-border/10 pt-8 text-center">
+              <Link href="/login" className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-white">
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                Back to Sign In
+              </Link>
             </div>
           </div>
 
-          {serverError && (
-            <div className="p-3 bg-[#ff6e84]/10 border border-[#ff6e84]/30 rounded-sm w-full mt-4">
-              <p className="text-xs text-[#ff6e84] text-center font-medium">{serverError}</p>
-            </div>
-          )}
+          <div className="mt-12 text-center">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">Secure Authentication • Velvet Gallery Encryption</p>
+          </div>
+        </div>
+      </main>
 
-          <button 
-            type="submit"
-            disabled={isLoading}
-            className="flex items-center justify-center w-full bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#650003] py-5 rounded-sm font-extrabold text-sm uppercase tracking-widest shadow-xl shadow-[#ff8e80]/10 hover:brightness-110 active:scale-[0.98] transition-all duration-200 mt-4 disabled:opacity-50"
-            style={{ fontFamily: 'var(--font-headline)' }}
-          >
-            {isLoading ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : null}
-            {isLoading ? "Sending..." : "Send Instructions"}
-          </button>
-        </form>
-      )}
-
-      <footer className="mt-12 text-center">
-        <Link href="/login" className="inline-flex items-center text-[#adaaad] hover:text-[#f9f5f8] transition-colors font-sans text-sm pb-1 border-b border-transparent hover:border-[#ff8e80]">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to sign in
-        </Link>
+      <footer className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
+        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Privacy Policy</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Terms of Service</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Cookie Preferences</span>
       </footer>
-    </>
+    </div>
   );
 }

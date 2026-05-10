@@ -1,0 +1,151 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Aura" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link "Library" [ref=e7] [cursor=pointer]:
+          - /url: /library
+        - generic [ref=e9]:
+          - link "Sign In" [ref=e10] [cursor=pointer]:
+            - /url: /login
+          - link "Sign Up" [ref=e11] [cursor=pointer]:
+            - /url: /register
+    - complementary [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e16]: stars
+          - generic [ref=e17]:
+            - generic [ref=e18]: Visitor Access
+            - generic [ref=e19]: Browse Mode
+        - generic [ref=e20]: Sign in for more
+      - navigation [ref=e21]:
+        - link "video_library Library" [ref=e22] [cursor=pointer]:
+          - /url: /library
+          - generic [ref=e23]: video_library
+          - generic [ref=e24]: Library
+        - generic [ref=e25]:
+          - generic [ref=e26]: payments
+          - generic [ref=e27]: Purchased
+        - generic [ref=e28]:
+          - generic [ref=e29]: subscriptions
+          - generic [ref=e30]: Subscriptions
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]: settings
+          - generic [ref=e34]: Settings
+        - generic [ref=e35]:
+          - generic [ref=e36]: help_outline
+          - generic [ref=e37]: Help
+    - generic [ref=e38]:
+      - banner [ref=e39]:
+        - generic [ref=e40]:
+          - generic [ref=e41]: Velvet Gallery
+          - navigation [ref=e42]:
+            - generic [ref=e43]: Browse
+            - generic [ref=e44]: Memberships
+            - generic [ref=e45]: Live
+            - generic [ref=e46]: My Coins
+          - generic [ref=e48]:
+            - generic [ref=e49]: monetization_on
+            - generic [ref=e50]: 1,240 AC
+      - main [ref=e51]:
+        - generic [ref=e52]:
+          - img "Creator Banner" [ref=e54]
+          - generic [ref=e55]:
+            - img "CinemaLabs Avatar" [ref=e57]
+            - generic [ref=e58]:
+              - generic [ref=e59]:
+                - heading "CinemaLabs" [level=1] [ref=e60]
+                - generic [ref=e61]: verified
+              - paragraph [ref=e62]:
+                - generic [ref=e63]: 4.2M Subscribers
+                - generic [ref=e65]: Premium Studio Member
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - heading "Join The Velvet Gallery" [level=2] [ref=e68]
+            - paragraph [ref=e69]: Support your favorite creators and unlock exclusive cinematic content, early access, and unique member identities.
+          - generic [ref=e70]:
+            - generic [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]:
+                - heading "Level 1" [level=3] [ref=e73]
+                - generic [ref=e74]: Standard
+              - generic [ref=e76]:
+                - generic [ref=e77]: "50"
+                - generic [ref=e78]: AC
+                - generic [ref=e79]: / month
+              - generic [ref=e80]:
+                - generic [ref=e81]:
+                  - generic [ref=e82]: check_circle
+                  - generic [ref=e83]: Exclusive Loyalty Badge
+                - generic [ref=e84]:
+                  - generic [ref=e85]: check_circle
+                  - generic [ref=e86]: Custom Emojis in Live Chat
+                - generic [ref=e87]:
+                  - generic [ref=e88]: check_circle
+                  - generic [ref=e89]: Members-only Community Posts
+              - button "Join Now" [ref=e90]
+            - generic [ref=e91] [cursor=pointer]:
+              - generic [ref=e92]: Most Popular
+              - generic [ref=e93]:
+                - heading "Level 2" [level=3] [ref=e94]
+                - generic [ref=e95]: Premium
+              - generic [ref=e97]:
+                - generic [ref=e98]: "150"
+                - generic [ref=e99]: AC
+                - generic [ref=e100]: / month
+              - generic [ref=e101]:
+                - generic [ref=e102]:
+                  - generic [ref=e103]: check_circle
+                  - generic [ref=e104]: All Level 1 Perks
+                - generic [ref=e105]:
+                  - generic [ref=e106]: check_circle
+                  - generic [ref=e107]: Early Access to New Videos
+                - generic [ref=e108]:
+                  - generic [ref=e109]: check_circle
+                  - generic [ref=e110]: Behind the Scenes Content
+                - generic [ref=e111]:
+                  - generic [ref=e112]: check_circle
+                  - generic [ref=e113]: Priority Comment Response
+              - button "Proceeding..." [ref=e114]
+            - generic [ref=e115] [cursor=pointer]:
+              - generic [ref=e116]:
+                - heading "Level 3" [level=3] [ref=e117]
+                - generic [ref=e118]: Exclusive
+              - generic [ref=e120]:
+                - generic [ref=e121]: "300"
+                - generic [ref=e122]: AC
+                - generic [ref=e123]: / month
+              - generic [ref=e124]:
+                - generic [ref=e125]:
+                  - generic [ref=e126]: star
+                  - generic [ref=e127]: Lv1 + Lv2 Access
+                - generic [ref=e128]:
+                  - generic [ref=e129]: check_circle
+                  - generic [ref=e130]: Live Member Hangouts
+                - generic [ref=e131]:
+                  - generic [ref=e132]: check_circle
+                  - generic [ref=e133]: Monthly Q&A Participation
+                - generic [ref=e134]:
+                  - generic [ref=e135]: check_circle
+                  - generic [ref=e136]: Exclusive Badges & Merch Discounts
+              - button "Join Now" [ref=e137]
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - heading "Membership Rules" [level=4] [ref=e140]
+            - list [ref=e141]:
+              - listitem [ref=e142]: Subscriptions renew automatically every 30 days.
+              - listitem [ref=e143]: You can cancel or change your tier at any time through your account settings.
+              - listitem [ref=e144]: All memberships are non-refundable once the perks have been accessed.
+          - generic [ref=e145]:
+            - heading "Need More Aura Coins?" [level=4] [ref=e146]
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e150]: add_shopping_cart
+                - generic [ref=e151]:
+                  - generic [ref=e152]: Refill Wallet
+                  - generic [ref=e153]: Starting from 100 AC / 100,000 VND
+              - button "Top Up" [ref=e154]
+  - button "Open Next.js Dev Tools" [ref=e160] [cursor=pointer]:
+    - img [ref=e161]
+  - alert [ref=e164]

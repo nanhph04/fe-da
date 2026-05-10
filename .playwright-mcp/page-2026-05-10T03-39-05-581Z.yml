@@ -1,0 +1,52 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - banner [ref=e10]:
+      - link "play_arrow Velvet Gallery" [ref=e11] [cursor=pointer]:
+        - /url: /landing
+        - generic [ref=e13]: play_arrow
+        - generic [ref=e15]: Velvet Gallery
+      - generic [ref=e16]: Help
+    - main [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - heading "Welcome Back" [level=1] [ref=e20]
+          - paragraph [ref=e21]: Return to the Velvet Gallery experience.
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - generic [ref=e25]: Email Address
+              - generic [ref=e26]:
+                - textbox "Email Address" [ref=e27]:
+                  - /placeholder: name@domain.com
+                - generic:
+                  - generic: alternate_email
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - generic [ref=e30]: Password
+                - link "Forgot Password?" [ref=e31] [cursor=pointer]:
+                  - /url: /forgot-password
+              - generic [ref=e32]:
+                - textbox "Password" [ref=e33]:
+                  - /placeholder: ••••••••
+                - generic:
+                  - generic: lock
+          - button "Sign In" [ref=e34]
+          - generic [ref=e39]: Or continue with
+          - generic [ref=e40]:
+            - button "google Google" [ref=e41]:
+              - generic [ref=e42]: google
+              - generic [ref=e43]: Google
+            - button "ios Apple" [ref=e44]:
+              - generic [ref=e45]: ios
+              - generic [ref=e46]: Apple
+        - paragraph [ref=e48]:
+          - text: New to Velvet Gallery?
+          - link "Create an account" [ref=e49] [cursor=pointer]:
+            - /url: /register
+    - generic [ref=e50]:
+      - generic [ref=e51]: Privacy Policy
+      - generic [ref=e52]: Terms of Service
+      - generic [ref=e53]: Cookie Preferences
+  - button "Open Next.js Dev Tools" [ref=e59] [cursor=pointer]:
+    - img [ref=e60]
+  - alert [ref=e63]
