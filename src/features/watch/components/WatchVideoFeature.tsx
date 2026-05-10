@@ -1,10 +1,9 @@
 import { VideoInfo } from "./VideoInfo";
 import { CreatorSection } from "./CreatorSection";
-import { CommentsSection } from "./CommentsSection";
 import { RelatedVideosSidebar } from "./RelatedVideosSidebar";
 import { PlayerContainerClient } from "./PlayerContainerClient";
 import {
-  getVideoMetadataCached,
+  getViewerVideoMetadata,
   type PublicApiError,
 } from "../services/publicMediaService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -22,7 +21,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let description = "";
 
   try {
-    const infoRes = await getVideoMetadataCached(videoId);
+    const infoRes = await getViewerVideoMetadata(videoId);
     if (infoRes.success && infoRes.data) {
       title = infoRes.data.title;
       poster = infoRes.data.thumbnailUrl || undefined;
@@ -50,11 +49,11 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
         <PlayerContainerClient videoId={videoId} poster={poster} title={title} />
         <VideoInfo title={title} viewCount={viewCount} publishedAt={publishedAt} />
         <CreatorSection description={description} />
-        <CommentsSection />
+        {/* CommentsSection intentionally hidden: comments are not in the current development scope. */}
       </div>
 
       {/* Related Videos Sidebar (Right) */}
-      <RelatedVideosSidebar />
+      <RelatedVideosSidebar currentVideoId={videoId} />
     </div>
   );
 }

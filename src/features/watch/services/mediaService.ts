@@ -158,6 +158,40 @@ export interface ContinueWatchingVideoResponse {
   viewCount: number;
 }
 
+export interface UserMembershipResponse {
+  membershipId: string;
+  channelId: string;
+  channelName: string;
+  channelAvatarUrl: string | null;
+  tierId: string;
+  tierName: string;
+  tierLevel: number;
+  priceCoin: number;
+  startedAt: string;
+  expiryDate: string | null;
+  isActive: boolean;
+  canRenew: boolean;
+  canUpgrade: boolean;
+  isMembershipClosedByAdmin: boolean;
+  membershipBlockedReason: string | null;
+}
+
+export interface PurchasedVideoResponse {
+  videoId: string;
+  channelId: string;
+  channelName: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string | null;
+  durationSeconds: number | null;
+  categories: string[];
+  priceCoin: number;
+  purchasedAt: string;
+  lastWatchedAt: string | null;
+  resumePositionSeconds: number | null;
+  accessStatus: "ACTIVE" | "EXPIRED" | "REVOKED" | string;
+}
+
 // Category Interface
 export interface CategoryResponse {
   id: string;
@@ -189,7 +223,14 @@ export const mediaService = {
     return api.get<{ channelId: string; userId: string; status: string; isEligibleForMembership: boolean }>("/api/media/channels/me", { requireAuth: true });
   },
   getMembershipStatus: async (id: string) => {
-    return api.get<{ isActive: boolean; membershipId: string | null; expiryDate: string | null }>(`/api/media/channels/${id}/membership-status`, { requireAuth: true });
+    return api.get<{ isActive: boolean; membershipId: string | null; expiryDate: string | null; canRenew: boolean; canUpgrade: boolean; membershipBlockedReason: string | null; isMembershipClosedByAdmin: boolean }>(`/api/media/channels/${id}/membership-status`, { requireAuth: true });
+  },
+  getMyMemberships: async (params?: PaginationParams) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return api.get<UserMembershipResponse[]>(`/api/media/memberships/me${qs}`, { requireAuth: true });
   },
 
   // 3. MEMBERSHIP TIERS
@@ -231,6 +272,13 @@ export const mediaService = {
   getContinueWatching: async (params?: PaginationParams) => {
     const qs = params?.limit ? `?limit=${params.limit}` : "";
     return api.get<ContinueWatchingVideoResponse[]>(`/api/media/videos/continue-watching${qs}`, { requireAuth: true });
+  },
+  getPurchasedVideos: async (params?: PaginationParams) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return api.get<PurchasedVideoResponse[]>(`/api/media/videos/library/purchased${qs}`, { requireAuth: true });
   },
   getVideoMetadata: async (id: string) => {
     return api.get<VideoMetadataResponse>(`/api/media/videos/${id}/metadata`);

@@ -3,6 +3,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import {
   fetchPublicApi,
+  fetchServerApi,
   type ApiError as PublicApiError,
   type ApiResponse as PublicApiResponse,
 } from "@/shared/api";
@@ -76,6 +77,13 @@ export async function getVideoMetadataCached(videoId: string) {
 
   return fetchPublicApi<PublicVideoMetadata>(
     `/api/media/videos/${videoId}/metadata`
+  );
+}
+
+export async function getViewerVideoMetadata(videoId: string) {
+  return fetchServerApi<PublicVideoMetadata>(
+    `/api/media/videos/${videoId}/metadata`,
+    { requireAuth: true }
   );
 }
 
