@@ -5,7 +5,7 @@ export interface TokenResponse {
   expiresIn: number;
 }
 
-export type UserRole = "viewer" | "creator" | "admin";
+export type UserRole = "user" | "creator" | "viewer" | "admin";
 
 export interface MessageResponse {
   message: string;
@@ -45,6 +45,40 @@ export interface ResetPasswordRequest {
 export interface ChangePasswordRequest {
   oldPassword: string;
   newPassword: string;
+}
+
+export interface UpdateProfileRequest {
+  displayName?: string;
+  bio?: string;
+  phone?: number;
+  gender?: "male" | "women" | "female";
+  birthday?: string;
+}
+
+export type AvatarContentType = "image/jpeg" | "image/png" | "image/webp";
+
+export interface CreateAvatarUploadUrlRequest {
+  fileName: string;
+  contentType: AvatarContentType;
+  contentLength: number;
+}
+
+export interface CreateAvatarUploadUrlResponse {
+  uploadUrl: string;
+  objectKey: string;
+  expiresIn: number;
+  publicUrl: string;
+  requiredHeaders: Record<string, string>;
+}
+
+export interface CompleteAvatarUploadRequest {
+  objectKey: string;
+}
+
+export interface UploadAvatarFileRequest {
+  uploadUrl: string;
+  file: Blob;
+  requiredHeaders?: Record<string, string>;
 }
 
 export const authService = {
@@ -93,15 +127,42 @@ export const authService = {
     return api.get<UserProfileResponse>("/api/user/users/profile", { requireAuth: true });
   },
 
-  // Cập nhật Profile
-  updateProfile: async (data: { 
-    displayName?: string; 
-    avatarUrl?: string; 
-    bio?: string; 
-    phone?: number; 
-    gender?: "male" | "women" | "female"; 
-    birthday?: string 
-  }) => {
+  // Cập nhật Profile. avatarUrl không được cập nhật qua endpoint này.
+  updateProfile: async (data: UpdateProfileRequest) => {
     return api.patch<UserProfileResponse>("/api/user/users/profile", data, { requireAuth: true });
+  },
+
+  createAvatarUploadUrl: async (data: CreateAvatarUploadUrlRequest) => {
+    return api.post<CreateAvatarUploadUrlResponse>(
+      "/api/user/users/profile/avatar/upload-url",
+      data,
+      { requireAuth: true }
+    );
+  },
+
+  uploadAvatarFile: async ({ uploadUrl, file, requiredHeaders }: UploadAvatarFileRequest) => {
+    const headers = new Headers(requiredHeaders);
+
+    if (file.type && !headers.has("Content-Type")) {
+      headers.set("Content-Type", file.type);
+    }
+
+    const response = await fetch(uploadUrl, {
+      method: "PUT",
+      headers,
+      body: file,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Avatar upload failed: ${response.status}`);
+    }
+  },
+
+  completeAvatarUpload: async (data: CompleteAvatarUploadRequest) => {
+    return api.post<UserProfileResponse>(
+      "/api/user/users/profile/avatar/complete",
+      data,
+      { requireAuth: true }
+    );
   },
 };

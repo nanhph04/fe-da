@@ -1,5 +1,5 @@
 import { api } from "@/shared/api/client";
-import { DepositPackage } from "@/features/wallet/types/wallet.types";
+import { Deposit, DepositPackage } from "@/features/wallet/types/wallet.types";
 
 export interface CreatePackagePayload {
   code: string;
@@ -13,13 +13,6 @@ export interface CreatePackagePayload {
 }
 
 export type UpdatePackagePayload = Partial<CreatePackagePayload>;
-
-export interface ReconcileDepositResponse {
-  success: boolean;
-  depositId?: string;
-  status?: string;
-  message?: string;
-}
 
 export class AdminDepositService {
   /**
@@ -49,8 +42,8 @@ export class AdminDepositService {
   /**
    * Reconcile a pending deposit
    */
-  static async reconcileDeposit(depositId: string): Promise<ReconcileDepositResponse> {
-    const response = await api.post<ReconcileDepositResponse>(
+  static async reconcileDeposit(depositId: string): Promise<Deposit> {
+    const response = await api.post<Deposit>(
       `/api/deposits/admin/${depositId}/reconcile`,
       {},
       { requireAuth: true }

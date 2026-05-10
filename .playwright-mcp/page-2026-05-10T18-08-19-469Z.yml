@@ -1,0 +1,82 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "play_arrow Velvet Gallery" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]: play_arrow
+          - generic [ref=e9]: Velvet Gallery
+        - navigation [ref=e11]:
+          - link "Khám phá" [ref=e12] [cursor=pointer]:
+            - /url: /
+          - link "Thư viện" [ref=e13] [cursor=pointer]:
+            - /url: /library
+          - link "Xưởng sáng tạo" [ref=e14] [cursor=pointer]:
+            - /url: /onboarding
+    - generic [ref=e16]:
+      - img "Cinematic Background" [ref=e18]
+      - generic [ref=e21]:
+        - generic [ref=e22]: star
+        - generic [ref=e23]: Thẻ Truy Cập Cao Cấp Đã Mở
+      - generic [ref=e24]:
+        - 'heading "The Velvet Gallery: Tái Định Nghĩa Trải Nghiệm Điện Ảnh" [level=1] [ref=e25]':
+          - text: "The Velvet Gallery:"
+          - text: Tái Định Nghĩa Trải Nghiệm Điện Ảnh
+        - paragraph [ref=e26]: Bước vào phòng chiếu số với nội dung chất lượng cao, phân phối phi tập trung và vận hành bằng nền kinh tế Aura Coin. Nơi tuyển chọn điện ảnh gặp gỡ sức mạnh sáng tạo của cộng đồng.
+        - generic [ref=e27]:
+          - link "Khám phá kho phim arrow_forward" [ref=e28] [cursor=pointer]:
+            - /url: /landing
+            - generic [ref=e29]: Khám phá kho phim
+            - generic [ref=e30]: arrow_forward
+          - link "play_arrow Xem trailer" [ref=e31] [cursor=pointer]:
+            - /url: /onboarding
+            - generic [ref=e32]: play_arrow
+            - generic [ref=e33]: Xem trailer
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e39]: local_activity
+        - generic [ref=e40]:
+          - generic [ref=e42]: local_activity
+          - heading "Cấp truy cập độc quyền (Lv1-Lv3)" [level=3] [ref=e43]
+          - paragraph [ref=e44]: Mở khóa nội dung cao cấp theo từng cấp độ. Từ trải nghiệm xem tiêu chuẩn đến bản director's cut độc quyền và các buổi chiếu riêng tư.
+      - generic [ref=e47]:
+        - generic [ref=e49]: monetization_on
+        - heading "Kinh tế Aura" [level=3] [ref=e50]
+        - paragraph [ref=e51]: Giao dịch an toàn bằng Aura Coins. Ủng hộ nhà sáng tạo trực tiếp, mua quyền xem nội dung và tham gia vào nền kinh tế phi tập trung.
+      - generic [ref=e52]:
+        - generic [ref=e54]: movie
+        - generic [ref=e55]:
+          - generic [ref=e57]: movie
+          - heading "Xưởng sáng tạo" [level=3] [ref=e58]
+          - paragraph [ref=e59]: Trao quyền cho thế hệ nhà làm phim mới với hạ tầng lưu trữ chất lượng cao, phân tích minh bạch và kết nối trực tiếp với khán giả.
+    - generic [ref=e60]:
+      - img "CTA Background" [ref=e62]
+      - generic [ref=e65]:
+        - heading "Tham gia cuộc cách mạng điện ảnh hôm nay" [level=2] [ref=e66]
+        - paragraph [ref=e67]: Giữ chỗ của bạn trong The Velvet Gallery. Kích hoạt ví Aura và bắt đầu khám phá kỷ nguyên mới của giải trí phi tập trung.
+        - link "Đăng ký ngay" [ref=e68] [cursor=pointer]:
+          - /url: /register
+    - contentinfo [ref=e69]:
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic [ref=e74]: play_arrow
+            - generic [ref=e75]: Velvet Gallery
+          - paragraph [ref=e76]: © 2024 Velvet Gallery. Triết lý và nhận diện thương hiệu Velvet Gallery là tài sản của Cinematic Immersion.
+        - generic [ref=e77]:
+          - generic [ref=e78]: Nền tảng
+          - link "Giới thiệu" [ref=e79] [cursor=pointer]:
+            - /url: /
+          - link "Nhà sáng tạo" [ref=e80] [cursor=pointer]:
+            - /url: /onboarding
+          - link "Trung tâm trợ giúp" [ref=e81] [cursor=pointer]:
+            - /url: /login
+        - generic [ref=e82]:
+          - generic [ref=e83]: Tài khoản
+          - link "Chính sách quyền riêng tư" [ref=e84] [cursor=pointer]:
+            - /url: /login
+          - link "Điều khoản dịch vụ" [ref=e85] [cursor=pointer]:
+            - /url: /register
+  - button "Open Next.js Dev Tools" [ref=e91] [cursor=pointer]:
+    - img [ref=e92]
+  - alert [ref=e95]

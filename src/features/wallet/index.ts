@@ -30,6 +30,7 @@ export type {
   BankInfo,
   PaymentRequest,
   PaymentResponse,
+  PaymentTransaction,
 } from './types/wallet.types';
 
 // Utilities

@@ -2,8 +2,8 @@ import { VerifyOTPForm } from "@/features/auth/components/VerifyOTPForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Verify OTP | Velvet Gallery",
-  description: "Verify your Velvet Gallery account.",
+  title: "Xác thực OTP | Velvet Gallery",
+  description: "Xác thực tài khoản Velvet Gallery của bạn.",
 };
 
 export default function VerifyOTPPage() {

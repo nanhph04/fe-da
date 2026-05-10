@@ -3,8 +3,6 @@ import { Withdrawal, BankInfo } from "../types/wallet.types";
 
 export interface CreateWithdrawalPayload {
   coinAmount: number;
-  moneyAmount: number;
-  exchangeRate: number;
   bankInfo: BankInfo;
   description?: string;
 }

@@ -1,4 +1,4 @@
-import type { Transaction } from "./wallet.types";
+import type { PaymentTransaction } from "./wallet.types";
 
 export interface PaymentRequest {
   serviceType: "VIDEO" | "MEMBERSHIP";
@@ -12,7 +12,7 @@ export interface PaymentResponse {
   payerWalletId: string;
   channelWalletId: string;
   systemWalletId: string;
-  serviceType: string;
+  serviceType: "VIDEO" | "MEMBERSHIP";
   serviceId: string;
   channelId: string;
   channelOwnerId: string;
@@ -20,5 +20,5 @@ export interface PaymentResponse {
   splitPercent: number;
   creatorCoins: number;
   systemCoins: number;
-  transactions: Transaction[];
+  transactions: PaymentTransaction[];
 }

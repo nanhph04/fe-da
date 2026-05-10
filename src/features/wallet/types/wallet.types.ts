@@ -65,7 +65,7 @@ export interface Deposit {
   gateway: string;
   status: DepositStatus;
   paymentCode: string;
-  transferContent: string;
+  transferContent: string | null;
   gatewayTransactionId: string | null;
   checkoutUrl: string | null;
   description: string | null;
@@ -112,6 +112,15 @@ export interface PaymentRequest {
   coinAmount: number;
 }
 
+export interface PaymentTransaction {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  fromWalletId: string | null;
+  toWalletId: string | null;
+  referenceId: string | null;
+}
+
 export interface PaymentResponse {
   payerWalletId: string;
   channelWalletId: string;
@@ -124,5 +133,5 @@ export interface PaymentResponse {
   splitPercent: number;
   creatorCoins: number;
   systemCoins: number;
-  transactions: Transaction[];
+  transactions: PaymentTransaction[];
 }

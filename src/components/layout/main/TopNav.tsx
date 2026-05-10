@@ -11,6 +11,19 @@ import {
   type MainNavRole,
 } from "./navigation";
 
+const getInitials = (value?: string | null) => {
+  if (!value?.trim()) {
+    return "U";
+  }
+
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+};
+
 const getRole = (role?: string, isAuthenticated?: boolean): MainNavRole => {
   if (!isAuthenticated || !role) {
     return "guest";
@@ -26,11 +39,15 @@ const getRole = (role?: string, isAuthenticated?: boolean): MainNavRole => {
 export function TopNav() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
   const pathname = usePathname();
 
   const role = getRole(user?.role, isAuthenticated);
   const visibleNavItems = topNavItems.filter(item => isNavItemVisible(item, role));
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
+  const avatarLabel = user?.displayName || user?.email || "User";
+  const avatarInitials = getInitials(avatarLabel);
+  const canRenderAvatar = Boolean(user?.avatarUrl && user.avatarUrl !== failedAvatarUrl);
 
   return (
     <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-zinc-950/40 backdrop-blur-xl bg-gradient-to-b from-zinc-900 to-transparent">
@@ -81,17 +98,24 @@ export function TopNav() {
             ) : (
               <>
                 <span className="material-symbols-outlined text-zinc-400 hover:text-white cursor-pointer transition-colors">notifications</span>
-                <div
-                  className="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-zinc-700 cursor-pointer relative"
+                <button
+                  type="button"
+                  aria-label="Mở menu tài khoản"
+                  className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-zinc-700 bg-muted text-sm font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                   onClick={() => setShowDropdown(value => !value)}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt="User profile"
-                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.displayName || user?.email || "User"}&background=19191c&color=f9f5f8`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                  {user?.avatarUrl && canRenderAvatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      alt="Ảnh đại diện người dùng"
+                      src={user.avatarUrl}
+                      className="h-full w-full object-cover"
+                      onError={() => setFailedAvatarUrl(user.avatarUrl || null)}
+                    />
+                  ) : (
+                    <span aria-hidden="true">{avatarInitials}</span>
+                  )}
+                </button>
 
                 {showDropdown && (
                   <div className="absolute top-12 right-0 w-48 bg-[#111] border border-zinc-800 rounded-sm shadow-2xl py-2 flex flex-col">

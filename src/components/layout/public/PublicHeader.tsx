@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { PublicBrand } from "./PublicBrand";
 import type { PublicNavLink } from "@/shared/navigation/branding";
-import { publicAuthLinks, publicMarketingLinks } from "@/shared/navigation/branding";
+import { publicMarketingLinks } from "@/shared/navigation/branding";
+import { PublicHeaderAuthActions } from "./PublicHeaderAuthActions";
 
 interface PublicHeaderProps {
   currentPath?: string;
@@ -46,22 +47,7 @@ export function PublicHeader({
 
           {children}
 
-          {showAuthActions ? (
-            <div className="hidden items-center gap-3 sm:flex">
-              <Link
-                href={publicAuthLinks[0].path}
-                className="px-4 py-2 text-sm font-bold text-white transition-colors duration-300 hover:text-[#ff8e80]"
-              >
-                {publicAuthLinks[0].label}
-              </Link>
-              <Link
-                href={publicAuthLinks[1].path}
-                className="rounded-sm bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors duration-300 hover:bg-red-500"
-              >
-                {publicAuthLinks[1].label}
-              </Link>
-            </div>
-          ) : null}
+          {showAuthActions ? <PublicHeaderAuthActions /> : null}
         </div>
       </div>
     </header>

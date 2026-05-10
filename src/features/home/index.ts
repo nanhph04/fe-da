@@ -1,4 +1,4 @@
-export { HomeFeature } from "./components/HomeFeature";
+export { HomePage } from "./components/HomePage";
 export { LandingPage } from "./components/LandingPage";
 export { MediaCard } from "./components/MediaCard";
 export { HeroSection } from "./components/HeroSection";

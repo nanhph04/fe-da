@@ -575,6 +575,7 @@ Response:
   "data": {
     "userId": "user-id",
     "email": "user@example.com",
+    "role": "user",
     "displayName": "Nguyen Van A",
     "avatarUrl": "https://cdn.example.com/avatars/user-1.png",
     "bio": "I create short-form media content.",
@@ -589,7 +590,121 @@ Response:
 ```
 
 
-2.2) PATCH /api/user/users/profile
+2.2) POST /api/user/users/profile/avatar/upload-url
+
+Muc dich:
+
+- Tao presigned URL de client upload avatar truc tiep len MinIO.
+
+Auth:
+
+- Protected.
+- Required header:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Body:
+
+```json
+{
+  "fileName": "avatar.png",
+  "contentType": "image/png",
+  "contentLength": 245678
+}
+```
+
+Field:
+
+- fileName: string, required.
+- contentType: "image/jpeg" | "image/png" | "image/webp", required.
+- contentLength: number, required, > 0, toi da 5242880.
+
+Response:
+
+- HTTP status: 200
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Avatar upload URL created successfully",
+  "data": {
+    "uploadUrl": "http://localhost:9000/identity-avatars/identity-service/avatars/user-1/550e8400-e29b-41d4-a716-446655440000.png?X-Amz-Algorithm=AWS4-HMAC-SHA256",
+    "objectKey": "identity-service/avatars/user-1/550e8400-e29b-41d4-a716-446655440000.png",
+    "expiresIn": 600,
+    "publicUrl": "http://localhost:9000/identity-avatars/identity-service/avatars/user-1/550e8400-e29b-41d4-a716-446655440000.png",
+    "requiredHeaders": {
+      "Content-Type": "image/png"
+    }
+  }
+}
+```
+
+FE flow:
+
+- Goi API nay truoc de lay presigned upload URL.
+- Upload file truc tiep len `data.uploadUrl` bang HTTP PUT.
+- Gui lai `Content-Type` dung voi `data.requiredHeaders`.
+- Sau khi upload thanh cong, goi API complete ben duoi.
+
+
+2.3) POST /api/user/users/profile/avatar/complete
+
+Muc dich:
+
+- Xac nhan object avatar da upload hop le va cap nhat profile.
+
+Auth:
+
+- Protected.
+- Required header:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Body:
+
+```json
+{
+  "objectKey": "identity-service/avatars/user-1/550e8400-e29b-41d4-a716-446655440000.png"
+}
+```
+
+Field:
+
+- objectKey: string, required.
+
+Response:
+
+- HTTP status: 200
+- Body CO boc ApiResponse.
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Avatar updated successfully",
+  "data": {
+    "userId": "user-id",
+    "email": "user@example.com",
+    "displayName": "Nguyen Van A",
+    "avatarUrl": "http://localhost:9000/identity-avatars/identity-service/avatars/user-1/550e8400-e29b-41d4-a716-446655440000.png",
+    "bio": "I create short-form media content.",
+    "phone": 84901234567,
+    "gender": "male",
+    "birthday": "1998-05-20T00:00:00.000Z",
+    "isCreator": false,
+    "createdAt": "2026-04-23T00:00:00.000Z",
+    "updatedAt": "2026-04-23T00:00:00.000Z"
+  }
+}
+```
+
+
+2.4) PATCH /api/user/users/profile
 
 Muc dich:
 
@@ -611,7 +726,6 @@ Tat ca field deu optional, nhung FE chi nen gui field can update.
 ```json
 {
   "displayName": "Nguyen Van A",
-  "avatarUrl": "https://cdn.example.com/avatars/user-1.png",
   "bio": "I create short-form media content.",
   "phone": 84901234567,
   "gender": "male",
@@ -622,15 +736,20 @@ Tat ca field deu optional, nhung FE chi nen gui field can update.
 Field:
 
 - displayName: string, optional, maxLength 100.
-- avatarUrl: string, optional, maxLength 512.
 - bio: string, optional.
 - phone: number, optional, integer, min 1.
 - gender: "male" | "women" | "female", optional.
 - birthday: string, optional, ISO date/date-time string.
 
+Luu y:
+
+- `avatarUrl` khong con duoc cap nhat qua `PATCH /profile`.
+- Avatar chi duoc doi qua flow `upload-url` + `complete`.
+
 System fields:
 
 - userId lay tu accessToken qua CurrentUserId, FE khong gui userId.
+- role lay tu auth context cua access token, FE khong gui role.
 - birthday duoc controller convert tu string sang Date.
 
 Response:
@@ -679,6 +798,8 @@ Protected, can Authorization Bearer:
 - POST /api/auth/change-password
 - POST /api/auth/logout
 - GET /api/user/users/profile
+- POST /api/user/users/profile/avatar/upload-url
+- POST /api/user/users/profile/avatar/complete
 - PATCH /api/user/users/profile
 
 

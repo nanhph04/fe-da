@@ -391,8 +391,6 @@ Neu FE goi thong qua API Gateway/BFF thi thuong gateway se tu gan cac header nay
 ```json
 {
   "coinAmount": 100,
-  "moneyAmount": 10000,
-  "exchangeRate": 100,
   "bankInfo": {
     "bankCode": "VCB",
     "bankName": "Vietcombank",
@@ -437,11 +435,15 @@ Neu FE goi thong qua API Gateway/BFF thi thuong gateway se tu gan cac header nay
 
 - Backend xu ly:
   - check vi user ton tai
+  - lay `exchangeRate` tu server config `WITHDRAWAL_EXCHANGE_RATE`
+  - tinh `moneyAmount = coinAmount * exchangeRate` tren backend
   - tru coin kha dung khoi vi theo co che freeze/rut
   - tao withdrawal `PENDING`
   - tao transaction `WITHDRAWAL`
 
 - FE luu y:
+  - khong gui `moneyAmount` hoac `exchangeRate`; backend se reject cac field la khi request validation bat `forbidNonWhitelisted`
+  - hien thi so tien rut dua tren response `moneyAmount` server tra ve
   - sau khi tao, coin user khong con dung duoc ngay vi da bi giu cho lenh rut
 
 ### 6.2 GET `/api/withdrawals/me`

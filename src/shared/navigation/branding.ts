@@ -10,12 +10,12 @@ export interface PublicNavLink {
 }
 
 export const publicMarketingLinks: PublicNavLink[] = [
-  { label: "Discover", path: "/landing" },
-  { label: "Library", path: "/library" },
-  { label: "Creator Studio", path: "/onboarding" },
+  { label: "Khám phá", path: "/" },
+  { label: "Thư viện", path: "/library" },
+  { label: "Xưởng sáng tạo", path: "/onboarding" },
 ];
 
 export const publicAuthLinks: PublicNavLink[] = [
-  { label: "Sign In", path: "/login" },
-  { label: "Sign Up", path: "/register" },
+  { label: "Đăng nhập", path: "/login" },
+  { label: "Đăng ký", path: "/register" },
 ];

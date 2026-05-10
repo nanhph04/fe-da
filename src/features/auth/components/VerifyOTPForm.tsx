@@ -110,7 +110,7 @@ export function VerifyOTPForm() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-black/35 px-6 py-6 backdrop-blur-xl md:px-8">
-        <PublicBrand href="/landing" />
+        <PublicBrand href="/" />
         <span className="font-headline text-sm font-bold tracking-tight text-zinc-400 transition-colors hover:text-white">Help</span>
       </header>
 

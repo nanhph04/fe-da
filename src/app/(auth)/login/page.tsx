@@ -2,8 +2,8 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign In | Velvet Gallery",
-  description: "Sign in to your Velvet Gallery account.",
+  title: "Đăng nhập | Velvet Gallery",
+  description: "Đăng nhập vào tài khoản Velvet Gallery của bạn.",
 };
 
 export default function LoginPage() {

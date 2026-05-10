@@ -7,12 +7,22 @@ export class PaymentService {
    * @param payload Payment request payload
    * @param idempotencyKey A unique key to prevent duplicate payments
    */
-  static async createPayment(payload: PaymentRequest, idempotencyKey: string): Promise<PaymentResponse> {
+  static async createPayment(
+    payload: PaymentRequest,
+    idempotencyKey: string,
+    requestId?: string
+  ): Promise<PaymentResponse> {
+    const headers: Record<string, string> = {
+      "idempotency-key": idempotencyKey,
+    };
+
+    if (requestId) {
+      headers["x-request-id"] = requestId;
+    }
+
     const response = await api.post<PaymentResponse>("/api/payments", payload, {
       requireAuth: true,
-      headers: {
-        "idempotency-key": idempotencyKey,
-      },
+      headers,
     });
     return response.data;
   }

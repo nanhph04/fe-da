@@ -66,7 +66,7 @@ export function RegisterForm() {
       <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/65 to-background" />
 
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-6 md:px-8">
-        <PublicBrand href="/landing" />
+        <PublicBrand href="/" />
         <span className="text-xs font-medium uppercase tracking-widest text-zinc-400 transition-colors hover:text-white">
           Help
         </span>

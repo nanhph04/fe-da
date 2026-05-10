@@ -10,17 +10,17 @@ import {
 
 function formatRemainingTime(value: number | null) {
   if (value === null || value <= 0) {
-    return "Sap xem xong";
+    return "Sắp xem xong";
   }
 
   const hours = Math.floor(value / 3600);
   const minutes = Math.ceil((value % 3600) / 60);
 
   if (hours > 0) {
-    return `${hours}h ${minutes}m con lai`;
+    return `${hours}h ${minutes}m còn lại`;
   }
 
-  return `${minutes}m con lai`;
+  return `${minutes}m còn lại`;
 }
 
 export function RecentlyWatched() {
@@ -66,7 +66,7 @@ export function RecentlyWatched() {
     <section>
       <div className="mb-8 flex items-end justify-between">
         <h2 className="text-3xl font-headline font-bold text-[#f9f5f8]">
-          Recently Watched
+          Xem tiếp
         </h2>
       </div>
 
@@ -84,7 +84,7 @@ export function RecentlyWatched() {
 
       {!isLoading && items.length === 0 ? (
         <div className="rounded-xl border border-[#262528] bg-[#131315] p-6 text-sm text-zinc-400">
-          Chua co video nao de xem tiep.
+          Chưa có dữ liệu.
         </div>
       ) : null}
 
@@ -107,15 +107,18 @@ export function RecentlyWatched() {
               className="group min-w-[320px] cursor-pointer snap-start"
             >
               <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-[#19191c]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={item.title}
-                  src={
-                    item.thumbnailUrl ||
-                    "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=600"
-                  }
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
+                {item.thumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt={item.title}
+                    src={item.thumbnailUrl}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+                    <span className="material-symbols-outlined text-5xl">movie</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
 
                 <div className="absolute bottom-0 left-0 h-1.5 w-full bg-zinc-800">
@@ -142,7 +145,7 @@ export function RecentlyWatched() {
               </h3>
               <p className="text-sm text-zinc-500">
                 {formatRemainingTime(item.remainingSeconds)} •{" "}
-                {item.viewCount.toLocaleString()} luot xem
+                {item.viewCount.toLocaleString()} lượt xem
               </p>
             </Link>
           );
