@@ -7,15 +7,16 @@ export interface AdminNavItem {
 }
 
 export const adminSidebarItems: AdminNavItem[] = [
-  { label: "Overview", path: "/admin", icon: "dashboard" },
-  { label: "User Management", path: "/admin/users", icon: "group", matchStartsWith: true },
-  { label: "Verification", path: "/admin/verifications", icon: "verified", matchStartsWith: true },
+  { label: "Dashboard", path: "/admin", icon: "dashboard" },
   { label: "Content Review", path: "/admin/content", icon: "movie", matchStartsWith: true },
+  { label: "Users", path: "/admin/users", icon: "group", matchStartsWith: true },
+  { label: "Verification", path: "/admin/verifications", icon: "verified", matchStartsWith: true },
   { label: "Categories", path: "/admin/categories", icon: "category", matchStartsWith: true },
-  { label: "Payouts & Revenue", path: "/admin/payouts", icon: "payments", matchStartsWith: true },
-  { label: "Audit Logs", path: "/admin/audit", icon: "history", disabled: true },
+  { label: "Finance", path: "/admin/payouts", icon: "payments", matchStartsWith: true },
+  { label: "Logs", path: "/admin/audit", icon: "history", disabled: true },
 ];
 
 export const adminFooterItems: AdminNavItem[] = [
-  { label: "Config", path: "/admin/settings", icon: "settings" },
+  { label: "System Settings", path: "/admin/settings", icon: "settings", matchStartsWith: true },
+  { label: "Content Policies", path: "/admin/settings/policies", icon: "policy", matchStartsWith: true },
 ];

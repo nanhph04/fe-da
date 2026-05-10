@@ -3,94 +3,142 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+const riskChecks = [
+  { label: "Suspicious Activity Check", value: "Passed", status: "passed" },
+  { label: "Velocity Check (Last 7 days)", value: "Normal (0 payouts)", status: "passed" },
+  { label: "KYC Status", value: "Verified & Active", status: "passed" },
+];
+
 export function PayoutDetailFeature() {
   const params = useParams();
   const id = params.id as string;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/admin/payouts">
-          <button className="p-2 hover:bg-[#19191c] rounded-full transition-colors flex items-center justify-center text-zinc-400 hover:text-white">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-        </Link>
-        <span className="font-headline text-2xl font-bold tracking-tight uppercase">Payout Detail: {id}</span>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="col-span-1 lg:col-span-8 space-y-6">
-          <div className="bg-[#0a0a0a] p-6 border border-zinc-800 rounded-sm">
-             <h3 className="font-headline text-lg font-bold text-white mb-6 uppercase tracking-widest border-b border-zinc-800 pb-4">Transaction Details</h3>
-             
-             <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Creator</p>
-                  <p className="text-sm font-bold text-white mt-1">Kaelen Studio (@kaelen_studio)</p>
-                  <p className="text-xs font-mono text-zinc-500 mt-1">Level 3 • Verified</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Amount Requested</p>
-                  <p className="text-2xl font-headline font-black text-[#fdc003] mt-1">12,500 AC</p>
-                  <p className="text-xs font-mono text-zinc-500 mt-1">Exchange Rate: 100 VND/AC</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Bank Details</p>
-                  <div className="mt-2 space-y-1 font-mono text-xs">
-                     <p className="text-white">Bank: VPBank (Vietnam Prosperity Joint-Stock Commercial Bank)</p>
-                     <p className="text-zinc-400">Account: **** **** 1245</p>
-                     <p className="text-zinc-400">Name: NGUYEN VAN A</p>
-                     <p className="text-emerald-500 flex items-center gap-1 mt-2"><span className="material-symbols-outlined text-[14px]">verified</span> Account Verified</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Final Payout Amount (Fiat)</p>
-                  <p className="text-2xl font-headline font-black text-emerald-500 mt-1">1,250,000 VND</p>
-                </div>
-             </div>
-          </div>
-
-          <div className="bg-[#0a0a0a] p-6 border border-zinc-800 rounded-sm">
-             <h3 className="font-headline text-lg font-bold text-white mb-4 uppercase tracking-widest border-b border-zinc-800 pb-4">Risk & Fraud Analysis</h3>
-             <ul className="space-y-3 font-mono text-xs">
-               <li className="flex items-center justify-between">
-                 <span className="text-zinc-400">Suspicious Activity Check</span>
-                 <span className="text-emerald-500">Passed</span>
-               </li>
-               <li className="flex items-center justify-between">
-                 <span className="text-zinc-400">Velocity Check (Last 7 days)</span>
-                 <span className="text-emerald-500">Normal (0 payouts)</span>
-               </li>
-               <li className="flex items-center justify-between">
-                 <span className="text-zinc-400">KYC Status</span>
-                 <span className="text-emerald-500">Verified & Active</span>
-               </li>
-             </ul>
+    <section className="space-y-8 animate-in fade-in duration-500">
+      <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/payouts"
+            className="flex h-10 w-10 items-center justify-center rounded border border-border/30 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="Back to payout queue"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              arrow_back
+            </span>
+          </Link>
+          <div>
+            <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-secondary">
+              Payout Request
+            </p>
+            <h1 className="font-headline text-3xl font-extrabold tracking-tight text-foreground">
+              {id}
+            </h1>
           </div>
         </div>
+        <span className="w-fit rounded-sm border border-secondary/30 bg-secondary/10 px-3 py-1 font-label text-xs font-bold uppercase tracking-widest text-secondary">
+          Pending Review
+        </span>
+      </header>
 
-        <div className="col-span-1 lg:col-span-4 space-y-6">
-          <div className="bg-[#111] border border-zinc-800 rounded-sm p-6 sticky top-28">
-             <h3 className="font-headline text-xl font-bold mb-6 text-white uppercase tracking-widest">Action</h3>
-             
-             <div className="space-y-6">
-                <div>
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 mb-3 block">Transaction Notes</label>
-                  <textarea className="w-full bg-black border border-zinc-800 rounded-sm text-sm p-3 focus:outline-none focus:border-[#fdc003] text-zinc-300 min-h-[100px]" placeholder="Reference ID or admin notes..."></textarea>
-                </div>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
+          <article className="rounded-lg border border-border/30 bg-card p-6">
+            <h2 className="mb-6 border-b border-border/30 pb-4 font-headline text-lg font-bold uppercase tracking-widest text-foreground">
+              Transaction Details
+            </h2>
 
-                <div className="space-y-3 pt-2">
-                  <button className="w-full py-3 bg-[#fdc003] text-black font-black uppercase tracking-widest text-xs rounded-sm hover:bg-[#ffe380] transition-colors shadow-lg shadow-[#fdc003]/20 flex items-center justify-center gap-2">
-                     <span className="material-symbols-outlined text-[16px]">account_balance</span> Execute Transfer
-                  </button>
-                  <button className="w-full py-3 bg-transparent border border-red-900/40 text-red-500 font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-red-900/20 transition-colors">
-                     Reject Payout
-                  </button>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div>
+                <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Creator</p>
+                <p className="mt-1 font-headline text-sm font-bold text-foreground">Kaelen Studio (@kaelen_studio)</p>
+                <p className="mt-1 font-mono text-xs text-muted-foreground">Level 3 • Verified</p>
+              </div>
+
+              <div>
+                <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Amount Requested
+                </p>
+                <p className="mt-1 font-headline text-3xl font-black text-secondary">12,500 AC</p>
+                <p className="mt-1 font-mono text-xs text-muted-foreground">Exchange Rate: 100 VND/AC</p>
+              </div>
+
+              <div>
+                <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Bank Details
+                </p>
+                <div className="mt-3 space-y-1 rounded-sm border border-border/30 bg-background p-4 font-mono text-xs">
+                  <p className="text-foreground">Bank: VPBank</p>
+                  <p className="text-muted-foreground">Account: **** **** 1245</p>
+                  <p className="text-muted-foreground">Name: NGUYEN VAN A</p>
+                  <p className="mt-3 flex items-center gap-1 text-emerald-400">
+                    <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                      verified
+                    </span>
+                    Account Verified
+                  </p>
                 </div>
-             </div>
-          </div>
+              </div>
+
+              <div>
+                <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Final Payout Amount
+                </p>
+                <p className="mt-1 font-headline text-3xl font-black text-emerald-400">1,250,000 VND</p>
+                <p className="mt-1 font-mono text-xs text-muted-foreground">Before external transfer fees</p>
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-lg border border-border/30 bg-card p-6">
+            <h2 className="mb-4 border-b border-border/30 pb-4 font-headline text-lg font-bold uppercase tracking-widest text-foreground">
+              Risk & Fraud Analysis
+            </h2>
+            <ul className="space-y-3 font-mono text-xs">
+              {riskChecks.map((check) => (
+                <li key={check.label} className="flex items-center justify-between gap-4 rounded-sm bg-background px-4 py-3">
+                  <span className="text-muted-foreground">{check.label}</span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                      check_circle
+                    </span>
+                    {check.value}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </article>
         </div>
+
+        <aside className="space-y-6 lg:col-span-4">
+          <div className="sticky top-24 rounded-lg border border-border/30 bg-card p-6">
+            <h2 className="mb-6 font-headline text-xl font-bold uppercase tracking-widest text-foreground">Action</h2>
+
+            <div className="space-y-6">
+              <div>
+                <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Transaction Notes
+                </label>
+                <textarea
+                  className="min-h-[120px] w-full rounded-sm border border-border/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-secondary"
+                  placeholder="Reference ID or admin notes..."
+                />
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <button className="flex w-full items-center justify-center gap-2 rounded-sm bg-secondary py-3 font-headline text-xs font-black uppercase tracking-widest text-black shadow-lg shadow-secondary/20 transition-opacity hover:opacity-90">
+                  <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                    account_balance
+                  </span>
+                  Execute Transfer
+                </button>
+                <button className="w-full rounded-sm border border-primary/40 bg-transparent py-3 font-headline text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10">
+                  Reject Payout
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
-    </div>
+    </section>
   );
 }

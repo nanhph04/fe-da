@@ -77,11 +77,12 @@ export function StudioMembershipFeature() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-12 w-full">
-      <div>
-        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Community Memberships</h1>
-        <p className="text-zinc-400">Offer exclusive perks, custom emojis, and loyalty badges to your most dedicated fans.</p>
-      </div>
+    <div className="mx-auto w-full max-w-7xl space-y-12 p-8">
+      <header>
+        <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Memberships</p>
+        <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tight text-foreground">Community Memberships</h1>
+        <p className="max-w-2xl font-body text-sm text-muted-foreground">Offer exclusive perks, member-only releases, and loyalty badges to your most dedicated viewers.</p>
+      </header>
 
       {isLoading ? (
         <div className="text-center text-zinc-500 py-12">Loading membership details...</div>

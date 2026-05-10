@@ -79,11 +79,11 @@ export function PayoutHistory({
   };
 
   return (
-    <section className={`rounded-md border border-zinc-800 bg-zinc-950/80 p-6 ${className}`}>
+    <section className={`rounded-lg border border-border/30 bg-card p-6 ${className}`}>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="font-headline text-2xl font-bold text-white">Payout History</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className="font-headline text-2xl font-bold text-foreground">Payout History</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Review withdrawal requests and payout processing states.
           </p>
         </div>

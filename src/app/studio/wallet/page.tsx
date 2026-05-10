@@ -23,8 +23,8 @@ export default async function StudioWalletPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-[#0e0e10]">
-      <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-7xl px-8 py-8">
         <StudioWalletDashboard
           initialWallet={walletResponse.data}
           initialStats={statsResponse.data}

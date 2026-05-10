@@ -13,49 +13,44 @@ export function StudioDashboardFeature() {
   const [dateRange, setDateRange] = useState<DateRange>("30D");
 
   return (
-    <section className="p-8 space-y-12 max-w-7xl mx-auto w-full">
-      {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <section className="mx-auto w-full max-w-7xl space-y-12 p-8">
+      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-black font-headline text-[#f9f5f8]">Dashboard Overview</h1>
-          <p className="text-zinc-500 font-medium mt-1">Here is what happening with your channel today.</p>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Studio</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Dashboard Overview</h1>
+          <p className="mt-2 font-body text-sm text-muted-foreground">Channel health, revenue, and audience signals for the current period.</p>
         </div>
-        
-        {/* Date Filter */}
-        <div className="flex bg-[#19191c] rounded-md p-1 border border-[#48474a]/20 w-fit">
-          <button 
-            onClick={() => setDateRange("7D")}
-            className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-all ${dateRange === "7D" ? 'bg-[#ff8e80] text-[#650003]' : 'text-zinc-500 hover:text-white'}`}
-          >
-            Last 7 Days
-          </button>
-          <button 
-            onClick={() => setDateRange("30D")}
-            className={`px-4 py-2 text-xs font-bold uppercase tracking-widest rounded transition-all ${dateRange === "30D" ? 'bg-[#ff8e80] text-[#650003]' : 'text-zinc-500 hover:text-white'}`}
-          >
-            Last 30 Days
-          </button>
+
+        <div className="flex w-fit rounded-md border border-border/30 bg-card p-1">
+          {(["7D", "30D"] as const).map((range) => (
+            <button
+              key={range}
+              type="button"
+              onClick={() => setDateRange(range)}
+              className={`rounded px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest transition-all ${
+                dateRange === range ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Last {range === "7D" ? "7" : "30"} Days
+            </button>
+          ))}
         </div>
-      </div>
+      </header>
 
       <StatCards dateRange={dateRange} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex flex-col">
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="flex flex-col lg:col-span-2">
           <EarningsGraph />
         </div>
-        <div>
-          <RecentActivities />
-        </div>
+        <RecentActivities />
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+
+      <div className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <TopVideos />
         </div>
-        <div>
-          <LatestComments />
-        </div>
+        <LatestComments />
       </div>
     </section>
   );

@@ -124,12 +124,12 @@ export function WithdrawFundsOverlay({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-md border border-zinc-800 bg-[#111113] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-lg border border-border/30 bg-card shadow-2xl">
+        <div className="flex items-center justify-between border-b border-border/30 px-6 py-4">
           <div>
-            <h2 className="font-headline text-2xl font-bold text-white">Request Payout</h2>
-            <p className="mt-1 text-sm text-zinc-400">
+            <h2 className="font-headline text-2xl font-bold text-foreground">Request Payout</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               Available balance: {wallet.balance.toLocaleString()} AC
             </p>
           </div>

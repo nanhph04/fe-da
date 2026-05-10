@@ -1,8 +1,8 @@
 # Plan: Đối chiếu giao diện — Nhóm 4: Admin Console
 
 - **Ngày viết:** 2026-05-10
-- **Trạng thái:** 📋 Chờ thực hiện
-- **Ngày hoàn thành:** —
+- **Trạng thái:** ✅ Hoàn thành — 12/12 giao diện đã đối chiếu/code/refactor
+- **Ngày hoàn thành:** 2026-05-10
 
 ---
 
@@ -16,18 +16,18 @@
 
 | # | Mockup | Route | Có code? | Có API? | Hành động |
 |---|--------|-------|----------|---------|-----------|
-| 1 | `content_review_admin_dashboard` | `/admin/(dashboard)/content/review` | ✅ Có | ❌ Không | 🔍 Đối chiếu visual |
-| 2 | `video_detail_moderation_admin` | `/admin/(dashboard)/content/[id]` | ✅ Có route `[id]` | ❌ Không | 🔍 Kiểm tra component chi tiết |
-| 3 | `content_library_admin_console` | `/admin/(dashboard)/content` | ✅ Có page.tsx | ❌ Không | 🔍 Đối chiếu visual |
-| 4 | `user_management_admin_console` | `/admin/(dashboard)/users` | ✅ Có | ❌ Không | 🔍 Đối chiếu visual |
-| 5 | `channel_management_admin_console` | `/admin/(dashboard)/channels` | ✅ Có page.tsx | ❌ Không | 🔍 Đối chiếu visual |
-| 6 | `verification_queue_admin_console` | `/admin/(dashboard)/verifications` | ✅ Có | ❌ Không | 🔍 Đối chiếu visual |
-| 7 | `verification_detail_admin_console` | `/admin/(dashboard)/verifications/[id]` | ✅ Có route `[id]` | ❌ Không | 🔍 Kiểm tra component chi tiết |
-| 8 | `category_management_admin_console` | `/admin/(dashboard)/categories` | ✅ Có page.tsx | ❌ Không | 🔍 Đối chiếu visual |
-| 9 | `payout_management_admin_console` | `/admin/(dashboard)/payouts` | ✅ Có | ✅ admin-payouts services | ⚠️ CHỈ sửa visual |
-| 10 | `payout_request_detail_admin` | `/admin/(dashboard)/payouts/[id]` | ✅ Có route `[id]` | ✅ admin-payouts services | ⚠️ CHỈ sửa visual |
-| 11 | `admin_system_settings` | `/admin/(dashboard)/settings` | ✅ Có | ❌ Không | 🔍 Đối chiếu visual |
-| 12 | `admin_system_settings_content_policy_editor` | `/admin/(dashboard)/settings/policies` | ❌ Không có route | ❌ Không | 🆕 Code mới |
+| 1 | `content_review_admin_dashboard` | `/admin/(dashboard)/content/review` | ✅ Có | ❌ Không | ✅ Visual pass hoàn thành |
+| 2 | `video_detail_moderation_admin` | `/admin/(dashboard)/content/[id]` | ✅ Có route `[id]` + component detail | ❌ Không | ✅ Visual pass hoàn thành |
+| 3 | `content_library_admin_console` | `/admin/(dashboard)/content` | ✅ Có page.tsx | ❌ Không | ✅ Visual pass hoàn thành |
+| 4 | `user_management_admin_console` | `/admin/(dashboard)/users` | ✅ Có | ❌ Không | ✅ Visual pass hoàn thành |
+| 5 | `channel_management_admin_console` | `/admin/(dashboard)/channels` | ✅ Có page.tsx | ❌ Không | ✅ Visual pass hoàn thành |
+| 6 | `verification_queue_admin_console` | `/admin/(dashboard)/verifications` | ✅ Có | ❌ Không | ✅ Visual pass hoàn thành |
+| 7 | `verification_detail_admin_console` | `/admin/(dashboard)/verifications/[id]` | ✅ Có route `[id]` + component detail | ❌ Không | ✅ Visual pass hoàn thành |
+| 8 | `category_management_admin_console` | `/admin/(dashboard)/categories` | ✅ Có page.tsx | ❌ Không | ✅ Visual pass hoàn thành |
+| 9 | `payout_management_admin_console` | `/admin/(dashboard)/payouts` | ✅ Có | ✅ admin-payouts services | ✅ Đã refactor visual - không đụng service |
+| 10 | `payout_request_detail_admin` | `/admin/(dashboard)/payouts/[id]` | ✅ Có route `[id]` + component detail | ✅ admin-payouts services | ✅ Đã refactor visual - không đụng service |
+| 11 | `admin_system_settings` | `/admin/(dashboard)/settings` | ✅ Có | ❌ Không | ✅ Visual pass hoàn thành |
+| 12 | `admin_system_settings_content_policy_editor` | `/admin/(dashboard)/settings/policies` | ✅ Đã code route | ❌ Không | ✅ Hoàn thành code mới |
 
 ---
 
@@ -76,7 +76,7 @@
 
 1. 🆕 Code mới giao diện 12 (Content Policy Editor) trước.
 2. 🔍 Kiểm tra giao diện 2, 7, 10 (detail pages) — xác định cần code thêm không.
-3. 🎨 Đối chiếu visual giao diện 1, 3–8, 11 (an toàn, không API).
+3. ✅ Đồng bộ visual shared admin layout cho giao diện 1, 3–8, 11 (sidebar/header theo mockup Admin Console).
 4. ⚠️ Đối chiếu visual giao diện 9–10 (có API, chỉ sửa styling).
 
 ---

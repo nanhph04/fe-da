@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { StudioWallet, WalletStats } from "../types/studio-wallet.types";
 
@@ -9,143 +9,122 @@ interface WalletOverviewProps {
   isLoading: boolean;
 }
 
+const summaryCards = [
+  { label: "Total Earned AC", icon: "stars", key: "total" },
+  { label: "Available for Payout", icon: "account_balance_wallet", key: "available" },
+  { label: "Pending Payouts", icon: "schedule", key: "pending" },
+] as const;
+
 export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletOverviewProps) {
+  const values = {
+    total: stats.totalBalance,
+    available: stats.availableBalance,
+    pending: stats.pendingPayouts,
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Main Balance Card */}
-      <div className="bg-[#131315] border border-[var(--color-border-700)] rounded-xl p-8">
-        <div className="flex items-center justify-between mb-6">
-          <span className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
-            Total Balance
-          </span>
-          <span className="px-3 py-1 bg-[var(--color-border-700)] rounded-full text-xs font-medium text-zinc-400">
-            {wallet.status}
-          </span>
-        </div>
-
-        <div className="space-y-2">
-          <span className="text-5xl font-extrabold font-headline text-white">
-            {stats.totalBalance.toLocaleString()}{" "}
-            <span className="text-2xl font-normal text-zinc-500">AC</span>
-          </span>
-          <p className="text-sm text-zinc-400">
-            ≈ ${(stats.totalBalance * 0.01).toFixed(2)} USD
-          </p>
-        </div>
-
-        {/* Balance Breakdown */}
-        <div className="mt-8 space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-zinc-400">Available</span>
-            <span className="text-lg font-semibold text-white">
-              {stats.availableBalance.toLocaleString()} AC
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-zinc-400">Pending</span>
-            <span className="text-lg font-semibold text-[var(--color-primary-600)]">
-              {stats.pendingPayouts.toLocaleString()} AC
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-zinc-400">Total Earned</span>
-            <span className="text-lg font-semibold text-[var(--color-secondary-600)]">
-              {stats.totalBalance.toLocaleString()} AC
-            </span>
-          </div>
-        </div>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {summaryCards.map((card) => (
+          <article
+            key={card.key}
+            className="group relative overflow-hidden rounded-lg border border-border/30 bg-card p-8 transition-colors hover:border-primary/30"
+          >
+            <div className="absolute -right-4 -top-4 opacity-[0.04] transition-opacity group-hover:opacity-10">
+              <span className="material-symbols-outlined text-[10rem]" aria-hidden="true">
+                {card.icon}
+              </span>
+            </div>
+            <p className="mb-3 font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              {card.label}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="font-headline text-5xl font-black tracking-tight text-foreground">
+                {values[card.key].toLocaleString()}
+              </p>
+              <span className="font-headline text-lg font-bold text-secondary">AC</span>
+            </div>
+            <div className="mt-6 flex items-center gap-2 font-label text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                {card.key === "total" ? "trending_up" : card.key === "available" ? "payments" : "hourglass_top"}
+              </span>
+              {card.key === "total" ? "+12.5% vs last month" : card.key === "available" ? "Ready to withdraw" : "Awaiting settlement"}
+            </div>
+          </article>
+        ))}
       </div>
 
-      {/* Quick Stats Card */}
-      <div className="bg-[#131315] border border-[var(--color-border-700)] rounded-xl p-8">
-        <h3 className="text-lg font-semibold font-headline text-white mb-6">
-          Studio Performance
-        </h3>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <section className="rounded-lg border border-border/30 bg-card p-8 lg:col-span-2">
+          <div className="mb-10 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-headline text-xl font-black tracking-tight text-foreground">Earnings Velocity</h2>
+              <p className="font-body text-xs text-muted-foreground">Monthly AC accumulation trend</p>
+            </div>
+            <select className="rounded-sm border border-border/40 bg-background px-4 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground outline-none focus:border-primary">
+              <option>Last 6 Months</option>
+              <option>Last Year</option>
+            </select>
+          </div>
 
-        <div className="space-y-6">
-          <StatItem
-            label="Videos"
-            value={wallet.videoCount}
-            icon="📹"
-            color="text-white"
-          />
-          <StatItem
-            label="Total Views"
-            value={stats.totalViews.toLocaleString()}
-            icon="👁️"
-            color="text-white"
-          />
-          <StatItem
-            label="Avg Revenue/Video"
-            value={`$${stats.avgRevenuePerVideo.toFixed(2)}`}
-            icon="💰"
-            color="text-[var(--color-secondary-600)]"
-          />
-          {stats.topPerformingVideo && (
-            <div className="pt-4 border-t border-[var(--color-border-700)]">
-              <p className="text-xs text-zinc-400 mb-2">Top Video</p>
-              <div className="flex items-center space-x-3">
-                <div className="text-xl">🏆</div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-white truncate">
-                    {stats.topPerformingVideo.title}
-                  </p>
-                  <p className="text-xs text-[var(--color-secondary-600)]">
-                    ${stats.topPerformingVideo.revenue} earned
-                  </p>
-                </div>
+          <div className="relative h-64 w-full">
+            <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+              <defs>
+                <linearGradient id="walletLine" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="100%" stopColor="hsl(var(--secondary))" />
+                </linearGradient>
+                <linearGradient id="walletFill" x1="0%" x2="0%" y1="0%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path d="M0,35 Q10,32 20,25 T40,15 T60,20 T80,8 T100,12" fill="none" stroke="url(#walletLine)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+              <path d="M0,35 Q10,32 20,25 T40,15 T60,20 T80,8 T100,12 V40 H0 Z" fill="url(#walletFill)" vectorEffect="non-scaling-stroke" />
+            </svg>
+            <div className="mt-6 flex justify-between font-label text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              <span>May</span>
+              <span>Jun</span>
+              <span>Jul</span>
+              <span>Aug</span>
+              <span>Sep</span>
+              <span>Oct</span>
+            </div>
+          </div>
+        </section>
+
+        <aside className="rounded-lg border border-border/30 bg-card p-8">
+          <h2 className="mb-8 font-headline text-xl font-black tracking-tight text-foreground">Redemption</h2>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-border/30 bg-background p-4">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Conversion Rate</span>
+                <span className="material-symbols-outlined text-sm text-secondary" aria-hidden="true">info</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-headline text-lg font-black text-foreground">100 AC</span>
+                <span className="font-body text-sm text-muted-foreground">=</span>
+                <span className="font-headline text-lg font-black text-secondary">10,000 VND</span>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Withdraw Button */}
-        <div className="mt-6">
-          <button
-            onClick={onWithdraw}
-            disabled={wallet.balance <= 0 || isLoading}
-            className="w-full py-3 bg-crimson-600 hover:bg-crimson-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-semibold flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </>
-            ) : (
-              <>
-                Withdraw Funds
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </>
-            )}
-          </button>
-        </div>
+            <div className="rounded-lg border border-border/30 bg-background p-4">
+              <span className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Wallet Status</span>
+              <p className="mt-2 font-headline text-lg font-bold text-foreground">{wallet.status}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onWithdraw}
+              disabled={wallet.balance <= 0 || isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-6 py-4 font-headline text-xs font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+            >
+              <span className="material-symbols-outlined text-base" aria-hidden="true">payments</span>
+              {isLoading ? "Processing..." : "Withdraw Now"}
+            </button>
+          </div>
+        </aside>
       </div>
-    </div>
-  );
-}
-
-interface StatItemProps {
-  label: string;
-  value: string | number;
-  icon: string;
-  color: string;
-}
-
-function StatItem({ label, value, icon, color }: StatItemProps) {
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-3">
-        <span className="text-xl">{icon}</span>
-        <span className="text-sm text-zinc-400">{label}</span>
-      </div>
-      <span className={`text-sm font-semibold ${color} font-headline`}>
-        {value}
-      </span>
     </div>
   );
 }

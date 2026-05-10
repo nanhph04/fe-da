@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Mock data based on typical Velvet Gallery categories
 const INITIAL_CATEGORIES = [
   { id: "1", name: "Cinematic Shorts", description: "High quality short films", videoCount: 142, status: "active" },
   { id: "2", name: "Documentaries", description: "In-depth true stories", videoCount: 89, status: "active" },
@@ -16,88 +15,83 @@ export function CategoryManagementFeature() {
   const [categories] = useState(INITIAL_CATEGORIES);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCategories = categories.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    category.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="flex-1 space-y-8 p-8 md:p-12 animate-in fade-in duration-500">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <section className="space-y-8 animate-in fade-in duration-500">
+      <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-black text-[#f9f5f8] tracking-tight font-headline">Category Management</h1>
-          <p className="text-[#adaaaa] mt-1 text-lg">Organize and curate content genres across the platform.</p>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Taxonomy</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Category Management</h1>
+          <p className="mt-2 font-body text-sm text-muted-foreground">Organize and curate content genres across the platform.</p>
         </div>
-        <Button className="bg-[#e11d48] hover:bg-[#be123c] text-white px-6 py-2 h-auto text-md font-bold rounded-md shadow-[0_0_15px_rgba(225,29,72,0.3)] transition-all">
+        <Button className="rounded-sm bg-primary px-6 py-2 font-headline font-bold text-primary-foreground transition-opacity hover:opacity-90">
           <span className="material-symbols-outlined mr-2">add</span>
           Create Category
         </Button>
-      </div>
+      </header>
 
-      {/* Filters and Search */}
-      <div className="flex items-center gap-4 bg-[#1a1a1a] p-4 rounded-xl border border-[#262626]">
+      <div className="flex items-center gap-4 rounded-lg border border-border/30 bg-card p-4">
         <div className="relative flex-1">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#adaaaa]">search</span>
-          <Input 
-            className="w-full bg-[#131313] border-[#262626] rounded-md py-6 pl-12 pr-5 text-[#f9f5f8] focus-visible:ring-[#e11d48]" 
-            placeholder="Search categories by name or description..." 
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">search</span>
+          <Input
+            className="w-full rounded-md border-border/30 bg-background py-6 pl-12 pr-5 text-foreground focus-visible:ring-primary"
+            placeholder="Search categories by name or description..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) => setSearchQuery(event.target.value)}
           />
         </div>
-        <Button variant="outline" className="h-[50px] px-6 bg-transparent border-[#262626] text-[#adaaaa] hover:text-white hover:bg-[#20201f]">
+        <Button variant="outline" className="h-[50px] border-border/40 bg-transparent px-6 text-muted-foreground hover:bg-muted hover:text-foreground">
           <span className="material-symbols-outlined mr-2">filter_list</span>
           Filter
         </Button>
       </div>
 
-      {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredCategories.map(category => (
-          <div key={category.id} className="bg-[#131313] p-6 rounded-xl border border-[#262626] hover:border-[#484847] hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all group relative overflow-hidden">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold text-[#f9f5f8]">{category.name}</h3>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {filteredCategories.map((category) => (
+          <article key={category.id} className="group relative overflow-hidden rounded-lg border border-border/30 bg-card p-6 transition-colors hover:border-border">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <h2 className="font-headline text-xl font-bold text-foreground">{category.name}</h2>
               <div className="flex items-center gap-2">
-                <span className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full ${category.status === 'active' ? 'bg-[#1a1a1a] text-[#f59e0b]' : 'bg-[#1a1a1a] text-[#adaaaa]'}`}>
+                <span className={`rounded-sm bg-muted px-3 py-1 font-label text-xs font-bold uppercase tracking-widest ${category.status === "active" ? "text-secondary" : "text-muted-foreground"}`}>
                   {category.status}
                 </span>
-                <button className="text-[#adaaaa] hover:text-white transition-colors">
+                <button className="text-muted-foreground transition-colors hover:text-foreground" aria-label={`More actions for ${category.name}`}>
                   <span className="material-symbols-outlined text-xl">more_vert</span>
                 </button>
               </div>
             </div>
-            
-            <p className="text-[#adaaaa] text-sm mb-6 line-clamp-2 h-10">
-              {category.description}
-            </p>
-            
-            <div className="flex justify-between items-center pt-4 border-t border-[#262626]">
-              <div className="flex items-center text-[#adaaaa] text-sm">
-                <span className="material-symbols-outlined text-lg mr-2">movie</span>
-                {category.videoCount} Videos
+
+            <p className="mb-6 line-clamp-2 h-10 font-body text-sm text-muted-foreground">{category.description}</p>
+
+            <div className="flex items-center justify-between border-t border-border/30 pt-4">
+              <div className="flex items-center font-body text-sm text-muted-foreground">
+                <span className="material-symbols-outlined mr-2 text-lg">movie</span>
+                {category.videoCount} videos
               </div>
-              
-              <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="text-[#adaaaa] hover:text-[#f59e0b] transition-colors" title="Edit">
+              <div className="flex gap-3 opacity-0 transition-opacity group-hover:opacity-100">
+                <button className="text-muted-foreground transition-colors hover:text-secondary" title="Edit">
                   <span className="material-symbols-outlined">edit</span>
                 </button>
-                <button className="text-[#adaaaa] hover:text-[#e11d48] transition-colors" title="Delete">
+                <button className="text-muted-foreground transition-colors hover:text-primary" title="Delete">
                   <span className="material-symbols-outlined">delete</span>
                 </button>
               </div>
             </div>
-          </div>
+          </article>
         ))}
-        
-        {filteredCategories.length === 0 && (
-          <div className="col-span-full py-12 text-center bg-[#131313] rounded-xl border border-[#262626]">
-            <span className="material-symbols-outlined text-4xl text-[#adaaaa] mb-4">category</span>
-            <h3 className="text-xl font-bold text-[#f9f5f8]">No categories found</h3>
-            <p className="text-[#adaaaa] mt-2">Try adjusting your search terms.</p>
+
+        {filteredCategories.length === 0 ? (
+          <div className="col-span-full rounded-lg border border-border/30 bg-card py-12 text-center">
+            <span className="material-symbols-outlined mb-4 text-4xl text-muted-foreground">category</span>
+            <h2 className="font-headline text-xl font-bold text-foreground">No categories found</h2>
+            <p className="mt-2 font-body text-sm text-muted-foreground">Try adjusting your search terms.</p>
           </div>
-        )}
+        ) : null}
       </div>
-    </div>
+    </section>
   );
 }

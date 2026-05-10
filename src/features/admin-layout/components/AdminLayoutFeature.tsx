@@ -28,17 +28,19 @@ export function AdminLayoutFeature({ children }: { children: ReactNode }) {
 
   if (isLoading || !isAuthenticated || user?.role !== "admin") {
     return (
-      <div className="min-h-screen bg-[#000] text-[#f9f5f8] flex items-center justify-center">
-        <p className="font-headline text-sm uppercase tracking-[0.2em] text-zinc-500">Authorizing admin console...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <p className="font-headline text-sm uppercase tracking-[0.2em] text-muted-foreground">
+          Authorizing admin console...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#000] text-[#f9f5f8] font-body selection:bg-red-600/30">
+    <div className="min-h-screen bg-background font-body text-foreground selection:bg-primary/30">
       <AdminSidebar />
       <AdminHeader />
-      <main className="ml-64 pt-24 pb-12 px-8 min-h-screen animate-in fade-in duration-500">
+      <main className="min-h-screen px-6 pb-12 pt-24 animate-in fade-in duration-500 md:ml-64 md:px-8">
         {children}
       </main>
     </div>

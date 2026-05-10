@@ -1,63 +1,72 @@
 export function StatCards({ dateRange = "30D" }: { dateRange?: "7D" | "30D" }) {
   const isWeekly = dateRange === "7D";
-  
+  const cards = [
+    {
+      label: "Total Views",
+      value: isWeekly ? "304,115" : "1,284,502",
+      icon: "visibility",
+      trend: isWeekly ? "+5.6%" : "+12.4%",
+      trendIcon: "trending_up",
+      tone: "primary",
+    },
+    {
+      label: "New Subscribers",
+      value: isWeekly ? "10,240" : "42,910",
+      icon: "person_add",
+      trend: isWeekly ? "+2.1%" : "+8.2%",
+      trendIcon: "trending_up",
+      tone: "primary",
+    },
+    {
+      label: "Earnings (Aura Coins)",
+      value: isWeekly ? "210,500" : "850,200",
+      icon: "monetization_on",
+      trend: isWeekly ? "≈ 21,050,000 VND" : "≈ 85,020,000 VND",
+      trendIcon: "payments",
+      tone: "secondary",
+    },
+    {
+      label: "Avg. Watch Time",
+      value: isWeekly ? "15m 10s" : "14m 22s",
+      icon: "schedule",
+      trend: isWeekly ? "+1.5%" : "-2.1%",
+      trendIcon: isWeekly ? "trending_up" : "trending_down",
+      tone: isWeekly ? "primary" : "danger",
+    },
+  ] as const;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in duration-500">
-      <div className="p-6 rounded-sm bg-[#19191c] border-none relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <span className="material-symbols-outlined text-6xl text-white">visibility</span>
-        </div>
-        <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">Total Views</p>
-        <h3 className="text-3xl font-headline font-extrabold mt-2 text-[#f9f5f8]">
-          {isWeekly ? "304,115" : "1,284,502"}
-        </h3>
-        <div className="mt-4 flex items-center gap-1 text-[#ff8e80] text-xs font-bold">
-          <span className="material-symbols-outlined text-sm">trending_up</span>
-          {isWeekly ? "+5.6%" : "+12.4%"} <span className="text-zinc-600 font-normal ml-1">vs prev. period</span>
-        </div>
-      </div>
-      
-      <div className="p-6 rounded-sm bg-[#19191c] border-none relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <span className="material-symbols-outlined text-6xl text-white">person_add</span>
-        </div>
-        <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">New Subscribers</p>
-        <h3 className="text-3xl font-headline font-extrabold mt-2 text-[#f9f5f8]">
-          {isWeekly ? "10,240" : "42,910"}
-        </h3>
-        <div className="mt-4 flex items-center gap-1 text-[#ff8e80] text-xs font-bold">
-          <span className="material-symbols-outlined text-sm">trending_up</span>
-          {isWeekly ? "+2.1%" : "+8.2%"} <span className="text-zinc-600 font-normal ml-1">vs prev. period</span>
-        </div>
-      </div>
-      
-      <div className="p-6 rounded-sm bg-[#19191c] border-none relative overflow-hidden group border-l-2 border-[#fdc003]/30">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <span className="material-symbols-outlined text-6xl text-[#fdc003]">monetization_on</span>
-        </div>
-        <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">Earnings (AC)</p>
-        <h3 className="text-3xl font-headline font-extrabold mt-2 text-[#fdc003]">
-          {isWeekly ? "210,500" : "850,200"}
-        </h3>
-        <div className="mt-4 flex items-center gap-1 text-[#fdc003] text-xs font-bold">
-          <span className="material-symbols-outlined text-sm">payments</span>
-          {isWeekly ? "≈ 21,050,000 VND" : "≈ 85,020,000 VND"}
-        </div>
-      </div>
-      
-      <div className="p-6 rounded-sm bg-[#19191c] border-none relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <span className="material-symbols-outlined text-6xl text-white">schedule</span>
-        </div>
-        <p className="text-zinc-500 text-xs uppercase tracking-widest font-bold">Avg. Watch Time</p>
-        <h3 className="text-3xl font-headline font-extrabold mt-2 text-[#f9f5f8]">
-          {isWeekly ? "15m 10s" : "14m 22s"}
-        </h3>
-        <div className={`mt-4 flex items-center gap-1 text-xs font-bold ${isWeekly ? 'text-[#ff8e80]' : 'text-red-500'}`}>
-          <span className="material-symbols-outlined text-sm">{isWeekly ? 'trending_up' : 'trending_down'}</span>
-          {isWeekly ? "+1.5%" : "-2.1%"} <span className="text-zinc-600 font-normal ml-1">vs prev. period</span>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-6 animate-in fade-in duration-500 md:grid-cols-2 lg:grid-cols-4">
+      {cards.map((card) => {
+        const isSecondary = card.tone === "secondary";
+        const isDanger = card.tone === "danger";
+
+        return (
+          <article
+            key={card.label}
+            className={`group relative overflow-hidden rounded-sm bg-card p-6 ${isSecondary ? "border-l-2 border-secondary/30" : ""}`}
+          >
+            <div className="absolute right-0 top-0 p-4 opacity-10 transition-opacity group-hover:opacity-20">
+              <span className={`material-symbols-outlined text-6xl ${isSecondary ? "text-secondary" : "text-foreground"}`}>
+                {card.icon}
+              </span>
+            </div>
+            <p className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{card.label}</p>
+            <h3 className={`mt-2 font-headline text-3xl font-extrabold ${isSecondary ? "text-secondary" : "text-foreground"}`}>
+              {card.value}
+            </h3>
+            <div
+              className={`mt-4 flex items-center gap-1 font-label text-xs font-bold ${
+                isSecondary ? "text-secondary" : isDanger ? "text-primary" : "text-primary"
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm">{card.trendIcon}</span>
+              {card.trend}
+              {!isSecondary ? <span className="ml-1 font-normal text-muted-foreground">vs prev. period</span> : null}
+            </div>
+          </article>
+        );
+      })}
     </div>
   );
 }

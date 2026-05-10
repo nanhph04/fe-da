@@ -3,66 +3,66 @@
 import Link from "next/link";
 import { useState } from "react";
 
+const reportsData = [
+  { id: "REP-001", targetId: "VID-099", title: "Dangerous Act", reporter: "Auto-Mod System", reason: "NSFW / violent content", confidence: "94%", date: "2 mins ago", tone: "danger" },
+  { id: "REP-002", targetId: "VID-102", title: "Copycat Movie", reporter: "3 Users", reason: "Copyright claim", confidence: "N/A", date: "1 hour ago", tone: "warning" },
+];
+
 export function ContentReviewQueueFeature() {
-  const [reports] = useState([
-    { id: "REP-001", targetId: "VID-099", title: "Dangerous Act", reporter: "Auto-Mod System", reason: "NSFW/Violent Content Detected", confidence: "94%", date: "2 mins ago", thumb: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&q=80&w=300" },
-    { id: "REP-002", targetId: "VID-102", title: "Copycat Movie", reporter: "3 Users", reason: "Copyright Infringement", confidence: "N/A", date: "1 hour ago", thumb: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&q=80&w=300" },
-  ]);
+  const [reports] = useState(reportsData);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex justify-between items-end mb-10 border-b border-[#262528] pb-6">
+    <section className="space-y-8 animate-in fade-in duration-500">
+      <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-4xl font-headline font-extrabold tracking-tight text-white uppercase">Content Review</h1>
-          <p className="text-zinc-500 font-mono text-sm mt-2 flex items-center gap-2">
-            <span className="material-symbols-outlined text-red-500 text-[16px]">warning</span> Action Required: 2 Pending
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Moderation Queue</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Content Review</h1>
+          <p className="mt-2 flex items-center gap-2 font-body text-sm text-muted-foreground">
+            <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">warning</span>
+            {reports.length} pending flags require administrator review.
           </p>
         </div>
-      </div>
+        <div className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 font-label text-xs font-bold uppercase tracking-widest text-primary">
+          Action Required
+        </div>
+      </header>
 
-      <div className="bg-[#111] border border-red-900/30 rounded-sm overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="bg-[#1a0000] border-b border-red-900/40 text-[10px] font-bold text-red-400 uppercase tracking-widest">
+              <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-4">Flagged Media</th>
                 <th className="px-6 py-4">Reporter</th>
                 <th className="px-6 py-4">Reason</th>
-                <th className="px-6 py-4">Auto-Mod Confidence</th>
+                <th className="px-6 py-4">Confidence</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#262528]">
-              {reports.map(rep => (
-                <tr key={rep.id} className="hover:bg-[#19191c] transition-colors group">
+            <tbody className="divide-y divide-border/30">
+              {reports.map((report) => (
+                <tr key={report.id} className="group transition-colors hover:bg-muted/40">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={rep.thumb} alt="Thumb" className="w-24 h-14 object-cover rounded-sm border border-zinc-800" />
+                      <div className="relative h-14 w-24 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]" />
                       <div>
-                        <p className="text-sm font-bold text-white font-headline">{rep.title}</p>
-                        <p className="text-[10px] text-zinc-500 font-mono">{rep.targetId} • {rep.date}</p>
+                        <p className="font-headline text-sm font-bold text-foreground">{report.title}</p>
+                        <p className="font-mono text-[10px] text-muted-foreground">{report.targetId} • {report.date}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-mono text-xs text-zinc-300">{rep.reporter}</td>
+                  <td className="px-6 py-4 font-mono text-xs text-foreground/80">{report.reporter}</td>
                   <td className="px-6 py-4">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-red-500">
-                      {rep.reason}
-                    </span>
+                    <span className="font-label text-[10px] font-bold uppercase tracking-widest text-primary">{report.reason}</span>
                   </td>
-                  <td className="px-6 py-4 text-xs font-mono">
-                    <span className={`px-2 py-0.5 rounded-sm border ${
-                      rep.confidence !== 'N/A' ? 'bg-red-600/20 text-red-500 border-red-600/30' : 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                    }`}>
-                      {rep.confidence}
+                  <td className="px-6 py-4 font-mono text-xs">
+                    <span className={`rounded-sm border px-2 py-0.5 ${report.confidence !== "N/A" ? "border-primary/30 bg-primary/10 text-primary" : "border-border/40 bg-muted text-muted-foreground"}`}>
+                      {report.confidence}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Link href={`/admin/content/${rep.targetId}`}>
-                      <button className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-sm text-xs font-bold transition-all uppercase tracking-widest">
-                        Review
-                      </button>
+                    <Link href={`/admin/content/${report.targetId}`} className="inline-flex rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
+                      Review
                     </Link>
                   </td>
                 </tr>
@@ -71,6 +71,6 @@ export function ContentReviewQueueFeature() {
           </table>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

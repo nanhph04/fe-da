@@ -8,126 +8,127 @@ interface UploadStep2MonetizationProps {
   onNext: () => void;
 }
 
+const pricePresets = [0, 100, 500, 1000];
+
 export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNext }: UploadStep2MonetizationProps) {
   return (
-    <div className="max-w-6xl mx-auto p-8 pb-32 w-full animate-in fade-in slide-in-from-right-4 duration-500">
-      {/* Page Header */}
-      <div className="mb-12">
-        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Monetization Strategy</h1>
-        <p className="text-zinc-400 max-w-2xl">Configure how viewers access your content and how your earnings are distributed. Aura Cinematic uses a transparent Aura Coin (AC) system for all transactions.</p>
-      </div>
+    <div className="mx-auto w-full max-w-6xl p-8 pb-32 animate-in fade-in slide-in-from-right-4 duration-500">
+      <header className="mb-12">
+        <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-secondary">Monetization</p>
+        <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tight text-foreground">Pricing Strategy</h1>
+        <p className="max-w-2xl font-body text-sm text-muted-foreground">
+          Configure how viewers access your content. Aura Coins power all unlocks and creator settlements.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Pricing Left Column */}
-        <div className="lg:col-span-7 space-y-8">
-          {/* Price Input Section */}
-          <section className="bg-[#131315] p-8 rounded-xl space-y-6 border border-[#262528]">
-            <div className="flex justify-between items-end">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <div className="space-y-8 lg:col-span-7">
+          <section className="space-y-6 rounded-lg border border-border/30 bg-card p-8">
+            <div className="flex items-end justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold font-headline text-white">Video Listing Price</h3>
-                <p className="text-sm text-zinc-400">Set the access fee in Aura Coins (set to 0 for Free)</p>
+                <h2 className="font-headline text-lg font-bold text-foreground">Video Listing Price</h2>
+                <p className="font-body text-sm text-muted-foreground">Set the access fee in Aura Coins. Use 0 AC for free releases.</p>
               </div>
-              <div className="text-right">
-                <span className="text-xs text-[#fdc003] font-bold uppercase tracking-widest">Premium Content</span>
-              </div>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-secondary">Premium Content</span>
             </div>
-            
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-[#fdc003] text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
-              </div>
-              <input 
-                type="number" 
+
+            <div className="group relative">
+              <span className="material-symbols-outlined pointer-events-none absolute inset-y-0 left-6 flex items-center text-2xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+                monetization_on
+              </span>
+              <input
+                type="number"
                 value={formData.price}
-                onChange={e => updateFormData({ price: Number(e.target.value) })}
+                onChange={(event) => updateFormData({ price: Number(event.target.value) })}
                 min={0}
-                className="w-full bg-black/50 border border-zinc-800 rounded-lg py-6 pl-16 pr-24 text-4xl font-extrabold font-headline text-white focus:ring-2 focus:ring-[#fdc003]/50 transition-all outline-none" 
+                className="w-full rounded-lg border border-border/40 bg-background py-6 pl-16 pr-24 font-headline text-4xl font-extrabold text-foreground outline-none transition-all focus:border-secondary focus:ring-2 focus:ring-secondary/30"
               />
-              <div className="absolute inset-y-0 right-6 flex items-center">
-                <span className="text-zinc-500 font-bold font-headline text-xl">AC</span>
-              </div>
+              <span className="absolute inset-y-0 right-6 flex items-center font-headline text-xl font-bold text-muted-foreground">AC</span>
             </div>
-            
-            <div className="flex gap-4">
-              <button type="button" onClick={() => updateFormData({ price: 0 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 0 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>Free</button>
-              <button type="button" onClick={() => updateFormData({ price: 100 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 100 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>100 AC</button>
-              <button type="button" onClick={() => updateFormData({ price: 500 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 500 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>500 AC</button>
-              <button type="button" onClick={() => updateFormData({ price: 1000 })} className={`px-4 py-2 rounded text-xs font-bold transition-colors border ${formData.price === 1000 ? 'bg-[#fdc003]/20 border-[#fdc003]/50 text-[#fdc003]' : 'bg-[#19191c] text-zinc-400 hover:text-white border-zinc-800'}`}>1,000 AC</button>
+
+            <div className="flex flex-wrap gap-4">
+              {pricePresets.map((price) => (
+                <button
+                  key={price}
+                  type="button"
+                  onClick={() => updateFormData({ price })}
+                  className={`rounded border px-4 py-2 font-headline text-xs font-bold transition-colors ${
+                    formData.price === price
+                      ? "border-secondary/50 bg-secondary/20 text-secondary"
+                      : "border-border/40 bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {price === 0 ? "Free" : `${price.toLocaleString()} AC`}
+                </button>
+              ))}
             </div>
           </section>
 
-          {/* Tier Required Section */}
-          <section className="bg-[#131315] p-8 rounded-xl border border-[#262528] space-y-4">
+          <section className="space-y-4 rounded-lg border border-border/30 bg-card p-8">
             <div>
-               <h3 className="text-lg font-bold font-headline text-white">Required Membership Tier</h3>
-               <p className="text-sm text-zinc-400">Optional. Only allow users with this tier level to access.</p>
+              <h2 className="font-headline text-lg font-bold text-foreground">Required Membership Tier</h2>
+              <p className="font-body text-sm text-muted-foreground">Optional. Restrict access to viewers with a specific tier level.</p>
             </div>
-            <select 
-               value={formData.requiredTierLevel || ""}
-               onChange={e => updateFormData({ requiredTierLevel: e.target.value ? Number(e.target.value) : null })}
-               className="w-full bg-[#19191c] border-0 rounded-lg text-sm text-zinc-200 font-medium py-3 px-4 focus:ring-1 focus:ring-[#ff8e80] transition-all outline-none"
+            <select
+              value={formData.requiredTierLevel || ""}
+              onChange={(event) => updateFormData({ requiredTierLevel: event.target.value ? Number(event.target.value) : null })}
+              className="w-full rounded-lg border border-border/40 bg-input px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
             >
-               <option value="">None (Available to all)</option>
-               <option value="1">Tier Level 1</option>
-               <option value="2">Tier Level 2</option>
-               <option value="3">Tier Level 3</option>
+              <option value="">None (Available to all)</option>
+              <option value="1">Tier Level 1</option>
+              <option value="2">Tier Level 2</option>
+              <option value="3">Tier Level 3</option>
             </select>
           </section>
         </div>
 
-        {/* Summary Right Column (Earnings Breakdown) */}
-        <div className="lg:col-span-5 sticky top-28">
-          <div className="bg-[#1f1f22] rounded-xl overflow-hidden shadow-2xl border border-[#262528]">
-            <div className="h-2 bg-gradient-to-r from-[#ff8e80] to-[#fdc003]"></div>
+        <aside className="sticky top-28 lg:col-span-5">
+          <div className="overflow-hidden rounded-lg border border-border/30 bg-card shadow-2xl">
+            <div className="h-2 bg-gradient-to-r from-primary to-secondary" />
             <div className="p-8">
-              <h3 className="text-xl font-bold font-headline text-white mb-8">Earnings Breakdown</h3>
-              
+              <h2 className="mb-8 font-headline text-xl font-bold text-foreground">Earnings Breakdown</h2>
+
               <div className="space-y-6">
-                <div className="flex justify-between items-center text-zinc-400">
-                  <span className="text-sm">Gross Price ({formData.price} AC)</span>
-                  <span className="font-headline text-white">{formData.price * 100} VND</span>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="font-body text-sm">Gross Price ({formData.price} AC)</span>
+                  <span className="font-headline text-foreground">{formData.price * 100} VND</span>
                 </div>
-                
-                <div className="flex justify-between items-center">
+
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-zinc-400">Platform Fee</span>
-                    <span className="px-1.5 py-0.5 bg-zinc-800 text-[10px] font-bold rounded text-zinc-400">10%</span>
+                    <span className="font-body text-sm text-muted-foreground">Platform Fee</span>
+                    <span className="rounded bg-muted px-1.5 py-0.5 font-label text-[10px] font-bold text-muted-foreground">10%</span>
                   </div>
-                  <span className="font-headline text-red-500">- {formData.price * 10} VND</span>
+                  <span className="font-headline text-primary">- {formData.price * 10} VND</span>
                 </div>
-                
-                <div className="h-[1px] bg-zinc-800"></div>
-                
+
+                <div className="h-px bg-border/30" />
+
                 <div className="pt-2">
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <p className="text-xs font-bold text-[#fdc003] uppercase tracking-widest mb-1">Estimated Net</p>
-                      <p className="text-4xl font-extrabold font-headline text-white">{formData.price * 90} VND</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-zinc-500 italic">Per purchase</p>
-                    </div>
-                  </div>
+                  <p className="mb-1 font-label text-xs font-bold uppercase tracking-widest text-secondary">Estimated Net</p>
+                  <p className="font-headline text-4xl font-extrabold text-foreground">{formData.price * 90} VND</p>
+                  <p className="mt-1 font-body text-xs text-muted-foreground">Per purchase</p>
                 </div>
-                
-                <div className="bg-[#fdc003]/10 p-4 rounded-lg border border-[#fdc003]/20 mt-4">
+
+                <div className="rounded-lg border border-secondary/20 bg-secondary/10 p-4">
                   <div className="flex gap-3">
-                    <span className="material-symbols-outlined text-[#fdc003] text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
-                    <p className="text-xs text-[#fdc003] leading-relaxed">
-                      Your content is protected by <strong className="font-bold">Aura DRM</strong>. Payments are settled automatically to your Wallet.
+                    <span className="material-symbols-outlined text-sm text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
+                    <p className="font-body text-xs leading-relaxed text-secondary">
+                      Aura DRM protects premium releases. Payments settle automatically to your Wallet after unlocks.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
 
-      {/* Footer Action Bar */}
-      <div className="fixed bottom-0 left-0 md:left-64 right-0 h-20 bg-[#131315]/80 backdrop-blur-2xl border-t border-[#262528] z-50 px-8 flex items-center justify-between">
-        <button onClick={onPrev} className="px-6 py-2.5 text-sm font-bold text-zinc-400 hover:text-white transition-colors">Back</button>
-        <button onClick={onNext} className="px-8 py-2.5 bg-gradient-to-r from-[#ff8e80] to-[#ff7668] text-[#650003] font-bold text-sm rounded-sm hover:shadow-[0_0_20px_rgba(255,142,128,0.3)] transition-all active:scale-95">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-20 items-center justify-between border-t border-border/30 bg-card/80 px-8 backdrop-blur-2xl md:left-64">
+        <button onClick={onPrev} className="px-6 py-2.5 font-headline text-sm font-bold text-muted-foreground transition-colors hover:text-foreground">
+          Back
+        </button>
+        <button onClick={onNext} className="rounded-sm bg-primary px-8 py-2.5 font-headline text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-95">
           Next: Review & Publish
         </button>
       </div>

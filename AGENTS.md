@@ -885,18 +885,18 @@ Khi code mới hoặc refactor giao diện, AI **phải** tham chiếu đến gi
 
 | Thư mục mockup | Route | Feature | Trạng thái |
 |----------------|-------|---------|-----------|
-| `content_review_admin_dashboard` | `/admin/(dashboard)/content` | `admin-content` | ✅ Đã code |
-| `video_detail_moderation_admin` | `/admin/(dashboard)/content/[id]` | `admin-content` | ⚠️ Kiểm tra |
-| `content_library_admin_console` | `/admin/(dashboard)/content/library` | `admin-content` | ⚠️ Kiểm tra |
+| `content_review_admin_dashboard` | `/admin/(dashboard)/content/review` | `admin-content` | ✅ Đã code |
+| `video_detail_moderation_admin` | `/admin/(dashboard)/content/[id]` | `admin-content` | ✅ Đã code |
+| `content_library_admin_console` | `/admin/(dashboard)/content` | `admin-content` | ✅ Đã code |
 | `user_management_admin_console` | `/admin/(dashboard)/users` | `admin-users` | ✅ Đã code |
-| `channel_management_admin_console` | `/admin/(dashboard)/channels` | `admin-users` | ⚠️ Kiểm tra |
-| `verification_queue_admin_console` | `/admin/(dashboard)/verification` | `admin-verification` | ✅ Đã code |
-| `verification_detail_admin_console` | `/admin/(dashboard)/verification/[id]` | `admin-verification` | ⚠️ Kiểm tra |
-| `category_management_admin_console` | `/admin/(dashboard)/categories` | `admin-content` | ⚠️ Kiểm tra |
+| `channel_management_admin_console` | `/admin/(dashboard)/channels` | `admin-users` | ✅ Đã code |
+| `verification_queue_admin_console` | `/admin/(dashboard)/verifications` | `admin-verification` | ✅ Đã code |
+| `verification_detail_admin_console` | `/admin/(dashboard)/verifications/[id]` | `admin-verification` | ✅ Đã code |
+| `category_management_admin_console` | `/admin/(dashboard)/categories` | `admin-content` | ✅ Đã code |
 | `payout_management_admin_console` | `/admin/(dashboard)/payouts` | `admin-payouts` | ✅ Đã code |
-| `payout_request_detail_admin` | `/admin/(dashboard)/payouts/[id]` | `admin-payouts` | ⚠️ Kiểm tra |
+| `payout_request_detail_admin` | `/admin/(dashboard)/payouts/[id]` | `admin-payouts` | ✅ Đã code |
 | `admin_system_settings` | `/admin/(dashboard)/settings` | `admin-settings` | ✅ Đã code |
-| `admin_system_settings_content_policy_editor` | `/admin/(dashboard)/settings/policies` | `admin-settings` | ⚠️ Kiểm tra |
+| `admin_system_settings_content_policy_editor` | `/admin/(dashboard)/settings/policies` | `admin-settings` | ✅ Đã code |
 
 > **Ký hiệu trạng thái:**
 > - ✅ = Đã code xong trong Next.js

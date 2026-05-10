@@ -1,8 +1,8 @@
 # Plan: Đối chiếu giao diện — Nhóm 3: Creator / Studio
 
 - **Ngày viết:** 2026-05-10
-- **Trạng thái:** 📋 Chờ thực hiện
-- **Ngày hoàn thành:** —
+- **Trạng thái:** ✅ Hoàn thành — 10/10 giao diện đã đối chiếu/code/refactor
+- **Ngày hoàn thành:** 2026-05-10
 
 ---
 
@@ -16,16 +16,16 @@
 
 | # | Mockup | Route | Có code? | Có API? | Hành động |
 |---|--------|-------|----------|---------|-----------|
-| 1 | `creator_dashboard_velvet_gallery` | `/studio` | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 2 | `creator_studio_content_library` | `/studio/content` | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 3 | `step_1_details_access_level` | `/studio/upload` (step 1) | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 4 | `step_2_pricing_monetization` | `/studio/upload` (step 2) | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 5 | `step_3_visibility_review_final_sync` | `/studio/upload` (step 3) | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 6 | `creator_wallet_payouts_synchronized_ac_logic` | `/studio/wallet` | ✅ Có | ✅ **8 services** | ⚠️ CHỈ sửa visual |
-| 7 | `withdraw_funds_creator_studio` | `/studio/wallet/withdraw` | ✅ Có | ✅ withdrawalService | ⚠️ CHỈ sửa visual |
-| 8 | `membership_eligibility_creator_studio` | `/studio/memberships` | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 9 | `membership_management_creator_studio` | `/studio/memberships` | ✅ Có | ❌ Không service | 🔍 Đối chiếu visual |
-| 10 | `membership_tier_editor_velvet_gallery` | `/studio/memberships/edit` | ⚠️ Cần kiểm tra | ❌ Không rõ | 🔍 Kiểm tra → code nếu thiếu |
+| 1 | `creator_dashboard_velvet_gallery` | `/studio` | ✅ Có | ❌ Không service | ✅ Visual pass hoàn thành |
+| 2 | `creator_studio_content_library` | `/studio/content` | ✅ Có | ✅ mediaService owner videos | ✅ Visual pass hoàn thành - không đụng service |
+| 3 | `step_1_details_access_level` | `/studio/upload` (step 1) | ✅ Có | ❌ Không service | ✅ Visual token pass hoàn thành |
+| 4 | `step_2_pricing_monetization` | `/studio/upload` (step 2) | ✅ Có | ❌ Không service | ✅ Visual pass hoàn thành |
+| 5 | `step_3_visibility_review_final_sync` | `/studio/upload` (step 3) | ✅ Có | ❌ Không service | ✅ **ĐÃ HOÀN THÀNH** - Layout 2 cột, components con tách riêng |
+| 6 | `creator_wallet_payouts_synchronized_ac_logic` | `/studio/wallet` | ✅ Có | ✅ **8 services** | ✅ Visual pass hoàn thành - không đụng service/hook/provider |
+| 7 | `withdraw_funds_creator_studio` | `/studio/wallet/withdraw` | ✅ Đã tạo route + page feature | ✅ payout/withdraw services | ✅ Visual pass hoàn thành - không sửa service |
+| 8 | `membership_eligibility_creator_studio` | `/studio/memberships` | ✅ Có | ✅ mediaService channel read | ✅ Visual pass hoàn thành - không đụng service |
+| 9 | `membership_management_creator_studio` | `/studio/memberships` | ✅ Có | ✅ mediaService channel read | ✅ Visual pass hoàn thành - không đụng service |
+| 10 | `membership_tier_editor_velvet_gallery` | `/studio/memberships/edit` | ✅ Đã tạo route + component | ❌ Không service | ✅ Hoàn thành 2-column editor |
 
 ---
 

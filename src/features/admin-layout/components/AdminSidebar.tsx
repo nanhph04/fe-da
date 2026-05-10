@@ -5,32 +5,46 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { adminFooterItems, adminSidebarItems } from "./navigation";
 
+function isActivePath(pathname: string | null, path: string, matchStartsWith?: boolean) {
+  if (!pathname) {
+    return false;
+  }
+
+  if (path === "/admin") {
+    return pathname === "/admin";
+  }
+
+  return pathname === path || Boolean(matchStartsWith && pathname.startsWith(path));
+}
+
 export function AdminSidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
 
   return (
-    <aside className="fixed left-0 top-0 h-full flex flex-col py-6 border-r border-[#262528] bg-[#0e0e10] font-body text-sm font-medium w-64 z-50">
-      <div className="px-6 mb-10">
-        <span className="text-xl font-black font-headline text-white tracking-tight uppercase">Velvet Gallery</span>
-        <p className="text-[10px] uppercase tracking-widest text-[#ff8e80] mt-1 font-bold">Admin Console</p>
+    <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col border-r border-border/30 bg-sidebar py-6 font-body text-sm font-medium shadow-[4px_0_24px_rgba(0,0,0,0.5)] md:flex">
+      <div className="mb-8 flex flex-col items-start gap-2 px-6">
+        <span className="font-display text-lg font-bold tracking-tight text-foreground">System Admin</span>
+        <span className="font-body text-xs text-muted-foreground">Global Configuration</span>
       </div>
-      
-      <nav className="flex-1 px-3 space-y-2 relative">
+
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3">
         {adminSidebarItems.map((item) => {
-          const isActive =
-            pathname === item.path ||
-            (!!item.matchStartsWith && pathname?.startsWith(item.path));
-          const className = `flex items-center gap-3 px-3 py-3 rounded transition-all ease-in-out font-headline tracking-wide text-xs uppercase ${
+          const isActive = isActivePath(pathname, item.path, item.matchStartsWith);
+          const className = `flex items-center gap-3 rounded-lg px-4 py-3 transition-all ${
             item.disabled
-              ? "text-zinc-700 border border-dashed border-[#262528] cursor-not-allowed"
+              ? "cursor-not-allowed border border-dashed border-border/30 text-muted-foreground/40"
               : isActive
-                ? "text-red-500 border-r-2 border-red-600 bg-gradient-to-r from-red-600/10 to-transparent font-bold"
-                : "text-zinc-500 hover:text-zinc-200 hover:bg-[#19191c]"
+                ? "scale-[0.99] bg-muted/60 text-primary shadow-[inset_0_0_12px_rgba(229,9,20,0.1)]"
+                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
           }`;
           const content = (
             <>
-              <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
+              <span
+                className="material-symbols-outlined text-[20px]"
+                style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
+                aria-hidden="true"
+              >
                 {item.icon}
               </span>
               <span>{item.label}</span>
@@ -46,48 +60,53 @@ export function AdminSidebar() {
           }
 
           return (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={className}
-            >
+            <Link key={item.path} href={item.path} className={className}>
               {content}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-6 py-4">
-        <div className="bg-[#131315] p-4 rounded-lg border border-[#262528]">
-          <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-2">System Status</p>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="text-xs text-zinc-200 font-mono">100% HEALTHY</span>
-          </div>
-        </div>
-      </div>
+      <footer className="mt-auto space-y-1 border-t border-border/20 px-3 pt-6">
+        {adminFooterItems.map((item) => {
+          const isActive = isActivePath(pathname, item.path, item.matchStartsWith);
 
-      <footer className="px-3 space-y-1 pt-4 border-t border-[#262528]">
-        {adminFooterItems.map((item) => (
-          <Link 
-            key={item.path}
-            href={item.path}
-            className={`flex items-center gap-3 px-3 py-2 font-headline text-xs uppercase tracking-widest transition-all ${
-              pathname === item.path
-                ? "text-red-500 border-r-2 border-red-600 bg-gradient-to-r from-red-600/10 to-transparent font-bold"
-                : "text-zinc-500 hover:text-zinc-200 hover:bg-[#19191c]"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
-            <span>{item.label}</span>
-          </Link>
-        ))}
-        <button 
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-all ${
+                isActive
+                  ? "scale-[0.99] bg-muted/60 text-primary shadow-[inset_0_0_12px_rgba(229,9,20,0.1)]"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+                {item.icon}
+              </span>
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+
+        <div className="px-4 pt-4">
+          <button className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 font-headline text-sm font-semibold text-primary-foreground shadow-[0_4px_12px_rgba(229,9,20,0.2)] transition-opacity hover:opacity-90">
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">
+              rocket_launch
+            </span>
+            Deploy Updates
+          </button>
+        </div>
+
+        <button
+          type="button"
           onClick={logout}
-          className="flex w-full items-center gap-3 px-3 py-2 text-zinc-500 hover:text-red-500 font-headline text-xs uppercase tracking-widest cursor-pointer"
+          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-primary"
         >
-          <span className="material-symbols-outlined text-[18px]">logout</span>
-          <span>Terminate</span>
+          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+            logout
+          </span>
+          <span>Sign Out</span>
         </button>
       </footer>
     </aside>

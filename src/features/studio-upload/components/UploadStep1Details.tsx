@@ -39,7 +39,7 @@ export function UploadStep1Details({
           <span className="mb-2 block font-headline text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             New Upload
           </span>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tighter text-[#f9f5f8] md:text-5xl">
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">
             Video Details
           </h1>
         </div>
@@ -61,7 +61,7 @@ export function UploadStep1Details({
       >
         <div className="space-y-8 lg:col-span-8">
           <div className="group">
-            <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-zinc-500 transition-colors group-focus-within:text-[#ff8e80]">
+            <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors group-focus-within:text-primary">
               Video Title
             </label>
             <input
@@ -69,7 +69,7 @@ export function UploadStep1Details({
               maxLength={200}
               value={formData.title}
               onChange={e => updateFormData({ title: e.target.value })}
-              className="w-full border-0 border-b-2 border-zinc-700 bg-transparent px-0 py-4 font-headline text-xl font-semibold text-[#f9f5f8] outline-none transition-all placeholder-zinc-700 focus:border-[#ff8e80] focus:ring-0"
+              className="w-full border-0 border-b-2 border-border/50 bg-transparent px-0 py-4 font-headline text-xl font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:ring-0"
             />
             <div className="mt-1 flex justify-end">
               <span className="text-[10px] text-zinc-600">
@@ -78,9 +78,9 @@ export function UploadStep1Details({
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#262528] bg-[#131315] p-6">
-            <div className="mb-4 flex items-center justify-between border-b border-[#262528] pb-4">
-              <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+          <div className="rounded-lg border border-border/30 bg-card p-6">
+            <div className="mb-4 flex items-center justify-between border-b border-border/30 pb-4">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Description
               </label>
             </div>

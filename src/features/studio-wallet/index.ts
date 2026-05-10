@@ -11,3 +11,4 @@ export { StudioWalletFeature } from "./components/StudioWalletFeature";
 export { WalletDashboard } from "./components/WalletDashboard";
 export { PayoutHistory } from "./components/PayoutHistory";
 export { WithdrawFundsOverlay } from "./components/WithdrawFundsOverlayv2";
+export { WithdrawFundsPageFeature } from "./components/WithdrawFundsPageFeature";
