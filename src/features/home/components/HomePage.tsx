@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
 import { HomePageAccountCta } from "./HomePageAccountCta";
+import { HomePageStudioCta } from "./HomePageStudioCta";
 
 export function HomePage() {
   return (
@@ -59,15 +60,7 @@ export function HomePage() {
                 arrow_forward
               </span>
             </Link>
-            <Link
-              href="/onboarding"
-              className="flex w-full items-center justify-center space-x-2 rounded-sm border border-border/15 bg-card/40 px-8 py-4 font-semibold tracking-wide text-foreground backdrop-blur-xl transition-all duration-300 hover:bg-muted sm:w-auto"
-            >
-              <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                play_arrow
-              </span>
-              <span>Xem trailer</span>
-            </Link>
+            <HomePageStudioCta />
           </div>
         </div>
       </section>
