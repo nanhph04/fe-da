@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export interface MediaCardProps {
   title: string;
@@ -6,10 +7,11 @@ export interface MediaCardProps {
   views: string;
   imageUrl: string;
   duration?: string;
+  href?: string;
 }
 
-export function MediaCard({ title, creator, views, imageUrl, duration }: MediaCardProps) {
-  return (
+export function MediaCard({ title, creator, views, imageUrl, duration, href }: MediaCardProps) {
+  const card = (
     <div className="group relative w-64 flex-shrink-0 cursor-pointer">
       {/* Image Container */}
       <div className="relative aspect-[16/9] overflow-hidden rounded-sm bg-[#1a1a1a]">
@@ -45,5 +47,15 @@ export function MediaCard({ title, creator, views, imageUrl, duration }: MediaCa
         <p className="text-xs text-white/30">{views} views</p>
       </div>
     </div>
+  );
+
+  if (!href) {
+    return card;
+  }
+
+  return (
+    <Link href={href} aria-label={`Watch ${title}`} className="flex-shrink-0">
+      {card}
+    </Link>
   );
 }

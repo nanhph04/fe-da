@@ -42,6 +42,16 @@ export interface PublicVideoMetadata {
   updatedAt: string;
 }
 
+export interface CategoryPublic {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  status: "active";
+  createdAt: string;
+  updatedAt: string;
+}
+
 export async function getLatestVideosCached(limit = 10) {
   "use cache";
 
@@ -64,6 +74,58 @@ export async function getLatestVideosCached(limit = 10) {
         apiError.mess ||
         apiError.message ||
         "Unable to load latest videos from the media service.",
+      errors: apiError.errors,
+    } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
+  }
+}
+
+export async function getCategoriesCached() {
+  "use cache";
+
+  cacheLife("hours");
+  cacheTag("media:categories");
+
+  try {
+    return await fetchPublicApi<CategoryPublic[]>("/api/media/categories");
+  } catch (error) {
+    const apiError = error as PublicApiError;
+
+    return {
+      success: false,
+      code: apiError.code ?? 503,
+      data: [],
+      mess:
+        apiError.mess ||
+        apiError.message ||
+        "Unable to load categories from the media service.",
+      errors: apiError.errors,
+    } satisfies PublicApiResponse<CategoryPublic[]>;
+  }
+}
+
+export async function getVideosByCategoryCached(category: string, limit = 6) {
+  "use cache";
+
+  cacheLife("minutes");
+  cacheTag("media:category-videos", `media:category:${category}`);
+
+  const query = new URLSearchParams({ category, limit: String(limit) });
+
+  try {
+    return await fetchPublicApi<PublicDiscoveryVideo[]>(
+      `/api/media/videos/discovery/by-category?${query.toString()}`
+    );
+  } catch (error) {
+    const apiError = error as PublicApiError;
+
+    return {
+      success: false,
+      code: apiError.code ?? 503,
+      data: [],
+      mess:
+        apiError.mess ||
+        apiError.message ||
+        "Unable to load category videos from the media service.",
       errors: apiError.errors,
     } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
   }

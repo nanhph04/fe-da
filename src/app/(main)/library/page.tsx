@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ProfileHeader } from "@/features/library/components/ProfileHeader";
 import { RecentlyWatched } from "@/features/library/components/RecentlyWatched";
 import { PurchasedLibrary } from "@/features/library/components/PurchasedLibrary";
@@ -11,6 +12,31 @@ import { Button } from "@/components/ui/button";
 
 export default function LibraryPage() {
   const { user, isLoading } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const refreshLibrary = () => setRefreshKey(value => value + 1);
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        refreshLibrary();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshLibrary();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   if (isLoading) return null;
 
@@ -36,7 +62,7 @@ export default function LibraryPage() {
   return (
     <main className="min-h-screen bg-background pt-20 md:pl-64">
       <div className="mx-auto max-w-7xl space-y-16 px-8 py-12 animate-in fade-in duration-500">
-        <ProfileHeader />
+        <ProfileHeader refreshKey={refreshKey} />
         
         <div className="flex items-center gap-6 border-b border-border/20 pb-4">
           <span className="-mb-[18px] border-b-2 border-primary pb-4 font-headline text-sm font-bold uppercase tracking-widest text-primary">
@@ -47,11 +73,11 @@ export default function LibraryPage() {
            </span>
          </div>
 
-        <RecentlyWatched />
-        <PurchasedLibrary />
+        <RecentlyWatched refreshKey={refreshKey} />
+        <PurchasedLibrary refreshKey={refreshKey} />
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          <Subscriptions />
-          <AccountActivity />
+          <Subscriptions refreshKey={refreshKey} />
+          <AccountActivity refreshKey={refreshKey} />
         </section>
       </div>
     </main>

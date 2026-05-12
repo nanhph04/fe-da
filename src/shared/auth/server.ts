@@ -1,7 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { fetchServerApi } from "@/shared/api/server";
+import { getServerSessionProfile } from "@/shared/api/server";
 
 export interface ServerUserProfile {
   userId: string;
@@ -9,27 +9,24 @@ export interface ServerUserProfile {
   displayName?: string;
   avatarUrl?: string;
   bio?: string;
-  role: "viewer" | "creator" | "admin";
+  phone?: number;
+  gender?: "male" | "women" | "female" | null;
+  birthday?: string | null;
+  role: "user" | "viewer" | "creator" | "admin";
   isCreator: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export async function getServerUserProfile() {
-  const response = await fetchServerApi<ServerUserProfile>(
-    "/api/user/users/profile",
-    {
-      requireAuth: true,
-      cache: "no-store",
-    }
-  );
-
-  return response.data;
+  return getServerSessionProfile();
 }
 
 export async function requireAuthenticatedUser(redirectPath: string) {
   try {
     return await getServerUserProfile();
   } catch {
-    redirect(`/auth/login?redirect=${encodeURIComponent(redirectPath)}`);
+    redirect(`/login?redirect=${encodeURIComponent(redirectPath)}`);
   }
 }
 

@@ -63,7 +63,11 @@ function getActivityMeta(transaction: Transaction) {
   };
 }
 
-export function AccountActivity() {
+interface AccountActivityProps {
+  refreshKey?: number;
+}
+
+export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +77,7 @@ export function AccountActivity() {
 
     async function loadTransactions() {
       try {
+        setIsLoading(true);
         setError(null);
         const data = await TransactionService.getMyTransactions();
         if (isMounted) {
@@ -96,7 +101,7 @@ export function AccountActivity() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   return (
     <div className="space-y-6 lg:col-span-2">

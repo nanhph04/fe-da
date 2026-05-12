@@ -55,8 +55,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const token = api.getToken();
       if (token) {
         await fetchProfile();
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+
+      try {
+        const sessionRes = await authService.getSessionProfile();
+        if (sessionRes.success && sessionRes.data) {
+          setUser(sessionRes.data);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initAuth();

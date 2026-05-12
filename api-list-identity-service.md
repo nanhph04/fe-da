@@ -1,6 +1,6 @@
 IDENTITY SERVICE API LIST - FRONTEND CONTRACT
 
-Last updated: 2026-04-26
+Last updated: 2026-05-12
 
 Muc dich
 ========
@@ -53,6 +53,11 @@ Nguyen tac ghep API cho FE
 
    await fetch(`${gatewayBaseUrl}/api/auth/refresh`, {
      method: "POST",
+     credentials: "include",
+   });
+
+   await fetch(`${gatewayBaseUrl}/api/auth/session/profile`, {
+     method: "GET",
      credentials: "include",
    });
    ```
@@ -310,7 +315,65 @@ FE flow:
 - Neu refresh that bai, clear local auth state va dieu huong ve login.
 
 
-1.5) POST /api/auth/resend-otp
+1.5) GET /api/auth/session/profile
+
+Muc dich:
+
+- Cho SSR guard kiem tra session hien tai bang refresh_token httpOnly cookie.
+- Lay profile hien tai ma KHONG rotate refresh token.
+- API nay KHONG cap accessToken moi va KHONG set lai refresh_token cookie.
+
+Auth:
+
+- Public o gateway.
+- Khong can Authorization header.
+
+Body:
+
+- Khong gui body.
+
+Cookie request:
+
+- Browser/SSR fetch gui cookie `refresh_token` neu bat credentials/include cookie.
+
+Response:
+
+- HTTP status: 200
+- KHONG co Set-Cookie moi.
+- KHONG co accessToken/refreshToken trong body.
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Session profile fetched successfully",
+  "data": {
+    "userId": "user-id",
+    "email": "user@example.com",
+    "role": "user",
+    "displayName": "User",
+    "avatarUrl": "",
+    "bio": "",
+    "phone": 0,
+    "gender": null,
+    "birthday": null,
+    "isCreator": false,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  }
+}
+```
+
+FE/SSR flow:
+
+- Dung cho SSR middleware/guard can biet user dang login hay chua.
+- Neu success, SSR co the dung profile/role de render hoac redirect.
+- Neu fail 401, xem nhu chua co session hop le.
+- Khong dung endpoint nay de refresh accessToken; khi can accessToken moi van goi
+  `POST /api/auth/refresh`.
+
+
+1.6) POST /api/auth/resend-otp
 
 Muc dich:
 
@@ -356,7 +419,7 @@ Luu y:
 - FE nen hien `mess` hoac `data.message`.
 
 
-1.6) POST /api/auth/forgot-password
+1.7) POST /api/auth/forgot-password
 
 Muc dich:
 
@@ -396,7 +459,7 @@ Response:
 ```
 
 
-1.7) POST /api/auth/reset-password
+1.8) POST /api/auth/reset-password
 
 Muc dich:
 
@@ -439,7 +502,7 @@ Response:
 ```
 
 
-1.8) POST /api/auth/change-password
+1.9) POST /api/auth/change-password
 
 Muc dich:
 
@@ -488,7 +551,7 @@ Response:
 ```
 
 
-1.9) POST /api/auth/logout
+1.10) POST /api/auth/logout
 
 Muc dich:
 
@@ -789,6 +852,7 @@ Public, khong can Authorization:
 - POST /api/auth/verify-email
 - POST /api/auth/login
 - POST /api/auth/refresh
+- GET /api/auth/session/profile
 - POST /api/auth/resend-otp
 - POST /api/auth/forgot-password
 - POST /api/auth/reset-password
@@ -826,6 +890,14 @@ Refresh flow:
 1. POST /api/auth/refresh voi credentials include, khong body
 2. Neu success, cap nhat data.accessToken
 3. Neu fail, clear auth state va ve login
+
+SSR session guard flow:
+
+1. GET /api/auth/session/profile voi credentials include/cookie forwarded tu SSR
+   request
+2. Neu success, dung data profile + role cho SSR guard/render
+3. Neu 401, redirect ve login hoac render unauthenticated state
+4. Khong cap nhat accessToken va khong mong doi Set-Cookie moi
 
 Logout flow:
 

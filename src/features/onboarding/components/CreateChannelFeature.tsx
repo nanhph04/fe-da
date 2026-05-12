@@ -8,8 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { authService, type UserProfileResponse } from "@/features/auth/services/authService";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
+
+function isChannelConflict(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const apiError = error as { code?: number; status?: number; mess?: string; message?: string };
+  const message = `${apiError.mess ?? ""} ${apiError.message ?? ""}`.toLowerCase();
+
+  return apiError.code === 409 || apiError.status === 409 || message.includes("conflict");
+}
+
+function canAccessStudio(profile: UserProfileResponse | null) {
+  return !!profile && (profile.isCreator || profile.role === "creator" || profile.role === "admin");
+}
 
 export function CreateChannelFeature() {
   const [name, setName] = useState("");
@@ -25,7 +41,7 @@ export function CreateChannelFeature() {
     }
 
     if (!user) {
-      router.replace("/login");
+      router.replace(`/login?redirect=${encodeURIComponent("/onboarding")}`);
       return;
     }
 
@@ -34,20 +50,74 @@ export function CreateChannelFeature() {
     }
   }, [isAuthLoading, router, user]);
 
+  const syncCreatorAccess = async () => {
+    await fetchProfile();
+
+    try {
+      const sessionProfile = await authService.getSessionProfile();
+      if (canAccessStudio(sessionProfile.data ?? null)) {
+        await fetchProfile();
+        return true;
+      }
+    } catch {
+      return false;
+    }
+
+    try {
+      const channel = await mediaService.getMyChannel();
+      if (channel.success && channel.data?.channelId) {
+        await fetchProfile();
+      }
+    } catch {
+      return false;
+    }
+
+    try {
+      const refreshedSessionProfile = await authService.getSessionProfile();
+      return canAccessStudio(refreshedSessionProfile.data ?? null);
+    } catch {
+      return false;
+    }
+  };
+
+  const goToStudioWhenReady = async () => {
+    const canEnterStudio = await syncCreatorAccess();
+    if (!canEnterStudio) {
+      setError("Kênh đã được tạo nhưng phiên đăng nhập chưa đồng bộ quyền Creator. Vui lòng thử lại sau vài giây.");
+      return;
+    }
+
+    router.refresh();
+    router.replace("/studio");
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const trimmedName = name.trim();
+    const trimmedBio = bio.trim();
+
+    if (!trimmedName || !trimmedBio) {
+      setError("Vui long nhap day du ten kenh va mo ta kenh.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const res = await mediaService.createChannel({ name, bio });
+      const res = await mediaService.createChannel({ name: trimmedName, bio: trimmedBio });
       if (res.success || res.code === 201) {
-        await fetchProfile(); // Cập nhật lại thông tin user trong context
-        router.push("/studio"); // Đi tới Studio
+        await goToStudioWhenReady();
       } else {
         setError(res.mess || "Không thể tạo kênh.");
       }
     } catch (err: unknown) {
+      if (isChannelConflict(err)) {
+        await goToStudioWhenReady();
+        return;
+      }
+
       setError(getErrorMessage(err, "Không thể tạo kênh. Vui lòng thử lại."));
     } finally {
       setIsLoading(false);

@@ -39,10 +39,7 @@ export async function LatestVideosServer() {
           <div className="relative aspect-video overflow-hidden rounded-xl border border-[#262528] bg-[#131315] transition-colors duration-300 ease-in-out group-hover:border-[#ff8e80]/50">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={
-                video.thumbnailUrl ||
-                "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&q=80&w=600"
-              }
+              src={video.thumbnailUrl || "/images/thumbnail.png"}
               alt={video.title}
               className="h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
             />

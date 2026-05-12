@@ -122,6 +122,11 @@ export const authService = {
     return api.post<MessageResponse>("/api/auth/logout", {}, { requireAuth: true });
   },
 
+  // Lấy session profile bằng refresh_token cookie, không rotate token và không trả accessToken.
+  getSessionProfile: async () => {
+    return api.get<UserProfileResponse>("/api/auth/session/profile");
+  },
+
   // Lấy Profile hiện tại (để load User Context)
   getProfile: async () => {
     return api.get<UserProfileResponse>("/api/user/users/profile", { requireAuth: true });

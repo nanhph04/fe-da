@@ -37,7 +37,11 @@ function formatExpiryDate(value: string | null, isActive: boolean) {
   }).format(date)}`;
 }
 
-export function Subscriptions() {
+interface SubscriptionsProps {
+  refreshKey?: number;
+}
+
+export function Subscriptions({ refreshKey = 0 }: SubscriptionsProps) {
   const [items, setItems] = useState<UserMembershipResponse[]>([]);
   const [failedAvatarUrls, setFailedAvatarUrls] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +52,7 @@ export function Subscriptions() {
 
     async function loadMemberships() {
       try {
+        setIsLoading(true);
         setError(null);
         const response = await mediaService.getMyMemberships({ page: 1, limit: 5 });
         if (isMounted && response.success && response.data) {
@@ -71,7 +76,7 @@ export function Subscriptions() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   return (
     <div className="space-y-6 lg:col-span-1">

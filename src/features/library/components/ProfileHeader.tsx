@@ -31,7 +31,11 @@ function getStatusLabel(role?: string, isCreator?: boolean) {
   return "Người xem";
 }
 
-export function ProfileHeader() {
+interface ProfileHeaderProps {
+  refreshKey?: number;
+}
+
+export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
   const { user } = useAuth();
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
@@ -72,7 +76,7 @@ export function ProfileHeader() {
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user, refreshKey]);
 
   const displayName = user?.displayName || user?.email || "Tài khoản của bạn";
   const walletLabel = wallet

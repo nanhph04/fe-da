@@ -182,7 +182,7 @@ export const fetchWrapper = async <T = unknown>(
           clearLocalAccessToken();
 
           if (typeof window !== "undefined") {
-            window.location.href = "/auth/login";
+            window.location.href = "/login";
           }
 
           return Promise.reject(error);
@@ -299,7 +299,7 @@ export const fetchSSE = async (
           clearLocalAccessToken();
 
           if (typeof window !== "undefined") {
-            window.location.href = "/auth/login";
+            window.location.href = "/login";
           }
 
           throw error;

@@ -23,7 +23,11 @@ function formatRemainingTime(value: number | null) {
   return `${minutes}m còn lại`;
 }
 
-export function RecentlyWatched() {
+interface RecentlyWatchedProps {
+  refreshKey?: number;
+}
+
+export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
   const { user } = useAuth();
   const [items, setItems] = useState<ContinueWatchingVideoResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +36,8 @@ export function RecentlyWatched() {
     let isMounted = true;
 
     async function loadContinueWatching() {
+      setIsLoading(true);
+
       if (!user) {
         setItems([]);
         setIsLoading(false);
@@ -60,7 +66,7 @@ export function RecentlyWatched() {
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user, refreshKey]);
 
   return (
     <section>

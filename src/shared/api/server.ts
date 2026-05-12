@@ -6,6 +6,26 @@ import type { ApiError, ApiRequestInit, ApiResponse, ApiResponseType } from "./t
 
 export type ServerApiRequestInit = ApiRequestInit;
 
+export interface ServerSessionProfile {
+  userId: string;
+  email: string;
+  displayName?: string;
+  avatarUrl?: string;
+  bio?: string;
+  phone?: number;
+  gender?: "male" | "women" | "female" | null;
+  birthday?: string | null;
+  role: "user" | "viewer" | "creator" | "admin";
+  isCreator: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const SERVER_SESSION_PROFILE_ENDPOINT =
+  process.env.AUTH_SESSION_PROFILE_ENDPOINT ||
+  process.env.NEXT_PUBLIC_AUTH_SESSION_PROFILE_ENDPOINT ||
+  "/api/auth/session/profile";
+
 const parseResponseBody = async (
   response: Response,
   responseType: ApiResponseType = "json"
@@ -46,18 +66,18 @@ const getRequestCookieHeader = async () => {
   return serialized || null;
 };
 
-const getServerAccessToken = async () => {
+export const getServerSessionProfile = async () => {
   const cookieHeader = await getRequestCookieHeader();
   if (!cookieHeader) {
     throw {
       success: false,
       code: 401,
-      mess: "Missing refresh token cookie",
+      mess: "Missing session cookie",
     } satisfies ApiError;
   }
 
-  const refreshResponse = await fetch(buildApiUrl("/api/auth/refresh"), {
-    method: "POST",
+  const sessionResponse = await fetch(buildApiUrl(SERVER_SESSION_PROFILE_ENDPOINT), {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
       Cookie: cookieHeader,
@@ -65,28 +85,20 @@ const getServerAccessToken = async () => {
     cache: "no-store",
   });
 
-  const payload = (await parseResponseBody(refreshResponse)) as
-    | ApiResponse<{ accessToken: string }>
+  const payload = (await parseResponseBody(sessionResponse)) as
+    | ApiResponse<ServerSessionProfile>
     | ApiError
     | null;
 
-  if (
-    refreshResponse.ok &&
-    payload &&
-    "data" in payload &&
-    payload.data?.accessToken
-  ) {
-    return {
-      accessToken: payload.data.accessToken,
-      cookieHeader,
-    };
+  if (sessionResponse.ok && payload && "data" in payload && payload.data) {
+    return payload.data;
   }
 
   throw (
     payload || {
       success: false,
-      code: refreshResponse.status,
-      mess: "Unable to refresh server session",
+      code: sessionResponse.status,
+      mess: "Unable to resolve server session profile",
     }
   );
 };
@@ -96,21 +108,24 @@ export async function fetchServerApi<T>(
   options: ServerApiRequestInit = {}
 ): Promise<ApiResponse<T>> {
   const url = buildApiUrl(endpoint);
-  const headers = new Headers(options.headers || {});
+  const requestHeaders = new Headers(options.headers || {});
 
-  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
+  if (!requestHeaders.has("Content-Type") && !(options.body instanceof FormData)) {
+    requestHeaders.set("Content-Type", "application/json");
   }
 
-  if (options.requireAuth) {
-    const { accessToken, cookieHeader } = await getServerAccessToken();
-    headers.set("Authorization", `Bearer ${accessToken}`);
-    headers.set("Cookie", cookieHeader);
+  if (options.requireAuth && !requestHeaders.has("Authorization")) {
+    throw {
+      success: false,
+      code: 401,
+      mess:
+        "Server authenticated fetch requires an explicit Authorization header. Do not call rotating refresh from Server Components.",
+    } satisfies ApiError;
   }
 
   const response = await fetch(url, {
     ...options,
-    headers,
+    headers: requestHeaders,
   });
 
   const payload = (await parseResponseBody(

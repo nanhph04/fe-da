@@ -35,7 +35,11 @@ function formatDate(value: string) {
   }).format(date);
 }
 
-export function PurchasedLibrary() {
+interface PurchasedLibraryProps {
+  refreshKey?: number;
+}
+
+export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
   const [items, setItems] = useState<PurchasedVideoResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +49,7 @@ export function PurchasedLibrary() {
 
     async function loadPurchasedVideos() {
       try {
+        setIsLoading(true);
         setError(null);
         const response = await mediaService.getPurchasedVideos({ page: 1, limit: 6 });
         if (isMounted && response.success && response.data) {
@@ -68,7 +73,7 @@ export function PurchasedLibrary() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   return (
     <section>

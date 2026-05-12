@@ -22,7 +22,7 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
     if (!isLoading) {
       // If not authenticated, redirect to login
       if (!user) {
-        router.push(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
+        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
         return;
       }
 
