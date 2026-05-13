@@ -68,11 +68,11 @@ export function StudioSidebar() {
 
       <div className="px-4 py-6 border-t border-[#19191c] space-y-1">
         <Link 
-          href="/" 
+          href="/library" 
           className="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-zinc-300 font-headline text-sm"
         >
           <span className="material-symbols-outlined">public</span>
-          Back to Discover
+          Back to Library
         </Link>
         <button 
           onClick={logout}

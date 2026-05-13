@@ -24,13 +24,21 @@ const getInitials = (value?: string | null) => {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 };
 
-const getRole = (role?: string, isAuthenticated?: boolean): MainNavRole => {
+const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean): MainNavRole => {
   if (!isAuthenticated || !role) {
     return "guest";
   }
 
-  if (role === "admin" || role === "creator" || role === "viewer") {
-    return role;
+  if (role === "admin") {
+    return "admin";
+  }
+
+  if (isCreator || role === "creator") {
+    return "creator";
+  }
+
+  if (role === "viewer") {
+    return "viewer";
   }
 
   return "viewer";
@@ -42,7 +50,7 @@ export function TopNav() {
   const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
   const pathname = usePathname();
 
-  const role = getRole(user?.role, isAuthenticated);
+  const role = getRole(user?.role, isAuthenticated, user?.isCreator);
   const visibleNavItems = topNavItems.filter(item => isNavItemVisible(item, role));
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
   const avatarLabel = user?.displayName || user?.email || "User";

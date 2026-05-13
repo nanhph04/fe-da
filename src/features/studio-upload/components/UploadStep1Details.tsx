@@ -18,16 +18,10 @@ export function UploadStep1Details({
   updateFormData,
   onNext,
 }: UploadStep1DetailsProps) {
-  const {
-    categories,
-    uploadProgress,
-    isUploading,
-    uploadComplete,
-    handleStartUpload,
-  } = useUploadStep1State();
+  const { categories } = useUploadStep1State();
 
   const canContinue =
-    uploadComplete &&
+    !!formData.file &&
     formData.title.trim().length > 0 &&
     formData.categories.length > 0 &&
     formData.resolutions.length > 0;
@@ -45,20 +39,12 @@ export function UploadStep1Details({
         </div>
 
         <UploadProgressCard
-          isUploading={isUploading}
-          uploadComplete={uploadComplete}
-          uploadProgress={uploadProgress}
-          onStartUpload={handleStartUpload}
+          file={formData.file}
+          onFileSelect={file => updateFormData({ file })}
         />
       </header>
 
-      <div
-        className={`grid grid-cols-1 gap-8 transition-opacity duration-500 lg:grid-cols-12 ${
-          !uploadComplete && !isUploading
-            ? "pointer-events-none opacity-40"
-            : "opacity-100"
-        }`}
-      >
+      <div className="grid grid-cols-1 gap-8 transition-opacity duration-500 lg:grid-cols-12">
         <div className="space-y-8 lg:col-span-8">
           <div className="group">
             <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors group-focus-within:text-primary">
@@ -122,22 +108,13 @@ export function UploadStep1Details({
             </span>
             <span
               className={`flex items-center gap-1 text-xs font-bold ${
-                uploadComplete
-                  ? "text-green-500"
-                  : isUploading
-                    ? "text-[#ff8e80]"
-                    : "text-zinc-500"
+                formData.file ? "text-green-500" : "text-zinc-500"
               }`}
             >
-              {!uploadComplete && !isUploading && "Draft"}
-              {isUploading && (
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff8e80]" />
-              )}
-              {isUploading && "Uploading..."}
-              {uploadComplete && (
+              {formData.file ? (
                 <span className="material-symbols-outlined text-[14px]">check</span>
-              )}
-              {uploadComplete && "Saved"}
+              ) : null}
+              {formData.file ? "File selected" : "Draft"}
             </span>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { StudioContentFeature } from "@/features/studio-content";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function StudioContentPage() {
-  return <StudioContentFeature />;
+  return (
+    <Suspense fallback={<div className="p-8 text-muted-foreground">Loading content library...</div>}>
+      <StudioContentFeature />
+    </Suspense>
+  );
 }

@@ -1,8 +1,3 @@
-export const RESOLUTION_OPTIONS = [
-  "360p",
-  "480p",
-  "720p",
-  "1080p",
-  "1440p",
-  "2160p",
-];
+import type { UploadResolution } from "../StudioUploadFeature";
+
+export const RESOLUTION_OPTIONS: UploadResolution[] = ["480p", "720p", "1080p"];

@@ -95,6 +95,12 @@ export interface InitUploadResponse {
   uploadUrl: string;
 }
 
+export interface UploadRawVideoFileRequest {
+  uploadUrl: string;
+  file: File;
+  onProgress?: (progress: number) => void;
+}
+
 export interface PlaybackInfoResponse {
   videoId: string;
   title: string;
@@ -287,6 +293,35 @@ const toCommaSeparated = (value?: string | string[]) => {
   return value;
 };
 
+const uploadRawVideoFile = ({ uploadUrl, file, onProgress }: UploadRawVideoFileRequest) => {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("PUT", uploadUrl);
+    xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+
+    xhr.upload.onprogress = event => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100);
+        resolve();
+        return;
+      }
+
+      reject(new Error(`Raw video upload failed: ${xhr.status}`));
+    };
+
+    xhr.onerror = () => reject(new Error("Raw video upload failed. Check your connection and try again."));
+    xhr.onabort = () => reject(new Error("Raw video upload was cancelled."));
+    xhr.send(file);
+  });
+};
+
 export const mediaService = {
   // 1. HEALTH CHECK
   healthCheck: async () => {
@@ -367,6 +402,7 @@ export const mediaService = {
   initUpload: async (data: InitUploadBody) => {
     return api.post<InitUploadResponse>("/api/media/videos/init-upload", data, { requireAuth: true });
   },
+  uploadRawVideoFile,
   confirmUpload: async (id: string, data: ConfirmUploadBody) => {
     return api.post<{ status: string; message: string }>(
       `/api/media/videos/${id}/confirm-upload`,

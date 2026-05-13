@@ -5,13 +5,21 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { isNavItemVisible, mobileNavItems, type MainNavRole, type NavItem } from "./navigation";
 
-const getRole = (role?: string, isAuthenticated?: boolean): MainNavRole => {
+const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean): MainNavRole => {
   if (!isAuthenticated || !role) {
     return "guest";
   }
 
-  if (role === "admin" || role === "creator" || role === "viewer") {
-    return role;
+  if (role === "admin") {
+    return "admin";
+  }
+
+  if (isCreator || role === "creator") {
+    return "creator";
+  }
+
+  if (role === "viewer") {
+    return "viewer";
   }
 
   return "viewer";
@@ -47,7 +55,7 @@ function MobileNavEntry({ item, isActive }: { item: NavItem; isActive?: boolean 
 export function MobileNav() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
-  const role = getRole(user?.role, isAuthenticated);
+  const role = getRole(user?.role, isAuthenticated, user?.isCreator);
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 w-full h-16 bg-zinc-950/80 backdrop-blur-xl border-t border-outline-variant/10 flex justify-around items-center z-50">

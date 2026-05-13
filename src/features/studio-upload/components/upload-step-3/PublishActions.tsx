@@ -24,7 +24,7 @@ export function PublishActions({ canPublish, isPublishing, onPublish }: PublishA
         ) : (
           <span className="material-symbols-outlined text-lg">upload</span>
         )}
-        Create Upload Draft
+        Upload & Publish
       </button>
 
       <button

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UploadFormData } from "./StudioUploadFeature";
+import type { UploadFormData } from "./StudioUploadFeature";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 
@@ -26,36 +26,58 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [publishStage, setPublishStage] = useState<"idle" | "initializing" | "uploading" | "confirming">("idle");
 
-  const canPublish = isChecked1 && isChecked2;
+  const canPublish = isChecked1 && isChecked2 && !!formData.file;
 
   const handlePublish = async () => {
-    if (!canPublish) return;
+    if (!canPublish || !formData.file) return;
     setIsPublishing(true);
+    setUploadProgress(0);
     setError(null);
-    
+
     try {
-      // Gọi API initUpload (channelId được tự động nhận dạng bởi backend qua Auth Token)
-      const res = await mediaService.initUpload({
-        title: formData.title,
-        description: formData.description,
+      setPublishStage("initializing");
+      const initResponse = await mediaService.initUpload({
+        title: formData.title.trim(),
+        description: formData.description.trim(),
         categories: formData.categories,
         visibility: formData.visibility,
         price: formData.price,
-        requiredTierLevel: formData.requiredTierLevel
+        requiredTierLevel: formData.requiredTierLevel,
       });
 
-      if (res.success || res.code === 201) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          router.push("/studio");
-        }, 2000);
-      } else {
-        setError(res.mess || "Failed to initialize upload");
+      if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
+        setError(initResponse.mess || "Failed to initialize upload");
+        return;
       }
+
+      setPublishStage("uploading");
+      await mediaService.uploadRawVideoFile({
+        uploadUrl: initResponse.data.uploadUrl,
+        file: formData.file,
+        onProgress: setUploadProgress,
+      });
+
+      setPublishStage("confirming");
+      const confirmResponse = await mediaService.confirmUpload(initResponse.data.videoId, {
+        resolutions: formData.resolutions,
+      });
+
+      if (!(confirmResponse.success || confirmResponse.code === 201 || confirmResponse.code === 200)) {
+        setError(confirmResponse.mess || "Failed to confirm upload");
+        return;
+      }
+
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.push("/studio/content");
+      }, 2000);
     } catch (err: unknown) {
       setError(getErrorMessage(err, "An error occurred during upload"));
     } finally {
+      setPublishStage("idle");
       setIsPublishing(false);
     }
   };
@@ -66,9 +88,9 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
           <span className="material-symbols-outlined text-green-500 text-6xl">check_circle</span>
         </div>
-        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Upload Draft Created</h1>
-        <p className="text-zinc-400">Thong tin video va cau hinh upload da duoc gui sang media service.</p>
-        <p className="text-zinc-500 text-sm mt-4">Redirecting to Dashboard...</p>
+        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Upload Submitted</h1>
+        <p className="text-zinc-400">Video đã được gửi sang pipeline xử lý và kiểm duyệt.</p>
+        <p className="text-zinc-500 text-sm mt-4">Redirecting to Content Library...</p>
       </div>
     );
   }
@@ -102,6 +124,12 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
           <aside className="w-full lg:w-[340px] shrink-0 flex flex-col gap-6 lg:sticky lg:top-24">
             <VideoSummaryCard formData={formData} />
             <PreflightChecks />
+
+            {!formData.file ? (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+                Vui lòng quay lại bước Details để chọn video file trước khi publish.
+              </div>
+            ) : null}
 
             {/* Declarations — compact inline */}
             <div className={`bg-surface-container-low rounded-xl p-5 flex flex-col gap-3 transition-opacity ${isPublishing ? 'opacity-20 pointer-events-none' : ''}`}>
@@ -163,9 +191,22 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       {/* Publishing Overlay */}
       {isPublishing && (
         <div className="fixed inset-0 z-50 bg-[#0e0e10]/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="text-center space-y-4">
+          <div className="w-full max-w-sm space-y-4 rounded-lg border border-border/30 bg-card p-8 text-center shadow-2xl">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
             <h3 className="font-headline font-bold text-xl text-on-surface">Publishing your Masterpiece...</h3>
+            <p className="text-sm text-muted-foreground">
+              {publishStage === "initializing" && "Creating secure upload session..."}
+              {publishStage === "uploading" && `Uploading raw file... ${uploadProgress}%`}
+              {publishStage === "confirming" && "Confirming upload for processing..."}
+            </p>
+            {publishStage === "uploading" ? (
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       )}

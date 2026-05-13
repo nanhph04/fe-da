@@ -12,13 +12,21 @@ import {
   type NavItem,
 } from "./navigation";
 
-const getRole = (role?: string, isAuthenticated?: boolean): MainNavRole => {
+const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean): MainNavRole => {
   if (!isAuthenticated || !role) {
     return "guest";
   }
 
-  if (role === "admin" || role === "creator" || role === "viewer") {
-    return role;
+  if (role === "admin") {
+    return "admin";
+  }
+
+  if (isCreator || role === "creator") {
+    return "creator";
+  }
+
+  if (role === "viewer") {
+    return "viewer";
   }
 
   return "viewer";
@@ -58,7 +66,7 @@ function NavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
 export function SideNav() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
-  const role = getRole(user?.role, isAuthenticated);
+  const role = getRole(user?.role, isAuthenticated, user?.isCreator);
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
 
   return (
