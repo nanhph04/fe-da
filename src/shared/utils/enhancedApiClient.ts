@@ -1,9 +1,5 @@
-import {
-  buildApiUrl,
-  fetchWrapper,
-  type ApiRequestInit,
-  type ApiResponse,
-} from "@/shared/api";
+import { buildApiUrl, fetchWrapper } from "@/shared/api/client";
+import type { ApiRequestInit, ApiResponse } from "@/shared/api/types";
 
 type RetryableError = {
   status?: number;

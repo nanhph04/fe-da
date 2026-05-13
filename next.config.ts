@@ -6,6 +6,9 @@ const apiGatewayUrl =
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+
+  allowedDevOrigins: ["192.168.2.6"],
+
   images: {
     remotePatterns: [
       {
@@ -18,6 +21,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
   async rewrites() {
     return [
       {

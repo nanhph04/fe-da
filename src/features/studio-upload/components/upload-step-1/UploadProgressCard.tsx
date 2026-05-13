@@ -4,6 +4,8 @@ import { useRef } from "react";
 
 interface UploadProgressCardProps {
   file: File | null;
+  isReplacing?: boolean;
+  replaceError?: string | null;
   onFileSelect: (file: File | null) => void;
 }
 
@@ -15,8 +17,19 @@ const formatFileSize = (bytes: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-export function UploadProgressCard({ file, onFileSelect }: UploadProgressCardProps) {
+export function UploadProgressCard({
+  file,
+  isReplacing = false,
+  replaceError,
+  onFileSelect,
+}: UploadProgressCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const openFilePicker = () => {
+    if (!isReplacing) {
+      inputRef.current?.click();
+    }
+  };
 
   return (
     <div className="w-full rounded-lg border border-[#262528] bg-[#131315] p-5 shadow-xl md:w-80">
@@ -25,7 +38,11 @@ export function UploadProgressCard({ file, onFileSelect }: UploadProgressCardPro
         type="file"
         accept="video/*"
         className="sr-only"
-        onChange={event => onFileSelect(event.target.files?.[0] ?? null)}
+        disabled={isReplacing}
+        onChange={event => {
+          onFileSelect(event.target.files?.[0] ?? null);
+          event.currentTarget.value = "";
+        }}
       />
 
       {!file ? (
@@ -35,11 +52,13 @@ export function UploadProgressCard({ file, onFileSelect }: UploadProgressCardPro
           </span>
           <button
             type="button"
-            onClick={() => inputRef.current?.click()}
-            className="w-full border border-dashed border-zinc-600 bg-[#262528] py-2 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3d3d40]"
+            onClick={openFilePicker}
+            disabled={isReplacing}
+            className="w-full border border-dashed border-zinc-600 bg-[#262528] py-2 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3d3d40] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Browse Files
           </button>
+          {replaceError ? <p className="text-xs text-destructive">{replaceError}</p> : null}
         </div>
       ) : (
         <div className="space-y-4">
@@ -47,7 +66,7 @@ export function UploadProgressCard({ file, onFileSelect }: UploadProgressCardPro
             <div className="mb-2 flex items-center gap-2 text-green-500">
               <span className="material-symbols-outlined text-[18px]">check_circle</span>
               <span className="font-headline text-xs font-bold uppercase tracking-widest">
-                File Ready
+                {isReplacing ? "Replacing File" : "File Ready"}
               </span>
             </div>
             <p className="truncate font-headline text-sm font-semibold text-zinc-200" title={file.name}>
@@ -56,20 +75,23 @@ export function UploadProgressCard({ file, onFileSelect }: UploadProgressCardPro
             <p className="mt-1 text-xs text-zinc-500">
               {formatFileSize(file.size)} {file.type ? `· ${file.type}` : ""}
             </p>
+            {replaceError ? <p className="mt-2 text-xs text-destructive">{replaceError}</p> : null}
           </div>
 
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => inputRef.current?.click()}
-              className="flex-1 rounded-sm bg-[#262528] py-2 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3d3d40]"
+              onClick={openFilePicker}
+              disabled={isReplacing}
+              className="flex-1 rounded-sm bg-[#262528] py-2 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3d3d40] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Replace
+              {isReplacing ? "Replacing..." : "Replace"}
             </button>
             <button
               type="button"
               onClick={() => onFileSelect(null)}
-              className="rounded-sm border border-border/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400 transition-colors hover:text-white"
+              disabled={isReplacing}
+              className="rounded-sm border border-border/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               Clear
             </button>

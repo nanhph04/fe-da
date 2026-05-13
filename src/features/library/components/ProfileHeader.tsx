@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { WalletService } from "@/features/wallet/services/walletService";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
-import { createAsyncState, getErrorMessage, isAsyncLoading } from "@/shared/api";
+import { createAsyncState, isAsyncLoading } from "@/shared/api/async-state";
+import { getErrorMessage } from "@/shared/api/client";
 
 function formatMemberSince(value?: string) {
   if (!value) {

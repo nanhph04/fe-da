@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { UploadFormData } from "./StudioUploadFeature";
-import { AccessLevelSection } from "./upload-step-1/AccessLevelSection";
+import { mediaService } from "@/features/watch/services/mediaService";
+import { getErrorMessage } from "@/shared/api/client";
 import { CategorySection } from "./upload-step-1/CategorySection";
 import { ResolutionSection } from "./upload-step-1/ResolutionSection";
 import { TagSection } from "./upload-step-1/TagSection";
@@ -20,6 +22,59 @@ export function UploadStep1Details({
   onNext,
 }: UploadStep1DetailsProps) {
   const { categories, tags } = useUploadStep1State();
+  const [isReplacingFile, setIsReplacingFile] = useState(false);
+  const [replaceError, setReplaceError] = useState<string | null>(null);
+
+  const handleFileSelect = async (file: File | null) => {
+    if (!file) {
+      if (!formData.draftUpload) {
+        updateFormData({ file: null });
+        setReplaceError(null);
+        return;
+      }
+
+      setIsReplacingFile(true);
+      setReplaceError(null);
+
+      try {
+        const res = await mediaService.cancelUpload(formData.draftUpload.videoId);
+        if (res.success) {
+          updateFormData({ file: null, draftUpload: null });
+          return;
+        }
+
+        setReplaceError(res.mess || "Không thể hủy draft upload hiện tại.");
+      } catch (err) {
+        setReplaceError(getErrorMessage(err, "Không thể hủy draft upload. Vui lòng thử lại."));
+      } finally {
+        setIsReplacingFile(false);
+      }
+      return;
+    }
+
+    if (!formData.draftUpload) {
+      updateFormData({ file });
+      setReplaceError(null);
+      return;
+    }
+
+    setIsReplacingFile(true);
+    setReplaceError(null);
+
+    try {
+      const res = await mediaService.replaceUpload(formData.draftUpload.videoId);
+      if (res.success && res.data) {
+        updateFormData({ file, draftUpload: res.data });
+        return;
+      }
+
+      setReplaceError(res.mess || "Không thể tạo upload URL mới cho video thay thế.");
+    } catch (err) {
+      setReplaceError(getErrorMessage(err, "Không thể đổi file video. Vui lòng thử lại."));
+    } finally {
+      setIsReplacingFile(false);
+    }
+  };
 
   const canContinue =
     !!formData.file &&
@@ -41,7 +96,9 @@ export function UploadStep1Details({
 
         <UploadProgressCard
           file={formData.file}
-          onFileSelect={file => updateFormData({ file })}
+          isReplacing={isReplacingFile}
+          replaceError={replaceError}
+          onFileSelect={handleFileSelect}
         />
       </header>
 
@@ -78,11 +135,6 @@ export function UploadStep1Details({
               onChange={e => updateFormData({ description: e.target.value })}
             />
           </div>
-
-          <AccessLevelSection
-            visibility={formData.visibility}
-            updateFormData={updateFormData}
-          />
 
           <ResolutionSection
             resolutions={formData.resolutions}

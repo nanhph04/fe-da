@@ -6,7 +6,8 @@ import {
   mediaService,
   type PurchasedVideoResponse,
 } from "@/features/watch/services/mediaService";
-import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
+import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
+import { getErrorMessage } from "@/shared/api/client";
 
 function formatDuration(seconds: number | null) {
   if (!seconds || seconds <= 0) {

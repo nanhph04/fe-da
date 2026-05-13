@@ -255,10 +255,51 @@ export const api = {
   clearToken: clearLocalAccessToken,
 };
 
+export interface SSEMessage<T = unknown> {
+  event: string;
+  data: T;
+}
+
+const parseSSEBlock = (block: string): SSEMessage | null => {
+  const lines = block.split(/\r?\n/);
+  let event = "message";
+  const dataLines: string[] = [];
+
+  for (const line of lines) {
+    if (!line || line.startsWith(":")) {
+      continue;
+    }
+
+    if (line.startsWith("event:")) {
+      event = line.slice(6).trim() || "message";
+      continue;
+    }
+
+    if (line.startsWith("data:")) {
+      dataLines.push(line.slice(5).trimStart());
+    }
+  }
+
+  if (dataLines.length === 0) {
+    return null;
+  }
+
+  const dataString = dataLines.join("\n").trim();
+  if (!dataString) {
+    return null;
+  }
+
+  try {
+    return { event, data: JSON.parse(dataString) };
+  } catch {
+    return { event, data: dataString };
+  }
+};
+
 export const fetchSSE = async (
   endpoint: string,
   options: ApiRequestInit = {},
-  onMessage: (data: unknown) => void,
+  onMessage: (data: unknown, event: string) => void,
   onEnd?: () => void,
   onError?: (error: unknown) => void
 ) => {
@@ -332,29 +373,25 @@ export const fetchSSE = async (
     while (true) {
       const { done, value } = await reader.read();
       if (done) {
+        const finalMessage = parseSSEBlock(buffer.trim());
+        if (finalMessage && finalMessage.event !== "ping") {
+          onMessage(finalMessage.data, finalMessage.event);
+        }
         onEnd?.();
         break;
       }
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split(/\r?\n/);
-      buffer = lines.pop() || "";
+      const blocks = buffer.split(/\r?\n\r?\n/);
+      buffer = blocks.pop() || "";
 
-      for (const line of lines) {
-        if (!line.startsWith("data:")) {
+      for (const block of blocks) {
+        const message = parseSSEBlock(block);
+        if (!message || message.event === "ping") {
           continue;
         }
 
-        const dataString = line.slice(5).trim();
-        if (!dataString) {
-          continue;
-        }
-
-        try {
-          onMessage(JSON.parse(dataString));
-        } catch {
-          onMessage(dataString);
-        }
+        onMessage(message.data, message.event);
       }
     }
   } catch (error: unknown) {

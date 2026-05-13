@@ -8,7 +8,7 @@ import { getErrorMessage } from "@/shared/api/client";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
 import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 
-const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating"]);
+const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
 const READY_STATUSES = new Set(["ready"]);
 
@@ -17,7 +17,7 @@ type ContentFilter = "all" | "draft" | "processing" | "ready" | "failed";
 const CONTENT_FILTERS: Array<{ label: string; value: ContentFilter; statuses?: string[] }> = [
   { label: "Videos", value: "all" },
   { label: "Drafts", value: "draft", statuses: ["DRAFT"] },
-  { label: "Processing", value: "processing", statuses: ["PROCESSING", "PENDING_MODERATION", "MODERATING"] },
+  { label: "Processing", value: "processing", statuses: ["PROCESSING", "PENDING_MODERATION", "MODERATING", "PENDING_MANUAL_REVIEW"] },
   { label: "Ready", value: "ready", statuses: ["READY"] },
   { label: "Failed", value: "failed", statuses: ["FAILED", "REJECTED"] },
 ];

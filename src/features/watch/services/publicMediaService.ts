@@ -1,12 +1,11 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import {
-  fetchPublicApi,
-  fetchServerApi,
-  type ApiError as PublicApiError,
-  type ApiResponse as PublicApiResponse,
-} from "@/shared/api";
+import { fetchPublicApi, fetchServerApi } from "@/shared/api/server";
+import type {
+  ApiError as PublicApiError,
+  ApiResponse as PublicApiResponse,
+} from "@/shared/api/types";
 
 export interface PublicDiscoveryVideo {
   id: string;
@@ -34,7 +33,9 @@ export interface PublicVideoMetadata {
   id: string;
   title: string;
   description: string;
+  categoryId: string;
   category: string;
+  tagIds: string[];
   tags: string[];
   thumbnailUrl: string | null;
   viewCount: number;

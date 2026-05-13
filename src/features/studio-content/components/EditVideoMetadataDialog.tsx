@@ -18,28 +18,6 @@ interface EditVideoMetadataDialogProps {
   onSaved: () => void;
 }
 
-const normalizeTaxonomyValue = (value: string) => value.trim().toLowerCase();
-
-const findCategoryId = (categories: CategoryResponse[], categoryName: string) => {
-  const normalizedCategory = normalizeTaxonomyValue(categoryName);
-
-  return (
-    categories.find(category => {
-      return (
-        normalizeTaxonomyValue(category.name) === normalizedCategory ||
-        normalizeTaxonomyValue(category.slug) === normalizedCategory
-      );
-    })?.id ?? ""
-  );
-};
-
-const findTagIds = (tags: TagResponse[], currentTags: string[]) => {
-  const normalizedTags = new Set(currentTags.map(normalizeTaxonomyValue));
-
-  return tags
-    .filter(tag => normalizedTags.has(normalizeTaxonomyValue(tag.name)) || normalizedTags.has(normalizeTaxonomyValue(tag.slug)))
-    .map(tag => tag.id);
-};
 
 export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideoMetadataDialogProps) {
   const [metadata, setMetadata] = useState<VideoMetadataResponse | null>(null);
@@ -83,8 +61,8 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
           setTitle(metadataRes.data.title ?? "");
           setDescription(metadataRes.data.description ?? "");
           setThumbnailUrl(metadataRes.data.thumbnailUrl ?? "");
-          setCategoryId(findCategoryId(loadedCategories, metadataRes.data.category ?? ""));
-          setTagIds(findTagIds(loadedTags, metadataRes.data.tags ?? []));
+          setCategoryId(metadataRes.data.categoryId ?? "");
+          setTagIds(metadataRes.data.tagIds ?? []);
           return;
         }
 

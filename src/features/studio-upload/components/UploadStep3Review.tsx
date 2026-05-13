@@ -39,30 +39,37 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
 
     try {
       setPublishStage("initializing");
-      const initResponse = await mediaService.initUpload({
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        categoryId: formData.categoryId,
-        tagIds: formData.tagIds,
-        visibility: formData.visibility,
-        price: formData.price,
-        requiredTierLevel: formData.requiredTierLevel,
-      });
+      let draftUpload = formData.draftUpload;
 
-      if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
-        setError(initResponse.mess || "Failed to initialize upload");
-        return;
+      if (!draftUpload) {
+        const initResponse = await mediaService.initUpload({
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          categoryId: formData.categoryId,
+          tagIds: formData.tagIds,
+          visibility: formData.visibility,
+          price: formData.price,
+          requiredTierLevel: formData.requiredTierLevel,
+        });
+
+        if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
+          setError(initResponse.mess || "Failed to initialize upload");
+          return;
+        }
+
+        draftUpload = initResponse.data;
+        updateFormData({ draftUpload });
       }
 
       setPublishStage("uploading");
       await mediaService.uploadRawVideoFile({
-        uploadUrl: initResponse.data.uploadUrl,
+        uploadUrl: draftUpload.uploadUrl,
         file: formData.file,
         onProgress: setUploadProgress,
       });
 
       setPublishStage("confirming");
-      const confirmResponse = await mediaService.confirmUpload(initResponse.data.videoId, {
+      const confirmResponse = await mediaService.confirmUpload(draftUpload.videoId, {
         resolutions: formData.resolutions,
       });
 

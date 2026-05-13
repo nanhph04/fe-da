@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { TransactionService } from "@/features/wallet/services/transactionService";
 import type { Transaction } from "@/features/wallet/types/wallet.types";
-import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
+import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
+import { getErrorMessage } from "@/shared/api/client";
 
 function formatDate(value: string) {
   const date = new Date(value);

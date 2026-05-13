@@ -148,7 +148,9 @@ export interface VideoMetadataResponse {
   id: string;
   title: string;
   description: string;
+  categoryId: string;
   category: string;
+  tagIds: string[];
   tags: string[];
   thumbnailUrl: string | null;
   viewCount: number;
@@ -425,6 +427,14 @@ export const mediaService = {
   // 4. VIDEO
   initUpload: async (data: InitUploadBody) => {
     return api.post<InitUploadResponse>("/api/media/videos/init-upload", data, { requireAuth: true });
+  },
+  replaceUpload: async (id: string) => {
+    return api.post<InitUploadResponse>(`/api/media/videos/${id}/replace-upload`, undefined, { requireAuth: true });
+  },
+  cancelUpload: async (id: string) => {
+    return api.delete<{ videoId: string; cancelled: boolean }>(`/api/media/videos/${id}/upload`, {
+      requireAuth: true,
+    });
   },
   uploadRawVideoFile,
   confirmUpload: async (id: string, data: ConfirmUploadBody) => {

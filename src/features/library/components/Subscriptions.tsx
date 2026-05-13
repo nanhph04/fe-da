@@ -6,7 +6,8 @@ import {
   mediaService,
   type UserMembershipResponse,
 } from "@/features/watch/services/mediaService";
-import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
+import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
+import { getErrorMessage } from "@/shared/api/client";
 
 function getInitials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);

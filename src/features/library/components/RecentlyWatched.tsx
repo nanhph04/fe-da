@@ -7,7 +7,8 @@ import {
   mediaService,
   type ContinueWatchingVideoResponse,
 } from "@/features/watch/services/mediaService";
-import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
+import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
+import { getErrorMessage } from "@/shared/api/client";
 
 function formatRemainingTime(value: number | null) {
   if (value === null || value <= 0) {

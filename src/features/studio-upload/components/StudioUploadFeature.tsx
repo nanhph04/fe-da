@@ -7,6 +7,14 @@ import { UploadStep3Review } from "./UploadStep3Review";
 
 export type UploadResolution = "480p" | "720p" | "1080p";
 
+export interface DraftUploadSession {
+  videoId: string;
+  status: string;
+  rawFileKey: string;
+  bucket: string;
+  uploadUrl: string;
+}
+
 export interface UploadFormData {
   title: string;
   description: string;
@@ -17,6 +25,7 @@ export interface UploadFormData {
   price: number;
   requiredTierLevel: number | null;
   file: File | null;
+  draftUpload: DraftUploadSession | null;
 }
 
 export function StudioUploadFeature() {
@@ -31,6 +40,7 @@ export function StudioUploadFeature() {
     price: 0,
     requiredTierLevel: null,
     file: null,
+    draftUpload: null,
   });
 
   const updateFormData = (data: Partial<UploadFormData>) => {
