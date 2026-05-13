@@ -132,7 +132,7 @@ export function StudioContentFeature() {
         video.description,
         normalizeStatus(video.status),
         normalizeVisibility(video.visibility),
-        ...(video.categories ?? []),
+        video.category,
       ]
         .filter(Boolean)
         .join(" ")

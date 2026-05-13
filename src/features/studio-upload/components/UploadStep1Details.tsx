@@ -4,6 +4,7 @@ import type { UploadFormData } from "./StudioUploadFeature";
 import { AccessLevelSection } from "./upload-step-1/AccessLevelSection";
 import { CategorySection } from "./upload-step-1/CategorySection";
 import { ResolutionSection } from "./upload-step-1/ResolutionSection";
+import { TagSection } from "./upload-step-1/TagSection";
 import { UploadProgressCard } from "./upload-step-1/UploadProgressCard";
 import { useUploadStep1State } from "./upload-step-1/use-upload-step1-state";
 
@@ -18,12 +19,12 @@ export function UploadStep1Details({
   updateFormData,
   onNext,
 }: UploadStep1DetailsProps) {
-  const { categories } = useUploadStep1State();
+  const { categories, tags } = useUploadStep1State();
 
   const canContinue =
     !!formData.file &&
     formData.title.trim().length > 0 &&
-    formData.categories.length > 0 &&
+    formData.categoryId.trim().length > 0 &&
     formData.resolutions.length > 0;
 
   return (
@@ -92,10 +93,14 @@ export function UploadStep1Details({
         <div className="space-y-8 lg:col-span-4">
           <CategorySection
             categories={categories}
-            selectedCategories={formData.categories}
-            onChange={selectedCategories =>
-              updateFormData({ categories: selectedCategories })
-            }
+            selectedCategoryId={formData.categoryId}
+            onChange={categoryId => updateFormData({ categoryId })}
+          />
+
+          <TagSection
+            tags={tags}
+            selectedTagIds={formData.tagIds}
+            onChange={tagIds => updateFormData({ tagIds })}
           />
         </div>
       </div>

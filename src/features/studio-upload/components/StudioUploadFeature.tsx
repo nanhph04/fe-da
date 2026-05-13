@@ -10,7 +10,8 @@ export type UploadResolution = "480p" | "720p" | "1080p";
 export interface UploadFormData {
   title: string;
   description: string;
-  categories: string[];
+  categoryId: string;
+  tagIds: string[];
   resolutions: UploadResolution[];
   visibility: "public" | "private";
   price: number;
@@ -23,7 +24,8 @@ export function StudioUploadFeature() {
   const [formData, setFormData] = useState<UploadFormData>({
     title: "",
     description: "",
-    categories: [],
+    categoryId: "",
+    tagIds: [],
     resolutions: ["720p", "1080p"],
     visibility: "public",
     price: 0,

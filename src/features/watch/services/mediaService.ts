@@ -39,7 +39,8 @@ export interface MembershipEligibilityResponse {
 export interface ChannelPublicVideoResponse {
   id: string;
   title: string;
-  categories: string[];
+  category: string;
+  tags: string[];
   status: string;
   thumbnailUrl: string | null;
   publishedAt: string | null;
@@ -76,8 +77,9 @@ export interface MembershipTierResponse {
 
 export interface InitUploadBody {
   title: string;
-  categories: string[];
   description?: string;
+  categoryId: string;
+  tagIds?: string[];
   visibility?: "public" | "private";
   price?: number;
   requiredTierLevel?: number | null;
@@ -146,6 +148,8 @@ export interface VideoMetadataResponse {
   id: string;
   title: string;
   description: string;
+  category: string;
+  tags: string[];
   thumbnailUrl: string | null;
   viewCount: number;
   status: string;
@@ -155,14 +159,23 @@ export interface VideoMetadataResponse {
   updatedAt: string;
 }
 
+export interface UpdateVideoMetadataBody {
+  title?: string;
+  description?: string;
+  thumbnailUrl?: string | null;
+  categoryId?: string;
+  tagIds?: string[];
+}
+
 export interface DiscoveryVideoResponse {
   id: string;
   channelId: string;
   title: string;
   description: string;
-  categories: string[];
+  category: string;
+  tags: string[];
   status: string;
-  visibility: string;
+  visibility?: string;
   price: number;
   requiredTierLevel: number | null;
   thumbnailUrl: string | null;
@@ -232,7 +245,18 @@ export interface CategoryResponse {
   name: string;
   slug: string;
   description?: string;
+  parentId: string | null;
   status: "active" | "inactive" | "deleted" | string;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TagResponse {
+  id: string;
+  name: string;
+  slug: string;
+  status: "active" | "inactive" | "pending" | "deleted" | string;
   createdAt: string;
   updatedAt: string;
 }
@@ -446,10 +470,7 @@ export const mediaService = {
   getVideoMetadata: async (id: string) => {
     return api.get<VideoMetadataResponse>(`/api/media/videos/${id}/metadata`);
   },
-  updateVideoMetadata: async (
-    id: string,
-    data: { title?: string; description?: string; thumbnailUrl?: string | null }
-  ) => {
+  updateVideoMetadata: async (id: string, data: UpdateVideoMetadataBody) => {
     return api.patch<VideoMetadataResponse>(`/api/media/videos/${id}/metadata`, data, {
       requireAuth: true,
     });
@@ -483,17 +504,56 @@ export const mediaService = {
     return api.get<SearchMediaResponse>(`/api/media/search${qs}`);
   },
 
-  // 6. CATEGORIES
-  getCategories: async () => {
-    return api.get<CategoryResponse[]>("/api/media/categories");
+  // 6. CATEGORIES & TAGS
+  getCategories: async (params?: { q?: string }) => {
+    const qs = buildQueryString({ q: params?.q });
+    return api.get<CategoryResponse[]>(`/api/media/categories${qs}`);
   },
-  getAllCategoriesAdmin: async () => {
-    return api.get<CategoryResponse[]>("/api/media/categories/admin/all", { requireAuth: true });
+  getAllCategoriesAdmin: async (params?: { q?: string }) => {
+    const qs = buildQueryString({ q: params?.q });
+    return api.get<CategoryResponse[]>(`/api/media/admin/categories${qs}`, { requireAuth: true });
   },
-  createCategoryAdmin: async (data: { name: string; description?: string }) => {
-    return api.post<CategoryResponse>("/api/media/categories", data, { requireAuth: true });
+  createCategoryAdmin: async (data: {
+    name: string;
+    description?: string;
+    parentId?: string | null;
+    displayOrder?: number;
+  }) => {
+    return api.post<CategoryResponse>("/api/media/admin/categories", data, { requireAuth: true });
   },
-  updateCategoryAdmin: async (id: string, data: { name?: string; description?: string }) => {
-    return api.patch<CategoryResponse>(`/api/media/categories/${id}`, data, { requireAuth: true });
+  updateCategoryAdmin: async (
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      parentId?: string | null;
+      status?: "active" | "inactive" | "deleted";
+      displayOrder?: number;
+    }
+  ) => {
+    return api.patch<CategoryResponse>(`/api/media/admin/categories/${id}`, data, { requireAuth: true });
+  },
+  deleteCategoryAdmin: async (id: string) => {
+    return api.delete<CategoryResponse>(`/api/media/admin/categories/${id}`, { requireAuth: true });
+  },
+  getTags: async (params?: { q?: string }) => {
+    const qs = buildQueryString({ q: params?.q });
+    return api.get<TagResponse[]>(`/api/media/tags${qs}`);
+  },
+  getAllTagsAdmin: async (params?: { q?: string }) => {
+    const qs = buildQueryString({ q: params?.q });
+    return api.get<TagResponse[]>(`/api/media/admin/tags${qs}`, { requireAuth: true });
+  },
+  createTagAdmin: async (data: { name: string }) => {
+    return api.post<TagResponse>("/api/media/admin/tags", data, { requireAuth: true });
+  },
+  updateTagAdmin: async (
+    id: string,
+    data: { name?: string; status?: "active" | "inactive" | "pending" | "deleted" }
+  ) => {
+    return api.patch<TagResponse>(`/api/media/admin/tags/${id}`, data, { requireAuth: true });
+  },
+  deleteTagAdmin: async (id: string) => {
+    return api.delete<TagResponse>(`/api/media/admin/tags/${id}`, { requireAuth: true });
   },
 };

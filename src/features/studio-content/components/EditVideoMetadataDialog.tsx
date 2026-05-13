@@ -1,10 +1,15 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { mediaService, type VideoMetadataResponse } from "@/features/watch/services/mediaService";
+import {
+  mediaService,
+  type CategoryResponse,
+  type TagResponse,
+  type VideoMetadataResponse,
+} from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 
 interface EditVideoMetadataDialogProps {
@@ -13,11 +18,38 @@ interface EditVideoMetadataDialogProps {
   onSaved: () => void;
 }
 
+const normalizeTaxonomyValue = (value: string) => value.trim().toLowerCase();
+
+const findCategoryId = (categories: CategoryResponse[], categoryName: string) => {
+  const normalizedCategory = normalizeTaxonomyValue(categoryName);
+
+  return (
+    categories.find(category => {
+      return (
+        normalizeTaxonomyValue(category.name) === normalizedCategory ||
+        normalizeTaxonomyValue(category.slug) === normalizedCategory
+      );
+    })?.id ?? ""
+  );
+};
+
+const findTagIds = (tags: TagResponse[], currentTags: string[]) => {
+  const normalizedTags = new Set(currentTags.map(normalizeTaxonomyValue));
+
+  return tags
+    .filter(tag => normalizedTags.has(normalizeTaxonomyValue(tag.name)) || normalizedTags.has(normalizeTaxonomyValue(tag.slug)))
+    .map(tag => tag.id);
+};
+
 export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideoMetadataDialogProps) {
   const [metadata, setMetadata] = useState<VideoMetadataResponse | null>(null);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [tags, setTags] = useState<TagResponse[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,20 +62,33 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
       setError(null);
 
       try {
-        const res = await mediaService.getVideoMetadata(videoId);
+        const [metadataRes, categoriesRes, tagsRes] = await Promise.all([
+          mediaService.getVideoMetadata(videoId),
+          mediaService.getCategories(),
+          mediaService.getTags(),
+        ]);
+
         if (!isActive) {
           return;
         }
 
-        if (res.success && res.data) {
-          setMetadata(res.data);
-          setTitle(res.data.title ?? "");
-          setDescription(res.data.description ?? "");
-          setThumbnailUrl(res.data.thumbnailUrl ?? "");
+        const loadedCategories = categoriesRes.success && categoriesRes.data ? categoriesRes.data : [];
+        const loadedTags = tagsRes.success && tagsRes.data ? tagsRes.data : [];
+
+        setCategories(loadedCategories);
+        setTags(loadedTags);
+
+        if (metadataRes.success && metadataRes.data) {
+          setMetadata(metadataRes.data);
+          setTitle(metadataRes.data.title ?? "");
+          setDescription(metadataRes.data.description ?? "");
+          setThumbnailUrl(metadataRes.data.thumbnailUrl ?? "");
+          setCategoryId(findCategoryId(loadedCategories, metadataRes.data.category ?? ""));
+          setTagIds(findTagIds(loadedTags, metadataRes.data.tags ?? []));
           return;
         }
 
-        setError(res.mess || "Không tải được dữ liệu video.");
+        setError(metadataRes.mess || "Không tải được dữ liệu video.");
       } catch (err) {
         if (isActive) {
           setError(getErrorMessage(err, "Không tải được dữ liệu video."));
@@ -62,6 +107,10 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
     };
   }, [videoId]);
 
+  const selectedCategoryName = useMemo(() => {
+    return categories.find(category => category.id === categoryId)?.name;
+  }, [categories, categoryId]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -79,6 +128,8 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
         title: trimmedTitle,
         description: description.trim(),
         thumbnailUrl: thumbnailUrl.trim() || null,
+        categoryId: categoryId || undefined,
+        tagIds,
       });
 
       if (res.success && res.data) {
@@ -96,7 +147,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-lg border border-border/30 bg-card shadow-2xl shadow-black/50">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border/30 bg-card shadow-2xl shadow-black/50">
         <div className="flex items-start justify-between gap-4 border-b border-border/30 p-6">
           <div>
             <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Video Metadata</p>
@@ -142,6 +193,61 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                 onChange={event => setDescription(event.target.value)}
                 className="min-h-32 resize-none border-border/40 bg-background text-foreground focus-visible:ring-primary"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="video-category" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Category
+              </label>
+              <select
+                id="video-category"
+                value={categoryId}
+                onChange={event => setCategoryId(event.target.value)}
+                className="h-10 w-full rounded-md border border-border/40 bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/60"
+              >
+                <option value="">Keep current category</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Current category: {metadata?.category || "Unknown"}{selectedCategoryName ? ` -> ${selectedCategoryName}` : ""}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Tags
+              </span>
+              <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto rounded-md border border-border/30 bg-background p-3">
+                {tags.length > 0 ? (
+                  tags.map(tag => {
+                    const selected = tagIds.includes(tag.id);
+                    return (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => {
+                          setTagIds(current =>
+                            selected ? current.filter(item => item !== tag.id) : [...current, tag.id]
+                          );
+                        }}
+                        className={`rounded-sm border px-3 py-1.5 text-xs font-bold transition-colors ${
+                          selected
+                            ? "border-primary/70 bg-primary/10 text-primary"
+                            : "border-border/30 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                      >
+                        #{tag.slug}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-muted-foreground">Không có tag active.</p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

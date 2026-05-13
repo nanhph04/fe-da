@@ -13,7 +13,8 @@ export interface PublicDiscoveryVideo {
   channelId: string;
   title: string;
   description: string;
-  categories: string[];
+  category: string;
+  tags: string[];
   status: string;
   price: number;
   requiredTierLevel: number | null;
@@ -33,6 +34,8 @@ export interface PublicVideoMetadata {
   id: string;
   title: string;
   description: string;
+  category: string;
+  tags: string[];
   thumbnailUrl: string | null;
   viewCount: number;
   status: string;
@@ -47,7 +50,9 @@ export interface CategoryPublic {
   name: string;
   slug: string;
   description?: string;
+  parentId: string | null;
   status: "active";
+  displayOrder: number;
   createdAt: string;
   updatedAt: string;
 }

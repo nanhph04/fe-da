@@ -93,7 +93,7 @@ export function SubscribedVideosClient() {
               {video.title}
             </h3>
             <p className="mt-1 text-xs text-zinc-400">
-              {video.categories.join(" • ") || "Uncategorized"}
+              {video.category || "Uncategorized"}
             </p>
             <div className="mt-1.5 flex items-center gap-2 text-[10px] font-medium text-zinc-500">
               <span>{video.viewCount.toLocaleString()} views</span>

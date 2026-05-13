@@ -42,7 +42,8 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       const initResponse = await mediaService.initUpload({
         title: formData.title.trim(),
         description: formData.description.trim(),
-        categories: formData.categories,
+        categoryId: formData.categoryId,
+        tagIds: formData.tagIds,
         visibility: formData.visibility,
         price: formData.price,
         requiredTierLevel: formData.requiredTierLevel,
