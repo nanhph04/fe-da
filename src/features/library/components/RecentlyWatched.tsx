@@ -7,6 +7,7 @@ import {
   mediaService,
   type ContinueWatchingVideoResponse,
 } from "@/features/watch/services/mediaService";
+import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
 
 function formatRemainingTime(value: number | null) {
   if (value === null || value <= 0) {
@@ -29,34 +30,34 @@ interface RecentlyWatchedProps {
 
 export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
   const { user } = useAuth();
-  const [items, setItems] = useState<ContinueWatchingVideoResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, setState] = useState(() =>
+    createAsyncState<ContinueWatchingVideoResponse[]>([])
+  );
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadContinueWatching() {
-      setIsLoading(true);
+      setState((current) => ({ ...current, status: "loading", error: null }));
 
       if (!user) {
-        setItems([]);
-        setIsLoading(false);
+        setState({ status: "success", data: [], error: null });
         return;
       }
 
       try {
         const res = await mediaService.getContinueWatching({ limit: 10 });
         if (isMounted && res.success && res.data) {
-          setItems(res.data);
+          setState({ status: "success", data: res.data, error: null });
         }
       } catch (error) {
         if (isMounted) {
           console.error("Failed to load continue-watching videos", error);
-          setItems([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
+          setState({
+            status: "error",
+            data: [],
+            error: getErrorMessage(error, "Không thể tải danh sách xem tiếp."),
+          });
         }
       }
     }
@@ -68,6 +69,8 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
     };
   }, [user, refreshKey]);
 
+  const items = state.data;
+
   return (
     <section>
       <div className="mb-8 flex items-end justify-between">
@@ -76,25 +79,32 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
         </h2>
       </div>
 
-      {isLoading ? (
+      {isAsyncLoading(state) ? (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="min-w-[320px] animate-pulse">
-              <div className="mb-3 aspect-video rounded-lg bg-[#19191c]" />
-              <div className="h-5 w-3/4 rounded bg-[#19191c]" />
-              <div className="mt-2 h-4 w-1/2 rounded bg-[#19191c]" />
+            <div key={index} className="min-w-[320px]">
+              <div className="mb-3 aspect-video animate-pulse rounded-lg bg-muted" />
+              <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="mt-2 h-4 w-1/2 animate-pulse rounded bg-muted" />
             </div>
           ))}
         </div>
       ) : null}
 
-      {!isLoading && items.length === 0 ? (
-        <div className="rounded-xl border border-[#262528] bg-[#131315] p-6 text-sm text-zinc-400">
+      {isAsyncError(state) ? (
+        <div className="rounded-lg border border-destructive/30 bg-card p-6 text-sm text-muted-foreground">
+          {state.error}
+        </div>
+      ) : null}
+
+      {isAsyncSuccess(state) && items.length === 0 ? (
+        <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
           Chưa có dữ liệu.
         </div>
       ) : null}
 
-      <div className="hide-scrollbar flex gap-6 overflow-x-auto pb-4 snap-x">
+      {isAsyncSuccess(state) && items.length > 0 ? (
+        <div className="hide-scrollbar flex gap-6 overflow-x-auto pb-4 snap-x">
         {items.map((item) => {
           const progress =
             item.durationSeconds && item.durationSeconds > 0
@@ -156,7 +166,8 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
             </Link>
           );
         })}
-      </div>
+        </div>
+      ) : null}
     </section>
   );
 }

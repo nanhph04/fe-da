@@ -6,6 +6,7 @@ import {
   mediaService,
   type PurchasedVideoResponse,
 } from "@/features/watch/services/mediaService";
+import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
 
 function formatDuration(seconds: number | null) {
   if (!seconds || seconds <= 0) {
@@ -40,30 +41,28 @@ interface PurchasedLibraryProps {
 }
 
 export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
-  const [items, setItems] = useState<PurchasedVideoResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState(() =>
+    createAsyncState<PurchasedVideoResponse[]>([])
+  );
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadPurchasedVideos() {
       try {
-        setIsLoading(true);
-        setError(null);
+        setState((current) => ({ ...current, status: "loading", error: null }));
         const response = await mediaService.getPurchasedVideos({ page: 1, limit: 6 });
         if (isMounted && response.success && response.data) {
-          setItems(response.data);
+          setState({ status: "success", data: response.data, error: null });
         }
       } catch (err) {
         if (isMounted) {
           console.error("Failed to load purchased videos", err);
-          setError("Không thể tải thư viện đã mua.");
-          setItems([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
+          setState({
+            status: "error",
+            data: [],
+            error: getErrorMessage(err, "Không thể tải thư viện đã mua."),
+          });
         }
       }
     }
@@ -75,13 +74,15 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
     };
   }, [refreshKey]);
 
+  const items = state.data;
+
   return (
     <section>
       <div className="mb-8 flex items-end justify-between">
         <h2 className="font-headline text-3xl font-bold text-foreground">Thư viện đã mua</h2>
       </div>
 
-      {isLoading ? (
+      {isAsyncLoading(state) ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="overflow-hidden rounded-lg border border-border/20 bg-card">
@@ -95,19 +96,19 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
         </div>
       ) : null}
 
-      {!isLoading && error ? (
-        <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
-          {error}
+      {isAsyncError(state) ? (
+        <div className="rounded-lg border border-destructive/30 bg-card p-6 text-sm text-muted-foreground">
+          {state.error}
         </div>
       ) : null}
 
-      {!isLoading && !error && items.length === 0 ? (
+      {isAsyncSuccess(state) && items.length === 0 ? (
         <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
           Chưa có dữ liệu.
         </div>
       ) : null}
 
-      {!isLoading && !error && items.length > 0 ? (
+      {isAsyncSuccess(state) && items.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map((item, index) => {
             const isFeatured = index === 0;

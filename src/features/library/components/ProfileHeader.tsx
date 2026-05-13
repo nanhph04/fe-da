@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { WalletService } from "@/features/wallet/services/walletService";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
+import { createAsyncState, getErrorMessage, isAsyncLoading } from "@/shared/api";
 
 function formatMemberSince(value?: string) {
   if (!value) {
@@ -37,36 +38,33 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
   const { user } = useAuth();
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [isLoadingWallet, setIsLoadingWallet] = useState(true);
-  const [walletError, setWalletError] = useState<string | null>(null);
+  const [walletState, setWalletState] = useState(() =>
+    createAsyncState<Wallet | null>(null)
+  );
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadWallet() {
-      setIsLoadingWallet(true);
-      setWalletError(null);
+      setWalletState((current) => ({ ...current, status: "loading", error: null }));
 
       if (!user) {
-        setWallet(null);
-        setIsLoadingWallet(false);
+        setWalletState({ status: "success", data: null, error: null });
         return;
       }
 
       try {
         const data = await WalletService.getMyWallet();
         if (isMounted) {
-          setWallet(data);
+          setWalletState({ status: "success", data, error: null });
         }
-      } catch {
+      } catch (error) {
         if (isMounted) {
-          setWallet(null);
-          setWalletError("Chưa có dữ liệu");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingWallet(false);
+          setWalletState({
+            status: "error",
+            data: null,
+            error: getErrorMessage(error, "Không thể tải số dư ví."),
+          });
         }
       }
     }
@@ -79,9 +77,9 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
   }, [user, refreshKey]);
 
   const displayName = user?.displayName || user?.email || "Tài khoản của bạn";
-  const walletLabel = wallet
-    ? `${wallet.balance.toLocaleString()} AC`
-    : walletError || "Chưa có dữ liệu";
+  const walletLabel = walletState.data
+    ? `${walletState.data.balance.toLocaleString()} AC`
+    : walletState.error || "Chưa có dữ liệu";
 
   return (
     <section className="flex flex-col items-start justify-between gap-8 border-b border-border/20 pb-12 md:flex-row md:items-end">
@@ -106,7 +104,7 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
             Số dư Aura
           </span>
           <div className="flex items-center gap-2 font-headline text-3xl font-black text-secondary">
-            {isLoadingWallet ? "..." : walletLabel}
+            {isAsyncLoading(walletState) ? "..." : walletLabel}
             <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>toll</span>
           </div>
         </div>

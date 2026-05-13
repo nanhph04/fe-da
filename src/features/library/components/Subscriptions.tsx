@@ -6,6 +6,7 @@ import {
   mediaService,
   type UserMembershipResponse,
 } from "@/features/watch/services/mediaService";
+import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
 
 function getInitials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
@@ -42,31 +43,29 @@ interface SubscriptionsProps {
 }
 
 export function Subscriptions({ refreshKey = 0 }: SubscriptionsProps) {
-  const [items, setItems] = useState<UserMembershipResponse[]>([]);
+  const [state, setState] = useState(() =>
+    createAsyncState<UserMembershipResponse[]>([])
+  );
   const [failedAvatarUrls, setFailedAvatarUrls] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadMemberships() {
       try {
-        setIsLoading(true);
-        setError(null);
+        setState((current) => ({ ...current, status: "loading", error: null }));
         const response = await mediaService.getMyMemberships({ page: 1, limit: 5 });
         if (isMounted && response.success && response.data) {
-          setItems(response.data);
+          setState({ status: "success", data: response.data, error: null });
         }
       } catch (err) {
         if (isMounted) {
           console.error("Failed to load memberships", err);
-          setError("Không thể tải gói hội viên.");
-          setItems([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
+          setState({
+            status: "error",
+            data: [],
+            error: getErrorMessage(err, "Không thể tải gói hội viên."),
+          });
         }
       }
     }
@@ -78,12 +77,14 @@ export function Subscriptions({ refreshKey = 0 }: SubscriptionsProps) {
     };
   }, [refreshKey]);
 
+  const items = state.data;
+
   return (
     <div className="space-y-6 lg:col-span-1">
       <h2 className="font-headline text-2xl font-bold text-foreground">Gói hội viên</h2>
 
       <div className="space-y-4">
-        {isLoading
+        {isAsyncLoading(state)
           ? Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="flex items-center gap-3 rounded-lg border border-border/20 bg-card p-4">
                 <div className="h-12 w-12 animate-pulse rounded-full bg-muted" />
@@ -95,19 +96,19 @@ export function Subscriptions({ refreshKey = 0 }: SubscriptionsProps) {
             ))
           : null}
 
-        {!isLoading && error ? (
-          <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
-            {error}
+        {isAsyncError(state) ? (
+          <div className="rounded-lg border border-destructive/30 bg-card p-6 text-sm text-muted-foreground">
+            {state.error}
           </div>
         ) : null}
 
-        {!isLoading && !error && items.length === 0 ? (
+        {isAsyncSuccess(state) && items.length === 0 ? (
           <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
             Chưa có dữ liệu.
           </div>
         ) : null}
 
-        {!isLoading && !error
+        {isAsyncSuccess(state)
           ? items.map((membership) => {
               const avatarFailed = membership.channelAvatarUrl
                 ? failedAvatarUrls.has(membership.channelAvatarUrl)

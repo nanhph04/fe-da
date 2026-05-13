@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { TransactionService } from "@/features/wallet/services/transactionService";
 import type { Transaction } from "@/features/wallet/types/wallet.types";
+import { createAsyncState, getErrorMessage, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -68,30 +69,26 @@ interface AccountActivityProps {
 }
 
 export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState(() => createAsyncState<Transaction[]>([]));
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadTransactions() {
       try {
-        setIsLoading(true);
-        setError(null);
+        setState((current) => ({ ...current, status: "loading", error: null }));
         const data = await TransactionService.getMyTransactions();
         if (isMounted) {
-          setTransactions(data.slice(0, 5));
+          setState({ status: "success", data: data.slice(0, 5), error: null });
         }
       } catch (err) {
         if (isMounted) {
           console.error("Failed to load account activity", err);
-          setError("Không thể tải hoạt động tài khoản.");
-          setTransactions([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
+          setState({
+            status: "error",
+            data: [],
+            error: getErrorMessage(err, "Không thể tải hoạt động tài khoản."),
+          });
         }
       }
     }
@@ -103,12 +100,14 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
     };
   }, [refreshKey]);
 
+  const transactions = state.data;
+
   return (
     <div className="space-y-6 lg:col-span-2">
       <h2 className="font-headline text-2xl font-bold text-foreground">Hoạt động tài khoản</h2>
 
       <div className="overflow-hidden rounded-lg border border-border/20 bg-card divide-y divide-border/20">
-        {isLoading ? (
+        {isAsyncLoading(state) ? (
           Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="flex items-center justify-between p-5">
               <div className="flex items-center gap-4">
@@ -123,15 +122,15 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
           ))
         ) : null}
 
-        {!isLoading && error ? (
-          <div className="p-6 text-sm text-muted-foreground">{error}</div>
+        {isAsyncError(state) ? (
+          <div className="p-6 text-sm text-muted-foreground">{state.error}</div>
         ) : null}
 
-        {!isLoading && !error && transactions.length === 0 ? (
+        {isAsyncSuccess(state) && transactions.length === 0 ? (
           <div className="p-6 text-sm text-muted-foreground">Chưa có dữ liệu.</div>
         ) : null}
 
-        {!isLoading && !error
+        {isAsyncSuccess(state)
           ? transactions.map((transaction) => {
               const meta = getActivityMeta(transaction);
               return (
