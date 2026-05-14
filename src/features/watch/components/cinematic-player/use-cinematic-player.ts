@@ -35,6 +35,8 @@ export function useCinematicPlayer({
   const resumePositionRef = useRef(initialPositionSeconds);
   const hasRestoredProgressRef = useRef(false);
   const lastSavedPositionRef = useRef(0);
+  const inFlightProgressKeyRef = useRef<string | null>(null);
+  const lastForcedProgressKeyRef = useRef<string | null>(null);
   const [selectedResolution, setSelectedResolution] = useState("auto");
   const [playerError, setPlayerError] = useState<string | null>(null);
 
@@ -105,25 +107,51 @@ export function useCinematicPlayer({
       const normalizedDuration = Number.isFinite(duration)
         ? Math.max(0, Math.floor(safeDuration ?? 0))
         : null;
+      const currentVideoId = videoIdRef.current;
 
-      if (!force && normalizedTime - lastSavedPositionRef.current < 10) {
+      if (!currentVideoId || currentVideoId === "undefined") {
+        return;
+      }
+
+      const progressKey = [
+        currentVideoId,
+        state,
+        normalizedTime,
+        normalizedDuration ?? "unknown-duration",
+      ].join(":");
+
+      if (force) {
+        if (
+          progressKey === inFlightProgressKeyRef.current ||
+          progressKey === lastForcedProgressKeyRef.current
+        ) {
+          return;
+        }
+
+        lastForcedProgressKeyRef.current = progressKey;
+      } else if (normalizedTime - lastSavedPositionRef.current < 10) {
         return;
       }
 
       lastSavedPositionRef.current = normalizedTime;
+      inFlightProgressKeyRef.current = progressKey;
 
       try {
-        await mediaService.saveVideoProgress(videoIdRef.current, {
+        await mediaService.saveVideoProgress(currentVideoId, {
           positionSeconds: normalizedTime,
           durationSeconds: normalizedDuration,
           state,
         });
       } catch (error) {
         console.warn("[watch] failed to persist playback progress", {
-          videoId: videoIdRef.current,
+          videoId: currentVideoId,
           state,
           error,
         });
+      } finally {
+        if (inFlightProgressKeyRef.current === progressKey) {
+          inFlightProgressKeyRef.current = null;
+        }
       }
     };
 

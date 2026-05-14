@@ -3,7 +3,7 @@ import { CreatorSection } from "./CreatorSection";
 import { RelatedVideosSidebar } from "./RelatedVideosSidebar";
 import { PlayerContainerClient } from "./PlayerContainerClient";
 import {
-  getViewerVideoMetadata,
+  getVideoMetadataCached,
   type PublicApiError,
 } from "../services/publicMediaService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -21,7 +21,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let description = "";
 
   try {
-    const infoRes = await getViewerVideoMetadata(videoId);
+    const infoRes = await getVideoMetadataCached(videoId);
     if (infoRes.success && infoRes.data) {
       title = infoRes.data.title;
       poster = infoRes.data.thumbnailUrl || undefined;

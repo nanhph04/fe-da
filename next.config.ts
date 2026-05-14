@@ -4,10 +4,12 @@ const apiGatewayUrl =
   process.env.NEXT_PUBLIC_GATEWAY_URL ??
   "http://localhost:4000";
 
+const appHostIp = process.env.NEXT_PUBLIC_APP_HOST_IP;
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
 
-  allowedDevOrigins: ["192.168.2.6"],
+  allowedDevOrigins: appHostIp ? [appHostIp] : [],
 
   images: {
     remotePatterns: [

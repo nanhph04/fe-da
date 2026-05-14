@@ -229,16 +229,17 @@ export interface UserMembershipResponse {
 export interface PurchasedVideoResponse {
   videoId: string;
   channelId: string;
-  channelName: string;
+  channelName: string | null;
   title: string;
   description: string;
   thumbnailUrl: string | null;
   durationSeconds: number | null;
   categories: string[];
+  tags: string[];
   priceCoin: number;
   purchasedAt: string;
-  lastWatchedAt: string | null;
-  resumePositionSeconds: number | null;
+  publishedAt: string | null;
+  viewCount: number;
   accessStatus: "ACTIVE" | "EXPIRED" | "REVOKED" | string;
 }
 

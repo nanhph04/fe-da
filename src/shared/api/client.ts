@@ -37,8 +37,17 @@ export const clearLocalAccessToken = () => {
   }
 };
 
-export const buildApiUrl = (endpoint: string) =>
-  endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
+export const buildApiUrl = (endpoint: string) => {
+  if (endpoint.startsWith("http")) {
+    return endpoint;
+  }
+
+  if (typeof window !== "undefined") {
+    return endpoint;
+  }
+
+  return `${API_BASE_URL}${endpoint}`;
+};
 
 export const getErrorMessage = (
   error: unknown,

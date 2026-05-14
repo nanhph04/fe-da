@@ -112,11 +112,19 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
       {isAsyncSuccess(state) && items.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map((item, index) => {
+            const videoId = item.videoId;
+
+            if (!videoId) {
+              return null;
+            }
+
             const isFeatured = index === 0;
+            const itemKey = `${videoId}-${item.purchasedAt}-${index}`;
+
             return (
               <Link
-                key={item.videoId}
-                href={`/watch/${item.videoId}`}
+                key={itemKey}
+                href={`/watch/${videoId}`}
                 className={
                   isFeatured
                     ? "group relative h-80 overflow-hidden rounded-lg md:col-span-2"
@@ -147,10 +155,10 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
                     {item.title}
                   </h3>
                   <p className="line-clamp-2 text-sm text-zinc-300">
-                    {item.description || item.channelName}
+                    {item.description || item.channelName || "Video đã mua"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {item.channelName} • {formatDuration(item.durationSeconds)} • Mua ngày {formatDate(item.purchasedAt)}
+                    {item.channelName || "Kênh chưa rõ"} • {formatDuration(item.durationSeconds)} • Mua ngày {formatDate(item.purchasedAt)}
                   </p>
                 </div>
               </Link>
