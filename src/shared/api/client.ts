@@ -128,29 +128,47 @@ const createRequestConfig = (options: ApiRequestInit, headers: Headers): Request
   credentials: "include",
 });
 
+const isFetchConnectionError = (error: unknown) =>
+  error instanceof TypeError &&
+  (error.message === "Failed to fetch" || error.message === "fetch failed");
+
+const createConnectionError = (): ApiError => ({
+  success: false,
+  code: 503,
+  mess: "Unable to connect to the API server. Check that the backend is running and reachable.",
+});
+
 const refreshAccessToken = async () => {
-  const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  const refreshPayload = (await parseResponseBody(
-    refreshResponse
-  )) as ApiResponse<{ accessToken: string }> | ApiError | null;
+    const refreshPayload = (await parseResponseBody(
+      refreshResponse
+    )) as ApiResponse<{ accessToken: string }> | ApiError | null;
 
-  if (
-    refreshResponse.ok &&
-    refreshPayload &&
-    "data" in refreshPayload &&
-    refreshPayload.data?.accessToken
-  ) {
-    return refreshPayload.data.accessToken;
+    if (
+      refreshResponse.ok &&
+      refreshPayload &&
+      "data" in refreshPayload &&
+      refreshPayload.data?.accessToken
+    ) {
+      return refreshPayload.data.accessToken;
+    }
+
+    throw refreshPayload || ({ success: false, code: 401, mess: "Refresh failed" } satisfies ApiError);
+  } catch (error: unknown) {
+    if (isFetchConnectionError(error)) {
+      throw createConnectionError();
+    }
+
+    throw error;
   }
-
-  throw refreshPayload || new Error("Refresh failed");
 };
 
 export const fetchWrapper = async <T = unknown>(
@@ -221,15 +239,8 @@ export const fetchWrapper = async <T = unknown>(
 
     return payload;
   } catch (error: unknown) {
-    if (
-      error instanceof TypeError &&
-      (error.message === "Failed to fetch" || error.message === "fetch failed")
-    ) {
-      return Promise.reject({
-        success: false,
-        code: 503,
-        mess: "Unable to connect to the API server. Check that the backend is running and reachable.",
-      } satisfies ApiError);
+    if (isFetchConnectionError(error)) {
+      return Promise.reject(createConnectionError());
     }
 
     return Promise.reject(error);

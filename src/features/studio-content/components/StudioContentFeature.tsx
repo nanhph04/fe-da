@@ -3,14 +3,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { mediaService, type DiscoveryVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
+import { mediaService, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
-import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 
 const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
 const READY_STATUSES = new Set(["ready"]);
+const REJECTED_STATUS = "rejected";
 
 type ContentFilter = "all" | "draft" | "processing" | "ready" | "failed";
 
@@ -30,7 +30,7 @@ function normalizeVisibility(visibility?: string | null) {
   return visibility?.toLowerCase() || "private";
 }
 
-function getVisibilityTone(video: DiscoveryVideoResponse) {
+function getVisibilityTone(video: OwnerVideoResponse) {
   const visibility = normalizeVisibility(video.visibility);
 
   if (visibility === "public") {
@@ -64,16 +64,22 @@ function getStatusTone(status: string) {
   return "text-muted-foreground";
 }
 
+function getRejectReason(video: OwnerVideoResponse) {
+  return video.failureReason || video.errorMessage || video.jobStatusMessage || "Chưa có nguyên nhân reject từ hệ thống.";
+}
+
 export function StudioContentFeature() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim().toLowerCase() ?? "";
-  const [videos, setVideos] = useState<DiscoveryVideoResponse[]>([]);
+  const [videos, setVideos] = useState<OwnerVideoResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<ContentFilter>("all");
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
+  const [expandedRejectReasonVideoId, setExpandedRejectReasonVideoId] = useState<string | null>(null);
 
   const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter = activeFilter) => {
     if (showLoading) {
@@ -146,9 +152,37 @@ export function StudioContentFeature() {
     void fetchVideos(false);
   };
 
-  const handleUnavailableAction = (message: string) => {
+  const showActionMessage = (message: string) => {
     setActionMessage(message);
     window.setTimeout(() => setActionMessage(null), 3500);
+  };
+
+  const handleDeleteVideo = async (video: OwnerVideoResponse) => {
+    const status = normalizeStatus(video.status);
+    setDeletingVideoId(video.id);
+    setError(null);
+
+    try {
+      const response = FAILED_STATUSES.has(status)
+        ? await mediaService.deleteFailedUpload(video.id)
+        : await mediaService.deleteVideo(video.id);
+
+      if (!response.success) {
+        showActionMessage(response.mess || "Không thể xoá video. Vui lòng thử lại.");
+        return;
+      }
+
+      showActionMessage(
+        FAILED_STATUSES.has(status)
+          ? "Đã xoá video xử lý thất bại khỏi Studio."
+          : "Đã gỡ video khỏi thư viện công khai."
+      );
+      await fetchVideos(false);
+    } catch (err) {
+      showActionMessage(getErrorMessage(err, "Không thể xoá video. Vui lòng thử lại."));
+    } finally {
+      setDeletingVideoId(null);
+    }
   };
 
   return (
@@ -245,10 +279,12 @@ export function StudioContentFeature() {
             const visibility = normalizeVisibility(video.visibility);
             const visibilityLabel = toTitleCase(visibility);
             const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString() : "--";
-            const thumbUrl = video.thumbnailUrl;
+            const thumbUrl = video.thumbnailUrl || "/images/thumbnail.png";
             const price = video.price ?? 0;
             const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
+            const isRejected = status === REJECTED_STATUS;
+            const isRejectReasonExpanded = expandedRejectReasonVideoId === video.id;
 
             return (
               <article
@@ -262,16 +298,9 @@ export function StudioContentFeature() {
                     <div
                       aria-label={video.title}
                       role="img"
-                      className="h-full w-full bg-cover bg-center opacity-80 transition-opacity group-hover:opacity-100"
-                      style={
-                        thumbUrl
-                          ? { backgroundImage: `url(${thumbUrl})` }
-                          : undefined
-                      }
+                      className="h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
+                      style={{ backgroundImage: `url(${thumbUrl})` }}
                     />
-                    {!thumbUrl ? (
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]" />
-                    ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors group-hover:text-primary">
@@ -283,19 +312,35 @@ export function StudioContentFeature() {
                       </span>
                       <span className="font-label text-xs text-muted-foreground">• {formattedDate}</span>
                     </div>
-                    {FAILED_STATUSES.has(status) ? (
-                      <p className="mt-2 max-w-sm text-xs text-destructive">
-                        {video.errorMessage || "Video xử lý thất bại. Vui lòng thử upload lại hoặc kiểm tra log backend."}
-                      </p>
+                    {FAILED_STATUSES.has(status) && (!isRejected || isRejectReasonExpanded) ? (
+                      <div className="mt-2 max-w-sm rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                        <span className="font-bold uppercase tracking-widest">
+                          {isRejected ? "Reject reason" : "Processing failed"}
+                        </span>
+                        <p className="mt-1 text-destructive/90">
+                          {isRejected ? getRejectReason(video) : video.failureReason || video.errorMessage || video.jobStatusMessage || "Video xử lý thất bại. Bạn có thể xoá bản lỗi và upload lại."}
+                        </p>
+                      </div>
                     ) : null}
-                    {PROCESSING_STATUSES.has(status) && (
-                      <ProcessingProgressTracker
-                        videoId={video.id}
-                        initialStatus={status}
-                        onComplete={refreshAfterProcessing}
-                        onRefreshStatus={refreshAfterProcessing}
-                      />
-                    )}
+                    {PROCESSING_STATUSES.has(status) ? (
+                      <div className="mt-3 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 p-3 text-xs text-secondary">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-semibold uppercase tracking-widest">
+                            {(video.jobStatus || status).replaceAll("_", " ")}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={refreshAfterProcessing}
+                            className="rounded-sm border border-secondary/30 px-2 py-1 font-bold uppercase tracking-widest transition-colors hover:bg-secondary/10"
+                          >
+                            Refresh
+                          </button>
+                        </div>
+                        <p className="mt-2 text-muted-foreground">
+                          {video.jobStatusMessage || "Video đang được xử lý. Nhấn Refresh để cập nhật trạng thái mới nhất."}
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -320,32 +365,54 @@ export function StudioContentFeature() {
                 </div>
 
                 <div className="col-span-12 flex justify-end gap-2 md:col-span-2">
+                  {isRejected ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setExpandedRejectReasonVideoId(current => current === video.id ? null : video.id)}
+                      className="h-8 w-8 rounded-full p-0 text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      aria-label={`${isRejectReasonExpanded ? "Hide" : "View"} reject reason for ${video.title}`}
+                      aria-expanded={isRejectReasonExpanded}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {isRejectReasonExpanded ? "error" : "report"}
+                      </span>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setEditingVideoId(video.id)}
+                        className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
+                        aria-label={`Edit ${video.title}`}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                      </Button>
+                      {/* Analytics action is hidden until the feature is available.
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => showActionMessage("Analytics API chưa sẵn sàng. Hiện chỉ có views cơ bản trong danh sách.")}
+                        className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-secondary"
+                        aria-label={`View analytics for ${video.title}`}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">bar_chart</span>
+                      </Button>
+                      */}
+                    </>
+                  )}
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => setEditingVideoId(video.id)}
-                    className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
-                    aria-label={`Edit ${video.title}`}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">edit</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => handleUnavailableAction("Analytics API chưa sẵn sàng. Hiện chỉ có views cơ bản trong danh sách.")}
-                    className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-secondary"
-                    aria-label={`View analytics for ${video.title}`}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">bar_chart</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => handleUnavailableAction("Chức năng xoá video chưa có API contract, nên không xoá local giả.")}
-                    className="h-8 w-8 rounded-full p-0 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                    onClick={() => void handleDeleteVideo(video)}
+                    disabled={deletingVideoId === video.id || PROCESSING_STATUSES.has(status)}
+                    className="h-8 w-8 rounded-full p-0 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label={`Delete ${video.title}`}
                   >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                    <span className="material-symbols-outlined text-[18px]">
+                      {deletingVideoId === video.id ? "hourglass_top" : "delete"}
+                    </span>
                   </Button>
                 </div>
               </article>

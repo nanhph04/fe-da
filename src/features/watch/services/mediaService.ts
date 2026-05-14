@@ -133,16 +133,7 @@ export interface SaveVideoProgressResponse {
   completed: boolean;
 }
 
-export interface VideoProgressResponse {
-  videoId: string;
-  stage: string;
-  percent: number;
-  message: string;
-  terminal: boolean;
-  updatedAt: string;
-  detail: Record<string, unknown> | null;
-  errorCode: string | null;
-}
+export type ModerationDetails = Record<string, unknown>;
 
 export interface VideoMetadataResponse {
   id: string;
@@ -157,7 +148,15 @@ export interface VideoMetadataResponse {
   status: string;
   visibility: string;
   errorMessage: string | null;
+  jobStatus: string | null;
+  jobStatusMessage: string | null;
+  failureReason: string | null;
+  moderationDetails: ModerationDetails | null;
   publishedAt: string | null;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  deleteReason: string | null;
   updatedAt: string;
 }
 
@@ -194,6 +193,14 @@ export interface DiscoveryVideoResponse {
 
 export interface OwnerVideoResponse extends DiscoveryVideoResponse {
   visibility: string;
+  jobStatus: string | null;
+  jobStatusMessage: string | null;
+  failureReason: string | null;
+  moderationDetails: ModerationDetails | null;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  deleteReason: string | null;
 }
 
 export interface ContinueWatchingVideoResponse {
@@ -227,20 +234,23 @@ export interface UserMembershipResponse {
 }
 
 export interface PurchasedVideoResponse {
-  videoId: string;
+  id: string;
   channelId: string;
-  channelName: string | null;
   title: string;
   description: string;
+  category: string;
+  tags: string[];
+  status: string;
+  price: number;
+  requiredTierLevel: number | null;
   thumbnailUrl: string | null;
   durationSeconds: number | null;
-  categories: string[];
-  tags: string[];
-  priceCoin: number;
-  purchasedAt: string;
-  publishedAt: string | null;
+  resolutions: string[];
+  errorMessage: string | null;
   viewCount: number;
-  accessStatus: "ACTIVE" | "EXPIRED" | "REVOKED" | string;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CategoryResponse {
@@ -291,6 +301,10 @@ export interface SearchMediaParams {
   q?: string;
   category?: string;
   limit?: number;
+}
+
+export interface PublicVideosParams extends SearchMediaParams {
+  tags?: string | string[];
 }
 
 export interface OwnerVideosParams {
@@ -437,6 +451,17 @@ export const mediaService = {
       requireAuth: true,
     });
   },
+  deleteFailedUpload: async (id: string) => {
+    return api.delete<{ videoId: string; deleted: boolean }>(
+      `/api/media/videos/${id}/failed-upload`,
+      { requireAuth: true }
+    );
+  },
+  deleteVideo: async (id: string) => {
+    return api.delete<{ videoId: string; unpublished: boolean }>(`/api/media/videos/${id}`, {
+      requireAuth: true,
+    });
+  },
   uploadRawVideoFile,
   confirmUpload: async (id: string, data: ConfirmUploadBody) => {
     return api.post<{ status: string; message: string }>(
@@ -452,12 +477,6 @@ export const mediaService = {
     return api.post<SaveVideoProgressResponse>(`/api/media/videos/${id}/progress`, data, {
       requireAuth: true,
     });
-  },
-  getVideoProgress: async (id: string) => {
-    return api.get<VideoProgressResponse>(`/api/media/videos/${id}/progress`, { requireAuth: true });
-  },
-  getVideoProgressStreamUrl: (id: string) => {
-    return `/api/media/videos/${id}/progress/stream`;
   },
   refreshPlaybackToken: async (id: string) => {
     return api.post<RefreshPlaybackTokenResponse>(
@@ -488,6 +507,15 @@ export const mediaService = {
   },
 
   // 5. DISCOVERY & SEARCH
+  getPublicVideos: async (params?: PublicVideosParams) => {
+    const qs = buildQueryString({
+      q: params?.q,
+      category: params?.category,
+      tags: toCommaSeparated(params?.tags),
+      limit: params?.limit,
+    });
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos${qs}`);
+  },
   getLatestVideos: async (params?: Pick<PaginationParams, "limit">) => {
     const qs = buildQueryString({ limit: params?.limit });
     return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/latest${qs}`);
@@ -495,6 +523,10 @@ export const mediaService = {
   getVideosByCategory: async (category: string, params?: PaginationParams) => {
     const qs = buildQueryString({ category, page: params?.page, limit: params?.limit });
     return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/by-category${qs}`);
+  },
+  getVideosByCategorySlug: async (slug: string, params?: PaginationParams) => {
+    const qs = buildQueryString({ page: params?.page, limit: params?.limit });
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/categories/${slug}/videos${qs}`);
   },
   getSubscribedVideos: async (params?: Pick<PaginationParams, "limit">) => {
     const qs = buildQueryString({ limit: params?.limit });

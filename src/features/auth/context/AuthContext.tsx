@@ -42,8 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(res.data);
         return res.data;
       }
-    } catch (error) {
-      console.error("Failed to load profile:", error);
+    } catch {
       api.clearToken();
       setUser(null);
     }

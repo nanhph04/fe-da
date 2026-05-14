@@ -42,7 +42,15 @@ export interface PublicVideoMetadata {
   status: string;
   visibility: string;
   errorMessage: string | null;
+  jobStatus: string | null;
+  jobStatusMessage: string | null;
+  failureReason: string | null;
+  moderationDetails: Record<string, unknown> | null;
   publishedAt: string | null;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  deleteReason: string | null;
   updatedAt: string;
 }
 
