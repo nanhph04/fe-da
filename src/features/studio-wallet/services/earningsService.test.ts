@@ -16,32 +16,16 @@ describe("EarningsService", () => {
     jest.clearAllMocks();
   });
 
-  it("requests video earnings with merged filters", async () => {
-    const mockResponse = { data: { id: "video-earnings-id" } };
-    mockApi.get.mockResolvedValue(mockResponse);
-
-    const result = await EarningsService.getVideoEarnings("video-id", {
-      period: "monthly",
-      status: "confirmed",
-    });
-
-    expect(mockApi.get).toHaveBeenCalledWith(
-      "/api/studio/earnings/video?videoId=video-id&period=monthly&status=confirmed",
-      { requireAuth: true }
-    );
-    expect(result).toEqual(mockResponse.data);
-  });
-
   it("requests monthly earnings with year and month params", async () => {
-    const mockResponse = { data: { month: "2024-01" } };
+    const mockResponse = { data: { month: "01", year: 2024 } };
     mockApi.get.mockResolvedValue(mockResponse);
 
     const result = await EarningsService.getMonthlyEarnings(2024, 1, {
-      status: "confirmed",
+      period: "monthly",
     });
 
     expect(mockApi.get).toHaveBeenCalledWith(
-      "/api/studio/earnings/monthly?year=2024&month=1&status=confirmed",
+      "/api/studio/earnings/monthly?year=2024&month=1&period=monthly",
       { requireAuth: true }
     );
     expect(result).toEqual(mockResponse.data);
@@ -62,12 +46,26 @@ describe("EarningsService", () => {
     expect(result).toEqual(mockResponse.data);
   });
 
+  it("requests top earning videos", async () => {
+    const mockResponse = { data: [] };
+    mockApi.get.mockResolvedValue(mockResponse);
+
+    const result = await EarningsService.getTopEarningVideos({
+      period: "monthly",
+      limit: 3,
+    });
+
+    expect(mockApi.get).toHaveBeenCalledWith(
+      "/api/studio/earnings/top-videos?period=monthly&limit=3",
+      { requireAuth: true }
+    );
+    expect(result).toEqual(mockResponse.data);
+  });
+
   it("passes through rejected api errors", async () => {
     const error = new Error("Network Error");
     mockApi.get.mockRejectedValue(error);
 
-    await expect(
-      EarningsService.getEarningsHistory({ period: "monthly" })
-    ).rejects.toThrow("Network Error");
+    await expect(EarningsService.getEarningsSummary()).rejects.toThrow("Network Error");
   });
 });

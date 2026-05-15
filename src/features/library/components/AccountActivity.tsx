@@ -21,11 +21,58 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function normalizeText(value: string | null | undefined) {
+  return value?.trim().toLowerCase() ?? "";
+}
+
+function formatNumber(value: number) {
+  return value.toLocaleString("vi-VN");
+}
+
+function readNumberMetadata(metadata: Record<string, unknown>, key: string) {
+  const value = metadata[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function isInternalRevenueTransaction(transaction: Transaction) {
+  return ["channel_revenue", "system_revenue"].includes(normalizeText(transaction.type));
+}
+
+function isDepositTransaction(transaction: Transaction) {
+  return normalizeText(transaction.type) === "deposit";
+}
+
+function getServiceType(transaction: Transaction) {
+  const metadataServiceType = typeof transaction.metadata.serviceType === "string"
+    ? transaction.metadata.serviceType
+    : undefined;
+  const serviceType = normalizeText(metadataServiceType);
+
+  if (serviceType) {
+    return serviceType;
+  }
+
+  const type = normalizeText(transaction.type);
+
+  if (type.includes("video")) {
+    return "video";
+  }
+
+  if (type.includes("membership")) {
+    return "membership";
+  }
+
+  return "service";
+}
+
 function getActivityMeta(transaction: Transaction) {
-  if (transaction.type === "DEPOSIT") {
+  if (isDepositTransaction(transaction)) {
+    const moneyAmount = readNumberMetadata(transaction.metadata, "moneyAmount");
+    const coinAmount = readNumberMetadata(transaction.metadata, "totalCoinAmount") ?? transaction.amount;
+
     return {
-      title: transaction.description || "Nạp Aura Coin",
-      amount: `+ ${transaction.amount.toLocaleString()} ${transaction.assetType === "COIN" ? "AC" : ""}`.trim(),
+      title: moneyAmount !== null ? `Nạp thành công ${formatNumber(moneyAmount)} VND` : "Nạp coin thành công",
+      amount: `+${formatNumber(coinAmount)} AC`,
       icon: "add_card",
       iconColor: "text-secondary",
       iconBg: "bg-secondary/10",
@@ -33,10 +80,12 @@ function getActivityMeta(transaction: Transaction) {
     };
   }
 
-  if (transaction.type === "VIDEO_PURCHASE") {
+  const serviceType = getServiceType(transaction);
+
+  if (serviceType === "video") {
     return {
-      title: transaction.description || "Mở khóa video",
-      amount: `- ${transaction.amount.toLocaleString()} AC`,
+      title: "Thanh toán video",
+      amount: `-${formatNumber(transaction.amount)} AC`,
       icon: "lock_open",
       iconColor: "text-primary",
       iconBg: "bg-primary/10",
@@ -44,24 +93,24 @@ function getActivityMeta(transaction: Transaction) {
     };
   }
 
-  if (transaction.type === "WITHDRAWAL") {
+  if (serviceType === "membership") {
     return {
-      title: transaction.description || "Rút tiền",
-      amount: `- ${transaction.amount.toLocaleString()}`,
-      icon: "payments",
-      iconColor: "text-zinc-300",
-      iconBg: "bg-muted",
-      amountColor: "text-zinc-300",
+      title: "Thanh toán gói hội viên",
+      amount: `-${formatNumber(transaction.amount)} AC`,
+      icon: "autorenew",
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
+      amountColor: "text-primary",
     };
   }
 
   return {
-    title: transaction.description || "Giao dịch tài khoản",
-    amount: `${transaction.amount.toLocaleString()} ${transaction.assetType === "COIN" ? "AC" : ""}`.trim(),
+    title: "Thanh toán dịch vụ",
+    amount: `-${formatNumber(transaction.amount)} AC`,
     icon: "receipt_long",
-    iconColor: "text-zinc-300",
-    iconBg: "bg-muted",
-    amountColor: "text-zinc-300",
+    iconColor: "text-primary",
+    iconBg: "bg-primary/10",
+    amountColor: "text-primary",
   };
 }
 
@@ -79,8 +128,12 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
       try {
         setState((current) => ({ ...current, status: "loading", error: null }));
         const data = await TransactionService.getMyTransactions();
+        const viewerTransactions = data
+          .filter((transaction) => !isInternalRevenueTransaction(transaction))
+          .slice(0, 5);
+
         if (isMounted) {
-          setState({ status: "success", data: data.slice(0, 5), error: null });
+          setState({ status: "success", data: viewerTransactions, error: null });
         }
       } catch (err) {
         if (isMounted) {

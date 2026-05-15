@@ -1,55 +1,67 @@
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/features/auth/context/AuthContext";
-import { Skeleton } from "@/components/ui/skeleton";
-export function AccountInfo() {
-  const { user, isLoading } = useAuth();
+"use client";
 
-  if (isLoading) {
-    return <Skeleton className="w-full h-48 rounded-xl" />;
-  }
+import { useState } from "react";
+import { CalendarDays, Mail, Phone, UserRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { ProfileUser } from "../types/profile.types";
+import { formatProfileDate } from "../utils/profile-formatters";
+import { ChangePasswordDialog } from "./ChangePasswordDialog";
+
+interface AccountInfoProps {
+  user: ProfileUser;
+}
+
+const getGenderLabel = (gender?: ProfileUser["gender"]) => {
+  if (gender === "male") return "Nam";
+  if (gender === "female" || gender === "women") return "Nữ";
+  return "Chưa cập nhật";
+};
+
+export function AccountInfo({ user }: AccountInfoProps) {
+  const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+
+  const items = [
+    { label: "Email", value: user.email, icon: Mail },
+    { label: "Số điện thoại", value: user.phone ? `+${user.phone}` : "Chưa cập nhật", icon: Phone },
+    { label: "Giới tính", value: getGenderLabel(user.gender), icon: UserRound },
+    { label: "Ngày sinh", value: formatProfileDate(user.birthday), icon: CalendarDays },
+  ];
 
   return (
     <section>
-      <h2 className="text-xl font-bold mb-6 font-headline flex items-center gap-3 text-[#f9f5f8]">
-        <span className="w-1 h-6 bg-[#ff8e80] rounded-full"></span>
-        Account Information
+      <h2 className="mb-6 flex items-center gap-3 font-headline text-xl font-bold text-foreground">
+        <span className="h-6 w-1 rounded-full bg-primary" aria-hidden="true" />
+        Thông tin tài khoản
       </h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Email Address</label>
-          <div className="relative group">
-            <Input 
-              className="w-full bg-black/50 border-[#48474a]/20 rounded-lg py-6 px-5 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" 
-              type="email" 
-              defaultValue={user?.email || ""} 
-              readOnly 
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-zinc-600 group-hover:text-[#ff8e80] cursor-pointer text-xl">edit</span>
-          </div>
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Phone Number</label>
-          <div className="relative group">
-            <Input 
-              className="w-full bg-black/50 border-[#48474a]/20 rounded-lg py-6 px-5 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" 
-              type="text" 
-              defaultValue={user?.phone ? `+${user.phone}` : "Not provided"} 
-              readOnly 
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-zinc-600 group-hover:text-[#ff8e80] cursor-pointer text-xl">edit</span>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {items.map(item => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="rounded-lg border border-border/20 bg-card p-5 shadow-lg">
+              <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                <Icon className="h-4 w-4 text-primary" />
+                {item.label}
+              </div>
+              <p className="break-words font-medium text-foreground">{item.value}</p>
+            </div>
+          );
+        })}
 
-        <div className="md:col-span-2 space-y-2">
-          <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Password Security</label>
-          <div className="flex items-center justify-between w-full bg-black/50 border border-[#48474a]/20 rounded-lg py-4 px-5 shadow-inner">
-            <span className="text-[#f9f5f8] tracking-[0.5em] font-black">••••••••••••</span>
-            <button className="text-[#ff8e80] text-xs font-bold uppercase tracking-wider hover:underline">Change Password</button>
+        <div className="md:col-span-2 rounded-lg border border-border/20 bg-card p-5 shadow-lg">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Password Security</p>
+              <p className="mt-2 font-black tracking-[0.5em] text-foreground">************</p>
+            </div>
+            <Button type="button" variant="outline" onClick={() => setIsPasswordOpen(true)}>
+              Đổi mật khẩu
+            </Button>
           </div>
         </div>
       </div>
+
+      <ChangePasswordDialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen} />
     </section>
   );
 }

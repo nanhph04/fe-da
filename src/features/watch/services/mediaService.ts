@@ -234,23 +234,20 @@ export interface UserMembershipResponse {
 }
 
 export interface PurchasedVideoResponse {
-  id: string;
+  videoId: string;
   channelId: string;
+  channelName: string | null;
   title: string;
   description: string;
-  category: string;
-  tags: string[];
-  status: string;
-  price: number;
-  requiredTierLevel: number | null;
   thumbnailUrl: string | null;
   durationSeconds: number | null;
-  resolutions: string[];
-  errorMessage: string | null;
-  viewCount: number;
+  categories: string[];
+  tags: string[];
+  priceCoin: number;
+  purchasedAt: string;
   publishedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  viewCount: number;
+  accessStatus: string;
 }
 
 export interface CategoryResponse {

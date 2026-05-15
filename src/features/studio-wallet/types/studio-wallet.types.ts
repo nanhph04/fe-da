@@ -3,7 +3,7 @@ import type {
   WalletStatus as BaseWalletStatus,
 } from "../../wallet/types/base-wallet.types";
 import type { VideoEarnings, MonthlyEarnings } from "./earnings.types";
-import type { WithdrawalMethod } from "./withdrawal.types";
+import type { Withdrawal } from "./withdrawal.types";
 
 export type StudioWalletStatus = BaseWalletStatus | "SUSPENDED";
 
@@ -55,43 +55,6 @@ export interface TotalRevenueData {
   topPerformingVideo: VideoRevenue;
 }
 
-export interface PaymentMethod {
-  id: string;
-  type: "BANK_ACCOUNT" | "E_WALLET" | "CRYPTO";
-  bankInfo?: BankInfo;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BankInfo {
-  bankCode: string;
-  bankName: string;
-  accountNumber: string;
-  accountHolderName: string;
-  branchName?: string;
-  qrCode?: string;
-}
-
-export interface CreatePayoutRequest {
-  amount: number;
-  paymentMethodId: string;
-  description?: string;
-}
-
-export interface Payout {
-  id: string;
-  studioId: string;
-  amount: number;
-  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-  paymentMethodId: string;
-  requestedAt: string;
-  processedAt?: string;
-  completedAt?: string;
-  failureReason?: string;
-  adminNote?: string;
-}
-
 export interface WalletStats {
   totalBalance: number;
   availableBalance: number;
@@ -118,21 +81,14 @@ export interface EarningsFilters {
   status?: "pending" | "confirmed" | "paid" | "ALL";
 }
 
-export interface PayoutFilters {
-  status?: "ALL" | "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-  paymentMethodId?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
 export type VideoEarning = VideoEarnings & {
   likes?: number;
   payoutStatus?: "PENDING" | "PAID" | "FAILED";
 };
 
-export type StudioWithdrawal = Payout;
+export type StudioWithdrawal = Withdrawal;
 
-export type { MonthlyEarnings, WithdrawalMethod };
+export type { MonthlyEarnings };
 
 export interface WalletStatsProps {
   stats: WalletStats;

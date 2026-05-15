@@ -6,6 +6,14 @@ export interface BankInfo {
   qrCode?: string;
 }
 
+export type WithdrawalStatus =
+  | "pending"
+  | "approved"
+  | "processing"
+  | "completed"
+  | "rejected"
+  | "cancelled";
+
 export interface Withdrawal {
   id: string;
   walletId: string;
@@ -14,34 +22,39 @@ export interface Withdrawal {
   moneyAmount: number;
   exchangeRate: number;
   bankInfo: BankInfo;
-  status: 'PENDING' | 'APPROVED' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
-  adminNote?: string;
-  processedByAdminId?: string;
-  transferReference?: string;
-  description?: string;
-  rejectionReason?: string;
+  status: WithdrawalStatus;
+  adminNote: string | null;
+  processedByAdminId: string | null;
+  transferReference: string | null;
+  description: string | null;
+  rejectionReason: string | null;
   requestedAt: string;
-  approvedAt?: string;
-  completedAt?: string;
-  rejectedAt?: string;
-  cancelledAt?: string;
+  approvedAt: string | null;
+  completedAt: string | null;
+  rejectedAt: string | null;
+  cancelledAt: string | null;
 }
 
 export interface CreateWithdrawalRequest {
   coinAmount: number;
-  moneyAmount: number;
-  exchangeRate: number;
   bankInfo: BankInfo;
   description?: string;
 }
 
 export interface WithdrawalHistoryFilters {
-  status?: 'PENDING' | 'APPROVED' | 'COMPLETED' | 'REJECTED' | 'CANCELLED' | 'ALL';
-  methodType?: string;
-  startDate?: string;
-  endDate?: string;
+  status?: WithdrawalStatus | "ALL";
   page?: number;
   limit?: number;
+}
+
+export interface WithdrawalHistoryResponse {
+  withdrawals: Withdrawal[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface WithdrawalSummary {
@@ -52,88 +65,4 @@ export interface WithdrawalSummary {
   pendingCount: number;
   avgProcessingTime: number;
   lastWithdrawalDate?: string;
-}
-
-export interface WithdrawalStatus {
-  id: string;
-  status: string;
-  processedBy?: string;
-  processedAt?: string;
-  notes?: string;
-}
-
-export interface WithdrawalMethod {
-  id: string;
-  type: 'BANK' | 'WALLET' | 'CRYPTO';
-  name: string;
-  accountNumber: string;
-  bankName?: string;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface FeeCalculationRequest {
-  amount: number;
-  methodType: string;
-}
-
-export interface FeeCalculationResponse {
-  amount: number;
-  fee: number;
-  totalAmount: number;
-  feePercentage: number;
-  fixedFee: number;
-  methodType: string;
-  currency: string;
-}
-
-export interface WithdrawalMethodConfig {
-  bankTransfer: {
-    enabled: boolean;
-    minAmount: number;
-    maxAmount: number;
-    feePercentage: number;
-    fixedFee: number;
-    processingTime: string;
-    currencies: Array<{
-      code: string;
-      name: string;
-      symbol: string;
-      decimalDigits: number;
-    }>;
-  };
-  wallet: {
-    enabled: boolean;
-    minAmount: number;
-    maxAmount: number;
-    feePercentage: number;
-    fixedFee: number;
-    processingTime: string;
-    supportedWallets: Array<{
-      provider: string;
-      name: string;
-    }>;
-  };
-  crypto: {
-    enabled: boolean;
-    minAmount: number;
-    maxAmount: number;
-    feePercentage: number;
-    fixedFee: number;
-    processingTime: string;
-    supportedCoins: Array<{
-      symbol: string;
-      name: string;
-    }>;
-  };
-}
-
-export interface WithdrawalValidationResponse {
-  isValid: boolean;
-  errors?: string[];
-  warnings?: string[];
-  availableBalance?: number;
-  minAmount?: number;
-  maxAmount?: number;
 }

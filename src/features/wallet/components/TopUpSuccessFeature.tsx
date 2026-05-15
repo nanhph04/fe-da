@@ -11,15 +11,21 @@ type TopUpSuccessFeatureProps = {
   referenceId?: string;
 };
 
+const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
+
+function formatWalletNumber(value: number) {
+  return walletNumberFormatter.format(value);
+}
+
 function formatCoinPackage(amount?: number, bonusAmount?: number) {
   if (typeof amount !== "number") {
     return "Aura Coin package";
   }
 
-  const formattedAmount = `${amount.toLocaleString()} AC`;
+  const formattedAmount = `${formatWalletNumber(amount)} AC`;
 
   if (typeof bonusAmount === "number" && bonusAmount > 0) {
-    return `${formattedAmount} + ${bonusAmount.toLocaleString()} Bonus`;
+    return `${formattedAmount} + ${formatWalletNumber(bonusAmount)} Bonus`;
   }
 
   return formattedAmount;
@@ -67,7 +73,7 @@ export function TopUpSuccessFeature({
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-3xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
               <span className="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
-                {typeof amount === "number" ? `${amount.toLocaleString()} AC` : "Completed"}
+                {typeof amount === "number" ? `${formatWalletNumber(amount)} AC` : "Completed"}
               </span>
             </div>
           </div>
@@ -82,7 +88,7 @@ export function TopUpSuccessFeature({
               {typeof paidAmount === "number" ? (
                 <div className="flex items-center justify-between py-2">
                   <span className="font-medium text-muted-foreground">Amount Paid</span>
-                  <span className="font-headline font-semibold text-foreground">{paidAmount.toLocaleString()} VND</span>
+                  <span className="font-headline font-semibold text-foreground">{formatWalletNumber(paidAmount)} VND</span>
                 </div>
               ) : null}
               {referenceId ? (

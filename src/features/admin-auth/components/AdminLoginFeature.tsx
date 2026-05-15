@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Fingerprint, KeyRound, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -13,11 +13,11 @@ export function AdminLoginFeature() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  
+
   const { setAuthData } = useAuth();
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setServerError(null);
@@ -30,7 +30,7 @@ export function AdminLoginFeature() {
           setServerError("Failed to load your profile after login.");
           return;
         }
-        if (profile?.role === "admin") {
+        if (profile.role === "admin") {
           router.push("/admin");
         } else {
           router.push("/library");
@@ -46,89 +46,111 @@ export function AdminLoginFeature() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] flex items-center justify-center p-6 relative overflow-hidden font-body">
-      {/* Security Grid Background Pattern */}
-      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(#ff0000 1px, transparent 1px), linear-gradient(90deg, #ff0000 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
-      </div>
-      
-      {/* Glitch/Glow decorative */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
+    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-background px-6 py-10 font-body text-foreground selection:bg-primary/30">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.16)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.12)_1px,transparent_1px)] bg-[size:44px_44px] opacity-30" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,hsl(var(--primary)/0.18),transparent_36%),radial-gradient(circle_at_18%_82%,hsl(var(--secondary)/0.10),transparent_26%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/10 to-transparent" />
 
-      <div className="w-full max-w-md bg-[#0a0a0a]/90 backdrop-blur-xl border border-red-900/30 p-8 z-10 relative shadow-[0_0_50px_rgba(255,0,0,0.1)] before:content-[''] before:absolute before:inset-0 before:border-t-2 before:border-red-600 before:w-1/3 before:left-1/3 before:opacity-50">
-        
-        {/* System Header */}
-        <div className="text-center mb-10">
-          <span className="material-symbols-outlined text-4xl text-red-600 mb-2">admin_panel_settings</span>
-          <h1 className="text-3xl font-black text-white font-headline tracking-tighter uppercase">Velvet Gallery</h1>
-          <p className="text-[10px] text-red-500/70 font-bold tracking-[0.3em] uppercase mt-1">Classified Access Only</p>
-        </div>
+      <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-6 md:px-8">
+        <Link href="/" className="font-headline text-lg font-black uppercase tracking-[-0.04em] text-primary transition-opacity hover:opacity-90">
+          System Admin
+        </Link>
+        <Link href="/" className="font-headline text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground">
+          Public portal
+        </Link>
+      </header>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Administrator Email</label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-3.5 text-zinc-600 text-sm">alternate_email</span>
-              <input 
-                type="email" 
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="admin@console.com"
-                className="w-full bg-[#111] border border-zinc-800 focus:border-red-600 focus:ring-1 focus:ring-red-600 focus:bg-black rounded-none py-3 pl-10 pr-4 text-white font-mono text-sm transition-all outline-none"
-              />
+      <main className="relative z-10 w-full max-w-md pt-20">
+        <section className="relative overflow-hidden rounded-lg border border-border/40 bg-card p-8 shadow-[0_28px_80px_rgba(0,0,0,0.42)]">
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+
+          <div className="mb-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-primary shadow-[0_0_28px_hsl(var(--primary)/0.18)]">
+              <ShieldCheck className="h-7 w-7" aria-hidden="true" />
             </div>
+            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-primary/80">
+              Classified access only
+            </p>
+            <h1 className="font-headline text-3xl font-black uppercase tracking-[-0.04em] text-foreground">
+              Velvet Gallery Core
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Authenticate with an administrator account to manage platform policy, users, payouts, and moderation queues.
+            </p>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Access Key</label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-3.5 text-zinc-600 text-sm">vpn_key</span>
-              <input 
-                type="password" 
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full bg-[#111] border border-zinc-800 focus:border-red-600 focus:ring-1 focus:ring-red-600 focus:bg-black rounded-none py-3 pl-10 pr-4 text-white font-mono text-sm transition-all outline-none"
-              />
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="admin-email" className="ml-1 block font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                Administrator email
+              </label>
+              <div className="relative">
+                <Fingerprint className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  id="admin-email"
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@console.com"
+                  className="w-full rounded-sm border border-border/50 bg-input py-4 pl-11 pr-4 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
             </div>
+
+            <div className="space-y-2">
+              <label htmlFor="admin-password" className="ml-1 block font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                Access key
+              </label>
+              <div className="relative">
+                <KeyRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  id="admin-password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full rounded-sm border border-border/50 bg-input py-4 pl-11 pr-4 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+
+            {serverError ? (
+              <div className="rounded-sm border border-destructive/35 bg-destructive/10 p-3" role="alert" aria-live="polite">
+                <p className="text-center font-mono text-xs text-destructive">{serverError}</p>
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex min-h-12 w-full items-center justify-center rounded-sm bg-primary px-4 py-4 font-headline text-xs font-black uppercase tracking-[0.22em] text-primary-foreground shadow-[0_14px_32px_hsl(var(--primary)/0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:opacity-95 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-55"
+            >
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+              {isLoading ? "Authenticating" : "Authenticate"}
+            </button>
+          </form>
+
+          <div className="mt-8 border-t border-border/30 pt-6 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Unauthorized access is logged and reviewed.
+            </p>
+            <Link href="/" className="mt-4 block font-headline text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground underline underline-offset-4 transition-colors hover:text-primary">
+              Return to public portal
+            </Link>
           </div>
+        </section>
 
-          {serverError && (
-            <div className="p-3 bg-[#ff0000]/10 border border-[#ff0000]/30 rounded-none w-full">
-              <p className="text-xs text-[#ff0000] text-center font-mono">{serverError}</p>
-            </div>
-          )}
-
-          <button 
-            type="submit"
-            disabled={isLoading}
-            className="flex justify-center items-center w-full bg-red-600 hover:bg-red-500 text-white font-black font-headline uppercase tracking-widest text-xs py-4 transition-all hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-[0.98] disabled:opacity-50"
-          >
-            {isLoading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
-            {isLoading ? "Authenticating..." : "Authenticate"}
-          </button>
-        </form>
-
-        <div className="mt-8 text-center border-t border-zinc-900 pt-6">
-          <p className="text-[10px] text-zinc-600 uppercase tracking-widest">
-            Unauthorized access is strictly prohibited and logged.
-          </p>
-          <Link href="/" className="text-[10px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest mt-4 block underline">
-            Return to Public Portal
-          </Link>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+          <span>
+            Sys.stat: <span className="text-secondary">Online</span>
+          </span>
+          <span>Core: Admin Console</span>
         </div>
-      </div>
-      
-      {/* System info / Footer */}
-      <div className="absolute bottom-4 left-6 text-[10px] text-zinc-700 font-mono flex gap-6">
-        <span>SYS.STAT: <span className="text-green-500">ONLINE</span></span>
-        <span>VER: 4.2.1-BETA</span>
-      </div>
-      <div className="absolute top-4 right-6 text-[10px] text-zinc-700 font-mono">
-        VELVET GALLERY CORE
-      </div>
+      </main>
     </div>
   );
 }

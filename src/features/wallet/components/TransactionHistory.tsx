@@ -1,12 +1,116 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { TransactionService } from "../services/transactionService";
 import type { Transaction } from "../types/wallet.types";
 
 interface TransactionHistoryProps {
+  error?: string | null;
   initialTransactions?: Transaction[];
+  loading?: boolean;
+}
+
+type NormalizedTransactionStatus = "pending" | "completed" | "failed" | "cancelled";
+
+type TransactionMetadata = {
+  moneyAmount?: number;
+  totalCoinAmount?: number;
+  serviceType?: string;
+};
+
+const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
+
+function formatWalletNumber(value: number) {
+  return walletNumberFormatter.format(value);
+}
+
+function normalizeText(value: string | null | undefined) {
+  return value?.trim().toLowerCase() ?? "";
+}
+
+function readNumberMetadata(metadata: Record<string, unknown>, key: keyof TransactionMetadata) {
+  const value = metadata[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function normalizeStatus(status: Transaction["status"]): NormalizedTransactionStatus {
+  const normalizedStatus = normalizeText(status);
+
+  if (["pending", "completed", "failed", "cancelled"].includes(normalizedStatus)) {
+    return normalizedStatus as NormalizedTransactionStatus;
+  }
+
+  return "failed";
+}
+
+function isDepositTransaction(transaction: Transaction) {
+  return normalizeText(transaction.type) === "deposit";
+}
+
+function isInternalRevenueTransaction(transaction: Transaction) {
+  return ["channel_revenue", "system_revenue"].includes(normalizeText(transaction.type));
+}
+
+function isIncomingTransaction(transaction: Transaction) {
+  return normalizeText(transaction.type) === "deposit";
+}
+
+function getTransactionIcon(transaction: Transaction) {
+  const type = normalizeText(transaction.type);
+
+  if (type === "deposit") {
+    return "add_circle";
+  }
+
+  if (type === "withdrawal") {
+    return "account_balance";
+  }
+
+  return "receipt_long";
+}
+
+function getDepositDescription(transaction: Transaction) {
+  const moneyAmount = readNumberMetadata(transaction.metadata, "moneyAmount");
+
+  if (moneyAmount !== null) {
+    return `Nạp thành công ${formatWalletNumber(moneyAmount)} VND`;
+  }
+
+  return "Nạp coin thành công";
+}
+
+function getPaymentDescription(transaction: Transaction) {
+  const serviceType = normalizeText(
+    typeof transaction.metadata.serviceType === "string" ? transaction.metadata.serviceType : undefined
+  );
+
+  if (serviceType === "membership") {
+    return "Thanh toán gói hội viên";
+  }
+
+  if (serviceType === "video") {
+    return "Thanh toán video";
+  }
+
+  return "Thanh toán dịch vụ";
+}
+
+function getTransactionDescription(transaction: Transaction) {
+  if (isDepositTransaction(transaction)) {
+    return getDepositDescription(transaction);
+  }
+
+  return getPaymentDescription(transaction);
+}
+
+function getDisplayAmount(transaction: Transaction) {
+  const isDeposit = isDepositTransaction(transaction);
+  const coinAmount = isDeposit
+    ? readNumberMetadata(transaction.metadata, "totalCoinAmount") ?? transaction.amount
+    : transaction.amount;
+  const sign = isIncomingTransaction(transaction) ? "+" : "-";
+  const assetLabel = normalizeText(transaction.assetType) === "coin" ? "AC" : transaction.assetType.toUpperCase();
+
+  return `${sign}${formatWalletNumber(coinAmount)} ${assetLabel}`;
 }
 
 const sortTransactions = (transactions: Transaction[]) =>
@@ -15,33 +119,20 @@ const sortTransactions = (transactions: Transaction[]) =>
   );
 
 export function TransactionHistory({
-  initialTransactions,
+  error = null,
+  initialTransactions = [],
+  loading = false,
 }: TransactionHistoryProps) {
-  const [transactions, setTransactions] = useState<Transaction[]>(
-    initialTransactions ? sortTransactions(initialTransactions) : []
+  const transactions = sortTransactions(
+    initialTransactions.filter((transaction) => !isInternalRevenueTransaction(transaction))
   );
-  const [loading, setLoading] = useState(!initialTransactions);
-
-  useEffect(() => {
-    if (initialTransactions) {
-      return;
-    }
-
-    const fetchTransactions = async () => {
-      try {
-        const data = await TransactionService.getMyTransactions();
-        setTransactions(sortTransactions(data));
-      } catch (error) {
-        console.error("Failed to fetch transactions:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void fetchTransactions();
-  }, [initialTransactions]);
 
   const formatDate = (dateStr: string) => {
-    return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(dateStr));
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(new Date(dateStr));
   };
 
   return (
@@ -53,9 +144,9 @@ export function TransactionHistory({
         </button>
       </div>
 
-      <div className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950/40 backdrop-blur-xl">
+      <div className="overflow-hidden rounded-lg border border-border/20 bg-card">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border-collapse text-left">
             <thead>
               <tr className="bg-zinc-900 border-b border-zinc-800">
                 <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Date</th>
@@ -69,42 +160,53 @@ export function TransactionHistory({
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">Loading transactions...</td>
                 </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-destructive">{error}</td>
+                </tr>
               ) : transactions.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">No transactions found.</td>
                 </tr>
               ) : (
-                transactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-zinc-800/50 transition-colors">
-                    <td className="px-6 py-5 text-sm font-medium text-zinc-300">
-                      {formatDate(tx.createdAt)}
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#fdc003]/10 flex items-center justify-center text-[#fdc003]">
-                          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-                            {tx.type === 'DEPOSIT' ? 'add_circle' : (tx.type === 'WITHDRAWAL' ? 'account_balance' : 'receipt_long')}
-                          </span>
+                transactions.map((tx) => {
+                  const status = normalizeStatus(tx.status);
+                  const isIncoming = isIncomingTransaction(tx);
+
+                  return (
+                    <tr key={tx.id} className="transition-colors hover:bg-zinc-800/50">
+                      <td className="px-6 py-5 text-sm font-medium text-zinc-300">
+                        {formatDate(tx.createdAt)}
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10 text-secondary">
+                            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                              {getTransactionIcon(tx)}
+                            </span>
+                          </div>
+                          <span className="font-bold text-white">{getTransactionDescription(tx)}</span>
                         </div>
-                        <span className="font-bold text-white">{tx.description || tx.type}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className={`font-headline font-bold ${['DEPOSIT', 'CHANNEL_REVENUE', 'SYSTEM_REVENUE'].includes(tx.type) ? 'text-[#fdc003]' : 'text-zinc-300'}`}>
-                        {['DEPOSIT', 'CHANNEL_REVENUE', 'SYSTEM_REVENUE'].includes(tx.type) ? '+' : '-'}{tx.amount.toLocaleString()} {tx.assetType}
-                      </span>
-                    </td>
-                    <td className="px-6 py-5">
-                      {tx.status === 'COMPLETED' ? (
-                        <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Successful</Badge>
-                      ) : tx.status === 'PENDING' ? (
-                        <Badge className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Pending</Badge>
-                      ) : (
-                        <Badge className="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold border-0">Failed</Badge>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className={`font-headline font-bold ${isIncoming ? "text-secondary" : "text-zinc-300"}`}>
+                          {getDisplayAmount(tx)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5">
+                        {status === "completed" ? (
+                          <Badge className="rounded-full border-0 bg-green-500/10 px-2.5 py-0.5 text-xs font-bold text-green-500 hover:bg-green-500/20">Thành công</Badge>
+                        ) : status === "pending" ? (
+                          <Badge className="rounded-full border-0 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-bold text-yellow-500 hover:bg-yellow-500/20">Đang xử lý</Badge>
+                        ) : status === "cancelled" ? (
+                          <Badge className="rounded-full border-0 bg-zinc-500/10 px-2.5 py-0.5 text-xs font-bold text-zinc-400 hover:bg-zinc-500/20">Đã hủy</Badge>
+                        ) : (
+                          <Badge className="rounded-full border-0 bg-red-500/10 px-2.5 py-0.5 text-xs font-bold text-red-500 hover:bg-red-500/20">Thất bại</Badge>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

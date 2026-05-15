@@ -4,19 +4,24 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { DepositService } from "../services/depositService";
 import type { DepositPackage } from "../types/wallet.types";
 
+const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
+
+function formatWalletNumber(value: number) {
+  return walletNumberFormatter.format(value);
+}
+
 interface TopUpPackagesProps {
   initialPackages?: DepositPackage[];
+  onSelectPackage?: (depositPackage: DepositPackage) => void;
 }
 
 const sortPackages = (packages: DepositPackage[]) =>
   [...packages].sort((a, b) => a.sortOrder - b.sortOrder);
 
-export function TopUpPackages({ initialPackages }: TopUpPackagesProps) {
-  const router = useRouter();
+export function TopUpPackages({ initialPackages, onSelectPackage }: TopUpPackagesProps) {
   const [packages, setPackages] = useState<DepositPackage[]>(
     initialPackages ? sortPackages(initialPackages) : []
   );
@@ -75,8 +80,8 @@ export function TopUpPackages({ initialPackages }: TopUpPackagesProps) {
               <CardContent className="p-6 flex flex-col items-center text-center h-full">
                 <h3 className="mb-1 font-headline text-lg font-bold text-foreground">{pkg.name}</h3>
                 <p className="mb-4 text-2xl font-bold text-secondary">
-                  {pkg.totalCoinAmount.toLocaleString()} AC
-                  {pkg.bonusCoinAmount > 0 && <span className="ml-1 text-xs font-medium text-muted-foreground">+ {pkg.bonusCoinAmount} bonus</span>}
+                  {formatWalletNumber(pkg.totalCoinAmount)} AC
+                  {pkg.bonusCoinAmount > 0 && <span className="ml-1 text-xs font-medium text-muted-foreground">+ {formatWalletNumber(pkg.bonusCoinAmount)} bonus</span>}
                 </p>
                 
                 <div className="mb-6 h-32 flex items-center justify-center">
@@ -86,9 +91,9 @@ export function TopUpPackages({ initialPackages }: TopUpPackagesProps) {
                 </div>
 
                 <div className="mt-auto flex w-full flex-col gap-4 border-t border-white/5 pt-4">
-                  <span className="font-headline text-lg font-bold text-foreground">{pkg.moneyAmount.toLocaleString()} VND</span>
+                  <span className="font-headline text-lg font-bold text-foreground">{formatWalletNumber(pkg.moneyAmount)} VND</span>
                   <Button 
-                    onClick={() => router.push(`/wallet/checkout?pack=${pkg.id}`)}
+                    onClick={() => onSelectPackage?.(pkg)}
                     className={`w-full font-bold transition-colors active:scale-95 ${isPopular ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
                   >
                     Buy Now

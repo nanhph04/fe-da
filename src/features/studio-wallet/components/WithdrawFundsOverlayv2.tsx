@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { PaymentMethod } from "../types/payout.types";
 import type { StudioWallet } from "../types/studio-wallet.types";
-import { PayoutService } from "../services/payoutService";
+import { WithdrawalService } from "../services/withdrawalService";
 
 interface WithdrawFundsOverlayProps {
   wallet: StudioWallet;
@@ -20,83 +19,31 @@ export function WithdrawFundsOverlay({
   onClose,
   onSuccess,
 }: WithdrawFundsOverlayProps) {
-  const [methods, setMethods] = useState<PaymentMethod[]>([]);
-  const [selectedMethodId, setSelectedMethodId] = useState("");
   const [amount, setAmount] = useState("");
+  const [bankCode, setBankCode] = useState("VCB");
+  const [bankName, setBankName] = useState("Vietcombank");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountHolderName, setAccountHolderName] = useState("");
   const [description, setDescription] = useState("");
-  const [fee, setFee] = useState(0);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    setError(null);
-    setAmount("");
-    setDescription("");
-
-    const loadMethods = async () => {
-      try {
-        const paymentMethods = await PayoutService.getPaymentMethods();
-        setMethods(paymentMethods);
-
-        const defaultMethod = paymentMethods.find(method => method.isDefault) || paymentMethods[0];
-        setSelectedMethodId(defaultMethod?.id ?? "");
-      } catch {
-        setError("Failed to load payout methods.");
-      }
-    };
-
-    void loadMethods();
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || !selectedMethodId || !amount) {
-      setFee(0);
-      return;
-    }
-
-    const amountValue = Number(amount);
-    if (!Number.isFinite(amountValue) || amountValue <= 0) {
-      setFee(0);
-      return;
-    }
-
-    const calculate = async () => {
-      try {
-        const quote = await PayoutService.calculateFee({
-          amount: amountValue,
-          methodId: selectedMethodId,
-        });
-        setFee(quote.fee);
-      } catch {
-        setFee(0);
-      }
-    };
-
-    void calculate();
-  }, [amount, isOpen, selectedMethodId]);
-
-  const selectedMethod = useMemo(
-    () => methods.find(method => method.id === selectedMethodId) || null,
-    [methods, selectedMethodId]
-  );
-
-  const payoutAmount = Number(amount);
+  const withdrawalAmount = Number(amount);
   const canSubmit =
-    selectedMethodId.length > 0 &&
-    Number.isFinite(payoutAmount) &&
-    payoutAmount > 0 &&
-    payoutAmount <= wallet.balance &&
+    Number.isFinite(withdrawalAmount) &&
+    withdrawalAmount > 0 &&
+    withdrawalAmount <= wallet.balance &&
+    bankCode.trim().length > 0 &&
+    bankName.trim().length > 0 &&
+    accountNumber.trim().length > 0 &&
+    accountHolderName.trim().length > 0 &&
     !isBusy;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!canSubmit) {
-      setError("Enter a valid amount and payment method.");
+      setError("Enter a valid amount and bank account information.");
       return;
     }
 
@@ -104,16 +51,21 @@ export function WithdrawFundsOverlay({
     setError(null);
 
     try {
-      await PayoutService.requestPayout({
-        amount: payoutAmount,
-        methodId: selectedMethodId,
+      await WithdrawalService.requestWithdrawal({
+        coinAmount: withdrawalAmount,
+        bankInfo: {
+          bankCode: bankCode.trim(),
+          bankName: bankName.trim(),
+          accountNumber: accountNumber.trim(),
+          accountHolderName: accountHolderName.trim(),
+        },
         description: description.trim() || undefined,
       });
 
       await onSuccess?.();
       onClose();
     } catch {
-      setError("Failed to request payout.");
+      setError("Failed to request withdrawal.");
     } finally {
       setIsBusy(false);
     }
@@ -128,7 +80,7 @@ export function WithdrawFundsOverlay({
       <div className="w-full max-w-lg rounded-lg border border-border/30 bg-card shadow-2xl">
         <div className="flex items-center justify-between border-b border-border/30 px-6 py-4">
           <div>
-            <h2 className="font-headline text-2xl font-bold text-foreground">Request Payout</h2>
+            <h2 className="font-headline text-2xl font-bold text-foreground">Request Withdrawal</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Available balance: {wallet.balance.toLocaleString()} AC
             </p>
@@ -145,41 +97,6 @@ export function WithdrawFundsOverlay({
 
         <form className="space-y-5 px-6 py-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Payment method</label>
-            <div className="space-y-2">
-              {methods.map(method => (
-                <label
-                  key={method.id}
-                  className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition ${
-                    selectedMethodId === method.id
-                      ? "border-[#c1121f] bg-[#2a0d12]"
-                      : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    className="mt-1"
-                    checked={selectedMethodId === method.id}
-                    onChange={() => setSelectedMethodId(method.id)}
-                  />
-                  <div className="min-w-0">
-                    <p className="font-medium text-white">{method.type}</p>
-                    <p className="text-sm text-zinc-400">
-                      {method.bankInfo?.bankName ||
-                        method.cryptoInfo?.currency ||
-                        method.eWalletInfo?.provider ||
-                        "Configured payout destination"}
-                    </p>
-                  </div>
-                </label>
-              ))}
-              {methods.length === 0 ? (
-                <p className="text-sm text-zinc-500">No payout method available.</p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-300">Amount (AC)</label>
             <Input
               type="number"
@@ -191,12 +108,19 @@ export function WithdrawFundsOverlay({
             />
           </div>
 
+          <div className="grid gap-3 md:grid-cols-2">
+            <FormField label="Bank code" value={bankCode} onChange={setBankCode} placeholder="VCB" />
+            <FormField label="Bank name" value={bankName} onChange={setBankName} placeholder="Vietcombank" />
+            <FormField label="Account number" value={accountNumber} onChange={setAccountNumber} placeholder="0123456789" />
+            <FormField label="Account holder" value={accountHolderName} onChange={setAccountHolderName} placeholder="Nguyen Van A" />
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-300">Note</label>
             <Input
               value={description}
               onChange={event => setDescription(event.target.value)}
-              placeholder="Optional payout note"
+              placeholder="Optional withdrawal note"
               className="border-zinc-800 bg-zinc-950 text-white"
             />
           </div>
@@ -204,23 +128,11 @@ export function WithdrawFundsOverlay({
           <div className="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-300">
             <div className="flex items-center justify-between">
               <span>Requested amount</span>
-              <span>{Number.isFinite(payoutAmount) ? payoutAmount.toLocaleString() : 0} AC</span>
+              <span>{Number.isFinite(withdrawalAmount) ? withdrawalAmount.toLocaleString() : 0} AC</span>
             </div>
-            <div className="mt-2 flex items-center justify-between">
-              <span>Estimated fee</span>
-              <span>{fee.toLocaleString()} AC</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between border-t border-zinc-800 pt-2 font-semibold text-white">
-              <span>Estimated net</span>
-              <span>
-                {Math.max((Number.isFinite(payoutAmount) ? payoutAmount : 0) - fee, 0).toLocaleString()} AC
-              </span>
-            </div>
-            {selectedMethod ? (
-              <p className="mt-3 text-xs text-zinc-500">
-                Selected method: {selectedMethod.type}
-              </p>
-            ) : null}
+            <p className="mt-2 border-t border-zinc-800 pt-2 text-xs text-zinc-500">
+              Finance-service calculates exchange rate and money amount on the backend.
+            </p>
           </div>
 
           {error ? <p className="text-sm text-red-300">{error}</p> : null}
@@ -239,11 +151,35 @@ export function WithdrawFundsOverlay({
               className="bg-[#c1121f] text-white hover:bg-[#a60f1a]"
               disabled={!canSubmit}
             >
-              {isBusy ? "Submitting..." : "Submit payout"}
+              {isBusy ? "Submitting..." : "Submit withdrawal"}
             </Button>
           </div>
         </form>
       </div>
     </div>
+  );
+}
+
+function FormField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-medium text-zinc-300">{label}</span>
+      <Input
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="border-zinc-800 bg-zinc-950 text-white"
+      />
+    </label>
   );
 }

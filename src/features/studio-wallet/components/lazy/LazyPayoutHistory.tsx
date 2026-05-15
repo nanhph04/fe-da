@@ -1,13 +1,12 @@
 'use client';
 
-import type { Payout } from "../../types/payout.types";
+import type { Withdrawal } from "../../types/withdrawal.types";
 import { lazy, Suspense } from 'react';
 
-// Lazy load PayoutHistory component
-const PayoutHistory = lazy(() => import('../PayoutHistory'));
+const PayoutHistory = lazy(() => import('../PayoutHistory').then(module => ({ default: module.PayoutHistory })));
 
 interface LazyPayoutHistoryProps {
-  initialItems?: Payout[];
+  initialItems?: Withdrawal[];
   initialPagination?: {
     page: number;
     limit: number;

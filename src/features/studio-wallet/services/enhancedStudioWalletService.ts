@@ -1,4 +1,4 @@
-import { PayoutService } from "./payoutService";
+import { WithdrawalService } from "./withdrawalService";
 import { StudioWalletService } from "./studioWalletService";
 import type { StudioWallet, WalletStats } from "../types/studio-wallet.types";
 
@@ -13,7 +13,7 @@ export const enhancedStudioWalletService = {
 
     return { wallet, stats };
   },
-  getTransactionHistory: () => PayoutService.getPayoutHistory({ page: 1, limit: 20 }),
+  getTransactionHistory: () => WithdrawalService.getWithdrawalHistory({ page: 1, limit: 20 }),
   async refreshWallet() {
     await Promise.all([
       StudioWalletService.getStudioWallet(),

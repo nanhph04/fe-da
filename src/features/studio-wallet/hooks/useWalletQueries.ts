@@ -1,13 +1,11 @@
 import { EarningsService } from "../services/earningsService";
-import { PayoutService } from "../services/payoutService";
 import { StudioWalletService } from "../services/studioWalletService";
 import { WithdrawalService } from "../services/withdrawalService";
 
 export const WALLET_KEYS = {
   balance: ["wallet", "balance"] as const,
-  payoutHistory: (filters?: unknown) => ["wallet", "payouts", filters] as const,
+  withdrawalHistory: (filters?: unknown) => ["wallet", "withdrawals", filters] as const,
   earnings: (filters?: unknown) => ["wallet", "earnings", filters] as const,
-  withdrawalMethods: ["wallet", "withdrawal-methods"] as const,
 } as const;
 
 export const useWalletBalance = () => ({
@@ -16,10 +14,10 @@ export const useWalletBalance = () => ({
   refetch: StudioWalletService.getStudioWallet,
 });
 
-export const usePayoutHistory = () => ({
+export const useWithdrawalHistory = () => ({
   data: undefined,
   isLoading: false,
-  refetch: () => PayoutService.getPayoutHistory({ page: 1, limit: 10 }),
+  refetch: () => WithdrawalService.getWithdrawalHistory({ page: 1, limit: 10 }),
 });
 
 export const useEarningsData = () => ({
@@ -31,12 +29,6 @@ export const useEarningsData = () => ({
 export const useVideoEarnings = () => ({
   data: undefined,
   isLoading: false,
-});
-
-export const useWithdrawalMethods = () => ({
-  data: undefined,
-  isLoading: false,
-  refetch: () => WithdrawalService.getWithdrawalMethods(),
 });
 
 export const useRefreshWallet = () => ({

@@ -25,11 +25,9 @@ export function WithdrawFundsOverlay({ balance, onClose, onSuccess }: { balance:
     try {
       await WithdrawalService.requestWithdrawal({
         coinAmount: amount,
-        moneyAmount: amount * conversionRate,
-        exchangeRate: conversionRate,
         bankInfo: {
           bankCode,
-          bankName: bankCode, // Simplification for now, should map from code
+          bankName: bankCode,
           accountNumber,
           accountHolderName
         },

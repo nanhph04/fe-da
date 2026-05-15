@@ -1,6 +1,6 @@
 import type { OwnerVideoResponse } from "@/features/watch/services/mediaService";
-import type { EarningsAnalytics, EarningsSummary, VideoEarnings } from "@/features/studio-wallet/types/earnings.types";
-import type { WalletStats } from "@/features/studio-wallet/types/studio-wallet.types";
+import type { EarningsSummary, MonthlyEarnings, VideoEarnings } from "@/features/studio-wallet/types/earnings.types";
+import type { StudioWallet, WalletStats } from "@/features/studio-wallet/types/studio-wallet.types";
 import type {
   DashboardActivity,
   DashboardStatCard,
@@ -80,14 +80,18 @@ function getTotalViews(videos: OwnerVideoResponse[]) {
 
 export function buildDashboardStats(
   videos: OwnerVideoResponse[],
+  studioWallet: StudioWallet | null,
   walletStats: WalletStats | null,
-  earningsSummary: EarningsSummary | null
+  earningsSummary: EarningsSummary | null,
+  monthlyEarnings: MonthlyEarnings | null
 ): DashboardStatCard[] {
-  const totalViews = walletStats?.totalViews ?? earningsSummary?.totalViews ?? getTotalViews(videos);
+  const mediaTotalViews = getTotalViews(videos);
+  const totalViews = mediaTotalViews || walletStats?.totalViews || studioWallet?.totalViews || earningsSummary?.totalViews || 0;
   const readyVideos = countVideosByStatus(videos, "ready");
-  const totalEarnings = walletStats?.monthlyEarnings ?? earningsSummary?.totalEarnings ?? walletStats?.totalBalance ?? 0;
-  const totalWatchTime = earningsSummary?.totalWatchTime ?? 0;
-  const growth = walletStats?.monthlyGrowth ?? earningsSummary?.growth?.percentage ?? null;
+  const totalUploads = videos.length || studioWallet?.videoCount || earningsSummary?.totalVideos || 0;
+  const totalEarnings = studioWallet?.revenueThisMonth ?? walletStats?.monthlyEarnings ?? monthlyEarnings?.earnings ?? earningsSummary?.totalEarnings ?? studioWallet?.totalEarnings ?? 0;
+  const totalWatchTime = monthlyEarnings?.watchTime ?? earningsSummary?.totalWatchTime ?? 0;
+  const growth = monthlyEarnings?.growth ?? walletStats?.monthlyGrowth ?? earningsSummary?.growth?.percentage ?? null;
 
   return [
     {
@@ -102,7 +106,7 @@ export function buildDashboardStats(
       label: "Ready Videos",
       value: formatNumber(readyVideos),
       icon: "video_library",
-      trend: `${formatNumber(videos.length)} total uploads`,
+      trend: `${formatNumber(totalUploads)} total uploads`,
       trendIcon: "movie",
       tone: readyVideos > 0 ? "primary" : "muted",
     },
@@ -130,16 +134,22 @@ export function buildTopVideos(
   topEarningVideos: VideoEarnings[]
 ): DashboardTopVideo[] {
   if (topEarningVideos.length > 0) {
-    return topEarningVideos.slice(0, 3).map((video, index) => ({
-      id: video.videoId,
-      title: video.videoTitle,
-      thumbnailUrl: video.videoThumbnail || DEFAULT_THUMBNAIL,
-      views: compactNumber(video.views),
-      likes: "No API",
-      earnings: compactNumber(video.revenue || video.estimatedRevenue),
-      badgeLabel: index === 0 ? "Top earning" : video.status,
-      badgeTone: index === 0 ? "secondary" : "muted",
-    }));
+    return topEarningVideos.slice(0, 3).map((earningVideo, index) => {
+      const mediaVideo = videos.find(video => video.id === earningVideo.videoId);
+      const mediaViews = mediaVideo?.viewCount ?? mediaVideo?.metrics?.viewsCount;
+      const financeTitleIsPlaceholder = !earningVideo.videoTitle || earningVideo.videoTitle.toLowerCase() === "video";
+
+      return {
+        id: earningVideo.videoId,
+        title: mediaVideo?.title || (financeTitleIsPlaceholder ? `Video ${earningVideo.videoId.slice(0, 8)}` : earningVideo.videoTitle),
+        thumbnailUrl: mediaVideo?.thumbnailUrl || earningVideo.videoThumbnail || DEFAULT_THUMBNAIL,
+        views: compactNumber(mediaViews ?? earningVideo.views),
+        likes: "No API",
+        earnings: formatCoins(earningVideo.revenue || earningVideo.estimatedRevenue),
+        badgeLabel: index === 0 ? "Top earning" : earningVideo.status,
+        badgeTone: index === 0 ? "secondary" : "muted",
+      };
+    });
   }
 
   return [...videos]
@@ -151,7 +161,7 @@ export function buildTopVideos(
       thumbnailUrl: video.thumbnailUrl || DEFAULT_THUMBNAIL,
       views: compactNumber(video.viewCount ?? video.metrics?.viewsCount ?? 0),
       likes: "No API",
-      earnings: video.price ? compactNumber(video.price) : "0",
+      earnings: video.price ? formatCoins(video.price) : "0 AC",
       badgeLabel: index === 0 ? "Most viewed" : normalizeStatus(video.status),
       badgeTone: index === 0 ? "primary" : "muted",
     }));
@@ -176,17 +186,19 @@ export function buildActivities(videos: OwnerVideoResponse[]): DashboardActivity
     });
 }
 
-export function buildEarningsTrend(analytics: EarningsAnalytics | null): EarningsTrendPoint[] {
-  return analytics?.earningsTrend?.map(point => ({
-    label: formatDateLabel(point.date),
-    value: point.earnings,
-  })) ?? [];
+export function buildEarningsTrend(monthlyEarnings: MonthlyEarnings | null): EarningsTrendPoint[] {
+  if (!monthlyEarnings) {
+    return [];
+  }
+
+  return [
+    {
+      label: `${monthlyEarnings.month}/${monthlyEarnings.year}`,
+      value: monthlyEarnings.earnings,
+    },
+  ];
 }
 
 export function getEarningsPeriod(range: StudioDashboardRange) {
   return range === "7D" ? "weekly" : "monthly";
-}
-
-export function getAnalyticsPeriod(): "30days" {
-  return "30days";
 }

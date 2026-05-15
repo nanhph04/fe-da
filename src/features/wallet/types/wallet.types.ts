@@ -1,5 +1,5 @@
-export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
-export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "VIDEO_PURCHASE" | "CHANNEL_REVENUE" | "SYSTEM_REVENUE";
+export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "pending" | "completed" | "failed" | "cancelled";
+export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "VIDEO_PURCHASE" | "CHANNEL_REVENUE" | "SYSTEM_REVENUE" | "deposit" | "withdrawal" | "payment" | "video_purchase" | "membership_purchase" | "channel_revenue" | "system_revenue";
 export type DepositStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
 export type WithdrawalStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED" | "CANCELLED";
 

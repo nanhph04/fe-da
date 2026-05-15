@@ -23,31 +23,31 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
     const baseClasses = "inline-block px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest";
 
     switch (status) {
-      case 'COMPLETED':
+      case 'completed':
         return (
           <span className={`${baseClasses} bg-green-500/10 text-green-500`}>
             Completed
           </span>
         );
-      case 'PENDING':
+      case 'pending':
         return (
           <span className={`${baseClasses} bg-yellow-500/10 text-yellow-500 animate-pulse`}>
             Pending
           </span>
         );
-      case 'APPROVED':
+      case 'approved':
         return (
           <span className={`${baseClasses} bg-blue-500/10 text-blue-500`}>
             Approved
           </span>
         );
-      case 'REJECTED':
+      case 'rejected':
         return (
           <span className={`${baseClasses} bg-red-500/10 text-red-500`}>
             Rejected
           </span>
         );
-      case 'CANCELLED':
+      case 'cancelled':
         return (
           <span className={`${baseClasses} bg-red-500/10 text-red-500`}>
             Cancelled
@@ -66,9 +66,9 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
   const getAmountDisplay = () => {
     const baseClasses = "text-sm font-bold";
 
-    if (item.status === 'COMPLETED') {
+    if (item.status === 'completed') {
       return <span className={`${baseClasses} text-[var(--color-secondary-600)]`}>{(item.coinAmount).toLocaleString()} AC</span>;
-    } else if (item.status === 'REJECTED' || item.status === 'CANCELLED') {
+    } else if (item.status === 'rejected' || item.status === 'cancelled') {
       return <span className={`${baseClasses} text-red-500`}>{(item.coinAmount).toLocaleString()} AC</span>;
     } else {
       return <span className={`${baseClasses} text-[var(--color-primary-600)]`}>{(item.coinAmount).toLocaleString()} AC</span>;
@@ -123,7 +123,7 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
           >
             Details
           </button>
-          {item.status === 'PENDING' && (
+          {item.status === 'pending' && (
             <button
               onClick={handleCancel}
               disabled={isCancelling}

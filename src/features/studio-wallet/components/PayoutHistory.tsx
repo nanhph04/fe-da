@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import type { Payout, PayoutHistoryFilters } from "../types/payout.types";
-import { PayoutService } from "../services/payoutService";
+import type { Withdrawal, WithdrawalHistoryFilters } from "../types/withdrawal.types";
+import { WithdrawalService } from "../services/withdrawalService";
 
 interface PayoutHistoryProps {
   className?: string;
-  initialItems?: Payout[];
+  initialItems?: Withdrawal[];
   initialPagination?: {
     page: number;
     limit: number;
@@ -21,7 +21,7 @@ export function PayoutHistory({
   initialItems = [],
   initialPagination,
 }: PayoutHistoryProps) {
-  const [items, setItems] = useState<Payout[]>(initialItems);
+  const [items, setItems] = useState<Withdrawal[]>(initialItems);
   const [pagination, setPagination] = useState(
     initialPagination ?? {
       page: 1,
@@ -30,14 +30,14 @@ export function PayoutHistory({
       totalPages: initialItems.length > 0 ? 1 : 0,
     }
   );
-  const [filters, setFilters] = useState<PayoutHistoryFilters>({
+  const [filters, setFilters] = useState<WithdrawalHistoryFilters>({
     status: "ALL",
     page: initialPagination?.page ?? 1,
     limit: initialPagination?.limit ?? 10,
   });
-  const [isLoading, setIsLoading] = useState(initialItems.length === 0);
+  const [isLoading, setIsLoading] = useState(!initialPagination && initialItems.length === 0);
   const [error, setError] = useState<string | null>(null);
-  const skipInitialFetchRef = useRef(initialItems.length > 0);
+  const skipInitialFetchRef = useRef(Boolean(initialPagination) || initialItems.length > 0);
 
   useEffect(() => {
     if (skipInitialFetchRef.current) {
@@ -50,11 +50,11 @@ export function PayoutHistory({
       setError(null);
 
       try {
-        const response = await PayoutService.getPayoutHistory(filters);
-        setItems(response.payouts);
+        const response = await WithdrawalService.getWithdrawalHistory(filters);
+        setItems(response.withdrawals);
         setPagination(response.pagination);
       } catch {
-        setError("Failed to load payout history.");
+        setError("Failed to load withdrawal history.");
       } finally {
         setIsLoading(false);
       }
@@ -63,7 +63,7 @@ export function PayoutHistory({
     void loadHistory();
   }, [filters]);
 
-  const handleStatusChange = (status: PayoutHistoryFilters["status"]) => {
+  const handleStatusChange = (status: WithdrawalHistoryFilters["status"]) => {
     setFilters(previous => ({
       ...previous,
       status,
@@ -82,14 +82,14 @@ export function PayoutHistory({
     <section className={`rounded-lg border border-border/30 bg-card p-6 ${className}`}>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="font-headline text-2xl font-bold text-foreground">Payout History</h2>
+          <h2 className="font-headline text-2xl font-bold text-foreground">Withdrawal History</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Review withdrawal requests and payout processing states.
+            Review withdrawal requests and processing states.
           </p>
         </div>
 
-        <div className="flex gap-2">
-          {(["ALL", "PENDING", "PROCESSING", "COMPLETED", "FAILED"] as const).map(status => (
+        <div className="flex flex-wrap gap-2">
+          {(["ALL", "pending", "approved", "completed", "rejected", "cancelled"] as const).map(status => (
             <Button
               key={status}
               type="button"
@@ -101,7 +101,7 @@ export function PayoutHistory({
               }`}
               onClick={() => handleStatusChange(status)}
             >
-              {status}
+              {status.toUpperCase()}
             </Button>
           ))}
         </div>
@@ -114,9 +114,9 @@ export function PayoutHistory({
           <thead className="border-b border-zinc-800 text-zinc-500">
             <tr>
               <th className="pb-3 pr-4 font-medium">Requested</th>
-              <th className="pb-3 pr-4 font-medium">Method</th>
-              <th className="pb-3 pr-4 font-medium">Amount</th>
-              <th className="pb-3 pr-4 font-medium">Net</th>
+              <th className="pb-3 pr-4 font-medium">Bank</th>
+              <th className="pb-3 pr-4 font-medium">Coin Amount</th>
+              <th className="pb-3 pr-4 font-medium">Money Amount</th>
               <th className="pb-3 pr-4 font-medium">Status</th>
             </tr>
           </thead>
@@ -124,24 +124,22 @@ export function PayoutHistory({
             {isLoading ? (
               <tr>
                 <td className="py-6 text-zinc-400" colSpan={5}>
-                  Loading payout history...
+                  Loading withdrawal history...
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
                 <td className="py-6 text-zinc-500" colSpan={5}>
-                  No payout records found.
+                  No withdrawal records found.
                 </td>
               </tr>
             ) : (
               items.map(item => (
                 <tr key={item.id} className="border-b border-zinc-900/80 text-zinc-200">
                   <td className="py-4 pr-4">{new Date(item.requestedAt).toLocaleDateString()}</td>
-                  <td className="py-4 pr-4">
-                    {item.method.bankInfo?.bankName || item.method.eWalletInfo?.provider || item.method.type}
-                  </td>
-                  <td className="py-4 pr-4">{item.amount.toLocaleString()} AC</td>
-                  <td className="py-4 pr-4">{item.netAmount.toLocaleString()} AC</td>
+                  <td className="py-4 pr-4">{item.bankInfo.bankName}</td>
+                  <td className="py-4 pr-4">{item.coinAmount.toLocaleString()} AC</td>
+                  <td className="py-4 pr-4">{item.moneyAmount.toLocaleString()} VND</td>
                   <td className="py-4 pr-4">
                     <span className="rounded-sm border border-zinc-800 px-2 py-1 text-xs uppercase tracking-wide text-zinc-300">
                       {item.status}
@@ -163,20 +161,16 @@ export function PayoutHistory({
             <Button
               type="button"
               variant="outline"
-              className="border-zinc-800 bg-transparent text-zinc-200 hover:bg-zinc-900"
-              onClick={() => handlePageChange(Math.max(1, pagination.page - 1))}
               disabled={pagination.page <= 1}
+              onClick={() => handlePageChange(pagination.page - 1)}
             >
               Previous
             </Button>
             <Button
               type="button"
               variant="outline"
-              className="border-zinc-800 bg-transparent text-zinc-200 hover:bg-zinc-900"
-              onClick={() =>
-                handlePageChange(Math.min(pagination.totalPages, pagination.page + 1))
-              }
               disabled={pagination.page >= pagination.totalPages}
+              onClick={() => handlePageChange(pagination.page + 1)}
             >
               Next
             </Button>
@@ -186,5 +180,3 @@ export function PayoutHistory({
     </section>
   );
 }
-
-export default PayoutHistory;

@@ -1,101 +1,51 @@
+import { api } from "@/shared/api/client";
 import type {
-  CategoryEarnings,
-  CumulativeEarningsFilters,
-  CumulativeEarningsPoint,
-  EarningsAnalytics,
   EarningsFilters,
-  EarningsHistory,
-  EarningsMetrics,
-  EarningsMetricsFilters,
-  EarningsPredictionsFilters,
-  EarningsPredictionsResponse,
-  EarningsStatusSummary,
   EarningsSummary,
-  ExportEarningsRequest,
-  ExportEarningsResponse,
   MonthlyEarnings,
   TopEarningVideosFilters,
   VideoEarnings,
 } from "../types/earnings.types";
-import { buildEarningsQuery, fetchEarningsResource } from "./earningsService.utils";
+import { buildEarningsQuery } from "./earningsService.utils";
+
+type MonthlyEarningsFilters = Pick<EarningsFilters, "period">;
 
 export class EarningsService {
-  static getVideoEarnings(videoId: string, params: EarningsFilters = {}) {
-    return fetchEarningsResource<VideoEarnings>("video", params, { videoId });
+  /**
+   * Real finance-service contract: GET /api/studio/earnings/summary
+   * Finance currently accepts period but does not use it for filtering.
+   */
+  static async getEarningsSummary(params: Pick<EarningsFilters, "period"> = {}) {
+    const response = await api.get<EarningsSummary>(
+      `/api/studio/earnings/summary${buildEarningsQuery(params)}`,
+      { requireAuth: true }
+    );
+    return response.data;
   }
 
-  static getMonthlyEarnings(
+  /**
+   * Real finance-service contract: GET /api/studio/earnings/monthly?year=YYYY&month=M
+   */
+  static async getMonthlyEarnings(
     year: number,
     month: number,
-    params: EarningsFilters = {}
+    params: MonthlyEarningsFilters = {}
   ) {
-    return fetchEarningsResource<MonthlyEarnings>("monthly", params, {
-      year,
-      month,
-    });
-  }
-
-  static getEarningsByCategory(
-    category: string,
-    params: EarningsFilters = {}
-  ) {
-    return fetchEarningsResource<CategoryEarnings>("category", params, {
-      category,
-    });
-  }
-
-  static getEarningsHistory(params: EarningsFilters = {}) {
-    return fetchEarningsResource<EarningsHistory[]>("history", params);
-  }
-
-  static getEarningsSummary(params: EarningsFilters = {}) {
-    return fetchEarningsResource<EarningsSummary>("summary", params);
-  }
-
-  static getVideoEarningsList(params: EarningsFilters = {}) {
-    return fetchEarningsResource<VideoEarnings[]>("videos", params);
-  }
-
-  static getAllMonthlyEarnings(params: EarningsFilters = {}) {
-    return fetchEarningsResource<MonthlyEarnings[]>("monthly-all", params);
-  }
-
-  static getEarningsByStatus(params: EarningsFilters = {}) {
-    return fetchEarningsResource<EarningsStatusSummary>("by-status", params);
-  }
-
-  static getEarningsMetrics(params: EarningsMetricsFilters = {}) {
-    return fetchEarningsResource<EarningsMetrics>("metrics", params);
-  }
-
-  static async exportEarnings(
-    params: ExportEarningsRequest
-  ): Promise<ExportEarningsResponse> {
-    return fetchEarningsResource<ExportEarningsResponse>(
-      `export${buildEarningsQuery(params)}`
+    const response = await api.get<MonthlyEarnings>(
+      `/api/studio/earnings/monthly${buildEarningsQuery({ year, month }, params)}`,
+      { requireAuth: true }
     );
+    return response.data;
   }
 
-  static getEarningsAnalytics(params: {
-    period?: "30days" | "90days" | "180days" | "365days";
-    startDate?: string;
-    endDate?: string;
-  } = {}) {
-    return fetchEarningsResource<EarningsAnalytics>("analytics", params);
-  }
-
-  static getTopEarningVideos(params: TopEarningVideosFilters = {}) {
-    return fetchEarningsResource<VideoEarnings[]>("top-videos", params);
-  }
-
-  static getCumulativeEarnings(params: CumulativeEarningsFilters) {
-    return fetchEarningsResource<CumulativeEarningsPoint[]>("cumulative", params);
-  }
-
-  static getEarningsPredictions(params: EarningsPredictionsFilters) {
-    return fetchEarningsResource<EarningsPredictionsResponse>(
-      "predictions",
-      params
+  /**
+   * Real finance-service contract: GET /api/studio/earnings/top-videos?period=monthly&limit=3
+   */
+  static async getTopEarningVideos(params: TopEarningVideosFilters = {}) {
+    const response = await api.get<VideoEarnings[]>(
+      `/api/studio/earnings/top-videos${buildEarningsQuery(params)}`,
+      { requireAuth: true }
     );
+    return response.data;
   }
 }

@@ -14,13 +14,38 @@ const REJECTED_STATUS = "rejected";
 
 type ContentFilter = "all" | "draft" | "processing" | "ready" | "failed";
 
-const CONTENT_FILTERS: Array<{ label: string; value: ContentFilter; statuses?: string[] }> = [
-  { label: "Videos", value: "all" },
+type ContentFilterConfig = {
+  label: string;
+  value: ContentFilter;
+  statuses: string[];
+};
+
+const CONTENT_FILTERS: ContentFilterConfig[] = [
+  { label: "Videos", value: "all", statuses: [] },
   { label: "Drafts", value: "draft", statuses: ["DRAFT"] },
-  { label: "Processing", value: "processing", statuses: ["PROCESSING", "PENDING_MODERATION", "MODERATING", "PENDING_MANUAL_REVIEW"] },
+  { label: "Processing", value: "processing", statuses: ["PROCESSING"] },
   { label: "Ready", value: "ready", statuses: ["READY"] },
   { label: "Failed", value: "failed", statuses: ["FAILED", "REJECTED"] },
 ];
+
+const FILTER_STATUSES = CONTENT_FILTERS.reduce<Record<ContentFilter, Set<string>>>((acc, filter) => {
+  acc[filter.value] = new Set(filter.statuses.map(status => status.toLowerCase()));
+  return acc;
+}, {
+  all: new Set<string>(),
+  draft: new Set<string>(),
+  processing: new Set<string>(),
+  ready: new Set<string>(),
+  failed: new Set<string>(),
+});
+
+function matchesActiveFilter(video: OwnerVideoResponse, filter: ContentFilter) {
+  if (filter === "all") {
+    return true;
+  }
+
+  return FILTER_STATUSES[filter].has(normalizeStatus(video.status));
+}
 
 function normalizeStatus(status?: string | null) {
   return status?.toLowerCase() || "unknown";
@@ -81,7 +106,7 @@ export function StudioContentFeature() {
   const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
   const [expandedRejectReasonVideoId, setExpandedRejectReasonVideoId] = useState<string | null>(null);
 
-  const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter = activeFilter) => {
+  const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter) => {
     if (showLoading) {
       setIsLoading(true);
     } else {
@@ -91,12 +116,12 @@ export function StudioContentFeature() {
 
     try {
       const filterConfig = CONTENT_FILTERS.find(item => item.value === filter);
-      const params: OwnerVideosParams | undefined = filterConfig?.statuses
+      const params: OwnerVideosParams | undefined = filterConfig && filterConfig.statuses.length > 0
         ? { status: filterConfig.statuses }
         : undefined;
       const res = await mediaService.getOwnerVideos(params);
       if (res.success && res.data) {
-        setVideos(res.data);
+        setVideos(filter === "all" ? res.data : res.data.filter(video => matchesActiveFilter(video, filter)));
         return;
       }
 
@@ -113,26 +138,28 @@ export function StudioContentFeature() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [activeFilter]);
+  }, []);
 
   useEffect(() => {
-    void fetchVideos();
-  }, [fetchVideos]);
+    void fetchVideos(true, activeFilter);
+  }, [activeFilter, fetchVideos]);
 
   const refreshAfterProcessing = useCallback(() => {
-    void fetchVideos(false);
-  }, [fetchVideos]);
+    void fetchVideos(false, activeFilter);
+  }, [activeFilter, fetchVideos]);
 
   const handleFilterChange = (filter: ContentFilter) => {
     setActiveFilter(filter);
   };
 
   const filteredVideos = useMemo(() => {
+    const activeVideos = videos.filter(video => matchesActiveFilter(video, activeFilter));
+
     if (!query) {
-      return videos;
+      return activeVideos;
     }
 
-    return videos.filter(video => {
+    return activeVideos.filter(video => {
       const searchableText = [
         video.title,
         video.description,
@@ -146,10 +173,10 @@ export function StudioContentFeature() {
 
       return searchableText.includes(query);
     });
-  }, [query, videos]);
+  }, [activeFilter, query, videos]);
 
   const handleRefresh = () => {
-    void fetchVideos(false);
+    void fetchVideos(false, activeFilter);
   };
 
   const showActionMessage = (message: string) => {
@@ -177,7 +204,7 @@ export function StudioContentFeature() {
           ? "Đã xoá video xử lý thất bại khỏi Studio."
           : "Đã gỡ video khỏi thư viện công khai."
       );
-      await fetchVideos(false);
+      await fetchVideos(false, activeFilter);
     } catch (err) {
       showActionMessage(getErrorMessage(err, "Không thể xoá video. Vui lòng thử lại."));
     } finally {
@@ -255,7 +282,7 @@ export function StudioContentFeature() {
             <p className="mx-auto mt-2 max-w-md font-body text-sm text-muted-foreground">{error}</p>
             <button
               type="button"
-              onClick={() => void fetchVideos()}
+              onClick={() => void fetchVideos(true, activeFilter)}
               className="mt-6 rounded-sm bg-primary px-5 py-2.5 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
             >
               Thử lại
@@ -427,7 +454,7 @@ export function StudioContentFeature() {
           onClose={() => setEditingVideoId(null)}
           onSaved={() => {
             setEditingVideoId(null);
-            void fetchVideos(false);
+            void fetchVideos(false, activeFilter);
           }}
         />
       ) : null}

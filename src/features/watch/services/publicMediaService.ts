@@ -29,8 +29,23 @@ export interface PublicDiscoveryVideo {
   metrics?: { viewsCount: number };
 }
 
+export interface PublicMembershipTier {
+  id: string;
+  channelId: string;
+  name: string;
+  level: number;
+  priceCoin: number;
+  isAcceptingNew: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PublicVideoMetadata {
   id: string;
+  channelId: string;
+  channelName: string;
+  avatarUrlChannel: string | null;
+  membershipTiers: PublicMembershipTier[];
   title: string;
   description: string;
   categoryId: string;
@@ -52,6 +67,44 @@ export interface PublicVideoMetadata {
   deletedBy: string | null;
   deleteReason: string | null;
   updatedAt: string;
+}
+
+export interface PublicChannelMembershipEligibility {
+  isEligible: boolean;
+  readyVideoCount: number;
+  minReadyVideoCount: number;
+  totalVideoViews: number;
+  minTotalVideoViews: number;
+  missingRequirements: string[];
+}
+
+export interface PublicChannelVideo {
+  id: string;
+  title: string;
+  category: string;
+  tags: string[];
+  status: string;
+  thumbnailUrl: string | null;
+  publishedAt: string | null;
+}
+
+export interface PublicChannelDetail {
+  id: string;
+  userId: string;
+  name: string;
+  bio: string;
+  isEligibleForMembership: boolean;
+  isMembershipClosedByAdmin: boolean;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  membershipEligibility: PublicChannelMembershipEligibility;
+  membershipTiers: PublicMembershipTier[];
+  publicVideos: PublicChannelVideo[];
+  subscriberCount?: number;
+  videoCount?: number;
 }
 
 export interface CategoryPublic {
@@ -161,6 +214,15 @@ export async function getViewerVideoMetadata(videoId: string) {
     `/api/media/videos/${videoId}/metadata`,
     { requireAuth: true }
   );
+}
+
+export async function getChannelDetailCached(channelId: string) {
+  "use cache";
+
+  cacheLife("minutes");
+  cacheTag("media:channel", `media:channel:${channelId}`);
+
+  return fetchPublicApi<PublicChannelDetail>(`/api/media/channels/${channelId}`);
 }
 
 export type { PublicApiError };

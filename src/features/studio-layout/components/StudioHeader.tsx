@@ -3,9 +3,10 @@
 import Form from "next/form";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { StudioWalletService } from "@/features/studio-wallet";
 import { studioQuickLinks } from "./navigation";
 
 const getInitials = (value?: string | null) => {
@@ -26,19 +27,51 @@ export function StudioHeader() {
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [isWalletLoading, setIsWalletLoading] = useState(true);
 
   const avatarLabel = user?.displayName || user?.email || "Creator";
   const canRenderAvatar = Boolean(user?.avatarUrl && user.avatarUrl !== failedAvatarUrl);
+  const showContentSearch = pathname?.startsWith("/studio/content");
+  const walletBalanceLabel = isWalletLoading
+    ? "... AC"
+    : walletBalance === null
+      ? "-- AC"
+      : `${walletBalance.toLocaleString("vi-VN")} AC`;
 
-  const showTemporaryMessage = (value: string) => {
-    setMessage(value);
-    window.setTimeout(() => setMessage(null), 3000);
-  };
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadWalletBalance = async () => {
+      setIsWalletLoading(true);
+
+      try {
+        const wallet = await StudioWalletService.getStudioWallet();
+
+        if (isMounted) {
+          setWalletBalance(wallet.balance);
+        }
+      } catch {
+        if (isMounted) {
+          setWalletBalance(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsWalletLoading(false);
+        }
+      }
+    };
+
+    void loadWalletBalance();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-[#262528] bg-[#0e0e10]/80 px-8 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-border/40 bg-background/70 px-8 backdrop-blur-xl">
       <div className="flex min-w-0 items-center gap-8">
         <nav className="hidden gap-5 font-headline text-sm tracking-wide lg:flex">
           {studioQuickLinks.map((item) => {
@@ -49,7 +82,7 @@ export function StudioHeader() {
                 key={item.path}
                 href={item.path}
                 className={`whitespace-nowrap transition-colors duration-300 ${
-                  isActive ? "text-zinc-100" : "text-zinc-400 hover:text-zinc-100"
+                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {item.label}
@@ -60,37 +93,33 @@ export function StudioHeader() {
       </div>
 
       <div className="flex items-center gap-6">
-        <Form action="/studio/content" className="relative hidden items-center sm:flex">
-          <span className="material-symbols-outlined absolute left-3 text-sm text-zinc-500">search</span>
-          <Input
-            className="h-9 w-64 rounded-sm border-none bg-[#131315] pl-9 pr-4 text-sm text-[#f9f5f8] focus-visible:ring-1 focus-visible:ring-[#ff8e80]"
-            defaultValue={pathname?.startsWith("/studio/content") ? searchParams.get("q") ?? "" : ""}
-            name="q"
-            placeholder="Search content..."
-            type="search"
-          />
-        </Form>
+        {showContentSearch ? (
+          <Form action="/studio/content" className="relative hidden items-center sm:flex">
+            <span className="material-symbols-outlined absolute left-3 text-sm text-muted-foreground">search</span>
+            <Input
+              className="h-9 w-64 rounded-sm border-border/40 bg-input pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
+              defaultValue={searchParams.get("q") ?? ""}
+              name="q"
+              placeholder="Search content..."
+              type="search"
+            />
+          </Form>
+        ) : null}
 
         <div className="relative flex items-center gap-4">
-          {message ? (
-            <div className="absolute right-12 top-11 w-72 rounded-sm border border-secondary/30 bg-card px-3 py-2 text-xs font-medium text-secondary shadow-xl">
-              {message}
-            </div>
-          ) : null}
-
-          <button
-            type="button"
-            className="text-zinc-400 transition-colors hover:text-white"
-            aria-label="Notifications"
-            onClick={() => showTemporaryMessage("Notifications API chưa sẵn sàng.")}
+          <Link
+            href="/studio/wallet"
+            className="flex h-9 items-center gap-2 rounded-sm border border-secondary/30 bg-secondary/10 px-3 font-headline text-xs font-bold uppercase tracking-widest text-secondary transition-colors hover:border-secondary/60 hover:bg-secondary/15 focus:outline-none focus:ring-2 focus:ring-ring/60"
+            aria-label="Open studio wallet"
           >
-            <span className="material-symbols-outlined text-[20px]">notifications</span>
-          </button>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">account_balance_wallet</span>
+            <span className="hidden lg:inline">{walletBalanceLabel}</span>
+          </Link>
 
           <button
             type="button"
             onClick={() => setShowAccountMenu(value => !value)}
-            className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#262528] bg-muted text-xs font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+            className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-xs font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring/60"
             aria-label="Open creator account menu"
           >
             {user?.avatarUrl && canRenderAvatar ? (

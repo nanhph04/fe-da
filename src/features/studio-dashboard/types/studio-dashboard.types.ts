@@ -1,14 +1,15 @@
 import type { OwnerVideoResponse } from "@/features/watch/services/mediaService";
-import type { EarningsAnalytics, EarningsSummary, VideoEarnings } from "@/features/studio-wallet/types/earnings.types";
-import type { WalletStats } from "@/features/studio-wallet/types/studio-wallet.types";
+import type { EarningsSummary, MonthlyEarnings, VideoEarnings } from "@/features/studio-wallet/types/earnings.types";
+import type { StudioWallet, WalletStats } from "@/features/studio-wallet/types/studio-wallet.types";
 
 export type StudioDashboardRange = "7D" | "30D";
 
 export type StudioDashboardData = {
   videos: OwnerVideoResponse[];
+  studioWallet: StudioWallet | null;
   walletStats: WalletStats | null;
   earningsSummary: EarningsSummary | null;
-  earningsAnalytics: EarningsAnalytics | null;
+  monthlyEarnings: MonthlyEarnings | null;
   topEarningVideos: VideoEarnings[];
 };
 

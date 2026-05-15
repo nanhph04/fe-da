@@ -16,15 +16,15 @@ import {
   buildDashboardStats,
   buildEarningsTrend,
   buildTopVideos,
-  getAnalyticsPeriod,
   getEarningsPeriod,
 } from "../utils/studio-dashboard.utils";
 
 const initialDashboardData: StudioDashboardData = {
   videos: [],
+  studioWallet: null,
   walletStats: null,
   earningsSummary: null,
-  earningsAnalytics: null,
+  monthlyEarnings: null,
   topEarningVideos: [],
 };
 
@@ -45,34 +45,38 @@ export function StudioDashboardFeature() {
     setError(null);
 
     try {
-      const [videosRes, walletStatsRes, earningsSummaryRes, earningsAnalyticsRes, topEarningVideosRes] = await Promise.allSettled([
+      const now = new Date();
+      const [videosRes, studioWalletRes, walletStatsRes, earningsSummaryRes, monthlyEarningsRes, topEarningVideosRes] = await Promise.allSettled([
         mediaService.getOwnerVideos({ limit: 20 }),
+        StudioWalletService.getStudioWallet(),
         StudioWalletService.getWalletStats(),
         EarningsService.getEarningsSummary({ period: getEarningsPeriod(dateRange) }),
-        EarningsService.getEarningsAnalytics({ period: getAnalyticsPeriod() }),
+        EarningsService.getMonthlyEarnings(now.getFullYear(), now.getMonth() + 1),
         EarningsService.getTopEarningVideos({ period: getEarningsPeriod(dateRange), limit: 3 }),
       ]);
 
       const videos = videosRes.status === "fulfilled" && videosRes.value.success && videosRes.value.data
         ? videosRes.value.data
         : [];
+      const studioWallet = studioWalletRes.status === "fulfilled" ? studioWalletRes.value : null;
       const walletStats = walletStatsRes.status === "fulfilled" ? walletStatsRes.value : null;
       const earningsSummary = earningsSummaryRes.status === "fulfilled" ? earningsSummaryRes.value : null;
-      const earningsAnalytics = earningsAnalyticsRes.status === "fulfilled" ? earningsAnalyticsRes.value : null;
+      const monthlyEarnings = monthlyEarningsRes.status === "fulfilled" ? monthlyEarningsRes.value : null;
       const topEarningVideos = topEarningVideosRes.status === "fulfilled" ? topEarningVideosRes.value : [];
 
-      const hasAnyData = videos.length > 0 || walletStats || earningsSummary || earningsAnalytics || topEarningVideos.length > 0;
+      const hasAnyData = videos.length > 0 || studioWallet || walletStats || earningsSummary || monthlyEarnings || topEarningVideos.length > 0;
       if (!hasAnyData) {
-        const firstRejected = [videosRes, walletStatsRes, earningsSummaryRes, earningsAnalyticsRes, topEarningVideosRes]
+        const firstRejected = [videosRes, studioWalletRes, walletStatsRes, earningsSummaryRes, monthlyEarningsRes, topEarningVideosRes]
           .find(result => result.status === "rejected");
         setError(firstRejected?.status === "rejected" ? getErrorMessage(firstRejected.reason, "Không thể tải dashboard studio.") : null);
       }
 
       setDashboardData({
         videos,
+        studioWallet,
         walletStats,
         earningsSummary,
-        earningsAnalytics,
+        monthlyEarnings,
         topEarningVideos,
       });
     } catch (err) {
@@ -89,7 +93,13 @@ export function StudioDashboardFeature() {
   }, [loadDashboard]);
 
   const stats = useMemo(
-    () => buildDashboardStats(dashboardData.videos, dashboardData.walletStats, dashboardData.earningsSummary),
+    () => buildDashboardStats(
+      dashboardData.videos,
+      dashboardData.studioWallet,
+      dashboardData.walletStats,
+      dashboardData.earningsSummary,
+      dashboardData.monthlyEarnings
+    ),
     [dashboardData]
   );
   const topVideos = useMemo(
@@ -98,8 +108,8 @@ export function StudioDashboardFeature() {
   );
   const activities = useMemo(() => buildActivities(dashboardData.videos), [dashboardData.videos]);
   const earningsTrend = useMemo(
-    () => buildEarningsTrend(dashboardData.earningsAnalytics),
-    [dashboardData.earningsAnalytics]
+    () => buildEarningsTrend(dashboardData.monthlyEarnings),
+    [dashboardData.monthlyEarnings]
   );
 
   return (

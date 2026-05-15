@@ -116,6 +116,197 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - khong check ownership
   - neu khong co vi thi tra `404`
 
+### 4.3 GET `/api/studio/wallet/me`
+
+- Muc dich: lay wallet read model cho Creator Studio.
+- Gateway public contract:
+  - `GET /api/studio/wallet/me`
+- Headers:
+  - `x-user-id` bat buoc
+- Input:
+  - khong co body/query/path param
+- Output `data`:
+
+```json
+{
+  "id": "wallet-id",
+  "userId": "user-id",
+  "type": "STUDIO",
+  "balance": 1000,
+  "frozenBalance": 200,
+  "status": "ACTIVE",
+  "createdAt": "2026-05-15T00:00:00.000Z",
+  "updatedAt": "2026-05-15T00:00:00.000Z",
+  "totalEarnings": 1200,
+  "videoCount": 0,
+  "totalViews": 0,
+  "totalRevenue": 1200,
+  "revenueThisMonth": 300,
+  "subscribersCount": 0,
+  "currency": "AC"
+}
+```
+
+- Backend xu ly:
+  - tim wallet theo `x-user-id`
+  - tinh `totalEarnings` tu transaction `channel_revenue`
+  - tinh `revenueThisMonth` tu transaction `channel_revenue` trong thang hien tai
+  - cac chi so media chua co trong finance DB (`videoCount`, `totalViews`, `subscribersCount`) tam thoi tra `0`
+  - neu khong co wallet thi tra `404 Wallet not found`
+
+### 4.4 GET `/api/studio/wallet/stats`
+
+- Muc dich: lay thong ke tong hop cho Studio Wallet dashboard.
+- Gateway public contract:
+  - `GET /api/studio/wallet/stats`
+- Headers:
+  - `x-user-id` bat buoc
+- Input:
+  - khong co body/query/path param
+- Output `data`:
+
+```json
+{
+  "totalBalance": 1200,
+  "availableBalance": 1000,
+  "pendingPayouts": 100,
+  "totalWithdrawn": 500,
+  "avgRevenuePerVideo": 0,
+  "totalViews": 0,
+  "totalLikes": 0,
+  "monthlyEarnings": 300,
+  "monthlyGrowth": 25,
+  "topPerformingVideo": null
+}
+```
+
+- Backend xu ly:
+  - `totalBalance = balance + frozenBalance`
+  - `availableBalance = balance`
+  - `pendingPayouts`: tong withdrawal dang `pending`, `approved`, `processing`
+  - `totalWithdrawn`: tong withdrawal `completed`
+  - `monthlyEarnings`: tong transaction `channel_revenue` trong thang hien tai
+  - `monthlyGrowth`: so sanh `monthlyEarnings` voi thang truoc
+  - cac chi so media/top video chua co metadata media trong finance DB nen tam thoi tra `0`/`null`
+
+## 4.5 Studio Earnings GET APIs
+
+### 4.5.1 GET `/api/studio/earnings/summary`
+
+- Muc dich: lay tong quan earnings cho Creator Studio.
+- Gateway public contract:
+  - `GET /api/studio/earnings/summary`
+- Headers:
+  - `x-user-id` bat buoc
+- Query hien tai:
+  - FE co the gui `period=monthly`, backend hien chua dung query nay va tra summary theo du lieu hien co
+- Output `data`:
+
+```json
+{
+  "totalEarnings": 1200,
+  "totalViews": 0,
+  "totalWatchTime": 0,
+  "totalVideos": 0,
+  "pendingEarnings": 200,
+  "confirmedEarnings": 1000,
+  "paidEarnings": 500,
+  "averageEarningsPerVideo": 0,
+  "averageEarningsPerView": 0,
+  "growth": {
+    "percentage": 25,
+    "comparedToPrevious": 960,
+    "absoluteDifference": 240
+  },
+  "nextPayoutDate": "2026-05-20T00:00:00.000Z",
+  "minimumPayoutThreshold": 100
+}
+```
+
+- Backend xu ly:
+  - `totalEarnings`: tong transaction `channel_revenue`
+  - `pendingEarnings`: tong settlement `pending`
+  - `confirmedEarnings`: tong settlement `released`
+  - `paidEarnings`: tong withdrawal `completed`
+  - `nextPayoutDate`: `MIN(releaseAfter)` cua settlement `pending`
+  - cac chi so view/watch/video tam thoi tra `0`
+
+### 4.5.2 GET `/api/studio/earnings/monthly`
+
+- Muc dich: lay earnings trong mot thang.
+- Gateway public contract:
+  - `GET /api/studio/earnings/monthly?year=2026&month=5`
+- Headers:
+  - `x-user-id` bat buoc
+- Query:
+  - `year` optional, mac dinh nam hien tai
+  - `month` optional, mac dinh thang hien tai, gia tri 1-12
+- Output `data`:
+
+```json
+{
+  "month": "05",
+  "year": 2026,
+  "earnings": 300,
+  "views": 0,
+  "watchTime": 0,
+  "videoCount": 0,
+  "payoutAmount": 1000,
+  "status": "confirmed",
+  "growth": 25
+}
+```
+
+- Backend xu ly:
+  - tinh `earnings` tu transaction `channel_revenue` trong thang query
+  - `growth`: so sanh voi thang lien truoc
+  - `payoutAmount`: balance kha dung hien tai
+  - `status`: `confirmed` neu balance >= nguong payout toi thieu, nguoc lai `pending`
+
+### 4.5.3 GET `/api/studio/earnings/top-videos`
+
+- Muc dich: lay top video theo revenue tu settlement.
+- Gateway public contract:
+  - `GET /api/studio/earnings/top-videos?period=monthly&limit=3`
+- Headers:
+  - `x-user-id` bat buoc
+- Query:
+  - `limit` optional, mac dinh `3`, min `1`, max `20`
+  - `period` hien FE co gui nhung backend chua dung de loc theo thoi gian
+- Output `data`:
+
+```json
+[
+  {
+    "id": "video-id",
+    "videoId": "video-id",
+    "videoTitle": "Video",
+    "categoryId": "",
+    "categoryName": "",
+    "views": 0,
+    "watchTime": 0,
+    "revenue": 300,
+    "estimatedRevenue": 300,
+    "currency": "AC",
+    "status": "confirmed",
+    "period": {
+      "startDate": "2026-05-01T00:00:00.000Z",
+      "endDate": "2026-05-31T23:59:59.999Z"
+    },
+    "metrics": {
+      "completionRate": 0,
+      "engagementRate": 0,
+      "averageViewDuration": 0
+    }
+  }
+]
+```
+
+- Backend xu ly:
+  - group `payment_revenue_settlements` theo `serviceId` voi `serviceType = video`
+  - sort theo tong `amount` giam dan
+  - finance-service chua co title/category/view/watchtime tu media-service, nen metadata media tam thoi la placeholder/`0`
+
 ## 5. Transaction APIs
 
 ### 5.1 GET `/api/transactions/me`
@@ -751,6 +942,15 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 - Man vi:
   - goi `GET /api/wallets/me`
+
+- Man Studio Wallet:
+  - goi `GET /api/studio/wallet/me`
+  - goi `GET /api/studio/wallet/stats`
+
+- Man Studio Earnings:
+  - goi `GET /api/studio/earnings/summary`
+  - goi `GET /api/studio/earnings/monthly?year=YYYY&month=M`
+  - goi `GET /api/studio/earnings/top-videos?limit=3`
 
 - Man lich su giao dich:
   - goi `GET /api/transactions/me`

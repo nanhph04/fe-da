@@ -1,4 +1,5 @@
 import { ProfileFeature } from "@/features/profile";
+import { requireAuthenticatedUser } from "@/shared/auth/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,6 +7,8 @@ export const metadata: Metadata = {
   description: "Quản lý thông tin hồ sơ của bạn.",
 };
 
-export default function ProfilePage() {
-  return <ProfileFeature />;
+export default async function ProfilePage() {
+  const user = await requireAuthenticatedUser("/profile");
+
+  return <ProfileFeature initialUser={user} />;
 }

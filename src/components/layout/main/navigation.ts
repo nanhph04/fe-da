@@ -21,8 +21,8 @@ export const sideNavItems: NavItem[] = [
   { label: "Library", icon: "video_library", path: "/library", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Wallet", icon: "account_balance_wallet", path: "/wallet", roles: ["viewer", "creator", "admin"] },
   { label: "Profile", icon: "person", path: "/profile", roles: ["viewer", "creator", "admin"] },
-  { label: "Purchased", icon: "payments", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
-  { label: "Subscriptions", icon: "subscriptions", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
+  { label: "Purchased", icon: "payments", path: "/library/purchased", roles: ["viewer", "creator", "admin"] },
+  { label: "Subscriptions", icon: "subscriptions", path: "/library/subscriptions", roles: ["viewer", "creator", "admin"] },
 ];
 
 export const mobileNavItems: NavItem[] = [

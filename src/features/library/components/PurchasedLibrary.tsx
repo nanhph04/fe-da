@@ -8,6 +8,7 @@ import {
 } from "@/features/watch/services/mediaService";
 import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
 import { getErrorMessage } from "@/shared/api/client";
+import type { ApiPagination } from "@/shared/api/types";
 
 function formatDuration(seconds: number | null) {
   if (!seconds || seconds <= 0) {
@@ -45,6 +46,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
   const [state, setState] = useState(() =>
     createAsyncState<PurchasedVideoResponse[]>([])
   );
+  const [pagination, setPagination] = useState<ApiPagination | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -53,12 +55,26 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
       try {
         setState((current) => ({ ...current, status: "loading", error: null }));
         const response = await mediaService.getPurchasedVideos({ page: 1, limit: 6 });
-        if (isMounted && response.success && response.data) {
-          setState({ status: "success", data: response.data, error: null });
+        if (!isMounted) {
+          return;
         }
+
+        if (!response.success) {
+          setPagination(null);
+          setState({
+            status: "error",
+            data: [],
+            error: response.mess || "Không thể tải thư viện đã mua.",
+          });
+          return;
+        }
+
+        setPagination(response.pagination ?? null);
+        setState({ status: "success", data: response.data ?? [], error: null });
       } catch (err) {
         if (isMounted) {
           console.error("Failed to load purchased videos", err);
+          setPagination(null);
           setState({
             status: "error",
             data: [],
@@ -79,8 +95,13 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
 
   return (
     <section>
-      <div className="mb-8 flex items-end justify-between">
+      <div className="mb-8 flex items-end justify-between gap-4">
         <h2 className="font-headline text-3xl font-bold text-foreground">Thư viện đã mua</h2>
+        {pagination && pagination.total > items.length ? (
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Hiển thị {items.length}/{pagination.total} video
+          </p>
+        ) : null}
       </div>
 
       {isAsyncLoading(state) ? (
@@ -105,21 +126,17 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
 
       {isAsyncSuccess(state) && items.length === 0 ? (
         <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
-          Chưa có dữ liệu.
+          Bạn chưa mua video nào.
         </div>
       ) : null}
 
       {isAsyncSuccess(state) && items.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map((item, index) => {
-            const videoId = item.id;
-
-            if (!videoId) {
-              return null;
-            }
-
+            const videoId = item.videoId;
+            const primaryCategory = item.categories[0] || "Chưa phân loại";
             const isFeatured = index === 0;
-            const itemKey = `${videoId}-${item.updatedAt}-${index}`;
+            const itemKey = `${videoId}-${item.purchasedAt}-${index}`;
 
             return (
               <Link
@@ -155,10 +172,10 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
                     {item.title}
                   </h3>
                   <p className="line-clamp-2 text-sm text-zinc-300">
-                    {item.description || item.category || "Video đã mua"}
+                    {item.description || item.channelName || "Video đã mua"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {item.category || "Chưa phân loại"} • {formatDuration(item.durationSeconds)} • Cập nhật ngày {formatDate(item.updatedAt)}
+                    {primaryCategory} • {formatDuration(item.durationSeconds)} • Đã mua {formatDate(item.purchasedAt)}
                   </p>
                 </div>
               </Link>
