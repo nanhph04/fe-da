@@ -37,6 +37,14 @@ export const clearLocalAccessToken = () => {
   }
 };
 
+const redirectToLogin = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.location.href = window.location.pathname.startsWith("/admin") ? "/admin/login" : "/login";
+};
+
 export const buildApiUrl = (endpoint: string) => {
   if (endpoint.startsWith("http")) {
     return endpoint;
@@ -208,9 +216,7 @@ export const fetchWrapper = async <T = unknown>(
           isRefreshing = false;
           clearLocalAccessToken();
 
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
+          redirectToLogin();
 
           return Promise.reject(error);
         }
@@ -359,9 +365,7 @@ export const fetchSSE = async (
           isRefreshing = false;
           clearLocalAccessToken();
 
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
+          redirectToLogin();
 
           throw error;
         }

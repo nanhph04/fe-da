@@ -22,6 +22,10 @@ export function ContentModerationDetailFeature() {
         <span className="w-fit rounded-sm border border-primary/30 bg-primary/10 px-3 py-1 font-label text-xs font-bold uppercase tracking-widest text-primary">Flagged</span>
       </header>
 
+      <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
+        Media service contract hien co moderation queue summary/list; detail moderation/action endpoint chua co trong tai lieu nen man nay van dung mock theo video id.
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="space-y-6 lg:col-span-8">
           <div className="relative flex aspect-video flex-col items-center justify-center overflow-hidden rounded-sm border border-border/30 bg-background p-4 text-center">

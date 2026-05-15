@@ -24,7 +24,7 @@ function isChannelConflict(error: unknown) {
 }
 
 function canAccessStudio(profile: UserProfileResponse | null) {
-  return !!profile && (profile.isCreator || profile.role === "creator" || profile.role === "admin");
+  return !!profile && (profile.isCreator || profile.role === "creator");
 }
 
 export function CreateChannelFeature() {

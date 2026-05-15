@@ -11,6 +11,12 @@ export function ProfileGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoading) return;
+
+    if (isAuthenticated && user?.role === "admin") {
+      router.replace("/admin");
+      return;
+    }
+
     if (isAuthenticated && user && !user.displayName) {
       // Prevent redirect loop by checking if already on onboarding page
       if (!pathname.startsWith("/onboarding")) {

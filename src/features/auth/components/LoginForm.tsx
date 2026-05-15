@@ -42,9 +42,11 @@ export function LoginForm() {
       const res = await authService.login(data);
       if (res.success && res.data?.accessToken) {
         const profile = await setAuthData(res.data.accessToken);
-        const redirectTo = profile && !profile.displayName
-          ? "/onboarding/profile"
-          : "/library";
+        const redirectTo = profile?.role === "admin"
+          ? "/admin"
+          : profile && !profile.displayName
+            ? "/onboarding/profile"
+            : "/library";
         router.push(redirectTo);
       } else {
         setServerError(res.mess || "Login failed");

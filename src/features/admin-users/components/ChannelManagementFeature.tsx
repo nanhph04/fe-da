@@ -19,6 +19,10 @@ export function ChannelManagementFeature() {
         <p className="mt-2 font-body text-sm text-muted-foreground">Oversee creator ecosystems and verification tiers.</p>
       </header>
 
+      <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
+        Media service contract hien chi co API channel summary `GET /api/media/admin/channels/summary`; channel directory dang giu mock cho den khi co API list/manage channels.
+      </div>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <SummaryCard label="Total Channels" value="1,482" icon="tv" />
         <SummaryCard label="Verified Creators" value="840" icon="verified" tone="secondary" />

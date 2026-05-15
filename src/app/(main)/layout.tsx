@@ -3,10 +3,13 @@ import { TopNav } from "@/components/layout/main/TopNav";
 import { SideNav } from "@/components/layout/main/SideNav";
 import { MobileNav } from "@/components/layout/main/MobileNav";
 import { ProfileGuard } from "@/components/guards/ProfileGuard";
+import { redirectAdminFromMain } from "@/shared/auth/server";
 
-export default function MainLayout({ children }: { children: ReactNode }) {
+export default async function MainLayout({ children }: { children: ReactNode }) {
+  await redirectAdminFromMain();
+
   return (
-    <div className="bg-[#0e0e10] text-[#f9f5f8] selection:bg-[#ff8e80] selection:text-[#650003] min-h-screen">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground">
       <TopNav />
       <SideNav />
       

@@ -1,6 +1,6 @@
 IDENTITY SERVICE API LIST - FRONTEND CONTRACT
 
-Last updated: 2026-05-12
+Last updated: 2026-05-15
 
 Muc dich
 ========
@@ -233,7 +233,8 @@ Luu y:
 
 - Controller lay IP tu request bang @Ip().
 - FE khong can gui field ip.
-- Neu FE gui field ip, backend co the reject do forbidNonWhitelisted tuy theo DTO.
+- Neu FE gui field ip, backend hien tai khong dung gia tri nay; IP thuc te van
+  lay tu request.
 
 Cookie:
 
@@ -843,7 +844,74 @@ Response:
 
 
 ==================================================
-3. PUBLIC ROUTE SUMMARY FOR FE
+3. ADMIN APIs
+==================================================
+
+3.1) GET /api/user/admin/users/summary
+
+Muc dich:
+
+- Lay tong quan user cho admin dashboard.
+- API nay chi tra du lieu co domain/schema that trong identity-service.
+
+Auth:
+
+- Protected.
+- Required header:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+System fields:
+
+- userId lay tu accessToken hoac gateway header `x-user-id`.
+- role lay tu accessToken hoac gateway header `x-user-role`.
+- Chi cho role `admin`; FE khong tu gui role thu cong.
+
+Response:
+
+- HTTP status: 200
+- Body CO boc ApiResponse.
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Admin users summary fetched successfully",
+  "data": {
+    "totalUsers": 1240000,
+    "activeUsers30d": 980000,
+    "newUsers30d": 25000,
+    "growth30dPercent": 12.4,
+    "flaggedUsers": 0,
+    "lockedUsers": 120
+  }
+}
+```
+
+Field tinh toan:
+
+- totalUsers: dem account co role `user`.
+- activeUsers30d: dem distinct user co refresh token chua revoke, chua het han,
+  va created/updated trong 30 ngay gan nhat.
+- newUsers30d: dem account role `user` tao trong 30 ngay gan nhat.
+- growth30dPercent: so sanh newUsers30d voi 30 ngay truoc do; `null` neu ky
+  truoc bang 0.
+- flaggedUsers: tam thoi `0` trong v1 vi chua co domain/schema user flag.
+- lockedUsers: dem account role `user` co status `suspended` hoac `inactive`.
+
+Luu y:
+
+- Creator verification API chua co trong v1 vi identity-service chua co
+  workflow/table verification that.
+- Dashboard nen giu unavailable state cho:
+  - GET /api/user/admin/creator-verifications/summary
+  - GET /api/user/admin/creator-verifications?status=pending&page=1&limit=5
+
+
+==================================================
+4. PUBLIC ROUTE SUMMARY FOR FE
 ==================================================
 
 Public, khong can Authorization:
@@ -865,10 +933,11 @@ Protected, can Authorization Bearer:
 - POST /api/user/users/profile/avatar/upload-url
 - POST /api/user/users/profile/avatar/complete
 - PATCH /api/user/users/profile
+- GET /api/user/admin/users/summary
 
 
 ==================================================
-4. FRONTEND AUTH FLOW GOI Y
+5. FRONTEND AUTH FLOW GOI Y
 ==================================================
 
 Register flow:

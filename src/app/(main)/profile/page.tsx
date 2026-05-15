@@ -1,5 +1,5 @@
 import { ProfileFeature } from "@/features/profile";
-import { requireAuthenticatedUser } from "@/shared/auth/server";
+import { requireMainAccess } from "@/shared/auth/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-  const user = await requireAuthenticatedUser("/profile");
+  const user = await requireMainAccess("/profile");
 
   return <ProfileFeature initialUser={user} />;
 }

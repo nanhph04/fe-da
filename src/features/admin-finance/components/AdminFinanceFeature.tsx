@@ -62,6 +62,10 @@ export function AdminFinanceFeature() {
         </div>
       </div>
 
+      <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
+        Finance service contract hien co admin deposit packages va withdrawal admin APIs; cac chi so platform revenue/subscriptions/transaction aggregate dang giu mock cho den khi co API tai lieu hoa.
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
           <div

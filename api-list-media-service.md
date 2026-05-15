@@ -1,15 +1,18 @@
-date 14/05/2026
+# Media Service API
 
-MEDIA SERVICE API LIST
-Base URL: /api/media
+**Last updated:** 15/05/2026
 
-Ghi chu chung
+**Base URL:** `/api/media`
+
+
+## Ghi chu chung
 - `x-user-id`: He thong tu set tu gateway/auth service, frontend/client khong nen tu dien tay.
 - `x-user-role`: Duoc gateway/auth service set cho cac API can role.
 - `x-internal-secret`: He thong noi bo tu set khi goi qua gateway/service noi bo.
 - API co `SkipInternalGatewayGuard` la API public, khong can `x-internal-secret`.
 - Validation dang bat `whitelist + forbidNonWhitelisted + transform`.
 - Success response THUC TE duoc wrap theo envelope:
+```json
   {
     "success": true,
     "code": 200,
@@ -22,14 +25,13 @@ Ghi chu chung
       "totalPages": 5
     }
   }
+```
 - Voi endpoint `POST`, neu NestJS tra HTTP 201 thi response envelope co `code = 201`.
 - Error response dung format `ApiError` o cuoi tai lieu nay.
 
-==================================================
-1. HEALTH CHECK
-==================================================
+## 1. HEALTH CHECK
 
-1.1) GET /api/media/
+### 1.1 GET `/api/media/`
 - Muc dich: kiem tra service dang chay.
 - Header:
   - Khong yeu cau.
@@ -42,11 +44,9 @@ Ghi chu chung
     - `data`: string
   - `data` hien tai: `"Hello World!"`
 
-==================================================
-2. CHANNEL APIs
-==================================================
+## 2. CHANNEL APIs
 
-2.0) GET /api/media/channels/me
+### 2.0 GET `/api/media/channels/me`
 - Muc dich: lay channel cua user hien tai de frontend resolve `channelId` creator context.
 - Header:
   - `x-user-id`: He thong tu set
@@ -63,7 +63,7 @@ Ghi chu chung
     - `isEligibleForMembership` (boolean)
     - `isMembershipClosedByAdmin` (boolean)
 
-2.1) POST /api/media/channels
+### 2.1 POST `/api/media/channels`
 - Muc dich: tao channel moi.
 - Header:
   - `x-user-id`: He thong tu set
@@ -87,7 +87,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-2.2) PATCH /api/media/channels/:id
+### 2.2 PATCH `/api/media/channels/:id`
 - Muc dich: cap nhat channel.
 - Header:
   - `x-user-id`: He thong tu set
@@ -115,7 +115,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-2.3) GET /api/media/channels/:id
+### 2.3 GET `/api/media/channels/:id`
 - Muc dich: lay chi tiet channel public.
 - Public API: khong can `x-internal-secret`.
 - Path param:
@@ -160,7 +160,7 @@ Ghi chu chung
       - `thumbnailUrl` (string | null)
       - `publishedAt` (string ISO | null)
 
-2.4) GET /api/media/channels/:id/membership-status
+### 2.4 GET `/api/media/channels/:id/membership-status`
 - Muc dich: kiem tra user hien tai co membership active trong channel hay khong.
 - Ghi chu them:
   - Endpoint nay chi kiem tra membership theo TUNG channel.
@@ -182,7 +182,7 @@ Ghi chu chung
     - `membershipBlockedReason` (string | null)
     - `isMembershipClosedByAdmin` (boolean)
 
-2.5) GET /api/media/memberships/me?page=1&limit=20
+### 2.5 GET `/api/media/memberships/me?page=1&limit=20`
 - Muc dich: lay danh sach membership/gói hoi vien cua user hien tai tren tat ca channel.
 - Header:
   - `x-user-id`: He thong tu set
@@ -222,7 +222,7 @@ Ghi chu chung
     - `total` (number)
     - `totalPages` (number)
 
-2.6) PATCH /api/media/channels/:id/admin/membership
+### 2.6 PATCH `/api/media/channels/:id/admin/membership`
 - Muc dich: admin dong/mo kha nang nhan membership cua channel.
 - Header:
   - `x-user-id`: He thong tu set
@@ -248,11 +248,9 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-==================================================
-3. MEMBERSHIP TIER APIs
-==================================================
+## 3. MEMBERSHIP TIER APIs
 
-3.1) GET /api/media/channels/:channelId/membership-tiers
+### 3.1 GET `/api/media/channels/:channelId/membership-tiers`
 - Muc dich: lay danh sach tier cua channel.
 - Header:
   - `x-internal-secret`: He thong tu set
@@ -269,7 +267,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-3.2) GET /api/media/channels/:channelId/membership-tiers/:tierId
+### 3.2 GET `/api/media/channels/:channelId/membership-tiers/:tierId`
 - Muc dich: lay chi tiet 1 tier.
 - Header:
   - `x-internal-secret`: He thong tu set
@@ -287,7 +285,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-3.3) POST /api/media/channels/:channelId/membership-tiers
+### 3.3 POST `/api/media/channels/:channelId/membership-tiers`
 - Muc dich: tao tier moi cho channel.
 - Header:
   - `x-user-id`: He thong tu set
@@ -311,7 +309,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-3.4) PATCH /api/media/channels/:channelId/membership-tiers/:tierId
+### 3.4 PATCH `/api/media/channels/:channelId/membership-tiers/:tierId`
 - Muc dich: cap nhat tier.
 - Header:
   - `x-user-id`: He thong tu set
@@ -336,7 +334,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-3.5) DELETE /api/media/channels/:channelId/membership-tiers/:tierId
+### 3.5 DELETE `/api/media/channels/:channelId/membership-tiers/:tierId`
 - Muc dich: disable tier.
 - Header:
   - `x-user-id`: He thong tu set
@@ -357,11 +355,9 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-==================================================
-4. VIDEO APIs
-==================================================
+## 4. VIDEO APIs
 
-4.0) GET /api/media/videos/me?limit=20&status=draft,processing&visibility=private
+### 4.0 GET `/api/media/videos/me?limit=20&status=draft,processing&visibility=private`
 - Muc dich: lay danh sach video Studio cua chinh creator hien tai, gom ca draft/private/trang thai xu ly.
 - Header:
   - `x-user-id`: He thong tu set
@@ -405,7 +401,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-4.0A) GET /api/media/videos?q=...&category=...&tags=tag1,tag2&limit=20
+### 4.0A GET `/api/media/videos?q=...&category=...&tags=tag1,tag2&limit=20`
 - Muc dich: tim kiem/list public videos truc tiep tu video controller.
 - Public API: khong can `x-internal-secret`.
 - Query:
@@ -436,7 +432,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-4.1) POST /api/media/videos/init-upload
+### 4.1 POST `/api/media/videos/init-upload`
 - Muc dich: tao video draft va tra presigned upload URL.
 - Header:
   - `x-user-id`: He thong tu set
@@ -465,7 +461,7 @@ Ghi chu chung
     - `bucket` (string)
     - `uploadUrl` (string)
 
-4.2) POST /api/media/videos/:id/confirm-upload
+### 4.2 POST `/api/media/videos/:id/confirm-upload`
 - Muc dich: xac nhan upload xong de he thong xu ly video.
 - Header:
   - `x-user-id`: He thong tu set
@@ -487,7 +483,7 @@ Ghi chu chung
     - `status` (string)
     - `message` (string)
 
-4.3) POST /api/media/videos/:id/replace-upload
+### 4.3 POST `/api/media/videos/:id/replace-upload`
 - Muc dich: doi raw upload file cho video draft va tra presigned upload URL moi.
 - Header:
   - `x-user-id`: He thong tu set
@@ -511,7 +507,7 @@ Ghi chu chung
     - `bucket` (string)
     - `uploadUrl` (string)
 
-4.4) DELETE /api/media/videos/:id/upload
+### 4.4 DELETE `/api/media/videos/:id/upload`
 - Muc dich: huy upload video draft khi user khong muon upload nua.
 - Header:
   - `x-user-id`: He thong tu set
@@ -532,7 +528,7 @@ Ghi chu chung
     - `videoId` (string)
     - `cancelled` (boolean)
 
-4.5) DELETE /api/media/videos/:id/failed-upload
+### 4.5 DELETE `/api/media/videos/:id/failed-upload`
 - Muc dich: xoa video upload/xu ly that bai khoi studio cua owner.
 - Header:
   - `x-user-id`: He thong tu set
@@ -551,7 +547,7 @@ Ghi chu chung
     - `videoId` (string)
     - `deleted` (boolean)
 
-4.6) DELETE /api/media/videos/:id
+### 4.6 DELETE `/api/media/videos/:id`
 - Muc dich: unpublish/xoa mem video cua owner.
 - Header:
   - `x-user-id`: He thong tu set
@@ -570,7 +566,7 @@ Ghi chu chung
     - `videoId` (string)
     - `unpublished` (boolean)
 
-4.7) GET /api/media/videos/:id/play
+### 4.7 GET `/api/media/videos/:id/play`
 - Muc dich: lay thong tin phat video cho user hien tai.
 - Header:
   - `x-user-id`: He thong tu set
@@ -589,7 +585,7 @@ Ghi chu chung
     - `resumePositionSeconds` (number): vi tri tiep tuc xem, `0` neu chua co tien do
     - `isResumeAvailable` (boolean): `true` neu co the xem tiep tu tien do da luu
 
-4.8) POST /api/media/videos/:id/progress
+### 4.8 POST `/api/media/videos/:id/progress`
 - Muc dich: luu tien do xem video cua user hien tai.
 - Header:
   - `x-user-id`: He thong tu set
@@ -608,7 +604,7 @@ Ghi chu chung
     - `positionSeconds` (number)
     - `completed` (boolean)
 
-4.9) POST /api/media/videos/:id/playback-token/refresh
+### 4.9 POST `/api/media/videos/:id/playback-token/refresh`
 - Muc dich: cap moi playback token cho video dang xem.
 - Header:
   - `x-user-id`: He thong tu set
@@ -623,7 +619,7 @@ Ghi chu chung
     - `playbackToken` (string)
     - `playbackUrl` (string)
 
-4.10) GET /api/media/videos/:id/metadata
+### 4.10 GET `/api/media/videos/:id/metadata`
 - Muc dich: lay metadata public cua video.
 - Public API: khong can `x-internal-secret`.
 - Path param:
@@ -636,6 +632,18 @@ Ghi chu chung
 - Response HTTP 200:
   - Envelope `data`:
     - `id` (string)
+    - `channelId` (string)
+    - `channelName` (string)
+    - `avatarUrlChannel` (string)
+    - `membershipTiers` (array)
+      - `id` (string)
+      - `channelId` (string)
+      - `name` (string)
+      - `level` (number)
+      - `priceCoin` (number)
+      - `isAcceptingNew` (boolean)
+      - `createdAt` (string ISO)
+      - `updatedAt` (string ISO)
     - `title` (string)
     - `description` (string)
     - `categoryId` (string): id cua category chinh hien tai
@@ -658,7 +666,7 @@ Ghi chu chung
     - `deleteReason` (string | null)
     - `updatedAt` (string ISO)
 
-4.11) PATCH /api/media/videos/:id/metadata
+### 4.11 PATCH `/api/media/videos/:id/metadata`
 - Muc dich: creator cap nhat metadata cua video.
 - Header:
   - `x-user-id`: Gateway verify JWT roi tu set
@@ -677,6 +685,18 @@ Ghi chu chung
 - Response HTTP 200:
   - Envelope `data`:
     - `id` (string)
+    - `channelId` (string)
+    - `channelName` (string)
+    - `avatarUrlChannel` (string)
+    - `membershipTiers` (array)
+      - `id` (string)
+      - `channelId` (string)
+      - `name` (string)
+      - `level` (number)
+      - `priceCoin` (number)
+      - `isAcceptingNew` (boolean)
+      - `createdAt` (string ISO)
+      - `updatedAt` (string ISO)
     - `title` (string)
     - `description` (string)
     - `categoryId` (string): id cua category chinh sau update
@@ -699,7 +719,7 @@ Ghi chu chung
     - `deleteReason` (string | null)
     - `updatedAt` (string ISO)
 
-4.12) GET /api/media/videos/discovery/latest?limit=20
+### 4.12 GET `/api/media/videos/discovery/latest?limit=20`
 - Muc dich: lay danh sach video moi nhat.
 - Public API: khong can `x-internal-secret`.
 - Query:
@@ -726,7 +746,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-4.13) GET /api/media/videos/library/purchased?page=1&limit=20
+### 4.13 GET `/api/media/videos/library/purchased?page=1&limit=20`
 - Muc dich: lay thu vien video da mua/unlock cua user hien tai.
 - Header:
   - `x-user-id`: He thong tu set
@@ -765,7 +785,7 @@ Ghi chu chung
     - `total` (number)
     - `totalPages` (number)
 
-4.14) GET /api/media/videos/discovery/by-category?category=...&page=1&limit=20
+### 4.14 GET `/api/media/videos/discovery/by-category?category=...&page=1&limit=20`
 - Muc dich: lay danh sach video theo category.
 - Public API: khong can `x-internal-secret`.
 - Query:
@@ -805,7 +825,7 @@ Ghi chu chung
     - `total` (number)
     - `totalPages` (number)
 
-4.15) GET /api/media/categories/:slug/videos?page=1&limit=20
+### 4.15 GET `/api/media/categories/:slug/videos?page=1&limit=20`
 - Muc dich: lay danh sach video public theo category slug qua nested category route.
 - Public API: khong can `x-internal-secret`.
 - Path param:
@@ -824,7 +844,7 @@ Ghi chu chung
     - `total` (number)
     - `totalPages` (number)
 
-4.16) GET /api/media/videos/discovery/subscribed?limit=20
+### 4.16 GET `/api/media/videos/discovery/subscribed?limit=20`
 - Muc dich: lay video public moi tu cac channel ma user dang co membership active.
 - Header:
   - `x-user-id`: He thong tu set
@@ -859,7 +879,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-4.17) GET /api/media/videos/continue-watching?limit=20
+### 4.17 GET `/api/media/videos/continue-watching?limit=20`
 - Muc dich: lay danh sach video user dang xem do de hien thi muc xem tiep.
 - Header:
   - `x-user-id`: He thong tu set
@@ -883,11 +903,9 @@ Ghi chu chung
     - `lastWatchedAt` (string ISO)
     - `viewCount` (number)
 
-==================================================
-5. SEARCH APIs
-==================================================
+## 5. SEARCH APIs
 
-5.1) GET /api/media/search?q=...&category=...&limit=20
+### 5.1 GET `/api/media/search?q=...&category=...&limit=20`
 - Muc dich: tim kiem tong hop public videos va channels.
 - Public API: khong can `x-internal-secret`.
 - Query:
@@ -923,11 +941,9 @@ Ghi chu chung
       - `category` (string | null)
       - `limit` (number)
 
-==================================================
-6. STREAMING APIs
-==================================================
+## 6. STREAMING APIs
 
-6.1) GET /api/media/stream/:videoId/master.m3u8?token=...
+### 6.1 GET `/api/media/stream/:videoId/master.m3u8?token=...`
 - Muc dich: lay file playlist HLS master.
 - Public theo gateway guard:
   - Khong co `x-internal-secret`
@@ -940,7 +956,7 @@ Ghi chu chung
   - Content-Type: `application/vnd.apple.mpegurl`
   - Body: noi dung text cua file m3u8
 
-6.2) GET /api/media/stream/:videoId/segments/:segmentName?token=...
+### 6.2 GET `/api/media/stream/:videoId/segments/:segmentName?token=...`
 - Muc dich: lay segment video HLS.
 - Public theo gateway guard:
   - Khong co `x-internal-secret`
@@ -954,11 +970,9 @@ Ghi chu chung
   - `Content-Type`: phu thuoc vao segment thuc te (`segment.contentType`)
   - Body: binary stream hoac text segment
 
-==================================================
-7. CATEGORY APIs
-==================================================
+## 7. CATEGORY APIs
 
-7.1) GET /api/media/categories?q=...
+### 7.1 GET `/api/media/categories?q=...`
 - Muc dich: lay danh sach category public dang ACTIVE, co ho tro search.
 - Public API: khong can `x-internal-secret`.
 - Query:
@@ -980,7 +994,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-7.2) GET /api/media/admin/categories?q=...
+### 7.2 GET `/api/media/admin/categories?q=...`
 - Muc dich: admin lay tat ca category hoac search category, gom ACTIVE, INACTIVE, DELETED.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1006,7 +1020,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-7.2A) GET /api/media/categories/admin/all?q=...
+### 7.2A GET `/api/media/categories/admin/all?q=...`
 - Muc dich: admin lay tat ca category hoac search category qua route categories controller.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1018,7 +1032,7 @@ Ghi chu chung
   - Route nay dang ton tai song song voi `GET /api/media/admin/categories`.
   - Response shape va rule admin giong `GET /api/media/admin/categories`.
 
-7.3) POST /api/media/admin/categories
+### 7.3 POST `/api/media/admin/categories`
 - Muc dich: admin tao category moi.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1041,7 +1055,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-7.3A) POST /api/media/categories
+### 7.3A POST `/api/media/categories`
 - Muc dich: admin tao category moi qua route categories controller.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1050,7 +1064,7 @@ Ghi chu chung
 - Body/response/rule:
   - Giong `POST /api/media/admin/categories`.
 
-7.4) PATCH /api/media/admin/categories/:id
+### 7.4 PATCH `/api/media/admin/categories/:id`
 - Muc dich: admin cap nhat category.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1076,7 +1090,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-7.4A) PATCH /api/media/categories/:id
+### 7.4A PATCH `/api/media/categories/:id`
 - Muc dich: admin cap nhat category qua route categories controller.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1085,7 +1099,7 @@ Ghi chu chung
 - Path/body/response/rule:
   - Giong `PATCH /api/media/admin/categories/:id`.
 
-7.5) DELETE /api/media/admin/categories/:id
+### 7.5 DELETE `/api/media/admin/categories/:id`
 - Muc dich: admin xoa mem category bang cach chuyen `status` ve `inactive`.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1096,7 +1110,7 @@ Ghi chu chung
 - Response HTTP 200:
   - Envelope `data`: category sau khi inactive.
 
-7.5A) DELETE /api/media/categories/:id
+### 7.5A DELETE `/api/media/categories/:id`
 - Muc dich: admin xoa mem category qua route categories controller.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1105,11 +1119,9 @@ Ghi chu chung
 - Path/response/rule:
   - Giong `DELETE /api/media/admin/categories/:id`.
 
-==================================================
-8. TAG APIs
-==================================================
+## 8. TAG APIs
 
-8.1) GET /api/media/tags?q=...
+### 8.1 GET `/api/media/tags?q=...`
 - Muc dich: lay danh sach tag public dang ACTIVE, co ho tro search.
 - Public API: khong can `x-internal-secret`.
 - Query:
@@ -1123,7 +1135,7 @@ Ghi chu chung
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-8.2) GET /api/media/admin/tags?q=...
+### 8.2 GET `/api/media/admin/tags?q=...`
 - Muc dich: admin lay tat ca tag hoac search tag, gom `active`, `inactive`, `pending`, `deleted`.
 - Header:
   - `x-user-id`: He thong tu set
@@ -1132,14 +1144,14 @@ Ghi chu chung
 - Response HTTP 200:
   - Envelope `data`: array tag.
 
-8.3) POST /api/media/admin/tags
+### 8.3 POST `/api/media/admin/tags`
 - Muc dich: admin tao tag moi.
 - Body:
   - `name` (string, bat buoc, max 100)
 - Response HTTP 201:
   - Envelope `data`: tag vua tao.
 
-8.4) PATCH /api/media/admin/tags/:id
+### 8.4 PATCH `/api/media/admin/tags/:id`
 - Muc dich: admin cap nhat tag.
 - Body:
   - `name` (string, optional, max 100)
@@ -1147,16 +1159,75 @@ Ghi chu chung
 - Response HTTP 200:
   - Envelope `data`: tag sau khi cap nhat.
 
-8.5) DELETE /api/media/admin/tags/:id
+### 8.5 DELETE `/api/media/admin/tags/:id`
 - Muc dich: admin xoa mem tag bang cach chuyen `status` ve `inactive`.
 - Response HTTP 200:
   - Envelope `data`: tag sau khi inactive.
 
-==================================================
-9. ERROR RESPONSE CHUNG
-==================================================
+## 9. ADMIN DASHBOARD APIs
+
+### 9.1 GET `/api/media/admin/channels/summary`
+- Muc dich: lay summary creator/channel cho admin dashboard.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-user-role`: Bat buoc la `admin`
+  - `x-internal-secret`: He thong tu set
+- Response HTTP 200:
+  - Envelope `data`:
+    - `totalChannels` (number): tong channel trong he thong
+    - `activeCreators30d` (number): so channel co video tao trong 30 ngay gan nhat
+    - `eligibleForMembership` (number): so channel du dieu kien membership
+    - `membershipClosedByAdmin` (number): so channel bi admin dong membership
+    - `uploadingNow` (number): so video dang draft/pending_moderation/processing
+
+### 9.2 GET `/api/media/admin/reports/summary`
+- Muc dich: lay summary moderation queue cho admin dashboard.
+- Ghi chu:
+  - V1 chua co bang user-submitted reports rieng.
+  - `reports` o day la synthetic reports tu video auto-moderation queue.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-user-role`: Bat buoc la `admin`
+  - `x-internal-secret`: He thong tu set
+- Response HTTP 200:
+  - Envelope `data`:
+    - `pendingReports` (number): bang `pendingManualReviewVideos` trong v1
+    - `pendingManualReviewVideos` (number): video status `pending_manual_review`
+    - `autoFlaggedVideos` (number): video co `moderationDetails` va status pending/rejected
+    - `rejectedLast30d` (number): video rejected trong 30 ngay gan nhat
+    - `averageResolutionHours` (number | null): hien tai `null`
+
+### 9.3 GET `/api/media/admin/reports?status=pending&page=1&limit=5`
+- Muc dich: lay danh sach moderation report/queue item cho dashboard.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-user-role`: Bat buoc la `admin`
+  - `x-internal-secret`: He thong tu set
+- Query:
+  - `status` (`pending` | `rejected`, optional, default `pending`)
+  - `page` (number, optional, default 1, min 1)
+  - `limit` (number, optional, default 20, min 1, max 100)
+- Response HTTP 200:
+  - Envelope `data`:
+    - `items` (array), moi object gom:
+      - `id` (string): synthetic report id, hien map bang video id
+      - `targetVideoId` (string)
+      - `title` (string)
+      - `reporterLabel` (string): hien tai `"Auto moderation"`
+      - `reason` (string)
+      - `confidencePercent` (number | null)
+      - `createdAt` (string ISO): thoi diem video vao status moderation hien tai
+      - `priority` (`low` | `medium` | `high` | `critical`)
+    - `pagination`:
+      - `page` (number)
+      - `limit` (number)
+      - `total` (number)
+      - `totalPages` (number)
+
+## 10. ERROR RESPONSE CHUNG
 
 Khi loi, service dung format:
+```json
 {
   "success": false,
   "code": 400,
@@ -1167,6 +1238,7 @@ Khi loi, service dung format:
   "timestamp": "2026-04-15T10:19:05.123Z",
   "path": "/api/media/..."
 }
+```
 
 Mapping pho bien:
 - `NOT_FOUND` -> 404

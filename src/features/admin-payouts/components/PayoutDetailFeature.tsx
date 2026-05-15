@@ -40,6 +40,10 @@ export function PayoutDetailFeature() {
         </span>
       </header>
 
+      <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
+        Finance service contract co action approve/reject/complete, nhung chua co admin detail endpoint rieng; detail hien giu mock theo payout id.
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="space-y-6 lg:col-span-8">
           <article className="rounded-lg border border-border/30 bg-card p-6">

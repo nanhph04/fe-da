@@ -25,6 +25,10 @@ export function UserManagementFeature() {
         </button>
       </header>
 
+      <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
+        Identity service contract hien chi co API summary `GET /api/user/admin/users/summary`; user directory dang giu mock cho den khi co API list/manage users.
+      </div>
+
       <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
         <div className="flex items-center justify-between border-b border-border/30 bg-background px-6 py-4">
           <h2 className="font-headline text-lg font-bold text-foreground">User Directory</h2>

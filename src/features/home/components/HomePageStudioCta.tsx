@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/features/auth/context/AuthContext";
 
 function canAccessStudio(user: ReturnType<typeof useAuth>["user"]) {
-  return !!user && (user.isCreator || user.role === "creator" || user.role === "admin");
+  return !!user && (user.isCreator || user.role === "creator");
 }
 
 export function HomePageStudioCta() {

@@ -27,10 +27,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const isProfileIncomplete = !!user && !user.displayName;
+  const isProfileIncomplete = !!user && user.role !== "admin" && !user.displayName;
 
   const getPostAuthRedirect = () => {
     if (!user) return "/login";
+    if (user.role === "admin") return "/admin";
     if (!user.displayName) return "/onboarding/profile";
     return "/library";
   };

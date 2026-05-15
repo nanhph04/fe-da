@@ -1,4 +1,4 @@
-# Finance Service API List
+# Finance Service API
 
 Tai lieu nay viet theo goc nhin FE/BFF: goi API nao, gui gi, nhan gi, va backend dang xu ly ra sao theo code hien tai.
 
@@ -315,23 +315,40 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Headers:
   - `x-user-id` bat buoc
 - Output `data`: mang transaction
+- Luu y voi transaction nap tien:
+  - `type = deposit`
+  - `assetType = coin`
+  - `amount` la so coin duoc cong vao vi
+  - so tien user da thanh toan nam trong `metadata.moneyAmount`
 
 ```json
 [
   {
     "id": "txn-1",
     "type": "deposit",
-    "assetType": "money",
-    "amount": 10000,
+    "assetType": "coin",
+    "amount": 550,
     "status": "completed",
     "fromWalletId": null,
     "toWalletId": "wallet-1",
     "initiatedByUserId": "user-1",
     "referenceId": "deposit-1",
-    "description": "Completed deposit TOPUP_10K",
+    "description": "Completed PayOS deposit TOPUP_50K",
     "failureReason": null,
     "metadata": {
-      "packageName": "TOPUP_10K"
+      "packageId": "package-1",
+      "packageCode": "TOPUP_50K",
+      "packageName": "Goi 50.000 VND",
+      "moneyAmount": 50000,
+      "baseCoinAmount": 500,
+      "bonusCoinAmount": 50,
+      "totalCoinAmount": 550,
+      "gateway": "payos",
+      "gatewayTransactionId": "PAYOS-REF-1",
+      "paymentCode": "123456789",
+      "payosOrderCode": 123456789,
+      "payosReference": "PAYOS-REF-1",
+      "paymentLinkId": "link-123456789"
     },
     "completedAt": "2026-05-06T10:00:00.000Z",
     "failedAt": null,
@@ -475,7 +492,8 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - verify HMAC signature
   - kiem tra gateway, so tien, transaction id co match deposit khong
   - cong coin vao vi
-  - tao transaction `deposit`
+  - tao transaction `deposit` dang ledger coin: `assetType=coin`, `amount=totalCoinAmount`
+  - luu so tien da thanh toan trong transaction metadata: `moneyAmount`
   - update deposit sang `completed`
 
 ### 6.4 POST `/api/deposits/webhooks/payos`
@@ -524,6 +542,8 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
     - neu co `dataCode` thi `dataCode === "00"`
   - tim deposit qua `paymentCode`/`orderCode`
   - check gateway va amount
+  - complete deposit se cong `totalCoinAmount` vao vi va tao transaction `deposit` voi `assetType=coin`
+  - transaction metadata luu `moneyAmount`, `baseCoinAmount`, `bonusCoinAmount`, `totalCoinAmount`
   - neu webhook duplicate cho deposit da `completed` thi tra thanh cong va khong cong coin lan 2
 
 ### 6.5 GET `/api/deposits/admin/packages`
@@ -777,6 +797,89 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - finalize coin deduction trong vi
   - update transaction completed
 
+### 7.8 GET `/api/withdrawals/admin/summary`
+
+- Muc dich: admin lay so lieu tong quan de render dashboard xu ly rut tien.
+- Headers:
+  - `x-user-id` bat buoc
+  - `x-user-role=admin` bat buoc
+- Input:
+  - khong co body/query/path param
+- Output `data`:
+
+```json
+{
+  "pendingCount": 3,
+  "pendingCoinAmount": 1200,
+  "pendingMoneyAmount": 120000,
+  "approvedCount": 1,
+  "processingCount": 2,
+  "completed30dMoneyAmount": 500000
+}
+```
+
+- Backend xu ly:
+  - check role `admin`
+  - dem/tong hop withdrawal theo cac status can hien thi
+  - `completed30dMoneyAmount`: tong tien withdrawal `completed` trong 30 ngay gan nhat
+
+### 7.9 GET `/api/withdrawals/admin`
+
+- Muc dich: admin lay danh sach lenh rut co phan trang va loc theo status.
+- Headers:
+  - `x-user-id` bat buoc
+  - `x-user-role=admin` bat buoc
+- Query:
+  - `status` optional, mot trong: `pending`, `approved`, `processing`, `completed`, `rejected`, `cancelled`
+  - `page` optional, mac dinh `1`, neu khong phai so nguyen duong thi backend fallback ve `1`
+  - `limit` optional, mac dinh `20`, toi da `100`, neu khong phai so nguyen duong thi backend fallback ve `20`
+- Output `data`:
+
+```json
+{
+  "items": [
+    {
+      "id": "withdrawal-id",
+      "walletId": "wallet-id",
+      "userId": "user-id",
+      "coinAmount": 100,
+      "moneyAmount": 10000,
+      "exchangeRate": 100,
+      "bankInfo": {
+        "bankCode": "VCB",
+        "bankName": "Vietcombank",
+        "accountNumber": "0123456789",
+        "accountHolderName": "Nguyen Van A",
+        "qrCode": "https://example.com/qr.png"
+      },
+      "status": "pending",
+      "adminNote": null,
+      "processedByAdminId": null,
+      "transferReference": null,
+      "description": "Rut tien thang 4",
+      "rejectionReason": null,
+      "requestedAt": "2026-05-06T10:00:00.000Z",
+      "approvedAt": null,
+      "completedAt": null,
+      "rejectedAt": null,
+      "cancelledAt": null
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+- Backend xu ly:
+  - check role `admin`
+  - validate `status` neu co; status khong hop le tra `400 Invalid withdrawal status`
+  - query withdrawal theo status neu co
+  - tra `items` va `pagination`
+
 ## 8. Payment APIs
 
 ### 8.1 POST `/api/payments`
@@ -911,6 +1014,10 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 - `assetType`: `money`, `coin`
 - `type` pho bien: `deposit`, `withdrawal`, `video_purchase`, `member_subscription`, `channel_revenue`, `system_revenue`, `refund`, `system_adjustment`
+- Voi `type=deposit`, transaction la ledger cong coin vao vi:
+  - `assetType=coin`
+  - `amount=totalCoinAmount`
+  - `metadata.moneyAmount` la so tien user da thanh toan
 
 ## 10. Loi FE se hay gap
 
@@ -955,6 +1062,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Man lich su giao dich:
   - goi `GET /api/transactions/me`
   - can drill down thi goi `GET /api/transactions/:transactionId`
+  - voi transaction nap tien, hien thi dang `Nap {metadata.moneyAmount} VND, nhan +{amount} coin`
 
 - Man nap tien:
   - goi `GET /api/deposits/packages`
@@ -977,3 +1085,4 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Cac API admin cua `withdrawals` cung dang check role `admin` trong use case.
 - `GET /api/transactions/reference/:referenceId` hien khong check ownership, nen khong nen expose truc tiep cho FE public neu chua co tang kiem soat phia gateway/BFF.
 - Webhook PayOS co the tra `status: "ignored"` thay vi loi khi payload khong phai success event.
+
