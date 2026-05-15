@@ -45,6 +45,8 @@ export interface WithdrawalHistoryFilters {
   status?: WithdrawalStatus | "ALL";
   page?: number;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface WithdrawalHistoryResponse {
@@ -58,11 +60,24 @@ export interface WithdrawalHistoryResponse {
 }
 
 export interface WithdrawalSummary {
-  totalRequested: number;
-  totalApproved: number;
-  totalCompleted: number;
-  totalRejected: number;
   pendingCount: number;
-  avgProcessingTime: number;
-  lastWithdrawalDate?: string;
+  pendingCoinAmount: number;
+  pendingMoneyAmount: number;
+  approvedCount: number;
+  processingCount: number;
+  completedCount: number;
+  completedCoinAmount: number;
+  completedMoneyAmount: number;
+  rejectedCount: number;
+  cancelledCount: number;
+}
+
+export interface WithdrawalAmountLimits {
+  minCoinAmount: number;
+  maxCoinAmount: number;
+  availableBalance: number;
+  exchangeRate: number;
+  minMoneyAmount: number;
+  maxMoneyAmount: number;
+  currency: "VND" | string;
 }

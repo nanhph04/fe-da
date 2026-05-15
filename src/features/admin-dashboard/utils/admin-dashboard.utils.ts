@@ -173,16 +173,6 @@ export function buildAdminPriorityActions(data: AdminDashboardData): AdminPriori
           unavailable: true,
         },
     {
-      id: "verifications",
-      label: "Verifications",
-      description: "Identity service v1 has no creator verification workflow/table yet.",
-      href: "/admin/verifications",
-      icon: "verified",
-      tone: "muted",
-      countLabel: "API needed",
-      unavailable: true,
-    },
-    {
       id: "taxonomy",
       label: "Taxonomy Health",
       description: "Real media-service data for tags and categories.",

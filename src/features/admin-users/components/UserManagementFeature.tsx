@@ -26,7 +26,7 @@ export function UserManagementFeature() {
       </header>
 
       <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
-        Identity service contract hien chi co API summary `GET /api/user/admin/users/summary`; user directory dang giu mock cho den khi co API list/manage users.
+        Identity service đã có API summary cho admin dashboard; user directory vẫn giữ dữ liệu mẫu cho đến khi có contract list/manage users thật.
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border/30 bg-card">

@@ -67,6 +67,10 @@ export function ContentModerationDetailFeature() {
                 <textarea className="min-h-[120px] w-full rounded-sm border border-primary/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary" placeholder="Record reason for intervention..." />
               </div>
               <div className="space-y-3 pt-2">
+                <div className="rounded-sm border border-secondary/30 bg-secondary/10 p-3 font-body text-xs leading-5 text-secondary">
+                  Admin moderation actions are temporarily disabled until media-service adds documented approve, takedown, strike, and dismiss endpoints.
+                </div>
+                {/* TODO: Re-enable after backend adds admin moderation action APIs.
                 <button className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-3 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
                   <span className="material-symbols-outlined text-[16px]">delete_forever</span>
                   Takedown Media
@@ -78,6 +82,7 @@ export function ContentModerationDetailFeature() {
                 <button className="w-full rounded-sm border border-border/40 bg-transparent py-3 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-border hover:text-foreground">
                   Dismiss Report
                 </button>
+                */}
               </div>
             </div>
           </div>

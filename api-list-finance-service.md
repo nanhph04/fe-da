@@ -198,8 +198,10 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `GET /api/studio/earnings/summary`
 - Headers:
   - `x-user-id` bat buoc
-- Query hien tai:
-  - FE co the gui `period=monthly`, backend hien chua dung query nay va tra summary theo du lieu hien co
+- Query:
+  - `startDate` optional, ISO date/date-time
+  - `endDate` optional, ISO date/date-time
+  - `period` neu FE gui thi backend hien bo qua; dung `startDate/endDate` khi can range cu the
 - Output `data`:
 
 ```json
@@ -272,7 +274,9 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `x-user-id` bat buoc
 - Query:
   - `limit` optional, mac dinh `3`, min `1`, max `20`
-  - `period` hien FE co gui nhung backend chua dung de loc theo thoi gian
+  - `startDate` optional, ISO date/date-time
+  - `endDate` optional, ISO date/date-time
+  - `period` hien FE co gui nhung backend chua dung; dung `startDate/endDate` khi can range cu the
 - Output `data`:
 
 ```json
@@ -304,8 +308,43 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 - Backend xu ly:
   - group `payment_revenue_settlements` theo `serviceId` voi `serviceType = video`
+  - loc theo `createdAt` neu co `startDate/endDate`
   - sort theo tong `amount` giam dan
   - finance-service chua co title/category/view/watchtime tu media-service, nen metadata media tam thoi la placeholder/`0`
+
+### 4.5.4 GET `/api/studio/earnings/history`
+
+- Muc dich: lay lich su earnings cua creator tu transaction `channel_revenue`.
+- Headers:
+  - `x-user-id` bat buoc
+- Query:
+  - `status` optional, loc theo transaction status
+  - `page` optional, mac dinh `1`
+  - `limit` optional, mac dinh `20`, toi da `100`
+  - `startDate` optional, ISO date/date-time
+  - `endDate` optional, ISO date/date-time
+- Output `data`:
+
+```json
+{
+  "items": [
+    {
+      "id": "transaction-id",
+      "amount": 80,
+      "status": "pending",
+      "referenceId": "video-id",
+      "description": "Creator revenue",
+      "createdAt": "2026-05-15T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
 
 ## 5. Transaction APIs
 
@@ -703,9 +742,93 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Muc dich: user xem danh sach lenh rut cua minh
 - Headers:
   - `x-user-id` bat buoc
-- Output: mang withdrawal
+- Query:
+  - `status` optional, mot trong: `pending`, `approved`, `processing`, `completed`, `rejected`, `cancelled`
+  - `page` optional, mac dinh `1`
+  - `limit` optional, mac dinh `20`, toi da `100`
+  - `startDate` optional, ISO date/date-time, loc theo `requestedAt >= startDate`
+  - `endDate` optional, ISO date/date-time, loc theo `requestedAt <= endDate`
+- Output: object co `items` va `pagination`
 - Backend xu ly:
   - lay theo `userId`
+  - loc theo query neu co
+  - fallback `page/limit` neu query khong hop le
+
+```json
+{
+  "items": [
+    {
+      "id": "withdrawal-id",
+      "walletId": "wallet-id",
+      "userId": "user-id",
+      "coinAmount": 100,
+      "moneyAmount": 10000,
+      "exchangeRate": 100,
+      "bankInfo": {
+        "bankCode": "VCB",
+        "bankName": "Vietcombank",
+        "accountNumber": "0123456789",
+        "accountHolderName": "Nguyen Van A"
+      },
+      "status": "pending",
+      "requestedAt": "2026-05-06T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+### 7.2.1 GET `/api/withdrawals/summary`
+
+- Muc dich: user xem tong quan withdrawal cua minh.
+- Headers:
+  - `x-user-id` bat buoc
+- Output `data`:
+
+```json
+{
+  "pendingCount": 1,
+  "pendingCoinAmount": 100,
+  "pendingMoneyAmount": 10000,
+  "approvedCount": 0,
+  "processingCount": 0,
+  "completedCount": 2,
+  "completedCoinAmount": 300,
+  "completedMoneyAmount": 30000,
+  "rejectedCount": 0,
+  "cancelledCount": 1
+}
+```
+
+### 7.2.2 GET `/api/withdrawals/amount-limits`
+
+- Muc dich: FE lay rule hien tai de render form rut tien.
+- Headers:
+  - `x-user-id` bat buoc
+- Output `data`:
+
+```json
+{
+  "minCoinAmount": 1,
+  "maxCoinAmount": 1000,
+  "availableBalance": 1000,
+  "exchangeRate": 100,
+  "minMoneyAmount": 100,
+  "maxMoneyAmount": 100000,
+  "currency": "VND"
+}
+```
+
+- Backend xu ly:
+  - lay wallet user hien tai
+  - `maxCoinAmount = availableBalance`
+  - `exchangeRate` lay tu config `WITHDRAWAL_EXCHANGE_RATE`
+  - khong nhan `moneyAmount`, `exchangeRate`, hay `methodId` tu FE
 
 ### 7.3 GET `/api/withdrawals/:withdrawalId`
 
@@ -831,8 +954,11 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `x-user-role=admin` bat buoc
 - Query:
   - `status` optional, mot trong: `pending`, `approved`, `processing`, `completed`, `rejected`, `cancelled`
+  - `userId` optional, loc withdrawal theo user
   - `page` optional, mac dinh `1`, neu khong phai so nguyen duong thi backend fallback ve `1`
   - `limit` optional, mac dinh `20`, toi da `100`, neu khong phai so nguyen duong thi backend fallback ve `20`
+  - `startDate` optional, ISO date/date-time, loc theo `requestedAt >= startDate`
+  - `endDate` optional, ISO date/date-time, loc theo `requestedAt <= endDate`
 - Output `data`:
 
 ```json
@@ -877,8 +1003,22 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Backend xu ly:
   - check role `admin`
   - validate `status` neu co; status khong hop le tra `400 Invalid withdrawal status`
-  - query withdrawal theo status neu co
+  - query withdrawal theo status/user/date range neu co
   - tra `items` va `pagination`
+
+### 7.10 GET `/api/withdrawals/admin/:withdrawalId`
+
+- Muc dich: admin xem chi tiet bat ky lenh rut.
+- Headers:
+  - `x-user-id` bat buoc
+  - `x-user-role=admin` bat buoc
+- Input:
+  - path param: `withdrawalId`
+- Output: 1 withdrawal
+- Backend xu ly:
+  - check role `admin`
+  - tim withdrawal theo id
+  - khong check ownership user vi day la route admin
 
 ## 8. Payment APIs
 

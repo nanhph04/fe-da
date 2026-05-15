@@ -1,283 +1,702 @@
 "use client";
 
-interface FinanceStat {
-  label: string;
-  value: string;
-  change?: string;
-  icon: string;
-}
+import type { FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-interface Transaction {
-  id: string;
-  type: string;
-  user: string;
-  amount: string;
-  status: "completed" | "pending" | "failed";
-  date: string;
-}
+import { getErrorMessage } from "@/shared/api/client";
+import type { DepositPackage } from "@/features/wallet/types/wallet.types";
 
-interface PayoutRequest {
-  id: string;
-  creator: string;
-  amount: string;
-  description: string;
-}
+import {
+  AdminDepositService,
+  type CreatePackagePayload,
+  type UpdatePackagePayload,
+} from "../services/adminDepositService";
 
-const stats: FinanceStat[] = [
-  { label: "Total Platform Revenue", value: "$1.2M", change: "+8%", icon: "account_balance_wallet" },
-  { label: "Total Payouts Processed", value: "$850K", icon: "paid" },
-  { label: "Active Subscriptions", value: "45,200", icon: "subscriptions" },
-  { label: "Pending Payout Requests", value: "$12,400", icon: "pending_actions" },
+const currencyFormatter = new Intl.NumberFormat("vi-VN", {
+  maximumFractionDigits: 0,
+  style: "currency",
+  currency: "VND",
+});
+
+const numberFormatter = new Intl.NumberFormat("en-US");
+
+type PackageFormState = CreatePackagePayload;
+
+type FormErrors = Partial<Record<keyof PackageFormState, string>>;
+
+const emptyForm: PackageFormState = {
+  code: "",
+  name: "",
+  moneyAmount: 0,
+  baseCoinAmount: 0,
+  bonusCoinAmount: 0,
+  sortOrder: 0,
+  isActive: true,
+  description: "",
+};
+
+const packagePresets: PackageFormState[] = [
+  {
+    code: "TOPUP_50K",
+    name: "Goi 50.000 VND",
+    moneyAmount: 50000,
+    baseCoinAmount: 500,
+    bonusCoinAmount: 50,
+    sortOrder: 1,
+    isActive: true,
+    description: "Goi nap pho bien cho nguoi xem moi.",
+  },
+  {
+    code: "TOPUP_100K",
+    name: "Goi 100.000 VND",
+    moneyAmount: 100000,
+    baseCoinAmount: 1000,
+    bonusCoinAmount: 120,
+    sortOrder: 2,
+    isActive: true,
+    description: "Tang them Aura Coin cho nguoi dung nap thuong xuyen.",
+  },
+  {
+    code: "TOPUP_200K",
+    name: "Goi 200.000 VND",
+    moneyAmount: 200000,
+    baseCoinAmount: 2000,
+    bonusCoinAmount: 300,
+    sortOrder: 3,
+    isActive: true,
+    description: "Goi nap gia tri cao voi bonus tot hon.",
+  },
+  {
+    code: "TOPUP_500K",
+    name: "Goi 500.000 VND",
+    moneyAmount: 500000,
+    baseCoinAmount: 5000,
+    bonusCoinAmount: 900,
+    sortOrder: 4,
+    isActive: true,
+    description: "Goi nap lon cho nguoi dung ung ho creator thuong xuyen.",
+  },
 ];
 
-const transactions: Transaction[] = [
-  { id: "#TRX-882190", type: "Subscription", user: "Alex Rivera", amount: "$24.99", status: "completed", date: "Oct 28, 2023" },
-  { id: "#TRX-882191", type: "Video Purchase", user: "Sarah Jenkins", amount: "$149.00", status: "pending", date: "Oct 28, 2023" },
-  { id: "#TRX-882192", type: "Payout", user: "Marco Polo Studio", amount: "-$2,450.00", status: "completed", date: "Oct 27, 2023" },
-  { id: "#TRX-882193", type: "Payout", user: "Creative Pixels", amount: "-$4,100.00", status: "failed", date: "Oct 27, 2023" },
-];
+function formatDate(value: string | null | undefined) {
+  if (!value) {
+    return "N/A";
+  }
 
-const pendingPayouts: PayoutRequest[] = [
-  { id: "1", creator: "Mega Creator Inc.", amount: "$5,400.00", description: "High-value payout request flagged for manual verification." },
-  { id: "2", creator: "Urban Motion Ltd.", amount: "$1,850.00", description: "Standard creator payout cycle (Bi-weekly)." },
-  { id: "3", creator: "The Tech Lab", amount: "$2,100.00", description: "Recurring creator partnership payout." },
-];
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value));
+}
 
-const revenueData = [40, 55, 45, 70, 85, 100, 80, 65, 50, 75, 90, 60];
-const months = ["JAN", "MAR", "MAY", "JUL", "SEP", "DEC"];
+function createFormFromPackage(pkg: DepositPackage): PackageFormState {
+  return {
+    code: pkg.code,
+    name: pkg.name,
+    moneyAmount: pkg.moneyAmount,
+    baseCoinAmount: pkg.baseCoinAmount,
+    bonusCoinAmount: pkg.bonusCoinAmount,
+    sortOrder: pkg.sortOrder,
+    isActive: pkg.isActive ?? true,
+    description: pkg.description,
+  };
+}
+
+function validatePackageForm(form: PackageFormState) {
+  const errors: FormErrors = {};
+
+  if (!form.code.trim()) {
+    errors.code = "Package code is required.";
+  }
+
+  if (!form.name.trim()) {
+    errors.name = "Package name is required.";
+  }
+
+  if (form.moneyAmount <= 0) {
+    errors.moneyAmount = "Money amount must be greater than 0.";
+  }
+
+  if (form.baseCoinAmount <= 0) {
+    errors.baseCoinAmount = "Base coin amount must be greater than 0.";
+  }
+
+  if (form.bonusCoinAmount < 0) {
+    errors.bonusCoinAmount = "Bonus coin amount cannot be negative.";
+  }
+
+  if (form.sortOrder < 0) {
+    errors.sortOrder = "Sort order cannot be negative.";
+  }
+
+  return errors;
+}
+
+function buildPackagePayload(form: PackageFormState): CreatePackagePayload {
+  return {
+    code: form.code.trim().toUpperCase(),
+    name: form.name.trim(),
+    moneyAmount: form.moneyAmount,
+    baseCoinAmount: form.baseCoinAmount,
+    bonusCoinAmount: form.bonusCoinAmount,
+    sortOrder: form.sortOrder,
+    isActive: form.isActive,
+    description: form.description.trim(),
+  };
+}
+
+function buildUpdatePayload(form: PackageFormState): UpdatePackagePayload {
+  return {
+    name: form.name.trim(),
+    moneyAmount: form.moneyAmount,
+    baseCoinAmount: form.baseCoinAmount,
+    bonusCoinAmount: form.bonusCoinAmount,
+    sortOrder: form.sortOrder,
+    isActive: form.isActive,
+    description: form.description.trim(),
+  };
+}
+
+function getStatusClass(isActive: boolean | undefined) {
+  return isActive
+    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+    : "border-border/40 bg-muted text-muted-foreground";
+}
+
+function getSummary(packages: DepositPackage[]) {
+  const activePackages = packages.filter(pkg => pkg.isActive ?? true);
+  const totalBonus = activePackages.reduce((sum, pkg) => sum + pkg.bonusCoinAmount, 0);
+  const highestPackage = packages.reduce<DepositPackage | null>((highest, pkg) => {
+    if (!highest || pkg.moneyAmount > highest.moneyAmount) {
+      return pkg;
+    }
+
+    return highest;
+  }, null);
+
+  return [
+    {
+      label: "Active Packages",
+      value: numberFormatter.format(activePackages.length),
+      detail: `${numberFormatter.format(packages.length)} total packages`,
+      icon: "inventory_2",
+      accent: "primary",
+    },
+    {
+      label: "Bonus Pool",
+      value: `${numberFormatter.format(totalBonus)} AC`,
+      detail: "Bonus coins across active packages",
+      icon: "paid",
+      accent: "secondary",
+    },
+    {
+      label: "Highest Top-up",
+      value: highestPackage ? currencyFormatter.format(highestPackage.moneyAmount) : "-",
+      detail: highestPackage ? highestPackage.code : "No package configured",
+      icon: "trending_up",
+      accent: "success",
+    },
+  ] as const;
+}
+
+function getSummaryAccent(accent: ReturnType<typeof getSummary>[number]["accent"]) {
+  if (accent === "secondary") {
+    return "border-l-secondary text-secondary";
+  }
+
+  if (accent === "success") {
+    return "border-l-emerald-500 text-emerald-400";
+  }
+
+  return "border-l-primary text-primary";
+}
 
 export function AdminFinanceFeature() {
+  const [packages, setPackages] = useState<DepositPackage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<DepositPackage | null>(null);
+  const [form, setForm] = useState<PackageFormState>(emptyForm);
+
+  const packageSummary = useMemo(() => getSummary(packages), [packages]);
+
+  const loadPackages = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const data = await AdminDepositService.getAdminPackages();
+      setPackages([...data].sort((a, b) => a.sortOrder - b.sortOrder));
+    } catch (err) {
+      setError(getErrorMessage(err, "Khong the tai danh sach goi nap."));
+      setPackages([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const data = await AdminDepositService.getAdminPackages();
+        if (!cancelled) {
+          setPackages([...data].sort((a, b) => a.sortOrder - b.sortOrder));
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(getErrorMessage(err, "Khong the tai danh sach goi nap."));
+          setPackages([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const openCreateForm = () => {
+    setEditingPackage(null);
+    setForm(emptyForm);
+    setFormErrors({});
+    setFormError(null);
+    setSuccessMessage(null);
+    setIsFormOpen(true);
+  };
+
+  const applyPreset = (preset: PackageFormState) => {
+    setEditingPackage(null);
+    setForm(preset);
+    setFormErrors({});
+    setFormError(null);
+    setSuccessMessage(null);
+    setIsFormOpen(true);
+  };
+
+  const openEditForm = (pkg: DepositPackage) => {
+    setEditingPackage(pkg);
+    setForm(createFormFromPackage(pkg));
+    setFormErrors({});
+    setFormError(null);
+    setSuccessMessage(null);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    if (isSaving) {
+      return;
+    }
+
+    setIsFormOpen(false);
+    setEditingPackage(null);
+    setForm(emptyForm);
+    setFormErrors({});
+    setFormError(null);
+  };
+
+  const updateFormValue = <K extends keyof PackageFormState>(key: K, value: PackageFormState[K]) => {
+    setForm(current => ({ ...current, [key]: value }));
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextErrors = validatePackageForm(form);
+    setFormErrors(nextErrors);
+    setFormError(null);
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      if (editingPackage) {
+        await AdminDepositService.updatePackage(editingPackage.id, buildUpdatePayload(form));
+        setSuccessMessage("Da cap nhat goi nap thanh cong.");
+      } else {
+        await AdminDepositService.createPackage(buildPackagePayload(form));
+        setSuccessMessage("Da tao goi nap thanh cong.");
+      }
+
+      closeForm();
+      await loadPackages();
+    } catch (err) {
+      setFormError(getErrorMessage(err, "Khong the luu goi nap."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const togglePackageStatus = async (pkg: DepositPackage) => {
+    try {
+      setError(null);
+      await AdminDepositService.updatePackage(pkg.id, { isActive: !(pkg.isActive ?? true) });
+      await loadPackages();
+    } catch (err) {
+      setError(getErrorMessage(err, "Khong the cap nhat trang thai goi nap."));
+    }
+  };
+
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <section className="space-y-8 animate-in fade-in duration-500">
+      <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-headline font-extrabold text-white tracking-tight">Finance Dashboard</h1>
-          <p className="text-zinc-500 text-sm mt-1">Real-time platform revenue and payout oversight.</p>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-secondary">
+            Finance Control
+          </p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">
+            Deposit Package Management
+          </h1>
+          <p className="mt-2 max-w-2xl font-body text-sm text-muted-foreground">
+            Manage VND to Aura Coin top-up packages shown on the viewer wallet checkout flow.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm text-zinc-400">calendar_today</span>
-            <span className="text-xs font-semibold text-zinc-300">Oct 1 - Oct 31, 2023</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
-        Finance service contract hien co admin deposit packages va withdrawal admin APIs; cac chi so platform revenue/subscriptions/transaction aggregate dang giu mock cho den khi co API tai lieu hoa.
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-xl hover:border-red-500/50 transition-colors group"
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <span className="inline-flex items-center justify-center rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground">
+            Live API
+          </span>
+          <button
+            type="button"
+            onClick={openCreateForm}
+            className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-5 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5 hover:opacity-90"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-red-600/10 text-red-500 flex items-center justify-center">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  {stat.icon}
-                </span>
-              </div>
-              {stat.change && (
-                <span className="text-emerald-500 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-full">
-                  {stat.change}
-                </span>
-              )}
-            </div>
-            <p className="text-zinc-400 text-xs font-medium uppercase tracking-wider">{stat.label}</p>
-            <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-          </div>
+            Tao goi nap
+          </button>
+        </div>
+      </header>
+
+      {error ? (
+        <div className="flex flex-col gap-4 rounded-lg border border-primary/30 bg-primary/10 p-6 font-body text-sm text-primary md:flex-row md:items-center md:justify-between">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void loadPackages()}
+            className="rounded-sm border border-primary/40 px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-primary/20"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
+
+      {successMessage ? (
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 font-body text-sm text-emerald-400">
+          {successMessage}
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {packageSummary.map(item => (
+          <article
+            key={item.label}
+            className={`relative overflow-hidden rounded-lg border border-border/30 border-l-4 bg-card p-6 ${getSummaryAccent(item.accent)}`}
+          >
+            <span className="material-symbols-outlined absolute right-4 top-4 text-6xl opacity-10" aria-hidden="true">
+              {item.icon}
+            </span>
+            <p className="mb-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              {item.label}
+            </p>
+            <h2 className="font-headline text-4xl font-black tabular-nums text-foreground">{item.value}</h2>
+            <p className="mt-1 font-mono text-xs">{item.detail}</p>
+          </article>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <section className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 relative overflow-hidden">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-lg font-bold text-white">Revenue Growth</h3>
-                <p className="text-zinc-500 text-xs">Platform earnings over the last 12 months</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 bg-zinc-800 text-white text-[10px] font-bold rounded uppercase">Daily</button>
-                <button className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold rounded uppercase">Monthly</button>
-              </div>
+      {!editingPackage ? (
+        <section className="rounded-lg border border-secondary/20 bg-secondary/5 p-5">
+          <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="font-headline text-lg font-bold text-foreground">Tao nhanh goi nap</h2>
+              <p className="font-body text-sm text-muted-foreground">
+                Chon preset de tu dien form, sau do kiem tra va bam tao goi nap.
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="inline-flex min-h-10 items-center justify-center rounded-sm border border-secondary/40 px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-secondary transition-colors hover:bg-secondary/10"
+            >
+              Nhap thu cong
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {packagePresets.map(preset => (
+              <button
+                key={preset.code}
+                type="button"
+                onClick={() => applyPreset(preset)}
+                className="rounded-lg border border-border/30 bg-card p-4 text-left transition-transform hover:-translate-y-0.5 hover:border-secondary/40"
+              >
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-secondary">{preset.code}</span>
+                <span className="mt-2 block font-headline text-lg font-black text-foreground">
+                  {currencyFormatter.format(preset.moneyAmount)}
+                </span>
+                <span className="mt-1 block font-body text-xs text-muted-foreground">
+                  {numberFormatter.format(preset.baseCoinAmount + preset.bonusCoinAmount)} AC total
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-            <div className="h-64 flex items-end justify-between gap-2 relative">
-              <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
-                <div className="border-t border-zinc-800 w-full"></div>
-                <div className="border-t border-zinc-800 w-full"></div>
-                <div className="border-t border-zinc-800 w-full"></div>
-                <div className="border-t border-zinc-800 w-full"></div>
-                <div className="border-t border-zinc-800 w-full"></div>
-              </div>
-              {revenueData.map((height, i) => (
-                <div
-                  key={i}
-                  className={`w-full rounded-t-sm relative group transition-colors ${
-                    i === revenueData.length - 1
-                      ? "bg-red-600 border-t-2 border-red-500"
-                      : "bg-red-600/20 hover:bg-red-600/40"
-                  }`}
-                  style={{ height: `${height}%` }}
-                >
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${height}k
-                  </div>
-                </div>
-              ))}
+      {isFormOpen ? (
+        <section className="rounded-lg border border-border/30 bg-card p-6">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-headline text-xl font-bold text-foreground">
+                {editingPackage ? "Chinh sua goi nap" : "Tao goi nap moi"}
+              </h2>
+              <p className="mt-1 font-body text-sm text-muted-foreground">
+                Only send fields accepted by finance-service DTO. Total coins are derived by the backend response.
+              </p>
             </div>
-            <div className="flex justify-between mt-4 px-2">
-              {months.map((month) => (
-                <span key={month} className="text-[10px] text-zinc-500 font-bold">{month}</span>
-              ))}
-            </div>
-          </section>
+            <button
+              type="button"
+              onClick={closeForm}
+              className="rounded-sm border border-border/40 px-3 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              Close
+            </button>
+          </div>
 
-          <section className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800">
-              <h3 className="text-lg font-bold text-white">Recent Transactions</h3>
-              <div className="flex gap-2">
-                <button className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-800 text-zinc-400">
-                  <span className="material-symbols-outlined text-sm">filter_list</span>
-                </button>
-                <button className="p-2 border border-zinc-800 rounded-lg hover:bg-zinc-800 text-zinc-400">
-                  <span className="material-symbols-outlined text-sm">download</span>
-                </button>
-              </div>
+          {formError ? (
+            <div className="mb-5 rounded-lg border border-primary/30 bg-primary/10 p-4 font-body text-sm text-primary">
+              {formError}
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-zinc-950/50 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800">
-                  <tr>
-                    <th className="px-6 py-4">Transaction ID</th>
-                    <th className="px-6 py-4">Type</th>
-                    <th className="px-6 py-4">User/Creator</th>
-                    <th className="px-6 py-4 text-right">Amount</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800">
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-zinc-900 transition-colors">
-                      <td className="px-6 py-4 text-xs font-mono text-zinc-400">{tx.id}</td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-medium text-zinc-200">{tx.type}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-zinc-800 flex-shrink-0"></div>
-                          <span className="text-xs font-semibold text-white">{tx.user}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={`text-xs font-bold ${tx.amount.startsWith("-") ? "text-red-500" : "text-white"}`}>
-                          {tx.amount}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            tx.status === "completed"
-                              ? "bg-emerald-500/10 text-emerald-500"
-                              : tx.status === "pending"
-                              ? "bg-amber-500/10 text-amber-500"
-                              : "bg-red-500/10 text-red-500"
-                          }`}
-                        >
-                          {tx.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-zinc-500">{tx.date}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          ) : null}
+
+          <form className="grid grid-cols-1 gap-5 lg:grid-cols-2" onSubmit={handleSubmit}>
+            <label className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Code</span>
+              <input
+                value={form.code}
+                onChange={event => updateFormValue("code", event.target.value)}
+                disabled={Boolean(editingPackage)}
+                placeholder="TOPUP_500K"
+                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+              />
+              {formErrors.code ? <p className="text-xs text-primary">{formErrors.code}</p> : null}
+            </label>
+
+            <label className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Name</span>
+              <input
+                value={form.name}
+                onChange={event => updateFormValue("name", event.target.value)}
+                placeholder="Goi 500.000 VND"
+                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
+              />
+              {formErrors.name ? <p className="text-xs text-primary">{formErrors.name}</p> : null}
+            </label>
+
+            <label className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Money Amount</span>
+              <input
+                type="number"
+                min={0}
+                value={form.moneyAmount}
+                onChange={event => updateFormValue("moneyAmount", Number(event.target.value))}
+                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+              />
+              {formErrors.moneyAmount ? <p className="text-xs text-primary">{formErrors.moneyAmount}</p> : null}
+            </label>
+
+            <label className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Base Coins</span>
+              <input
+                type="number"
+                min={0}
+                value={form.baseCoinAmount}
+                onChange={event => updateFormValue("baseCoinAmount", Number(event.target.value))}
+                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+              />
+              {formErrors.baseCoinAmount ? <p className="text-xs text-primary">{formErrors.baseCoinAmount}</p> : null}
+            </label>
+
+            <label className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Bonus Coins</span>
+              <input
+                type="number"
+                min={0}
+                value={form.bonusCoinAmount}
+                onChange={event => updateFormValue("bonusCoinAmount", Number(event.target.value))}
+                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+              />
+              {formErrors.bonusCoinAmount ? <p className="text-xs text-primary">{formErrors.bonusCoinAmount}</p> : null}
+            </label>
+
+            <label className="space-y-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Sort Order</span>
+              <input
+                type="number"
+                min={0}
+                value={form.sortOrder}
+                onChange={event => updateFormValue("sortOrder", Number(event.target.value))}
+                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+              />
+              {formErrors.sortOrder ? <p className="text-xs text-primary">{formErrors.sortOrder}</p> : null}
+            </label>
+
+            <label className="space-y-2 lg:col-span-2">
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Description</span>
+              <textarea
+                value={form.description}
+                onChange={event => updateFormValue("description", event.target.value)}
+                rows={3}
+                placeholder="Tang them coin cho nguoi dung nap lon"
+                className="w-full resize-none rounded-sm border border-border/40 bg-background px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
+              />
+            </label>
+
+            <label className="flex min-h-11 items-center gap-3 rounded-sm border border-border/40 bg-background px-4 lg:col-span-2">
+              <input
+                type="checkbox"
+                checked={form.isActive}
+                onChange={event => updateFormValue("isActive", event.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="font-body text-sm text-foreground">Package is active and visible to viewer top-up flow.</span>
+            </label>
+
+            <div className="flex flex-col gap-3 sm:flex-row lg:col-span-2">
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSaving ? "Saving..." : editingPackage ? "Save Changes" : "Create Package"}
+              </button>
+              <button
+                type="button"
+                onClick={closeForm}
+                disabled={isSaving}
+                className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border/40 px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
             </div>
-            <div className="p-4 border-t border-zinc-800 flex items-center justify-between">
-              <span className="text-xs text-zinc-500 font-medium">Showing 10 of 1,245 transactions</span>
-              <div className="flex gap-1">
-                <button className="p-1 border border-zinc-800 rounded hover:bg-zinc-800 text-zinc-400">
-                  <span className="material-symbols-outlined text-sm">chevron_left</span>
-                </button>
-                <button className="p-1 border border-zinc-800 rounded bg-zinc-800 text-white text-xs px-3 font-bold">1</button>
-                <button className="p-1 border border-zinc-800 rounded hover:bg-zinc-800 text-zinc-400 text-xs px-3 font-bold">2</button>
-                <button className="p-1 border border-zinc-800 rounded hover:bg-zinc-800 text-zinc-400">
-                  <span className="material-symbols-outlined text-sm">chevron_right</span>
-                </button>
-              </div>
-            </div>
-          </section>
+          </form>
+        </section>
+      ) : null}
+
+      <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
+        <div className="flex flex-col gap-3 border-b border-border/30 bg-background px-6 py-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-secondary" aria-hidden="true">
+              payments
+            </span>
+            <h2 className="font-headline text-lg font-bold text-foreground">Deposit Packages</h2>
+          </div>
+          <span className="font-mono text-xs text-muted-foreground">
+            {isLoading ? "Loading..." : `${packages.length} packages returned by finance-service`}
+          </span>
         </div>
 
-        <aside className="space-y-6">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">Pending Approvals</h3>
-              <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">3</span>
-            </div>
-            <div className="space-y-4">
-              {pendingPayouts.map((payout) => (
-                <div
-                  key={payout.id}
-                  className="bg-zinc-950 border border-zinc-800 p-4 rounded-lg hover:border-red-600/30 transition-all cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700">
-                        <span className="material-symbols-outlined text-sm">account_balance</span>
-                      </div>
-                      <p className="text-xs font-bold text-white">{payout.creator}</p>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                <th className="px-6 py-4">Package</th>
+                <th className="px-6 py-4">Money</th>
+                <th className="px-6 py-4">Coins</th>
+                <th className="px-6 py-4">Sort</th>
+                <th className="px-6 py-4 text-center">Status</th>
+                <th className="px-6 py-4">Updated</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/30">
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={index} className="animate-pulse">
+                    <td className="px-6 py-4" colSpan={7}>
+                      <div className="h-12 rounded-sm bg-muted/60" />
+                    </td>
+                  </tr>
+                ))
+              ) : packages.length === 0 ? (
+                <tr>
+                  <td className="px-6 py-12 text-center" colSpan={7}>
+                    <div className="mx-auto max-w-md space-y-4">
+                      <p className="font-body text-sm text-muted-foreground">
+                        Chua co goi nap nao. Tao goi dau tien de hien thi trong wallet checkout.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={openCreateForm}
+                        className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-5 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:opacity-90"
+                      >
+                        Tao goi nap dau tien
+                      </button>
                     </div>
-                    <span className="text-xs font-black text-red-500">{payout.amount}</span>
-                  </div>
-                  <p className="text-[10px] text-zinc-500 mb-4 italic">{payout.description}</p>
-                  <div className="flex gap-2">
-                    <button className="flex-1 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded transition-colors uppercase">
-                      Approve
-                    </button>
-                    <button className="px-3 py-1.5 border border-zinc-800 hover:bg-zinc-900 text-zinc-400 text-[10px] font-bold rounded transition-colors uppercase">
-                      View
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button className="w-full mt-6 py-2 text-zinc-500 text-[10px] font-bold hover:text-white transition-colors border-t border-zinc-800 pt-4 uppercase">
-              See All Approvals
-            </button>
-          </section>
-
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-4">
-            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Payment Gateway Status</h4>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Stripe API</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span className="text-[10px] font-bold text-emerald-500">ACTIVE</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">PayPal Connect</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span className="text-[10px] font-bold text-emerald-500">ACTIVE</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-400">Local Bank Swift</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  <span className="text-[10px] font-bold text-amber-500">LATENCY</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
+                  </td>
+                </tr>
+              ) : (
+                packages.map(pkg => (
+                  <tr key={pkg.id} className="group transition-colors hover:bg-muted/40">
+                    <td className="px-6 py-4">
+                      <p className="font-headline text-sm font-bold text-foreground">{pkg.name}</p>
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-secondary">{pkg.code}</p>
+                      <p className="mt-1 max-w-xs truncate font-body text-xs text-muted-foreground">{pkg.description}</p>
+                    </td>
+                    <td className="px-6 py-4 font-mono text-sm text-foreground">
+                      {currencyFormatter.format(pkg.moneyAmount)}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-xs text-muted-foreground">
+                      <span className="block text-sm font-bold text-foreground">{numberFormatter.format(pkg.totalCoinAmount)} AC</span>
+                      Base {numberFormatter.format(pkg.baseCoinAmount)} + Bonus {numberFormatter.format(pkg.bonusCoinAmount)}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-sm text-foreground">{pkg.sortOrder}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex rounded-sm border px-3 py-1 font-headline text-[10px] font-bold uppercase tracking-widest ${getStatusClass(pkg.isActive)}`}>
+                        {pkg.isActive ?? true ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{formatDate(pkg.updatedAt)}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditForm(pkg)}
+                          className="rounded-sm border border-border/40 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void togglePackageStatus(pkg)}
+                          className="rounded-sm border border-primary/30 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
+                        >
+                          {pkg.isActive ?? true ? "Disable" : "Enable"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

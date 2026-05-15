@@ -53,19 +53,8 @@ function buildSource<T>(
   };
 }
 
-const missingSource = (
-  key: AdminDashboardDataSource["key"],
-  label: string,
-  message: string
-): AdminDashboardDataSource => ({
-  key,
-  label,
-  status: "unavailable",
-  message,
-});
-
 async function getUsersSummary() {
-  const response = await api.get<AdminUsersSummary>("/api/user/admin/users/summary", { requireAuth: true });
+  const response = await api.get<AdminUsersSummary>("/api/identity/user/admin/users/summary", { requireAuth: true });
   return response.data;
 }
 
@@ -214,16 +203,6 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       packages.source,
       categories.source,
       tags.source,
-      missingSource(
-        "verifications",
-        "Verification Summary",
-        "Identity service v1 chưa có creator verification workflow/table; giữ trạng thái unavailable."
-      ),
-      missingSource(
-        "activity",
-        "Activity Log",
-        "Chưa có API `GET /api/admin/activity?limit=20` hoặc SSE stream để hiển thị log thật."
-      ),
     ],
     loadedAt: new Date().toISOString(),
   };

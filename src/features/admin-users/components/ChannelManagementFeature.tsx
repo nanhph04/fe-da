@@ -20,7 +20,7 @@ export function ChannelManagementFeature() {
       </header>
 
       <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 font-body text-sm text-secondary">
-        Media service contract hien chi co API channel summary `GET /api/media/admin/channels/summary`; channel directory dang giu mock cho den khi co API list/manage channels.
+        Media service đã có API summary cho admin dashboard; channel directory vẫn giữ dữ liệu mẫu cho đến khi có contract list/manage channels thật.
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">

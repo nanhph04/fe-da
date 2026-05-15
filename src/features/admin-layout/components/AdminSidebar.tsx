@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Rocket } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { adminFooterItems, adminSidebarItems, type AdminNavItem } from "./navigation";
+import { adminSidebarItems, type AdminNavItem } from "./navigation";
 
 function isActivePath(pathname: string | null, item: AdminNavItem) {
   if (!pathname) {
@@ -77,24 +77,6 @@ export function AdminSidebar() {
       </nav>
 
       <footer className="mt-auto space-y-1 border-t border-border/20 px-3 pt-5">
-        <nav className="space-y-1" aria-label="Admin secondary navigation">
-          {adminFooterItems.map((item) => (
-            <AdminNavLink key={item.path} item={item} />
-          ))}
-        </nav>
-
-        <div className="px-1 pt-4">
-          <button
-            type="button"
-            disabled
-            aria-label="Deploy updates is not available in this build"
-            className="flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-2 rounded-sm bg-primary/70 px-4 py-2 font-headline text-sm font-semibold text-primary-foreground/80 shadow-[0_10px_24px_hsl(var(--primary)/0.12)]"
-          >
-            <Rocket className="h-4 w-4" aria-hidden="true" />
-            Deploy Updates
-          </button>
-        </div>
-
         <button
           type="button"
           onClick={logout}

@@ -1,7 +1,15 @@
 export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "pending" | "completed" | "failed" | "cancelled";
-export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "VIDEO_PURCHASE" | "CHANNEL_REVENUE" | "SYSTEM_REVENUE" | "deposit" | "withdrawal" | "payment" | "video_purchase" | "membership_purchase" | "channel_revenue" | "system_revenue";
-export type DepositStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
+export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "VIDEO_PURCHASE" | "CHANNEL_REVENUE" | "SYSTEM_REVENUE" | "deposit" | "withdrawal" | "payment" | "video_purchase" | "membership_purchase" | "member_subscription" | "channel_revenue" | "system_revenue" | "refund" | "system_adjustment";
+export type DepositStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "pending" | "processing" | "completed" | "failed" | "cancelled";
 export type WithdrawalStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED" | "CANCELLED" | "pending" | "approved" | "processing" | "completed" | "rejected" | "cancelled";
+export type PaymentServiceType = "video" | "membership";
+
+export interface PaymentMetadata {
+  videoTitle?: string;
+  channelName?: string;
+  thumbnailUrl?: string;
+  packageName?: string;
+}
 
 import { WalletStatus, WalletType } from "./base-wallet.types";
 
@@ -19,7 +27,7 @@ export interface Wallet {
 export interface Transaction {
   id: string;
   type: TransactionType;
-  assetType: "MONEY" | "COIN" | string;
+  assetType: "money" | "coin" | "MONEY" | "COIN" | string;
   amount: number;
   status: TransactionStatus;
   fromWalletId: string | null;
@@ -105,11 +113,12 @@ export interface Withdrawal {
 }
 
 export interface PaymentRequest {
-  serviceType: "VIDEO" | "MEMBERSHIP";
+  serviceType: PaymentServiceType;
   serviceId: string;
   channelId: string;
   channelOwnerId: string;
   coinAmount: number;
+  metadata?: PaymentMetadata;
 }
 
 export interface PaymentTransaction {
@@ -125,7 +134,7 @@ export interface PaymentResponse {
   payerWalletId: string;
   channelWalletId: string;
   systemWalletId: string;
-  serviceType: "VIDEO" | "MEMBERSHIP";
+  serviceType: PaymentServiceType;
   serviceId: string;
   channelId: string;
   channelOwnerId: string;

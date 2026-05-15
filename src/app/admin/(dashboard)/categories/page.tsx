@@ -1,8 +1,8 @@
 import { CategoryManagementFeature } from "@/features/admin-content/components/CategoryManagementFeature";
 
 export const metadata = {
-  title: "Categories - Admin Console",
-  description: "Manage content categories for Velvet Gallery",
+  title: "Taxonomy - Admin Console",
+  description: "Manage content categories and tags for Velvet Gallery",
 };
 
 export default function CategoriesPage() {

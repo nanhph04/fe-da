@@ -18,8 +18,11 @@ export interface AdminWithdrawalListResponse {
 
 export interface AdminWithdrawalListParams {
   status?: "pending" | "approved" | "processing" | "completed" | "rejected" | "cancelled";
+  userId?: string;
   page?: number;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 const buildQueryString = (params: AdminWithdrawalListParams = {}) => {
@@ -29,12 +32,24 @@ const buildQueryString = (params: AdminWithdrawalListParams = {}) => {
     searchParams.set("status", params.status);
   }
 
+  if (params.userId) {
+    searchParams.set("userId", params.userId);
+  }
+
   if (params.page) {
     searchParams.set("page", String(params.page));
   }
 
   if (params.limit) {
     searchParams.set("limit", String(params.limit));
+  }
+
+  if (params.startDate) {
+    searchParams.set("startDate", params.startDate);
+  }
+
+  if (params.endDate) {
+    searchParams.set("endDate", params.endDate);
   }
 
   const query = searchParams.toString();
@@ -51,6 +66,11 @@ export class AdminWithdrawalService {
     const response = await api.get<AdminWithdrawalListResponse>(`/api/withdrawals/admin${buildQueryString(params)}`, {
       requireAuth: true,
     });
+    return response.data;
+  }
+
+  static async getWithdrawal(withdrawalId: string): Promise<Withdrawal> {
+    const response = await api.get<Withdrawal>(`/api/withdrawals/admin/${withdrawalId}`, { requireAuth: true });
     return response.data;
   }
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
 import { WithdrawalService } from "../services/withdrawalService";
-import type { Withdrawal, WithdrawalHistoryResponse } from "../types/withdrawal.types";
+import type { WithdrawalHistoryResponse, WithdrawalSummary } from "../types/withdrawal.types";
 import { PayoutHistory } from "./PayoutHistory";
 
 const initialHistory: WithdrawalHistoryResponse = {
@@ -19,7 +19,7 @@ const initialHistory: WithdrawalHistoryResponse = {
 
 export function StudioPayoutsFeature() {
   const [history, setHistory] = useState<WithdrawalHistoryResponse>(initialHistory);
-  const [allWithdrawals, setAllWithdrawals] = useState<Withdrawal[]>([]);
+  const [summary, setSummary] = useState<WithdrawalSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,23 +28,21 @@ export function StudioPayoutsFeature() {
     setError(null);
 
     try {
-      const response = await WithdrawalService.getWithdrawalHistory({
-        status: "ALL",
-        page: 1,
-        limit: 10,
-      });
-      const summaryResponse = await WithdrawalService.getWithdrawalHistory({
-        status: "ALL",
-        page: 1,
-        limit: Number.MAX_SAFE_INTEGER,
-      });
+      const [response, summaryResponse] = await Promise.all([
+        WithdrawalService.getWithdrawalHistory({
+          status: "ALL",
+          page: 1,
+          limit: 10,
+        }),
+        WithdrawalService.getWithdrawalSummary(),
+      ]);
 
       setHistory(response);
-      setAllWithdrawals(summaryResponse.withdrawals);
+      setSummary(summaryResponse);
     } catch (err) {
       setError(getErrorMessage(err, "Không thể tải lịch sử payout."));
       setHistory(initialHistory);
-      setAllWithdrawals([]);
+      setSummary(null);
     } finally {
       setIsLoading(false);
     }
@@ -53,13 +51,6 @@ export function StudioPayoutsFeature() {
   useEffect(() => {
     void loadPayouts();
   }, [loadPayouts]);
-
-  const pendingTotal = allWithdrawals
-    .filter(withdrawal => withdrawal.status === "pending")
-    .reduce((total, withdrawal) => total + withdrawal.coinAmount, 0);
-  const completedTotal = allWithdrawals
-    .filter(withdrawal => withdrawal.status === "completed")
-    .reduce((total, withdrawal) => total + withdrawal.coinAmount, 0);
 
   if (isLoading) {
     return (
@@ -98,9 +89,9 @@ export function StudioPayoutsFeature() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 md:grid-cols-3">
-        <SummaryCard label="Pending" value={`${pendingTotal.toLocaleString()} AC`} />
-        <SummaryCard label="Completed" value={`${completedTotal.toLocaleString()} AC`} />
-        <SummaryCard label="Records" value={allWithdrawals.length.toLocaleString()} />
+        <SummaryCard label="Pending" value={`${(summary?.pendingCoinAmount ?? 0).toLocaleString()} AC`} />
+        <SummaryCard label="Completed" value={`${(summary?.completedCoinAmount ?? 0).toLocaleString()} AC`} />
+        <SummaryCard label="Records" value={(history.pagination.total || summary?.completedCount || 0).toLocaleString()} />
       </div>
 
       <PayoutHistory
