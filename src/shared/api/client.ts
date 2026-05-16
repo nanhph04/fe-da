@@ -42,7 +42,13 @@ const redirectToLogin = () => {
     return;
   }
 
-  window.location.href = window.location.pathname.startsWith("/admin") ? "/admin/login" : "/login";
+  if (window.location.pathname === "/login") {
+    window.location.href = "/login";
+    return;
+  }
+
+  const redirectPath = `${window.location.pathname}${window.location.search}`;
+  window.location.href = `/login?redirect=${encodeURIComponent(redirectPath || "/")}`;
 };
 
 export const buildApiUrl = (endpoint: string) => {

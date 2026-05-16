@@ -6,7 +6,7 @@ import * as z from "zod";
 import Link from "next/link";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAuth } from "@/features/auth/context/AuthContext";
+import { type UserProfile, useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/shared/api/client";
@@ -19,7 +19,41 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+type LoginFormProps = {
+  redirectTo?: string;
+};
+
+const isSafeRedirectPath = (path?: string) => {
+  if (!path || !path.startsWith("/") || path.startsWith("//")) {
+    return false;
+  }
+
+  return !path.startsWith("/login") && !path.startsWith("/register");
+};
+
+const getRedirectAfterLogin = (profile: UserProfile | null, redirectTo?: string) => {
+  if (!profile) {
+    return null;
+  }
+
+  const safeRedirectPath = isSafeRedirectPath(redirectTo) ? redirectTo : null;
+
+  if (safeRedirectPath) {
+    if (safeRedirectPath.startsWith("/admin")) {
+      return profile.role === "admin" ? safeRedirectPath : "/library";
+    }
+
+    return safeRedirectPath;
+  }
+
+  if (profile.role === "admin") {
+    return "/admin";
+  }
+
+  return !profile.displayName ? "/onboarding/profile" : "/library";
+};
+
+export function LoginForm({ redirectTo }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -42,12 +76,12 @@ export function LoginForm() {
       const res = await authService.login(data);
       if (res.success && res.data?.accessToken) {
         const profile = await setAuthData(res.data.accessToken);
-        const redirectTo = profile?.role === "admin"
-          ? "/admin"
-          : profile && !profile.displayName
-            ? "/onboarding/profile"
-            : "/library";
-        router.push(redirectTo);
+        const nextPath = getRedirectAfterLogin(profile, redirectTo);
+        if (!nextPath) {
+          setServerError("Failed to load your profile after login.");
+          return;
+        }
+        router.push(nextPath);
       } else {
         setServerError(res.mess || "Login failed");
       }

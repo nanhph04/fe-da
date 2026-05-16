@@ -17,7 +17,10 @@ export function AdminLayoutFeature({ children }: { children: ReactNode }) {
     }
 
     if (!isAuthenticated) {
-      router.replace("/admin/login");
+      const redirectPath = typeof window === "undefined"
+        ? "/admin"
+        : `${window.location.pathname}${window.location.search}`;
+      router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}`);
       return;
     }
 

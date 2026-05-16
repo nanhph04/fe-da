@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { CinematicPlayer } from "./CinematicPlayer";
 import { getErrorMessage } from "@/shared/api/client";
@@ -82,6 +84,7 @@ export function PlayerContainerClient({
   poster,
   title,
 }: PlayerContainerClientProps) {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [initialPositionSeconds, setInitialPositionSeconds] = useState(0);
   const [availableResolutions, setAvailableResolutions] = useState<string[]>([]);
@@ -90,6 +93,24 @@ export function PlayerContainerClient({
 
   useEffect(() => {
     let isActive = true;
+
+    if (isAuthLoading) {
+      setIsLoading(true);
+      return () => {
+        isActive = false;
+      };
+    }
+
+    if (!isAuthenticated) {
+      setVideoUrl(null);
+      setInitialPositionSeconds(0);
+      setAvailableResolutions([]);
+      setError(null);
+      setIsLoading(false);
+      return () => {
+        isActive = false;
+      };
+    }
 
     async function loadVideo() {
       try {
@@ -152,7 +173,7 @@ export function PlayerContainerClient({
     return () => {
       isActive = false;
     };
-  }, [videoId]);
+  }, [videoId, isAuthenticated, isAuthLoading]);
 
   if (isLoading) {
     return (
@@ -163,6 +184,42 @@ export function PlayerContainerClient({
               play_arrow
             </span>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    const loginHref = `/login?redirect=${encodeURIComponent(`/watch/${videoId}`)}`;
+
+    return (
+      <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
+        {poster ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-45 blur-sm scale-105"
+            style={{ backgroundImage: `url(${poster})` }}
+            aria-hidden="true"
+          />
+        ) : null}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-lg">
+            <span className="material-symbols-outlined text-3xl">lock</span>
+          </div>
+          <div className="max-w-md space-y-2">
+            <p className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
+              Vui lòng đăng nhập để xem video
+            </p>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Bạn vẫn có thể xem thông tin video bên dưới. Đăng nhập để phát nội dung và tiếp tục trải nghiệm xem của bạn.
+            </p>
+          </div>
+          <Link
+            href={loginHref}
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-5 text-sm font-bold text-primary-foreground transition-transform duration-300 hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Đăng nhập để xem
+          </Link>
         </div>
       </div>
     );
