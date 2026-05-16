@@ -25,6 +25,9 @@ export interface AdminChannelsSummary {
   activeCreators30d: number;
   eligibleForMembership: number;
   membershipClosedByAdmin: number;
+  membershipPendingReview: number;
+  membershipApproved: number;
+  membershipRejected: number;
   uploadingNow: number;
 }
 

@@ -28,7 +28,7 @@ export const adminSidebarItems: AdminNavItem[] = [
   { label: "Content Review", path: "/admin/content", icon: Film, matchStartsWith: true },
   { label: "Users", path: "/admin/users", icon: Users, matchStartsWith: true },
   { label: "Channels", path: "/admin/channels", icon: Boxes, matchStartsWith: true },
-  { label: "Verification", path: "/admin/verifications", icon: ShieldCheck, matchStartsWith: true },
+  { label: "Membership Review", path: "/admin/verifications", icon: ShieldCheck, matchStartsWith: true },
   { label: "Categories", path: "/admin/categories", icon: SlidersHorizontal, matchStartsWith: true },
   { label: "Finance", path: "/admin/finance", icon: CircleDollarSign, matchStartsWith: true },
   { label: "Payouts", path: "/admin/payouts", icon: Banknote, matchStartsWith: true },

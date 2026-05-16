@@ -54,10 +54,10 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
           id: "creators",
           label: "Active Creators",
           value: formatCount(data.channelsSummary.activeCreators30d),
-          detail: `${formatCount(data.channelsSummary.totalChannels)} channels - ${formatCount(data.channelsSummary.uploadingNow)} uploading now`,
+          detail: `${formatCount(data.channelsSummary.membershipPendingReview)} membership reviews - ${formatCount(data.channelsSummary.uploadingNow)} uploading now`,
           icon: "movie_edit",
           tone: "primary",
-          href: "/admin/channels",
+          href: "/admin/verifications",
         }
       : {
           id: "creators",
@@ -128,6 +128,26 @@ export function buildAdminPriorityActions(data: AdminDashboardData): AdminPriori
   const latestWithdrawal = data.withdrawals[0];
 
   return [
+    data.channelsSummary
+      ? {
+          id: "membership-review",
+          label: "Membership Review",
+          description: `${formatCount(data.channelsSummary.membershipApproved)} approved / ${formatCount(data.channelsSummary.membershipRejected)} rejected channels.`,
+          href: "/admin/verifications",
+          icon: "verified_user",
+          tone: "primary",
+          countLabel: `${formatCount(data.channelsSummary.membershipPendingReview)} pending`,
+        }
+      : {
+          id: "membership-review",
+          label: "Membership Review",
+          description: "Creator/channel summary did not load.",
+          href: "/admin/verifications",
+          icon: "verified_user",
+          tone: "primary",
+          countLabel: "Unavailable",
+          unavailable: true,
+        },
     data.reportsSummary
       ? {
           id: "review-queue",
