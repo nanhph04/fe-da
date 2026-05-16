@@ -235,6 +235,8 @@ Luu y:
 - FE khong can gui field ip.
 - Neu FE gui field ip, backend hien tai khong dung gia tri nay; IP thuc te van
   lay tu request.
+- Neu account bi admin khoa voi status `suspended`, API tra 403 voi mess
+  `Your account has been suspended`.
 
 Cookie:
 
@@ -899,7 +901,7 @@ Field tinh toan:
 - growth30dPercent: so sanh newUsers30d voi 30 ngay truoc do; `null` neu ky
   truoc bang 0.
 - flaggedUsers: tam thoi `0` trong v1 vi chua co domain/schema user flag.
-- lockedUsers: dem account role `user` co status `suspended` hoac `inactive`.
+- lockedUsers: dem account role `user` co status `suspended`.
 
 Luu y:
 
@@ -908,6 +910,162 @@ Luu y:
 - Dashboard nen giu unavailable state cho:
   - GET /api/user/admin/creator-verifications/summary
   - GET /api/user/admin/creator-verifications?status=pending&page=1&limit=5
+
+
+3.2) GET /api/user/admin/users
+
+Muc dich:
+
+- Lay danh sach user cho man hinh admin user management.
+- Chi tra account role `user`; khong tra account role `admin`.
+
+Auth:
+
+- Protected, chi role `admin`.
+- Required header:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Query optional:
+
+- page: number, default 1.
+- limit: number, default 20, toi da 100.
+- search: string, tim theo email hoac displayName.
+- status: "active" | "suspended".
+- emailVerified: boolean.
+- isCreator: boolean.
+- createdFrom: ISO date/date-time string.
+- createdTo: ISO date/date-time string.
+- sortBy: "createdAt" | "updatedAt" | "email", default "createdAt".
+- sortOrder: "asc" | "desc", default "desc".
+
+Response:
+
+- HTTP status: 200
+- Body CO boc ApiResponse va pagination.
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Admin users fetched successfully",
+  "data": [
+    {
+      "userId": "user-id",
+      "email": "user@example.com",
+      "role": "user",
+      "status": "active",
+      "isEmailVerified": true,
+      "displayName": "Nguyen Van A",
+      "avatarUrl": "",
+      "isCreator": false,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z",
+      "lastActiveAt": "2026-01-03T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+
+3.3) GET /api/user/admin/users/:userId
+
+Muc dich:
+
+- Lay chi tiet account, profile va session summary cua mot user.
+- Chi danh cho admin dashboard/detail drawer.
+
+Auth:
+
+- Protected, chi role `admin`.
+
+Response:
+
+- HTTP status: 200
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "mess": "Admin user detail fetched successfully",
+  "data": {
+    "userId": "user-id",
+    "email": "user@example.com",
+    "role": "user",
+    "status": "active",
+    "isEmailVerified": true,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-02T00:00:00.000Z",
+    "profile": {
+      "userId": "user-id",
+      "email": "user@example.com",
+      "displayName": "Nguyen Van A",
+      "avatarUrl": "",
+      "bio": "",
+      "phone": 0,
+      "gender": null,
+      "birthday": null,
+      "isCreator": false,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z"
+    },
+    "sessions": {
+      "activeSessionCount": 1,
+      "lastActiveAt": "2026-01-03T00:00:00.000Z"
+    }
+  }
+}
+```
+
+
+3.4) PATCH /api/user/admin/users/:userId/status
+
+Muc dich:
+
+- Admin doi trang thai account user.
+- Neu status moi la `suspended`, backend revoke tat ca refresh token cua user de
+  dang xuat khoi moi session.
+- Sau khi cap nhat thanh cong, backend publish Kafka event
+  `user.status.changed` de media-service va finance-service dong bo quyen hoat
+  dong cua user.
+- API nay khong cho thao tac account role `admin`.
+
+Auth:
+
+- Protected, chi role `admin`.
+
+Body:
+
+```json
+{
+  "status": "suspended",
+  "reason": "Violation of platform policy"
+}
+```
+
+Field:
+
+- status: "active" | "suspended", required.
+- reason: string, required khi status la `suspended`, maxLength 500.
+
+Response:
+
+- HTTP status: 200
+- Body tra ve detail moi nhat, cung shape voi GET detail.
+
+Side effects:
+
+- Khi status la `suspended`, backend gui email cho user voi ly do bi khoa.
+- Backend publish Kafka event `user.status.changed`; payload co field
+  `data.reason`.
 
 
 ==================================================
@@ -934,6 +1092,9 @@ Protected, can Authorization Bearer:
 - POST /api/user/users/profile/avatar/complete
 - PATCH /api/user/users/profile
 - GET /api/user/admin/users/summary
+- GET /api/user/admin/users
+- GET /api/user/admin/users/:userId
+- PATCH /api/user/admin/users/:userId/status
 
 
 ==================================================
