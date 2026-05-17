@@ -44,9 +44,9 @@ export function ForgotPasswordForm() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-black/35 px-6 py-6 backdrop-blur-xl md:px-8">
+      <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-background/35 px-6 py-6 backdrop-blur-xl md:px-8">
         <PublicBrand href="/" />
-        <button type="button" className="font-headline text-sm font-bold tracking-tight text-zinc-400 transition-colors hover:text-white">
+        <button type="button" className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground">
           Help
         </button>
       </div>
@@ -101,7 +101,7 @@ export function ForgotPasswordForm() {
                       id="email"
                       type="email"
                       placeholder="name@example.com"
-                      className={`w-full rounded-sm bg-black py-4 pr-4 pl-12 text-foreground placeholder:text-zinc-600 ring-1 transition-all outline-none focus:ring-2 focus:ring-primary ${errors.email ? "ring-destructive" : "ring-border/30"}`}
+                      className={`w-full rounded-sm bg-input py-4 pr-4 pl-12 text-foreground placeholder:text-muted-foreground/50 ring-1 transition-all outline-none focus:ring-2 focus:ring-primary ${errors.email ? "ring-destructive" : "ring-border/30"}`}
                       {...register("email")}
                     />
                   </div>
@@ -126,7 +126,7 @@ export function ForgotPasswordForm() {
             )}
 
             <div className="mt-8 border-t border-border/10 pt-8 text-center">
-              <Link href="/login" className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-white">
+              <Link href="/login" className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground">
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 Back to Sign In
               </Link>
@@ -134,15 +134,15 @@ export function ForgotPasswordForm() {
           </div>
 
           <div className="mt-12 text-center">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">Secure Authentication • Velvet Gallery Encryption</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Secure Authentication • Velvet Gallery Encryption</p>
           </div>
         </div>
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Privacy Policy</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Terms of Service</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Cookie Preferences</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Privacy Policy</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Terms of Service</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Cookie Preferences</span>
       </footer>
     </div>
   );

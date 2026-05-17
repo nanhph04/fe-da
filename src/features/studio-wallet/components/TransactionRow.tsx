@@ -55,7 +55,7 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
         );
       default:
         return (
-          <span className={`${baseClasses} bg-zinc-500/10 text-zinc-500`}>
+          <span className={`${baseClasses} bg-zinc-500/10 text-muted-foreground`}>
             {status}
           </span>
         );
@@ -82,14 +82,14 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
           <div className="text-sm font-bold text-[var(--color-primary-600)]">
             {item.id.split('-').pop()?.substring(0, 8).toUpperCase()}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">
+          <div className="text-xs text-muted-foreground mt-1">
             {item.id}
           </div>
         </div>
       </td>
       <td className="py-4 px-4">
         <div>
-          <div className="text-sm text-zinc-300">
+          <div className="text-sm text-foreground/80">
             {formatDate(item.requestedAt)}
           </div>
           {item.completedAt && (
@@ -101,10 +101,10 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
       </td>
       <td className="py-4 px-4">
         <div>
-          <div className="text-sm font-bold text-white">
+          <div className="text-sm font-bold text-foreground">
             {item.bankInfo.bankName}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">
+          <div className="text-xs text-muted-foreground mt-1">
             **** {item.bankInfo.accountNumber.slice(-4)}
           </div>
         </div>
@@ -119,7 +119,7 @@ export function TransactionRow({ item, onCancel, onView, formatDate }: Transacti
         <div className="flex justify-end gap-2">
           <button
             onClick={() => onView(item)}
-            className="text-xs font-bold text-zinc-400 hover:text-white transition-colors px-2 py-1"
+            className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
           >
             Details
           </button>

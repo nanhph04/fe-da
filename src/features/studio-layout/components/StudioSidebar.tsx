@@ -10,10 +10,10 @@ export function StudioSidebar() {
   const { logout } = useAuth();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r-0 bg-[#0a0a0a] shadow-2xl shadow-black z-50 flex flex-col hidden md:flex">
+    <aside className="fixed left-0 top-0 h-screen w-64 border-r-0 bg-background shadow-2xl shadow-black z-50 flex flex-col hidden md:flex">
       <div className="p-8">
         <h1 className="text-2xl font-black tracking-tighter text-[#ff1a1a] uppercase font-headline">Velvet Gallery</h1>
-        <p className="text-xs text-zinc-500 font-headline uppercase tracking-widest mt-1">Creator Studio</p>
+        <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1">Creator Studio</p>
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
@@ -23,10 +23,10 @@ export function StudioSidebar() {
             (!!item.matchStartsWith && pathname?.startsWith(item.path));
           const className = `flex items-center gap-3 px-4 py-3 rounded-sm transition-transform font-headline text-sm ${
             item.disabled
-              ? "text-zinc-700 border border-dashed border-[#262528] cursor-not-allowed"
+              ? "text-muted-foreground/50 border border-dashed border-border cursor-not-allowed"
               : isActive
-                ? "text-[#ff8e80] font-bold bg-[#1f1f22]/80 border-r-2 border-[#ff8e80]"
-                : "text-zinc-400 hover:text-zinc-100 hover:bg-[#19191c]/50 transition-colors duration-300"
+                ? "text-primary font-bold bg-accent/80 border-r-2 border-primary"
+                : "text-muted-foreground hover:text-zinc-100 hover:bg-background/50 transition-colors duration-300"
           }`;
 
           const content = (
@@ -59,7 +59,7 @@ export function StudioSidebar() {
       <div className="px-6 py-6">
         <Link
           href="/studio/upload"
-          className="flex w-full items-center justify-center gap-2 rounded-sm bg-[#ff8e80] py-3 font-headline text-xs font-black uppercase tracking-widest text-[#650003] shadow-lg shadow-[#ff8e80]/20 transition-colors hover:bg-[#ff7668]"
+          className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-3 font-headline text-xs font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
         >
           <span className="material-symbols-outlined">add_circle</span>
           Upload
@@ -69,7 +69,7 @@ export function StudioSidebar() {
       <div className="px-4 py-6 border-t border-[#19191c] space-y-1">
         <Link 
           href="/library" 
-          className="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-zinc-300 font-headline text-sm"
+          className="flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground/80 font-headline text-sm"
         >
           <span className="material-symbols-outlined">public</span>
           Back to Library

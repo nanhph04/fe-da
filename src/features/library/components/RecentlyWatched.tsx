@@ -75,7 +75,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
   return (
     <section>
       <div className="mb-8 flex items-end justify-between">
-        <h2 className="text-3xl font-headline font-bold text-[#f9f5f8]">
+        <h2 className="text-3xl font-headline font-bold text-foreground">
           Xem tiếp
         </h2>
       </div>
@@ -123,7 +123,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
               key={item.videoId}
               className="group min-w-[320px] cursor-pointer snap-start"
             >
-              <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-[#19191c]">
+              <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-background">
                 {item.thumbnailUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -138,9 +138,9 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
 
-                <div className="absolute bottom-0 left-0 h-1.5 w-full bg-zinc-800">
+                <div className="absolute bottom-0 left-0 h-1.5 w-full bg-muted">
                   <div
-                    className="h-full bg-[#ff8e80]"
+                    className="h-full bg-primary"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -148,7 +148,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-md">
                     <span
-                      className="material-symbols-outlined fill-current text-3xl text-white"
+                      className="material-symbols-outlined fill-current text-3xl text-foreground"
                       style={{ fontVariationSettings: "'FILL' 1" }}
                     >
                       play_arrow
@@ -157,10 +157,10 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
                 </div>
               </div>
 
-              <h3 className="font-headline text-lg font-bold transition-colors group-hover:text-[#ff8e80]">
+              <h3 className="font-headline text-lg font-bold transition-colors group-hover:text-primary">
                 {item.title}
               </h3>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 {formatRemainingTime(item.remainingSeconds)} •{" "}
                 {item.viewCount.toLocaleString()} lượt xem
               </p>

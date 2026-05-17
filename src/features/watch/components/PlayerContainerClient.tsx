@@ -180,7 +180,7 @@ export function PlayerContainerClient({
       <div className="relative aspect-video animate-pulse overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted shadow-lg">
-            <span className="material-symbols-outlined text-3xl text-zinc-500">
+            <span className="material-symbols-outlined text-3xl text-muted-foreground">
               play_arrow
             </span>
           </div>

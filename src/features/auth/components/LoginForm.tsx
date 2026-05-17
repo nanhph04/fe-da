@@ -109,7 +109,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
 
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-6 md:px-8">
         <PublicBrand href="/" />
-        <span className="font-headline text-sm font-bold tracking-tight text-zinc-400 transition-colors hover:text-white">
+        <span className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground">
           Trợ giúp
         </span>
       </header>
@@ -136,10 +136,10 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                     id="email"
                     type="email"
                     placeholder="name@domain.com"
-                    className={`w-full rounded-sm bg-black py-4 pr-12 pl-4 text-foreground placeholder:text-zinc-700 ring-1 transition-all focus:outline-none focus:ring-primary/60 ${errors.email ? "ring-destructive" : "ring-border/30"}`}
+                    className={`w-full rounded-sm bg-input py-4 pr-12 pl-4 text-foreground placeholder:text-muted-foreground/50 ring-1 transition-all focus:outline-none focus:ring-primary/60 ${errors.email ? "ring-destructive" : "ring-border/30"}`}
                     {...register("email")}
                   />
-                  <div className="pointer-events-none absolute top-1/2 right-4 flex -translate-y-1/2 items-center justify-center text-zinc-600">
+                  <div className="pointer-events-none absolute top-1/2 right-4 flex -translate-y-1/2 items-center justify-center text-muted-foreground/50">
                     <span className="material-symbols-outlined">alternate_email</span>
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className={`w-full rounded-sm bg-black py-4 pr-12 pl-4 text-foreground placeholder:text-zinc-700 ring-1 transition-all focus:outline-none focus:ring-primary/60 ${errors.password ? "ring-destructive" : "ring-border/30"}`}
+                    className={`w-full rounded-sm bg-input py-4 pr-12 pl-4 text-foreground placeholder:text-muted-foreground/50 ring-1 transition-all focus:outline-none focus:ring-primary/60 ${errors.password ? "ring-destructive" : "ring-border/30"}`}
                     {...register("password")}
                   />
                   <button
@@ -168,7 +168,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
                     aria-pressed={showPassword}
                     onClick={() => setShowPassword((current) => !current)}
-                    className="absolute top-1/2 right-3 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-sm text-zinc-500 transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
+                    className="absolute top-1/2 right-3 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -197,18 +197,18 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                 <div className="w-full border-t border-border/10" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-4 tracking-widest text-zinc-600">Or continue with</span>
+                <span className="bg-background px-4 tracking-widest text-muted-foreground/50">Or continue with</span>
               </div>
             </div> */}
 
             {/* <div className="grid grid-cols-2 gap-4">
               <button type="button" className="group flex items-center justify-center gap-2 rounded-sm bg-card py-4 transition-colors hover:bg-muted">
-                <span className="material-symbols-outlined text-zinc-400 group-hover:text-foreground">google</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-foreground">Google</span>
+                <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground">google</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Google</span>
               </button>
               <button type="button" className="group flex items-center justify-center gap-2 rounded-sm bg-card py-4 transition-colors hover:bg-muted">
-                <span className="material-symbols-outlined text-zinc-400 group-hover:text-foreground" style={{ fontVariationSettings: "'FILL' 1" }}>ios</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 group-hover:text-foreground">Apple</span>
+                <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground" style={{ fontVariationSettings: "'FILL' 1" }}>ios</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Apple</span>
               </button>
             </div> */}
           </form>
@@ -225,9 +225,9 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Privacy Policy</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Terms of Service</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Cookie Preferences</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Privacy Policy</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Terms of Service</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Cookie Preferences</span>
       </div>
     </div>
   );

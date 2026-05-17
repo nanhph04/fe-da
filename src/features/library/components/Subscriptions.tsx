@@ -144,12 +144,12 @@ export function Subscriptions({ refreshKey = 0 }: SubscriptionsProps) {
                       <p className="text-xs text-muted-foreground">
                         Lv{membership.tierLevel} • {membership.tierName} • {membership.priceCoin.toLocaleString()} AC
                       </p>
-                      <p className={membership.isActive ? "text-xs text-secondary" : "text-xs text-zinc-500"}>
+                      <p className={membership.isActive ? "text-xs text-secondary" : "text-xs text-muted-foreground"}>
                         {formatExpiryDate(membership.expiryDate, membership.isActive)}
                       </p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-zinc-600 transition-colors group-hover:text-zinc-300">chevron_right</span>
+                  <span className="material-symbols-outlined text-muted-foreground/50 transition-colors group-hover:text-foreground/80">chevron_right</span>
                 </Link>
               );
             })

@@ -1,6 +1,6 @@
 export default function StudioLoading() {
   return (
-    <div className="flex-1 min-h-[calc(100vh-80px)] w-full flex items-center justify-center bg-[#0e0e10]">
+    <div className="flex-1 min-h-[calc(100vh-80px)] w-full flex items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-6">
         <div className="w-16 h-16 relative">
           <div className="absolute inset-0 border-4 border-[#fdc003]/20 rounded-full"></div>

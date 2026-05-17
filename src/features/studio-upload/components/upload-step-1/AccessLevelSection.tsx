@@ -11,7 +11,7 @@ export function AccessLevelSection({
 }: AccessLevelSectionProps) {
   return (
     <section className="space-y-6">
-      <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-zinc-500">
+      <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
         <span className="material-symbols-outlined text-[#fdc003]">lock_open</span>
         Video Access Level
       </h3>
@@ -24,17 +24,17 @@ export function AccessLevelSection({
             checked={visibility === "public"}
             onChange={() => updateFormData({ visibility: "public" })}
           />
-          <div className="h-full rounded-xl border border-[#262528] bg-[#131315] p-6 transition-all hover:bg-[#19191c]/50 peer-checked:border-[#ff8e80] peer-checked:bg-[#19191c]">
+          <div className="h-full rounded-xl border border-border bg-card p-6 transition-all hover:bg-background/50 peer-checked:border-primary peer-checked:bg-background">
             <div className="mb-4 flex items-start justify-between">
-              <span className="material-symbols-outlined text-zinc-500 peer-checked:text-[#ff8e80]">
+              <span className="material-symbols-outlined text-muted-foreground peer-checked:text-primary">
                 public
               </span>
-              <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-zinc-600 peer-checked:border-[#ff8e80] peer-checked:bg-[#ff8e80]">
-                <div className="h-1.5 w-1.5 rounded-full bg-black" />
+              <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-border peer-checked:border-primary peer-checked:bg-primary">
+                <div className="h-1.5 w-1.5 rounded-full bg-input" />
               </div>
             </div>
-            <h4 className="mb-1 font-headline font-bold text-white">Public</h4>
-            <p className="text-xs text-zinc-400">
+            <h4 className="mb-1 font-headline font-bold text-foreground">Public</h4>
+            <p className="text-xs text-muted-foreground">
               Available to everyone on your public feed.
             </p>
           </div>
@@ -48,20 +48,20 @@ export function AccessLevelSection({
             checked={visibility === "private"}
             onChange={() => updateFormData({ visibility: "private" })}
           />
-          <div className="h-full rounded-xl border border-[#262528] bg-[#131315] p-6 transition-all hover:bg-[#19191c]/50 peer-checked:border-zinc-400 peer-checked:bg-[#19191c]">
+          <div className="h-full rounded-xl border border-border bg-card p-6 transition-all hover:bg-background/50 peer-checked:border-zinc-400 peer-checked:bg-background">
             <div className="mb-4 flex items-start justify-between">
               <span
-                className="material-symbols-outlined text-zinc-400"
+                className="material-symbols-outlined text-muted-foreground"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 lock
               </span>
-              <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-zinc-600 peer-checked:border-zinc-400 peer-checked:bg-zinc-400">
-                <div className="hidden h-1.5 w-1.5 rounded-full bg-black peer-checked:block" />
+              <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-border peer-checked:border-zinc-400 peer-checked:bg-zinc-400">
+                <div className="hidden h-1.5 w-1.5 rounded-full bg-input peer-checked:block" />
               </div>
             </div>
-            <h4 className="mb-1 font-headline font-bold text-white">Private</h4>
-            <p className="text-xs text-zinc-400">
+            <h4 className="mb-1 font-headline font-bold text-foreground">Private</h4>
+            <p className="text-xs text-muted-foreground">
               Only visible to you or those with link.
             </p>
           </div>

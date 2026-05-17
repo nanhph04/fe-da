@@ -41,34 +41,34 @@ export class BasicErrorBoundary extends Component<BasicErrorBoundaryProps, Basic
 
       // Default error UI - Using Cinematic Canvas theme
       return (
-        <div className="min-h-screen bg-[#131315] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-card flex items-center justify-center p-4">
           <div className="text-center max-w-lg mx-auto">
             <div className="mb-6">
               <div className="text-6xl">⚠️</div>
             </div>
-            <h2 className="text-2xl font-bold text-[#ff8e80] mb-4 font-headline">
+            <h2 className="text-2xl font-bold text-primary mb-4 font-headline">
               Something went wrong
             </h2>
-            <p className="text-gray-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               We encountered an unexpected error. Please try again or contact support.
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-[#ff8e80] hover:bg-[#ff7668] text-black font-bold font-headline text-sm rounded-lg shadow-lg shadow-[#ff8e80]/20 transition-all w-full"
+                className="px-6 py-3 bg-primary hover:bg-primary/90 text-black font-bold font-headline text-sm rounded-lg shadow-lg shadow-primary/20 transition-all w-full"
               >
                 Refresh Page
               </button>
               <button
                 onClick={() => window.history.back()}
-                className="px-6 py-3 bg-[#262528] hover:bg-[#1f1f21] text-gray-400 rounded-lg transition-all w-full"
+                className="px-6 py-3 bg-muted hover:bg-accent text-muted-foreground rounded-lg transition-all w-full"
               >
                 Go Back
               </button>
             </div>
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="text-left bg-[#262528] rounded-lg p-4 text-sm text-gray-400 mt-6">
-                <summary className="cursor-pointer hover:text-[#ff8e80]">Error details</summary>
+              <details className="text-left bg-muted rounded-lg p-4 text-sm text-muted-foreground mt-6">
+                <summary className="cursor-pointer hover:text-primary">Error details</summary>
                 <pre className="mt-2 overflow-auto">
                   <code className="text-red-400 font-mono">{this.state.error.stack}</code>
                 </pre>
@@ -138,15 +138,15 @@ export class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps,
       const canRetry = this.state.retryCount < this.maxRetries;
 
       return (
-        <div className="min-h-screen bg-[#131315] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-card flex items-center justify-center p-4">
           <div className="text-center max-w-lg mx-auto">
             <div className="mb-6">
               <div className="text-6xl">⚠️</div>
             </div>
-            <h2 className="text-2xl font-bold text-[#ff8e80] mb-4 font-headline">
+            <h2 className="text-2xl font-bold text-primary mb-4 font-headline">
               Loading Failed
             </h2>
-            <p className="text-gray-400 mb-2">
+            <p className="text-muted-foreground mb-2">
               {canRetry
                 ? `Failed to load content. Attempt ${this.state.retryCount + 1} of ${this.maxRetries}.`
                 : 'Maximum retry attempts reached.'
@@ -163,7 +163,7 @@ export class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps,
             {canRetry && !this.props.fallback && (
               <button
                 onClick={this.handleRetry}
-                className="px-6 py-3 bg-[#ff8e80] hover:bg-[#ff7668] text-black font-bold font-headline text-sm rounded-lg shadow-lg shadow-[#ff8e80]/20 transition-all w-full mb-3"
+                className="px-6 py-3 bg-primary hover:bg-primary/90 text-black font-bold font-headline text-sm rounded-lg shadow-lg shadow-primary/20 transition-all w-full mb-3"
               >
                 Retry ({this.state.retryCount + 1}/{this.maxRetries})
               </button>
@@ -171,7 +171,7 @@ export class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps,
 
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-[#262528] hover:bg-[#1f1f21] text-gray-400 rounded-lg transition-all w-full"
+              className="px-6 py-3 bg-muted hover:bg-accent text-muted-foreground rounded-lg transition-all w-full"
             >
               Refresh Page
             </button>
@@ -207,19 +207,19 @@ export function withErrorBoundary<P extends object>(
 
 // Custom fallback components
 export const WalletErrorFallback = ({ error }: { error: Error }) => (
-  <div className="min-h-screen bg-[#131315] flex items-center justify-center p-4">
+  <div className="min-h-screen bg-card flex items-center justify-center p-4">
     <div className="text-center max-w-md mx-auto">
       <div className="mb-6">
         <div className="text-6xl">💳</div>
       </div>
-      <h2 className="text-2xl font-bold text-[#ff8e80] mb-4 font-headline">
+      <h2 className="text-2xl font-bold text-primary mb-4 font-headline">
         Wallet Error
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         We&apos;re having trouble loading your wallet information. Please try again.
       </p>
       {error && (
-        <div className="bg-[#262528] rounded-lg p-4 text-sm text-gray-400">
+        <div className="bg-muted rounded-lg p-4 text-sm text-muted-foreground">
           <p className="text-red-400 font-mono break-all">{error.message}</p>
         </div>
       )}
@@ -228,19 +228,19 @@ export const WalletErrorFallback = ({ error }: { error: Error }) => (
 );
 
 export const TransactionErrorFallback = ({ error }: { error: Error }) => (
-  <div className="min-h-screen bg-[#131315] flex items-center justify-center p-4">
+  <div className="min-h-screen bg-card flex items-center justify-center p-4">
     <div className="text-center max-w-md mx-auto">
       <div className="mb-6">
         <div className="text-6xl">📊</div>
       </div>
-      <h2 className="text-2xl font-bold text-[#ff8e80] mb-4 font-headline">
+      <h2 className="text-2xl font-bold text-primary mb-4 font-headline">
         Transaction Error
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         Failed to load transaction history. Please try refreshing.
       </p>
       {error && (
-        <div className="bg-[#262528] rounded-lg p-4 text-sm text-gray-400">
+        <div className="bg-muted rounded-lg p-4 text-sm text-muted-foreground">
           <p className="text-red-400 font-mono break-all">{error.message}</p>
         </div>
       )}

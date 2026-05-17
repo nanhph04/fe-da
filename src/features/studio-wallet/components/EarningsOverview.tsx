@@ -50,7 +50,7 @@ export function EarningsOverview({
 
   if (loading) {
     return (
-      <div className="rounded-md border border-zinc-800 bg-zinc-950/80 p-6 text-zinc-400">
+      <div className="rounded-md border border-border bg-background/80 p-6 text-muted-foreground">
         Loading earnings overview...
       </div>
     );
@@ -58,17 +58,17 @@ export function EarningsOverview({
 
   if (error || !summary || !monthly) {
     return (
-      <div className="rounded-md border border-[#4d1117] bg-[#220b0f] p-6 text-sm text-[#f7d7db]">
+      <div className="rounded-md border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive-foreground">
         {error || "No earnings data available."}
       </div>
     );
   }
 
   return (
-    <section className="space-y-6 rounded-md border border-zinc-800 bg-zinc-950/80 p-6">
+    <section className="space-y-6 rounded-md border border-border bg-background/80 p-6">
       <div>
-        <h2 className="font-headline text-2xl font-bold text-white">Earnings Overview</h2>
-        <p className="mt-1 text-sm text-zinc-400">
+        <h2 className="font-headline text-2xl font-bold text-foreground">Earnings Overview</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Current revenue performance and payout readiness.
         </p>
       </div>
@@ -105,11 +105,11 @@ function MetricCard({
         ? "text-[#e9c46a]"
         : tone === "green"
           ? "text-[#7bd389]"
-          : "text-white";
+          : "text-foreground";
 
   return (
-    <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{label}</p>
+    <div className="rounded-md border border-border bg-accent/70 p-4">
+      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
       <p className={`mt-3 text-2xl font-bold ${toneClass}`}>{value}</p>
     </div>
   );

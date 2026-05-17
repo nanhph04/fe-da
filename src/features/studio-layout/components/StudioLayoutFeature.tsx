@@ -6,7 +6,7 @@ export function StudioLayoutFeature({ children }: { children: ReactNode }) {
   return (
     <>
       <StudioSidebar />
-      <main className="md:ml-64 min-h-screen bg-[#0e0e10] flex flex-col">
+      <main className="md:ml-64 min-h-screen bg-background flex flex-col">
         <StudioHeader />
         <div className="flex-1 overflow-x-hidden">
           {children}

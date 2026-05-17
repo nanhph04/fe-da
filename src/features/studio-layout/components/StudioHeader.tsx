@@ -143,14 +143,14 @@ export function StudioHeader() {
               </div>
               <Link
                 href="/profile"
-                className="block px-4 py-2 text-sm text-zinc-300 transition-colors hover:bg-muted hover:text-white"
+                className="block px-4 py-2 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setShowAccountMenu(false)}
               >
                 My Profile
               </Link>
               <Link
                 href="/library"
-                className="block px-4 py-2 text-sm text-zinc-300 transition-colors hover:bg-muted hover:text-white"
+                className="block px-4 py-2 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setShowAccountMenu(false)}
               >
                 Back to Library

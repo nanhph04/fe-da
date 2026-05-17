@@ -4,9 +4,9 @@ import { PublicHeader } from "@/components/layout/public/PublicHeader";
 
 export function OnboardingFeature() {
   return (
-    <div className="bg-[#0e0e10] text-[#f9f5f8] min-h-screen flex flex-col items-center justify-center relative overflow-x-hidden pt-24 pb-12">
+    <div className="bg-background text-foreground min-h-screen flex flex-col items-center justify-center relative overflow-x-hidden pt-24 pb-12">
       {/* Background Cinematic Layer */}
-      <div className="fixed inset-0 z-0 bg-black">
+      <div className="fixed inset-0 z-0 bg-input">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           className="w-full h-full object-cover opacity-20 blur-sm" 
@@ -21,17 +21,17 @@ export function OnboardingFeature() {
 
       {/* Main Content Canvas */}
       <main className="relative z-10 w-full max-w-2xl px-6">
-        <div className="bg-[#19191c]/70 backdrop-blur-xl border border-[#48474a]/10 rounded-xl p-8 md:p-12 shadow-2xl">
+        <div className="bg-background/70 backdrop-blur-xl border border-border/10 rounded-xl p-8 md:p-12 shadow-2xl">
           <header className="text-center mb-10">
             <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Complete Your Profile</h1>
-            <p className="text-zinc-400 text-sm tracking-wide">Curate your cinematic identity for the gallery.</p>
+            <p className="text-muted-foreground text-sm tracking-wide">Curate your cinematic identity for the gallery.</p>
           </header>
 
           <form className="space-y-10">
             {/* Avatar Upload */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative group cursor-pointer">
-                <div className="w-32 h-32 rounded-full border-2 border-[#ff8e80]/20 p-1 flex items-center justify-center overflow-hidden bg-black">
+                <div className="w-32 h-32 rounded-full border-2 border-primary/20 p-1 flex items-center justify-center overflow-hidden bg-input">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     className="w-full h-full object-cover rounded-full group-hover:opacity-40 transition-opacity" 
@@ -39,30 +39,30 @@ export function OnboardingFeature() {
                     alt="Current Avatar" 
                   />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="material-symbols-outlined text-[#ff8e80] text-3xl">add_a_photo</span>
+                    <span className="material-symbols-outlined text-primary text-3xl">add_a_photo</span>
                   </div>
                 </div>
               </div>
-              <label className="text-xs font-bold uppercase tracking-widest text-[#ff8e80]/80">Change Portrait</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-primary/80">Change Portrait</label>
             </div>
 
             {/* Identity Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
-                <label className="font-headline text-xs font-bold tracking-widest uppercase text-zinc-500 px-1">Display Name</label>
-                <Input className="bg-black/50 border-[#48474a]/20 h-12 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" placeholder="e.g. CinemaLover99" />
+                <label className="font-headline text-xs font-bold tracking-widest uppercase text-muted-foreground px-1">Display Name</label>
+                <Input className="bg-black/50 border-border/20 h-12 text-foreground shadow-inner focus-visible:ring-primary" placeholder="e.g. CinemaLover99" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="font-headline text-xs font-bold tracking-widest uppercase text-zinc-500 px-1">Full Name</label>
-                <Input className="bg-black/50 border-[#48474a]/20 h-12 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" placeholder="e.g. Julian Vane" />
+                <label className="font-headline text-xs font-bold tracking-widest uppercase text-muted-foreground px-1">Full Name</label>
+                <Input className="bg-black/50 border-border/20 h-12 text-foreground shadow-inner focus-visible:ring-primary" placeholder="e.g. Julian Vane" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="font-headline text-xs font-bold tracking-widest uppercase text-zinc-500 px-1">Phone Number</label>
-                <Input className="bg-black/50 border-[#48474a]/20 h-12 text-[#f9f5f8] shadow-inner focus-visible:ring-[#ff8e80]" placeholder="+1 (555) 000-0000" type="tel" />
+                <label className="font-headline text-xs font-bold tracking-widest uppercase text-muted-foreground px-1">Phone Number</label>
+                <Input className="bg-black/50 border-border/20 h-12 text-foreground shadow-inner focus-visible:ring-primary" placeholder="+1 (555) 000-0000" type="tel" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="font-headline text-xs font-bold tracking-widest uppercase text-zinc-500 px-1">Gender</label>
-                <select className="bg-black/50 border border-[#48474a]/20 h-12 rounded-md px-3 text-[#f9f5f8] shadow-inner focus:ring-[#ff8e80] focus:outline-none appearance-none">
+                <label className="font-headline text-xs font-bold tracking-widest uppercase text-muted-foreground px-1">Gender</label>
+                <select className="bg-black/50 border border-border/20 h-12 rounded-md px-3 text-foreground shadow-inner focus:ring-primary focus:outline-none appearance-none">
                   <option disabled selected value="">Select Gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -71,17 +71,17 @@ export function OnboardingFeature() {
                 </select>
               </div>
               <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="font-headline text-xs font-bold tracking-widest uppercase text-zinc-500 px-1">Bio</label>
-                <textarea className="w-full bg-black/50 border border-[#48474a]/20 rounded-md px-3 py-3 text-[#f9f5f8] placeholder:text-zinc-600 focus:outline-[#ff8e80] transition-all resize-none shadow-inner" placeholder="Tell us about your cinematic taste..." rows={3}></textarea>
+                <label className="font-headline text-xs font-bold tracking-widest uppercase text-muted-foreground px-1">Bio</label>
+                <textarea className="w-full bg-black/50 border border-border/20 rounded-md px-3 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-[#ff8e80] transition-all resize-none shadow-inner" placeholder="Tell us about your cinematic taste..." rows={3}></textarea>
               </div>
             </div>
 
             {/* Content Preferences */}
             <div className="space-y-6 pt-4">
               <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-[#48474a]/30"></div>
-                <span className="font-headline text-xs font-bold tracking-widest uppercase text-zinc-500 px-2">Content Preferences</span>
-                <div className="h-px flex-1 bg-[#48474a]/30"></div>
+                <div className="h-px flex-1 bg-muted/30"></div>
+                <span className="font-headline text-xs font-bold tracking-widest uppercase text-muted-foreground px-2">Content Preferences</span>
+                <div className="h-px flex-1 bg-muted/30"></div>
               </div>
               <div className="flex flex-wrap gap-3 justify-center">
                 {['Action', 'Drama', 'Sci-Fi', 'Noir', 'Documentary', 'Horror', 'Indie', 'Comedy'].map((genre, idx) => (
@@ -90,8 +90,8 @@ export function OnboardingFeature() {
                     type="button"
                     className={`px-5 py-2 rounded-full border text-xs font-bold tracking-tight transition-all duration-300 ${
                       idx % 3 === 0 
-                      ? 'border-[#ff8e80]/40 bg-[#ff8e80]/10 text-[#ff8e80] hover:bg-[#ff8e80] hover:text-black' 
-                      : 'border-[#48474a]/30 bg-[#131315] text-zinc-400 hover:border-[#ff8e80]/50 hover:text-white'
+                      ? 'border-primary/40 bg-primary/10 text-primary hover:bg-primary hover:text-black' 
+                      : 'border-border/30 bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground'
                     }`}
                   >
                     {genre}
@@ -102,10 +102,10 @@ export function OnboardingFeature() {
 
             {/* Footer Actions */}
             <div className="pt-6 flex flex-col gap-4">
-              <Button className="w-full h-14 bg-gradient-to-br from-[#ff8e80] to-[#ff7668] text-[#4f0002] font-black tracking-widest uppercase shadow-lg shadow-[#ff8e80]/20 hover:brightness-110">
+              <Button className="w-full h-14 bg-gradient-to-br from-primary to-primary/90 text-[#4f0002] font-black tracking-widest uppercase shadow-lg shadow-primary/20 hover:brightness-110">
                 Save & Continue
               </Button>
-              <Button variant="ghost" className="w-full h-12 text-zinc-500 hover:bg-transparent hover:text-white uppercase tracking-widest text-xs font-bold">
+              <Button variant="ghost" className="w-full h-12 text-muted-foreground hover:bg-transparent hover:text-foreground uppercase tracking-widest text-xs font-bold">
                 Skip for now
               </Button>
             </div>

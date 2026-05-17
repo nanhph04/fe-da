@@ -48,7 +48,7 @@ export function HeroProfile({ user }: HeroProfileProps) {
             Thành viên từ {formatProfileDate(user.createdAt)}
           </p>
 
-          {user.bio && <p className="mb-6 max-w-2xl text-sm leading-relaxed text-zinc-300">{user.bio}</p>}
+          {user.bio && <p className="mb-6 max-w-2xl text-sm leading-relaxed text-foreground/80">{user.bio}</p>}
 
           <div className="flex flex-wrap items-center justify-center gap-4 md:justify-start">
             <div className="rounded-lg border-l-4 border-primary bg-background px-6 py-3 shadow-lg">

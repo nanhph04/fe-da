@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import {
   isNavItemVisible,
   studioEntryByRole,
@@ -58,8 +59,8 @@ export function TopNav() {
   const canRenderAvatar = Boolean(user?.avatarUrl && user.avatarUrl !== failedAvatarUrl);
 
   return (
-    <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-zinc-950/40 backdrop-blur-xl bg-gradient-to-b from-zinc-900 to-transparent">
-      <Link href="/" className="text-2xl font-black text-red-600 tracking-tighter font-headline">
+    <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-background/40 backdrop-blur-xl bg-gradient-to-b from-muted to-transparent">
+      <Link href="/" className="text-2xl font-black text-primary tracking-tighter font-headline">
         Aura
       </Link>
 
@@ -73,7 +74,7 @@ export function TopNav() {
                   key={item.label}
                   href={item.path!}
                   className={`font-headline tracking-tight font-bold transition-colors duration-300 ${
-                    isActive ? "text-white" : "text-zinc-400 hover:text-white"
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {item.label}
@@ -85,7 +86,7 @@ export function TopNav() {
               <Link
                 href={roleEntry.path!}
                 className={`font-headline tracking-tight font-bold transition-colors duration-300 ml-2 ${
-                  pathname?.startsWith(roleEntry.path!) ? "text-white" : "text-zinc-400 hover:text-white"
+                  pathname?.startsWith(roleEntry.path!) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {roleEntry.label}
@@ -94,22 +95,24 @@ export function TopNav() {
           </div>
 
           <div className="flex items-center gap-4 relative">
+            <ThemeToggle />
+
             {role === "guest" ? (
               <div className="flex gap-4">
-                <Link href="/login" className="text-white font-bold hover:text-red-500 transition-colors">
+                <Link href="/login" className="text-foreground font-bold hover:text-primary transition-colors">
                   Sign In
                 </Link>
-                <Link href="/register" className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-sm font-bold transition-colors">
+                <Link href="/register" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-sm font-bold transition-colors">
                   Sign Up
                 </Link>
               </div>
             ) : (
               <>
-                <span className="material-symbols-outlined text-zinc-400 hover:text-white cursor-pointer transition-colors">notifications</span>
+                <span className="material-symbols-outlined text-muted-foreground hover:text-foreground cursor-pointer transition-colors">notifications</span>
                 <button
                   type="button"
                   aria-label="Mở menu tài khoản"
-                  className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-zinc-700 bg-muted text-sm font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
+                  className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-sm font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                   onClick={() => setShowDropdown(value => !value)}
                 >
                   {user?.avatarUrl && canRenderAvatar ? (
@@ -126,14 +129,14 @@ export function TopNav() {
                 </button>
 
                 {showDropdown && (
-                  <div className="absolute top-12 right-0 w-48 bg-[#111] border border-zinc-800 rounded-sm shadow-2xl py-2 flex flex-col">
-                    <div className="px-4 py-2 border-b border-zinc-800 mb-2">
-                      <p className="text-white font-bold truncate">{user?.displayName || user?.email}</p>
-                      <p className="text-xs text-zinc-500 uppercase tracking-widest">{role}</p>
+                  <div className="absolute top-12 right-0 w-48 bg-popover border border-border rounded-sm shadow-2xl py-2 flex flex-col">
+                    <div className="px-4 py-2 border-b border-border mb-2">
+                      <p className="text-foreground font-bold truncate">{user?.displayName || user?.email}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest">{role}</p>
                     </div>
                     <Link
                       href="/profile"
-                      className="px-4 py-2 text-sm text-zinc-300 hover:bg-[#19191c] hover:text-white transition-colors text-left"
+                      className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
                       onClick={() => setShowDropdown(false)}
                     >
                       My Profile
@@ -143,7 +146,7 @@ export function TopNav() {
                         logout();
                         setShowDropdown(false);
                       }}
-                      className="px-4 py-2 text-sm text-red-500 hover:bg-[#19191c] transition-colors text-left font-bold"
+                      className="px-4 py-2 text-sm text-destructive hover:bg-accent transition-colors text-left font-bold"
                     >
                       Sign Out
                     </button>

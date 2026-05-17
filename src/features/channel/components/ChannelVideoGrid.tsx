@@ -68,7 +68,7 @@ export function ChannelVideoGrid({ videos, channelName }: ChannelVideoGridProps)
                   </div>
                 )}
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <span className="rounded-sm bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-white">
+                  <span className="rounded-sm bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">
                     {video.category}
                   </span>
                 </div>

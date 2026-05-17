@@ -66,7 +66,7 @@ export function ChannelHero({ channel }: ChannelHeroProps) {
               </span>
             ) : null}
           </div>
-          <p className="mt-5 max-w-3xl text-sm leading-relaxed text-zinc-300 md:text-base">
+          <p className="mt-5 max-w-3xl text-sm leading-relaxed text-foreground/80 md:text-base">
             {channel.bio || "Kênh chưa cập nhật phần giới thiệu."}
           </p>
         </div>

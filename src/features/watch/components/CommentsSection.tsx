@@ -41,8 +41,8 @@ export function CommentsSection() {
   return (
     <div className="pt-10 space-y-10">
       <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-headline font-bold text-[#f9f5f8]">{comments.length + 2481} Comments</h3>
-        <div className="flex items-center gap-3 text-sm font-bold text-zinc-400 cursor-pointer hover:text-white transition-colors">
+        <h3 className="text-2xl font-headline font-bold text-foreground">{comments.length + 2481} Comments</h3>
+        <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
           <span className="material-symbols-outlined">sort</span>
           <span>Sort by</span>
         </div>
@@ -50,7 +50,7 @@ export function CommentsSection() {
 
       {/* Comment Input */}
       <div className="flex gap-6">
-        <Avatar className="w-12 h-12 border border-[#48474a]/20">
+        <Avatar className="w-12 h-12 border border-border/20">
           <AvatarImage src={user?.avatarUrl || ""} alt="User avatar" />
           <AvatarFallback>{user ? (user.displayName || user.email || 'U')[0] : 'U'}</AvatarFallback>
         </Avatar>
@@ -60,14 +60,14 @@ export function CommentsSection() {
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={(e) => { if(e.key === 'Enter') handleComment(); }}
-            className="w-full bg-transparent border-0 border-b border-zinc-800 rounded-none px-0 py-3 focus-visible:ring-0 focus-visible:border-[#ff8e80] transition-colors text-sm placeholder:text-zinc-600 text-white" 
+            className="w-full bg-transparent border-0 border-b border-border rounded-none px-0 py-3 focus-visible:ring-0 focus-visible:border-primary transition-colors text-sm placeholder:text-muted-foreground/50 text-foreground" 
             placeholder={user ? "Add a public comment..." : "Sign in to add a public comment..."} 
             disabled={!user}
           />
           <div className="flex justify-end gap-4 md:gap-6">
             <Button 
               variant="ghost" 
-              className="text-sm font-bold text-zinc-500 hover:text-white hover:bg-transparent"
+              className="text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-transparent"
               onClick={() => setCommentText("")}
               disabled={!commentText}
             >
@@ -76,7 +76,7 @@ export function CommentsSection() {
             <Button 
               onClick={handleComment}
               disabled={!commentText || !user}
-              className={`px-8 rounded-full text-sm font-bold transition-all ${commentText ? 'bg-[#ff8e80] text-black hover:bg-[#ff7668]' : 'bg-zinc-800 text-zinc-400'}`}
+              className={`px-8 rounded-full text-sm font-bold transition-all ${commentText ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-muted text-muted-foreground'}`}
             >
               Comment
             </Button>
@@ -88,26 +88,26 @@ export function CommentsSection() {
       <div className="space-y-10 mt-8">
         {comments.map(c => (
           <div key={c.id} className="flex gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-            <Avatar className="w-12 h-12 border border-[#48474a]/20">
+            <Avatar className="w-12 h-12 border border-border/20">
               <AvatarImage src={c.avatar} alt={c.author} />
               <AvatarFallback>{c.author.substring(0,2)}</AvatarFallback>
             </Avatar>
             
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <span className={`font-bold text-sm ${c.author === (user?.displayName || user?.email) ? 'text-[#ff8e80]' : 'text-[#f9f5f8]'}`}>{c.author}</span>
-                <span className="text-zinc-600 text-xs">{c.time}</span>
+                <span className={`font-bold text-sm ${c.author === (user?.displayName || user?.email) ? 'text-primary' : 'text-foreground'}`}>{c.author}</span>
+                <span className="text-muted-foreground/50 text-xs">{c.time}</span>
               </div>
-              <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {c.text}
               </p>
               <div className="flex items-center gap-6 pt-3">
-                <div className="flex items-center gap-2 cursor-pointer text-zinc-500 hover:text-[#ff8e80] transition-colors">
+                <div className="flex items-center gap-2 cursor-pointer text-muted-foreground hover:text-primary transition-colors">
                   <span className="material-symbols-outlined text-sm">thumb_up</span>
                   <span className="text-xs font-bold">{c.likes > 0 ? c.likes : ''}</span>
                 </div>
-                <span className="material-symbols-outlined text-sm text-zinc-500 hover:text-red-500 cursor-pointer transition-colors">thumb_down</span>
-                <span className="text-xs font-bold text-zinc-500 hover:text-white cursor-pointer transition-colors uppercase tracking-widest">Reply</span>
+                <span className="material-symbols-outlined text-sm text-muted-foreground hover:text-destructive cursor-pointer transition-colors">thumb_down</span>
+                <span className="text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer transition-colors uppercase tracking-widest">Reply</span>
               </div>
             </div>
           </div>

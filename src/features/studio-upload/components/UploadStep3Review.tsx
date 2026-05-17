@@ -96,9 +96,9 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
           <span className="material-symbols-outlined text-green-500 text-6xl">check_circle</span>
         </div>
-        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-[#f9f5f8] mb-2">Upload Submitted</h1>
-        <p className="text-zinc-400">Video đã được gửi sang pipeline xử lý và kiểm duyệt.</p>
-        <p className="text-zinc-500 text-sm mt-4">Redirecting to Content Library...</p>
+        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-foreground mb-2">Upload Submitted</h1>
+        <p className="text-muted-foreground">Video đã được gửi sang pipeline xử lý và kiểm duyệt.</p>
+        <p className="text-muted-foreground text-sm mt-4">Redirecting to Content Library...</p>
       </div>
     );
   }
@@ -198,7 +198,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
 
       {/* Publishing Overlay */}
       {isPublishing && (
-        <div className="fixed inset-0 z-50 bg-[#0e0e10]/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="w-full max-w-sm space-y-4 rounded-lg border border-border/30 bg-card p-8 text-center shadow-2xl">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
             <h3 className="font-headline font-bold text-xl text-on-surface">Publishing your Masterpiece...</h3>

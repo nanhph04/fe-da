@@ -30,11 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${manrope.variable} h-full antialiased`}
-      style={{ colorScheme: "dark" }}
+      className={`${inter.variable} ${manrope.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[#0e0e10] text-[#f9f5f8]" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
         <Script id="remove-extension-hydration-attrs" strategy="beforeInteractive">
           {`(function () {
   function removeInjectedAttrs(root) {
@@ -80,7 +79,7 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem={false}
+          enableSystem
           disableTransitionOnChange
         >
           <AuthProvider>

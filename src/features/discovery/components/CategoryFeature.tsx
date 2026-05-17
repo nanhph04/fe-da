@@ -36,7 +36,7 @@ export function CategoryFeature({ slug }: { slug: string }) {
         <div className="relative z-10 max-w-4xl px-8 pb-20 md:px-16">
           <div className="mb-4 flex items-center gap-3">
             <span className="rounded-sm bg-secondary px-3 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-foreground">Lv3: Exclusive</span>
-            <span className="text-sm font-medium tracking-wide text-zinc-300">{category.name} Collection</span>
+            <span className="text-sm font-medium tracking-wide text-foreground/80">{category.name} Collection</span>
           </div>
           <h1 className="mb-6 font-headline text-6xl font-black leading-[0.9] tracking-tight text-foreground md:text-8xl">{category.name.toUpperCase()}</h1>
           <p className="mb-8 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">{category.description}</p>
@@ -45,7 +45,7 @@ export function CategoryFeature({ slug }: { slug: string }) {
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
               Watch Now
             </button>
-            <button className="rounded-sm border border-white/10 bg-white/10 px-10 py-4 font-headline text-lg font-bold text-white backdrop-blur-md transition-all hover:bg-white/20">
+            <button className="rounded-sm border border-white/10 bg-white/10 px-10 py-4 font-headline text-lg font-bold text-foreground backdrop-blur-md transition-all hover:bg-white/20">
               View Details
             </button>
           </div>
@@ -70,20 +70,20 @@ export function CategoryFeature({ slug }: { slug: string }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="rounded-sm bg-secondary px-2 py-0.5 text-[10px] font-black text-secondary-foreground">Lv3: Exclusive</span>
-                  {index === 1 ? <span className="rounded-sm bg-green-600 px-2 py-0.5 text-[10px] font-black uppercase text-white">Unlocked</span> : null}
+                  {index === 1 ? <span className="rounded-sm bg-green-600 px-2 py-0.5 text-[10px] font-black uppercase text-foreground">Unlocked</span> : null}
                 </div>
                 {index === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                     <div className="rounded-lg border border-secondary/30 bg-card/90 p-6 text-center backdrop-blur-xl">
                       <span className="material-symbols-outlined mb-2 text-4xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                      <div className="font-headline font-bold text-white">Unlock for 150 AC</div>
-                      <div className="text-xs text-zinc-400">Lifetime access</div>
+                      <div className="font-headline font-bold text-foreground">Unlock for 150 AC</div>
+                      <div className="text-xs text-muted-foreground">Lifetime access</div>
                     </div>
                   </div>
                 ) : null}
                 <div className="absolute bottom-4 left-4">
-                  <h3 className="font-headline text-xl font-bold text-white">{video.title}</h3>
-                  <div className="text-xs text-zinc-400 font-label">{video.creator} • {video.duration} • {video.views}</div>
+                  <h3 className="font-headline text-xl font-bold text-foreground">{video.title}</h3>
+                  <div className="text-xs text-muted-foreground font-label">{video.creator} • {video.duration} • {video.views}</div>
                 </div>
               </div>
             ))}

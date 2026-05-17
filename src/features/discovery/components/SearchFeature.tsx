@@ -25,24 +25,24 @@ export function SearchFeature({ initialQuery = "" }: { initialQuery?: string }) 
   const [sortBy, setSortBy] = useState("relevance");
 
   return (
-    <div className="pt-24 min-h-screen bg-[#0e0e10]">
+    <div className="pt-24 min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-8 pb-16">
         {/* Search Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold font-headline text-white mb-2">
+          <h1 className="text-3xl font-bold font-headline text-foreground mb-2">
             Search Results
           </h1>
-          <p className="text-zinc-500">
-            Found <span className="text-[#ff8e80] font-bold">{mockResults.results.length}</span> results for &quot;{query}&quot;
+          <p className="text-muted-foreground">
+            Found <span className="text-primary font-bold">{mockResults.results.length}</span> results for &quot;{query}&quot;
           </p>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-8 pb-8 border-b border-zinc-800">
+        <div className="flex flex-wrap gap-4 mb-8 pb-8 border-b border-border">
           <select 
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-white px-4 py-2 rounded-sm text-sm focus:border-[#ff8e80] outline-none"
+            className="bg-accent border border-border text-foreground px-4 py-2 rounded-sm text-sm focus:border-primary outline-none"
           >
             {mockResults.categories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
@@ -52,7 +52,7 @@ export function SearchFeature({ initialQuery = "" }: { initialQuery?: string }) 
           <select 
             value={selectedDuration}
             onChange={(e) => setSelectedDuration(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-white px-4 py-2 rounded-sm text-sm focus:border-[#ff8e80] outline-none"
+            className="bg-accent border border-border text-foreground px-4 py-2 rounded-sm text-sm focus:border-primary outline-none"
           >
             {mockResults.durationFilters.map(dur => (
               <option key={dur} value={dur}>{dur}</option>
@@ -62,7 +62,7 @@ export function SearchFeature({ initialQuery = "" }: { initialQuery?: string }) 
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 text-white px-4 py-2 rounded-sm text-sm focus:border-[#ff8e80] outline-none"
+            className="bg-accent border border-border text-foreground px-4 py-2 rounded-sm text-sm focus:border-primary outline-none"
           >
             {mockResults.sortBy.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -86,7 +86,7 @@ export function SearchFeature({ initialQuery = "" }: { initialQuery?: string }) 
 
         {/* Load More */}
         <div className="mt-12 text-center">
-          <button className="px-8 py-3 bg-zinc-900 border border-zinc-800 text-white font-bold text-sm rounded-sm hover:border-[#ff8e80] transition-colors">
+          <button className="px-8 py-3 bg-accent border border-border text-foreground font-bold text-sm rounded-sm hover:border-primary transition-colors">
             Load More Results
           </button>
         </div>

@@ -12,7 +12,7 @@ export function EarningsChart({ earnings }: EarningsChartProps) {
 
   return (
     <div className="bg-[var(--color-border-700)] rounded-xl p-6 h-64 flex items-center justify-center">
-      <div className="text-center text-zinc-400">
+      <div className="text-center text-muted-foreground">
         <div className="text-3xl mb-2">📊</div>
         <p>Earnings Chart</p>
         <p className="text-sm">

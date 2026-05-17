@@ -59,7 +59,7 @@ export function WatchChannelCard({
 
   return (
     <section className="mt-8 space-y-6">
-      <div className="flex flex-col gap-6 rounded-lg border border-border/20 bg-zinc-950/50 p-6 shadow-2xl md:flex-row md:items-center md:justify-between md:p-8">
+      <div className="flex flex-col gap-6 rounded-lg border border-border/20 bg-background/50 p-6 shadow-2xl md:flex-row md:items-center md:justify-between md:p-8">
         <div className="flex min-w-0 items-center gap-5">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-secondary/30 bg-gradient-to-tr from-primary/80 to-secondary/80 p-0.5 text-sm font-black text-foreground">
             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-4 border-zinc-950 bg-card">
@@ -87,7 +87,7 @@ export function WatchChannelCard({
                 channelTitle
               )}
             </h2>
-            <p className="mt-1 text-sm font-medium text-zinc-500">
+            <p className="mt-1 text-sm font-medium text-muted-foreground">
               {membershipTiers.length > 0
                 ? `${membershipTiers.length} gói membership • ${acceptingTierCount} gói đang mở`
                 : "Kênh chưa mở membership"}
@@ -108,8 +108,8 @@ export function WatchChannelCard({
         <WatchMembershipPanel channelId={channelId} tiers={membershipTiers} />
       ) : null}
 
-      <div className="rounded-lg border border-border/20 bg-zinc-950/30 p-6 md:p-8">
-        <p className={`whitespace-pre-wrap text-sm font-medium leading-relaxed text-zinc-400 ${isDescriptionOpen ? "" : "line-clamp-4"}`}>
+      <div className="rounded-lg border border-border/20 bg-background/30 p-6 md:p-8">
+        <p className={`whitespace-pre-wrap text-sm font-medium leading-relaxed text-muted-foreground ${isDescriptionOpen ? "" : "line-clamp-4"}`}>
           {hasDescription ? description : "Chưa có mô tả cho video này."}
         </p>
         {hasDescription && description.length > 220 ? (

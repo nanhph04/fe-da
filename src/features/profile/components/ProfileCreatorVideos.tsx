@@ -51,7 +51,7 @@ export function ProfileCreatorVideos({ videos, error }: ProfileCreatorVideosProp
                 <Film className="h-10 w-10" />
               </div>
             )}
-            <div className="absolute bottom-2 right-2 rounded-sm bg-black/70 px-2 py-1 text-xs font-mono font-bold text-white">
+            <div className="absolute bottom-2 right-2 rounded-sm bg-black/70 px-2 py-1 text-xs font-mono font-bold text-foreground">
               {formatDuration(video.durationSeconds)}
             </div>
             <div className="absolute left-2 top-2 rounded-sm bg-background/80 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">

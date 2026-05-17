@@ -96,27 +96,27 @@ export function getStatusBadgeStyle(status: string): string {
   const normalizedStatus = status.toUpperCase();
   switch (normalizedStatus) {
     case "ACTIVE":
-      return "bg-green-500 text-white";
+      return "bg-green-500 text-foreground";
     case "INACTIVE":
-      return "bg-gray-500 text-white";
+      return "bg-gray-500 text-foreground";
     case "FROZEN":
-      return "bg-blue-500 text-white";
+      return "bg-blue-500 text-foreground";
     case "SUSPENDED":
-      return "bg-red-500 text-white";
+      return "bg-red-500 text-foreground";
     case "PENDING":
       return "bg-yellow-500 text-black";
     case "COMPLETED":
-      return "bg-green-500 text-white";
+      return "bg-green-500 text-foreground";
     case "FAILED":
-      return "bg-red-500 text-white";
+      return "bg-red-500 text-foreground";
     case "CANCELLED":
-      return "bg-gray-500 text-white";
+      return "bg-gray-500 text-foreground";
     case "APPROVED":
-      return "bg-green-500 text-white";
+      return "bg-green-500 text-foreground";
     case "REJECTED":
-      return "bg-red-500 text-white";
+      return "bg-red-500 text-foreground";
     default:
-      return "bg-gray-400 text-white";
+      return "bg-gray-400 text-foreground";
   }
 }
 

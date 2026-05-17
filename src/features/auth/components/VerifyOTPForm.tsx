@@ -109,9 +109,9 @@ export function VerifyOTPForm() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-black/35 px-6 py-6 backdrop-blur-xl md:px-8">
+      <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-background/35 px-6 py-6 backdrop-blur-xl md:px-8">
         <PublicBrand href="/" />
-        <span className="font-headline text-sm font-bold tracking-tight text-zinc-400 transition-colors hover:text-white">Help</span>
+        <span className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground">Help</span>
       </header>
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#19191c_0%,#0e0e10_100%)]" />
@@ -140,7 +140,7 @@ export function VerifyOTPForm() {
                       <InputOTPSlot
                         key={index}
                         index={index}
-                        className="h-20 w-14 rounded-sm bg-black font-headline text-3xl font-extrabold text-primary ring-1 ring-border/30 transition-all data-[active=true]:ring-2 data-[active=true]:ring-primary"
+                        className="h-20 w-14 rounded-sm bg-input font-headline text-3xl font-extrabold text-primary ring-1 ring-border/30 transition-all data-[active=true]:ring-2 data-[active=true]:ring-primary"
                       />
                     ))}
                   </InputOTPGroup>
@@ -201,9 +201,9 @@ export function VerifyOTPForm() {
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Privacy Policy</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Terms of Service</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Cookie Preferences</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Privacy Policy</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Terms of Service</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Cookie Preferences</span>
       </footer>
     </div>
   );

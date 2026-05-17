@@ -15,10 +15,10 @@ export function JoinMembershipFeature() {
         <div className="flex w-full items-center justify-between px-8 py-4">
           <div className="font-headline text-2xl font-black tracking-tight text-primary">Velvet Gallery</div>
           <nav className="hidden items-center gap-8 md:flex">
-            <span className="text-sm font-medium text-zinc-400">Browse</span>
+            <span className="text-sm font-medium text-muted-foreground">Browse</span>
             <span className="border-b-2 border-primary pb-1 text-sm font-bold text-primary">Memberships</span>
-            <span className="text-sm font-medium text-zinc-400">Live</span>
-            <span className="text-sm font-medium text-zinc-400">My Coins</span>
+            <span className="text-sm font-medium text-muted-foreground">Live</span>
+            <span className="text-sm font-medium text-muted-foreground">My Coins</span>
           </nav>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 rounded-full border border-border/20 bg-card px-3 py-1.5">

@@ -32,7 +32,7 @@ export function UploadProgressCard({
   };
 
   return (
-    <div className="w-full rounded-lg border border-[#262528] bg-[#131315] p-5 shadow-xl md:w-80">
+    <div className="w-full rounded-lg border border-border bg-card p-5 shadow-xl md:w-80">
       <input
         ref={inputRef}
         type="file"
@@ -47,14 +47,14 @@ export function UploadProgressCard({
 
       {!file ? (
         <div className="flex flex-col gap-3">
-          <span className="text-center font-headline text-sm font-medium text-zinc-400">
+          <span className="text-center font-headline text-sm font-medium text-muted-foreground">
             Select video file to begin
           </span>
           <button
             type="button"
             onClick={openFilePicker}
             disabled={isReplacing}
-            className="w-full border border-dashed border-zinc-600 bg-[#262528] py-2 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3d3d40] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full border border-dashed border-border bg-muted py-2 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
           >
             Browse Files
           </button>
@@ -72,7 +72,7 @@ export function UploadProgressCard({
             <p className="truncate font-headline text-sm font-semibold text-zinc-200" title={file.name}>
               {file.name}
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {formatFileSize(file.size)} {file.type ? `· ${file.type}` : ""}
             </p>
             {replaceError ? <p className="mt-2 text-xs text-destructive">{replaceError}</p> : null}
@@ -83,7 +83,7 @@ export function UploadProgressCard({
               type="button"
               onClick={openFilePicker}
               disabled={isReplacing}
-              className="flex-1 rounded-sm bg-[#262528] py-2 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3d3d40] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-sm bg-muted py-2 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isReplacing ? "Replacing..." : "Replace"}
             </button>
@@ -91,7 +91,7 @@ export function UploadProgressCard({
               type="button"
               onClick={() => onFileSelect(null)}
               disabled={isReplacing}
-              className="rounded-sm border border-border/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-zinc-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-sm border border-border/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
             >
               Clear
             </button>

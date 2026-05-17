@@ -30,24 +30,24 @@ export function RecentPayouts() {
 
   if (loading) {
     return (
-      <div className="bg-[#131315] border border-[var(--color-border-700)] rounded-lg p-8">
-        <div className="h-32 bg-[#131315] border border-[var(--color-border-700)] rounded-lg animate-pulse" />
+      <div className="bg-card border border-[var(--color-border-700)] rounded-lg p-8">
+        <div className="h-32 bg-card border border-[var(--color-border-700)] rounded-lg animate-pulse" />
       </div>
     );
   }
 
   if (withdrawals.length === 0) {
     return (
-      <div className="bg-[#131315] border border-[var(--color-border-700)] rounded-lg p-8 text-center">
-        <p className="text-zinc-400">No withdrawal history</p>
+      <div className="bg-card border border-[var(--color-border-700)] rounded-lg p-8 text-center">
+        <p className="text-muted-foreground">No withdrawal history</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#131315] border border-[var(--color-border-700)] rounded-lg p-8">
+    <div className="bg-card border border-[var(--color-border-700)] rounded-lg p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold font-headline text-white">
+        <h2 className="text-2xl font-bold font-headline text-foreground">
           Recent Withdrawals
         </h2>
       </div>
@@ -77,29 +77,29 @@ function WithdrawalRow({ withdrawal }: WithdrawalRowProps) {
       case "rejected":
         return "text-[#ef4444]";
       default:
-        return "text-zinc-400";
+        return "text-muted-foreground";
     }
   };
 
   return (
-    <div className="bg-[var(--color-border-700)] rounded-lg p-4 hover:bg-[#2e2d30] transition-colors">
+    <div className="bg-[var(--color-border-700)] rounded-lg p-4 hover:bg-accent transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-2">
             <span className="material-symbols-outlined text-[var(--color-primary-600)] text-xl">
               account_balance
             </span>
-            <span className="font-medium text-white truncate">
+            <span className="font-medium text-foreground truncate">
               {withdrawal.bankInfo.bankName}
             </span>
           </div>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             {formatDate(withdrawal.requestedAt)}
           </p>
         </div>
 
         <div className="text-right">
-          <div className="font-bold text-white">
+          <div className="font-bold text-foreground">
             {formatCurrency(withdrawal.coinAmount)} AC
           </div>
           <div className={`text-sm font-medium ${getStatusColor(withdrawal.status)}`}>

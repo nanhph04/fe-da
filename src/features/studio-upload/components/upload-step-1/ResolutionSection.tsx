@@ -11,12 +11,12 @@ export function ResolutionSection({
   updateFormData,
 }: ResolutionSectionProps) {
   return (
-    <section className="space-y-4 rounded-xl border border-[#262528] bg-[#131315] p-6">
+    <section className="space-y-4 rounded-xl border border-border bg-card p-6">
       <div>
-        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-500">
+        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
           Processing Resolutions
         </h3>
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Các độ phân giải này khớp với body `resolutions` của API xử lý video.
         </p>
       </div>
@@ -38,7 +38,7 @@ export function ResolutionSection({
                   })
                 }
               />
-              <div className="rounded-lg border border-[#262528] bg-[#19191c] px-4 py-3 text-sm font-bold text-zinc-300 transition-all peer-checked:border-[#ff8e80] peer-checked:bg-[#ff8e80]/10 peer-checked:text-[#ffb2aa]">
+              <div className="rounded-lg border border-border bg-background px-4 py-3 text-sm font-bold text-foreground/80 transition-all peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary">
                 {resolution}
               </div>
             </label>

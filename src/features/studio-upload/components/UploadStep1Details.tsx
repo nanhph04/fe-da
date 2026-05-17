@@ -116,7 +116,7 @@ export function UploadStep1Details({
               className="w-full border-0 border-b-2 border-border/50 bg-transparent px-0 py-4 font-headline text-xl font-semibold text-foreground outline-none transition-all placeholder:text-muted-foreground/50 focus:border-primary focus:ring-0"
             />
             <div className="mt-1 flex justify-end">
-              <span className="text-[10px] text-zinc-600">
+              <span className="text-[10px] text-muted-foreground/50">
                 {formData.title.length} / 200
               </span>
             </div>
@@ -129,7 +129,7 @@ export function UploadStep1Details({
               </label>
             </div>
             <textarea
-              className="min-h-[200px] w-full resize-none border-0 bg-transparent font-body leading-relaxed text-zinc-300 outline-none focus:ring-0"
+              className="min-h-[200px] w-full resize-none border-0 bg-transparent font-body leading-relaxed text-foreground/80 outline-none focus:ring-0"
               placeholder="Tell viewers about your video..."
               value={formData.description}
               onChange={e => updateFormData({ description: e.target.value })}
@@ -157,15 +157,15 @@ export function UploadStep1Details({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-20 items-center justify-between border-t border-[#262528] bg-[#131315]/80 px-8 backdrop-blur-2xl md:left-64">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-20 items-center justify-between border-t border-border bg-card/80 px-8 backdrop-blur-2xl md:left-64">
         <div className="flex items-center gap-4">
           <div className="hidden flex-col sm:flex">
-            <span className="text-[10px] uppercase tracking-widest text-zinc-500">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
               Status
             </span>
             <span
               className={`flex items-center gap-1 text-xs font-bold ${
-                formData.file ? "text-green-500" : "text-zinc-500"
+                formData.file ? "text-green-500" : "text-muted-foreground"
               }`}
             >
               {formData.file ? (
@@ -181,8 +181,8 @@ export function UploadStep1Details({
             disabled={!canContinue}
             className={`rounded-sm px-8 py-2.5 text-sm font-bold transition-all active:scale-95 ${
               canContinue
-                ? "bg-gradient-to-r from-[#ff8e80] to-[#ff7668] text-[#650003] hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]"
-                : "pointer-events-none bg-zinc-800 text-zinc-500"
+                ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]"
+                : "pointer-events-none bg-muted text-muted-foreground"
             }`}
           >
             Next: Pricing & Monetization

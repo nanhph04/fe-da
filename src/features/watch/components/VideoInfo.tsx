@@ -42,7 +42,7 @@ export function VideoInfo({ title, viewCount, publishedAt, category, tags = [] }
                 {badges.map((badge) => (
                   <span
                     key={badge}
-                    className="rounded-md border border-border/40 bg-muted/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-300"
+                    className="rounded-md border border-border/40 bg-muted/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-foreground/80"
                   >
                     {badge}
                   </span>

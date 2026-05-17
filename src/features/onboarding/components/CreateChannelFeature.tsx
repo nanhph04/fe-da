@@ -134,7 +134,7 @@ export function CreateChannelFeature() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-x-hidden bg-background pt-24 pb-12 text-foreground">
-      <div className="fixed inset-0 z-0 bg-black">
+      <div className="fixed inset-0 z-0 bg-input">
         <Image
           className="object-cover opacity-30"
           src="/images/complete-profile-bg.jpg"
@@ -165,7 +165,7 @@ export function CreateChannelFeature() {
                 maxLength={100}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-14 border-border/40 bg-black/80 text-lg text-foreground shadow-inner placeholder:text-zinc-500 focus-visible:border-primary focus-visible:ring-primary" 
+                className="h-14 border-border/40 bg-black/80 text-lg text-foreground shadow-inner placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary" 
                 placeholder="Ví dụ: Velvet Productions" 
               />
             </div>
@@ -177,7 +177,7 @@ export function CreateChannelFeature() {
                 maxLength={1000}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="min-h-[120px] w-full resize-none rounded-md border border-border/40 bg-black/80 px-4 py-3 text-foreground shadow-inner transition-all placeholder:text-zinc-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
+                className="min-h-[120px] w-full resize-none rounded-md border border-border/40 bg-black/80 px-4 py-3 text-foreground shadow-inner transition-all placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" 
                 placeholder="Mô tả nội dung kênh của bạn..." 
               ></textarea>
             </div>

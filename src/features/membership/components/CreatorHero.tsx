@@ -10,7 +10,7 @@ export function CreatorHero() {
       />
       
       <div className="absolute bottom-0 left-0 p-10 z-20 flex items-end gap-8">
-        <div className="w-32 h-32 rounded-lg border-4 border-[#0e0e10] shadow-2xl overflow-hidden bg-[#19191c]">
+        <div className="w-32 h-32 rounded-lg border-4 border-[#0e0e10] shadow-2xl overflow-hidden bg-background">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             className="w-full h-full object-cover" 
@@ -21,12 +21,12 @@ export function CreatorHero() {
         
         <div className="pb-2">
           <div className="flex items-center gap-3">
-            <h1 className="font-headline text-5xl font-black -tracking-widest text-[#f9f5f8] uppercase italic">CinemaLabs</h1>
+            <h1 className="font-headline text-5xl font-black -tracking-widest text-foreground uppercase italic">CinemaLabs</h1>
             <span className="material-symbols-outlined text-[#fdc003]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
           </div>
-          <p className="text-zinc-400 mt-2 font-medium tracking-wide flex items-center gap-2">
+          <p className="text-muted-foreground mt-2 font-medium tracking-wide flex items-center gap-2">
             <span>4.2M Subscribers</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#48474a]"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-muted"></span>
             <span>Premium Studio Member</span>
           </p>
         </div>

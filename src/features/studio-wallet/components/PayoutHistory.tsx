@@ -94,10 +94,10 @@ export function PayoutHistory({
               key={status}
               type="button"
               variant="outline"
-              className={`rounded-md border-zinc-800 ${
+              className={`rounded-md border-border ${
                 filters.status === status
-                  ? "bg-[#2a0d12] text-white"
-                  : "bg-transparent text-zinc-400 hover:bg-zinc-900"
+                  ? "bg-destructive/10 text-foreground"
+                  : "bg-transparent text-muted-foreground hover:bg-accent"
               }`}
               onClick={() => handleStatusChange(status)}
             >
@@ -111,7 +111,7 @@ export function PayoutHistory({
 
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-zinc-800 text-zinc-500">
+          <thead className="border-b border-border text-muted-foreground">
             <tr>
               <th className="pb-3 pr-4 font-medium">Requested</th>
               <th className="pb-3 pr-4 font-medium">Bank</th>
@@ -123,25 +123,25 @@ export function PayoutHistory({
           <tbody>
             {isLoading ? (
               <tr>
-                <td className="py-6 text-zinc-400" colSpan={5}>
+                <td className="py-6 text-muted-foreground" colSpan={5}>
                   Loading withdrawal history...
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td className="py-6 text-zinc-500" colSpan={5}>
+                <td className="py-6 text-muted-foreground" colSpan={5}>
                   No withdrawal records found.
                 </td>
               </tr>
             ) : (
               items.map(item => (
-                <tr key={item.id} className="border-b border-zinc-900/80 text-zinc-200">
+                <tr key={item.id} className="border-b border-border/80 text-zinc-200">
                   <td className="py-4 pr-4">{new Date(item.requestedAt).toLocaleDateString()}</td>
                   <td className="py-4 pr-4">{item.bankInfo.bankName}</td>
                   <td className="py-4 pr-4">{item.coinAmount.toLocaleString()} AC</td>
                   <td className="py-4 pr-4">{item.moneyAmount.toLocaleString()} VND</td>
                   <td className="py-4 pr-4">
-                    <span className="rounded-sm border border-zinc-800 px-2 py-1 text-xs uppercase tracking-wide text-zinc-300">
+                    <span className="rounded-sm border border-border px-2 py-1 text-xs uppercase tracking-wide text-foreground/80">
                       {item.status}
                     </span>
                   </td>
@@ -153,7 +153,7 @@ export function PayoutHistory({
       </div>
 
       {pagination.totalPages > 1 ? (
-        <div className="mt-6 flex items-center justify-between text-sm text-zinc-400">
+        <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
           <span>
             Page {pagination.page} / {pagination.totalPages}
           </span>

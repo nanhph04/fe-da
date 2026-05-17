@@ -8,7 +8,7 @@ interface VideoEarningsListProps {
 export function VideoEarningsList({ videos }: VideoEarningsListProps) {
   if (videos.length === 0) {
     return (
-      <div className="text-center py-8 text-zinc-400">
+      <div className="text-center py-8 text-muted-foreground">
         No video earnings found
       </div>
     );
@@ -16,7 +16,7 @@ export function VideoEarningsList({ videos }: VideoEarningsListProps) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold font-headline text-white mb-4">
+      <h3 className="text-lg font-semibold font-headline text-foreground mb-4">
         Top Performing Videos
       </h3>
       <div className="space-y-3">
@@ -42,7 +42,7 @@ function VideoEarningRow({ video }: VideoEarningRowProps) {
       case "FAILED":
         return "text-[#ef4444]"; // red
       default:
-        return "text-zinc-400";
+        return "text-muted-foreground";
     }
   };
 
@@ -60,13 +60,13 @@ function VideoEarningRow({ video }: VideoEarningRowProps) {
   };
 
   return (
-    <div className="bg-[var(--color-border-700)] rounded-lg p-4 hover:bg-[#2e2d30] transition-colors">
+    <div className="bg-[var(--color-border-700)] rounded-lg p-4 hover:bg-accent transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-white truncate">
+          <h4 className="text-sm font-medium text-foreground truncate">
             {video.videoTitle}
           </h4>
-          <div className="flex items-center space-x-4 mt-1 text-xs text-zinc-400">
+          <div className="flex items-center space-x-4 mt-1 text-xs text-muted-foreground">
             <span>{video.views.toLocaleString()} views</span>
             <span>{video.likes} likes</span>
           </div>

@@ -63,7 +63,7 @@ export function PublicHeaderAuthActions() {
     <div className="hidden items-center gap-3 sm:flex">
       <Link
         href={publicAuthLinks[0].path}
-        className="px-4 py-2 text-sm font-bold text-white transition-colors duration-300 hover:text-primary"
+        className="px-4 py-2 text-sm font-bold text-foreground transition-colors duration-300 hover:text-primary"
       >
         {publicAuthLinks[0].label}
       </Link>

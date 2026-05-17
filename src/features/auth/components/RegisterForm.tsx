@@ -67,7 +67,7 @@ export function RegisterForm() {
 
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-6 md:px-8">
         <PublicBrand href="/" />
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-400 transition-colors hover:text-white">
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground">
           Help
         </span>
       </header>
@@ -95,7 +95,7 @@ export function RegisterForm() {
                     id="email"
                     type="email"
                     placeholder="name@example.com"
-                    className={`w-full rounded-sm bg-black py-4 pr-4 pl-12 text-foreground placeholder:text-zinc-700 transition-all focus:outline-none focus:ring-1 focus:ring-primary/60 ${errors.email ? "ring-1 ring-destructive" : "ring-1 ring-transparent"}`}
+                    className={`w-full rounded-sm bg-input py-4 pr-4 pl-12 text-foreground placeholder:text-muted-foreground/50 transition-all focus:outline-none focus:ring-1 focus:ring-primary/60 ${errors.email ? "ring-1 ring-destructive" : "ring-1 ring-transparent"}`}
                     {...register("email")}
                   />
                 </div>
@@ -112,7 +112,7 @@ export function RegisterForm() {
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className={`w-full rounded-sm bg-black py-4 pr-4 pl-12 text-foreground placeholder:text-zinc-700 transition-all focus:outline-none focus:ring-1 focus:ring-primary/60 ${errors.password ? "ring-1 ring-destructive" : "ring-1 ring-transparent"}`}
+                    className={`w-full rounded-sm bg-input py-4 pr-4 pl-12 text-foreground placeholder:text-muted-foreground/50 transition-all focus:outline-none focus:ring-1 focus:ring-primary/60 ${errors.password ? "ring-1 ring-destructive" : "ring-1 ring-transparent"}`}
                     {...register("password")}
                   />
                 </div>
@@ -129,7 +129,7 @@ export function RegisterForm() {
                     id="confirmPassword"
                     type="password"
                     placeholder="••••••••"
-                    className={`w-full rounded-sm bg-black py-4 pr-4 pl-12 text-foreground placeholder:text-zinc-700 transition-all focus:outline-none focus:ring-1 focus:ring-primary/60 ${errors.confirmPassword ? "ring-1 ring-destructive" : "ring-1 ring-transparent"}`}
+                    className={`w-full rounded-sm bg-input py-4 pr-4 pl-12 text-foreground placeholder:text-muted-foreground/50 transition-all focus:outline-none focus:ring-1 focus:ring-primary/60 ${errors.confirmPassword ? "ring-1 ring-destructive" : "ring-1 ring-transparent"}`}
                     {...register("confirmPassword")}
                   />
                 </div>
@@ -162,7 +162,7 @@ export function RegisterForm() {
                 Sign In
               </Link>
             </p>
-            <p className="text-[10px] leading-loose uppercase tracking-widest text-zinc-600">
+            <p className="text-[10px] leading-loose uppercase tracking-widest text-muted-foreground/50">
               By continuing, you agree to Velvet Gallery&apos;s <br />
               <span className="underline underline-offset-4">Terms of Service</span> & <span className="underline underline-offset-4">Privacy Policy</span>
             </p>
@@ -171,9 +171,9 @@ export function RegisterForm() {
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Privacy Policy</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Terms of Service</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-zinc-600 transition-colors hover:text-zinc-300">Cookie Preferences</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Privacy Policy</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Terms of Service</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Cookie Preferences</span>
       </footer>
     </div>
   );

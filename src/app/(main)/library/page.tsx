@@ -44,7 +44,7 @@ export default function LibraryPage() {
     return (
       <main className="flex min-h-screen items-center justify-center pt-20 md:pl-64">
         <div className="w-full max-w-md space-y-6 rounded-lg border border-border/20 bg-card p-8 text-center">
-           <span className="material-symbols-outlined text-zinc-600 text-6xl">video_library</span>
+           <span className="material-symbols-outlined text-muted-foreground/50 text-6xl">video_library</span>
            <div className="space-y-2">
                <h2 className="font-headline text-2xl font-bold text-foreground">Thư viện cá nhân</h2>
                <p className="text-sm text-muted-foreground">Đăng nhập để truy cập video đã mua, gói hội viên và lịch sử xem của bạn.</p>
@@ -68,7 +68,7 @@ export default function LibraryPage() {
           <span className="-mb-[18px] border-b-2 border-primary pb-4 font-headline text-sm font-bold uppercase tracking-widest text-primary">
              Tổng quan
            </span>
-           <span className="-mb-[18px] pb-4 font-headline text-sm font-bold uppercase tracking-widest text-zinc-500">
+           <span className="-mb-[18px] pb-4 font-headline text-sm font-bold uppercase tracking-widest text-muted-foreground">
              Dữ liệu thật + trạng thái đang phát triển
            </span>
          </div>

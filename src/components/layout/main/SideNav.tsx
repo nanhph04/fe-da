@@ -35,10 +35,10 @@ const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean):
 function NavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
   const className = `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
     item.disabled
-      ? "text-zinc-700 border border-dashed border-[#48474a]/20 cursor-not-allowed"
+      ? "text-muted-foreground/30 border border-dashed border-border/20 cursor-not-allowed"
       : isActive
-        ? "text-white bg-zinc-900/80"
-        : "text-zinc-500 hover:bg-zinc-800/50 hover:text-white"
+        ? "text-foreground bg-accent"
+        : "text-muted-foreground hover:bg-accent hover:text-foreground"
   }`;
 
   const content = (
@@ -70,17 +70,17 @@ export function SideNav() {
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 z-40 bg-zinc-950 flex-col pt-24 px-4 pb-8 hidden md:flex border-r border-[#48474a]/10">
+    <aside className="fixed left-0 top-0 h-full w-64 z-40 bg-sidebar flex-col pt-24 px-4 pb-8 hidden md:flex border-r border-sidebar-border/10">
       <div className="mb-8 px-2">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 rounded-lg bg-[#fdc003]/10 flex items-center justify-center border border-[#fdc003]/20">
-            <span className="material-symbols-outlined text-[#fdc003] fill-current" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+          <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20">
+            <span className="material-symbols-outlined text-secondary fill-current" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
           </div>
           <div>
-            <div className="font-headline font-semibold text-sm text-[#f9f5f8]">
+            <div className="font-headline font-semibold text-sm text-foreground">
               {role === "guest" ? "Visitor Access" : "Member Access"}
             </div>
-            <div className="text-xs text-[#ecb200] font-medium uppercase tracking-widest">
+            <div className="text-xs text-secondary font-medium uppercase tracking-widest">
               {role === "guest" ? "Browse Mode" : role}
             </div>
           </div>
@@ -88,12 +88,12 @@ export function SideNav() {
         {roleEntry ? (
           <Link
             href={roleEntry.path!}
-            className="w-full mt-4 bg-zinc-900/80 hover:bg-zinc-800 text-white text-xs font-bold py-2 rounded-lg transition-all inline-flex items-center justify-center"
+            className="w-full mt-4 bg-accent hover:bg-accent/80 text-foreground text-xs font-bold py-2 rounded-lg transition-all inline-flex items-center justify-center"
           >
             {roleEntry.label}
           </Link>
         ) : (
-          <div className="w-full mt-4 bg-zinc-900/80 text-zinc-700 text-xs font-bold py-2 rounded-lg border border-dashed border-[#48474a]/20 text-center">
+          <div className="w-full mt-4 bg-accent text-muted-foreground text-xs font-bold py-2 rounded-lg border border-dashed border-border/20 text-center">
             Sign in for more
           </div>
         )}
@@ -111,7 +111,7 @@ export function SideNav() {
           ))}
       </nav>
 
-      <div className="pt-8 border-t border-[#48474a]/10 space-y-1">
+      <div className="pt-8 border-t border-border/10 space-y-1">
         {sideNavFooterItems.map(item => (
           <NavEntry key={item.label} item={item} />
         ))}

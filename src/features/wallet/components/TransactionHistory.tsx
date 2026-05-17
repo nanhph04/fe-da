@@ -138,8 +138,8 @@ export function TransactionHistory({
   return (
     <section className="mt-20">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="font-headline text-2xl font-bold text-white">Transaction History</h2>
-        <button className="text-sm font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors">
+        <h2 className="font-headline text-2xl font-bold text-foreground">Transaction History</h2>
+        <button className="text-sm font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           View All <span className="material-symbols-outlined text-base">chevron_right</span>
         </button>
       </div>
@@ -148,17 +148,17 @@ export function TransactionHistory({
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="bg-zinc-900 border-b border-zinc-800">
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Date</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Description</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Amount</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-zinc-500">Status</th>
+              <tr className="bg-accent border-b border-border">
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Amount</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">Loading transactions...</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">Loading transactions...</td>
                 </tr>
               ) : error ? (
                 <tr>
@@ -166,7 +166,7 @@ export function TransactionHistory({
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-zinc-500">No transactions found.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">No transactions found.</td>
                 </tr>
               ) : (
                 transactions.map((tx) => {
@@ -174,8 +174,8 @@ export function TransactionHistory({
                   const isIncoming = isIncomingTransaction(tx);
 
                   return (
-                    <tr key={tx.id} className="transition-colors hover:bg-zinc-800/50">
-                      <td className="px-6 py-5 text-sm font-medium text-zinc-300">
+                    <tr key={tx.id} className="transition-colors hover:bg-muted/50">
+                      <td className="px-6 py-5 text-sm font-medium text-foreground/80">
                         {formatDate(tx.createdAt)}
                       </td>
                       <td className="px-6 py-5">
@@ -185,11 +185,11 @@ export function TransactionHistory({
                               {getTransactionIcon(tx)}
                             </span>
                           </div>
-                          <span className="font-bold text-white">{getTransactionDescription(tx)}</span>
+                          <span className="font-bold text-foreground">{getTransactionDescription(tx)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <span className={`font-headline font-bold ${isIncoming ? "text-secondary" : "text-zinc-300"}`}>
+                        <span className={`font-headline font-bold ${isIncoming ? "text-secondary" : "text-foreground/80"}`}>
                           {getDisplayAmount(tx)}
                         </span>
                       </td>
@@ -199,7 +199,7 @@ export function TransactionHistory({
                         ) : status === "pending" ? (
                           <Badge className="rounded-full border-0 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-bold text-yellow-500 hover:bg-yellow-500/20">Đang xử lý</Badge>
                         ) : status === "cancelled" ? (
-                          <Badge className="rounded-full border-0 bg-zinc-500/10 px-2.5 py-0.5 text-xs font-bold text-zinc-400 hover:bg-zinc-500/20">Đã hủy</Badge>
+                          <Badge className="rounded-full border-0 bg-zinc-500/10 px-2.5 py-0.5 text-xs font-bold text-muted-foreground hover:bg-zinc-500/20">Đã hủy</Badge>
                         ) : (
                           <Badge className="rounded-full border-0 bg-red-500/10 px-2.5 py-0.5 text-xs font-bold text-red-500 hover:bg-red-500/20">Thất bại</Badge>
                         )}

@@ -28,7 +28,7 @@ export function HeroSection({ title, subtitle, imageUrl, videoId }: HeroSectionP
           </p>
           
           {/* Title */}
-          <h1 className="text-5xl font-bold font-headline text-white tracking-tight leading-tight">
+          <h1 className="text-5xl font-bold font-headline text-foreground tracking-tight leading-tight">
             {title}
           </h1>
           
@@ -53,7 +53,7 @@ export function HeroSection({ title, subtitle, imageUrl, videoId }: HeroSectionP
                 <span>Watch Now</span>
               </button>
             )}
-            <button className="flex items-center gap-2 px-6 py-3 bg-[#1a1a1a]/80 border border-white/10 text-white rounded-sm hover:bg-[#262626] transition-colors">
+            <button className="flex items-center gap-2 px-6 py-3 bg-card/80 border border-white/10 text-foreground rounded-sm hover:bg-[#262626] transition-colors">
               <span className="material-symbols-outlined">bookmark_add</span>
               <span>Add to Watchlist</span>
             </button>

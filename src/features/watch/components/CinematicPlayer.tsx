@@ -29,10 +29,10 @@ export function CinematicPlayer({
     });
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg border border-[#48474a]/20 bg-black shadow-2xl group cinematic-video-wrapper">
+    <div className="relative w-full overflow-hidden rounded-lg border border-border/20 bg-input shadow-2xl group cinematic-video-wrapper">
       <div className="pointer-events-none absolute top-0 left-0 z-10 w-full bg-gradient-to-b from-black/80 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         {title ? (
-          <h2 className="font-headline text-lg font-bold tracking-widest text-[#f9f5f8] drop-shadow-md">
+          <h2 className="font-headline text-lg font-bold tracking-widest text-foreground drop-shadow-md">
             {title}
           </h2>
         ) : null}
@@ -47,7 +47,7 @@ export function CinematicPlayer({
             id="video-resolution"
             value={selectedResolution}
             onChange={(event) => setSelectedResolution(event.target.value)}
-            className="rounded-md border border-white/15 bg-black/70 px-3 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-sm outline-none transition-colors hover:border-[#ff8e80]/60 focus:border-[#ff8e80]"
+            className="rounded-md border border-white/15 bg-black/70 px-3 py-2 text-xs font-bold uppercase tracking-widest text-foreground backdrop-blur-sm outline-none transition-colors hover:border-primary/60 focus:border-primary"
           >
             <option value="auto">Auto</option>
             {availableResolutions.map((resolution) => (

@@ -27,7 +27,7 @@ const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean):
 
 function MobileNavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
   const className = `flex flex-col items-center gap-1 ${
-    item.disabled ? "text-zinc-700 cursor-not-allowed" : isActive ? "text-red-500" : "text-zinc-500"
+    item.disabled ? "text-muted-foreground/30 cursor-not-allowed" : isActive ? "text-primary" : "text-muted-foreground"
   }`;
 
   const content = (
@@ -58,7 +58,7 @@ export function MobileNav() {
   const role = getRole(user?.role, isAuthenticated, user?.isCreator);
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 w-full h-16 bg-zinc-950/80 backdrop-blur-xl border-t border-outline-variant/10 flex justify-around items-center z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 w-full h-16 bg-background/80 backdrop-blur-xl border-t border-border/10 flex justify-around items-center z-50">
       {mobileNavItems
         .filter(item => isNavItemVisible(item, role))
         .map(item => (

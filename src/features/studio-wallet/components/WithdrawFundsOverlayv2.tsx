@@ -88,7 +88,7 @@ export function WithdrawFundsOverlay({
           <Button
             type="button"
             variant="ghost"
-            className="text-zinc-400 hover:bg-zinc-900 hover:text-white"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground"
             onClick={onClose}
           >
             Close
@@ -97,14 +97,14 @@ export function WithdrawFundsOverlay({
 
         <form className="space-y-5 px-6 py-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Amount (AC)</label>
+            <label className="text-sm font-medium text-foreground/80">Amount (AC)</label>
             <Input
               type="number"
               min="1"
               max={wallet.balance}
               value={amount}
               onChange={event => setAmount(event.target.value)}
-              className="border-zinc-800 bg-zinc-950 text-white"
+              className="border-border bg-background text-foreground"
             />
           </div>
 
@@ -116,21 +116,21 @@ export function WithdrawFundsOverlay({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Note</label>
+            <label className="text-sm font-medium text-foreground/80">Note</label>
             <Input
               value={description}
               onChange={event => setDescription(event.target.value)}
               placeholder="Optional withdrawal note"
-              className="border-zinc-800 bg-zinc-950 text-white"
+              className="border-border bg-background text-foreground"
             />
           </div>
 
-          <div className="rounded-md border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-300">
+          <div className="rounded-md border border-border bg-background px-4 py-3 text-sm text-foreground/80">
             <div className="flex items-center justify-between">
               <span>Requested amount</span>
               <span>{Number.isFinite(withdrawalAmount) ? withdrawalAmount.toLocaleString() : 0} AC</span>
             </div>
-            <p className="mt-2 border-t border-zinc-800 pt-2 text-xs text-zinc-500">
+            <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
               Finance-service calculates exchange rate and money amount on the backend.
             </p>
           </div>
@@ -141,14 +141,14 @@ export function WithdrawFundsOverlay({
             <Button
               type="button"
               variant="outline"
-              className="border-zinc-800 bg-transparent text-zinc-100 hover:bg-zinc-900"
+              className="border-border bg-transparent text-zinc-100 hover:bg-accent"
               onClick={onClose}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-[#c1121f] text-white hover:bg-[#a60f1a]"
+              className="bg-destructive text-foreground hover:bg-destructive/90"
               disabled={!canSubmit}
             >
               {isBusy ? "Submitting..." : "Submit withdrawal"}
@@ -173,12 +173,12 @@ function FormField({
 }) {
   return (
     <label className="space-y-2">
-      <span className="text-sm font-medium text-zinc-300">{label}</span>
+      <span className="text-sm font-medium text-foreground/80">{label}</span>
       <Input
         value={value}
         onChange={event => onChange(event.target.value)}
         placeholder={placeholder}
-        className="border-zinc-800 bg-zinc-950 text-white"
+        className="border-border bg-background text-foreground"
       />
     </label>
   );

@@ -20,13 +20,13 @@ export function PublicBrand({
       <div className="flex flex-col">
         <span
           className={`font-headline text-xl font-black uppercase tracking-tight ${
-            emphasize ? "text-white" : "text-red-600"
+            emphasize ? "text-foreground" : "text-red-600"
           }`}
         >
           {platformBrand.name}
         </span>
         {subtitle ? (
-          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-zinc-500">
+          <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">
             {subtitle}
           </span>
         ) : null}

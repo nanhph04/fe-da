@@ -23,7 +23,7 @@ export function CreatorSection({ description }: CreatorSectionProps) {
           </div>
         </div>
 
-        <p className={`whitespace-pre-wrap text-sm font-medium leading-relaxed text-zinc-300 ${isExpanded ? "" : "line-clamp-4"}`}>
+        <p className={`whitespace-pre-wrap text-sm font-medium leading-relaxed text-foreground/80 ${isExpanded ? "" : "line-clamp-4"}`}>
           {hasDescription ? description : "Chưa có mô tả cho video này."}
         </p>
 

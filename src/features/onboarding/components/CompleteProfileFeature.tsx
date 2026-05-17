@@ -229,7 +229,7 @@ export function CompleteProfileFeature() {
                   disabled={isBusy}
                   onChange={handleAvatarChange}
                 />
-                <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary/40 bg-black shadow-lg shadow-black/30">
+                <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary/40 bg-input shadow-lg shadow-black/30">
                   {avatarPreviewUrl || user?.avatarUrl ? (
                     <div
                       className="h-full w-full bg-cover bg-center"
@@ -237,7 +237,7 @@ export function CompleteProfileFeature() {
                       aria-hidden="true"
                     />
                   ) : (
-                    <span className="material-symbols-outlined text-5xl text-zinc-300">person</span>
+                    <span className="material-symbols-outlined text-5xl text-foreground/80">person</span>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                     <span className="material-symbols-outlined text-2xl text-primary">add_a_photo</span>
@@ -246,7 +246,7 @@ export function CompleteProfileFeature() {
               </label>
               <div className="text-center">
                 <p className="text-xs font-bold uppercase tracking-widest text-primary">Đổi ảnh đại diện</p>
-                <p className="mt-1 text-xs text-zinc-300">
+                <p className="mt-1 text-xs text-foreground/80">
                   {avatarFile ? avatarFile.name : "JPG, PNG hoặc WebP, tối đa 5MB"}
                 </p>
               </div>
@@ -264,7 +264,7 @@ export function CompleteProfileFeature() {
                 <Input
                   {...register("displayName")}
                   placeholder="Ví dụ: CinemaLover99"
-                  className={`h-11 border-border/40 bg-black/90 text-base text-foreground placeholder:text-zinc-400 focus-visible:ring-primary ${errors.displayName ? "ring-1 ring-destructive" : ""}`}
+                  className={`h-11 border-border/40 bg-black/90 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-primary ${errors.displayName ? "ring-1 ring-destructive" : ""}`}
                 />
                 {errors.displayName && <p className="text-xs text-destructive">{errors.displayName.message}</p>}
               </div>
@@ -285,7 +285,7 @@ export function CompleteProfileFeature() {
                   {...register("bio")}
                   placeholder="Chia sẻ gu điện ảnh của bạn..."
                   rows={2}
-                  className="min-h-24 resize-none border-border/40 bg-black/90 text-base text-foreground placeholder:text-zinc-400 focus-visible:ring-primary"
+                  className="min-h-24 resize-none border-border/40 bg-black/90 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -293,7 +293,7 @@ export function CompleteProfileFeature() {
                 <Input
                   {...register("phone")}
                   placeholder="+84 901 234 567"
-                  className="h-11 border-border/40 bg-black/90 text-base text-foreground placeholder:text-zinc-400 focus-visible:ring-primary"
+                  className="h-11 border-border/40 bg-black/90 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
                 />
               </div>
               <div className="flex flex-col gap-1.5">

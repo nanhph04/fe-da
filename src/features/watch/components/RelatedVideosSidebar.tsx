@@ -86,7 +86,7 @@ export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSide
                   <span className="material-symbols-outlined text-4xl">movie</span>
                 </div>
               )}
-              <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-black uppercase text-white">
+              <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-black uppercase text-foreground">
                 {formatDuration(video.durationSeconds)}
               </span>
             </div>
@@ -94,8 +94,8 @@ export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSide
               <h4 className="line-clamp-2 text-sm font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
                 {video.title}
               </h4>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{getChannelName(video)}</p>
-              <p className="text-[11px] font-bold text-zinc-600">{formatViews(video.viewCount)}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{getChannelName(video)}</p>
+              <p className="text-[11px] font-bold text-muted-foreground/50">{formatViews(video.viewCount)}</p>
             </div>
           </Link>
         ))}

@@ -23,7 +23,7 @@ export function PublicHeader({
   children,
 }: PublicHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0e0e10]/78 backdrop-blur-xl">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/78 backdrop-blur-xl">
       <div className="mx-auto flex h-20 w-full max-w-[1600px] items-center justify-between gap-6 px-6 md:px-8">
         <PublicBrand href="/" subtitle={subtitle} emphasize={emphasizeBrand} />
 
@@ -36,7 +36,7 @@ export function PublicHeader({
                   key={item.path}
                   href={item.path}
                   className={`font-headline text-sm font-bold tracking-tight transition-colors duration-300 ${
-                    isActive ? "text-white" : "text-zinc-400 hover:text-white"
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {item.label}

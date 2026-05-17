@@ -60,10 +60,10 @@ function MetricCard({
           : "text-[#fcbf49]";
 
   return (
-    <div className="rounded-md border border-zinc-800 bg-zinc-950/80 p-6">
-      <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{label}</p>
+    <div className="rounded-md border border-border bg-background/80 p-6">
+      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
       <p className={`mt-3 text-3xl font-bold ${toneClass}`}>{value}</p>
-      <p className="mt-2 text-sm text-zinc-500">{helper}</p>
+      <p className="mt-2 text-sm text-muted-foreground">{helper}</p>
     </div>
   );
 }

@@ -27,12 +27,12 @@ export function MediaRow({ title, items, viewAllHref }: MediaRowProps) {
     <section className="py-8">
       {/* Section Header */}
       <div className="flex items-center justify-between mb-6 px-8">
-        <h2 className="text-xl font-bold font-headline text-white">{title}</h2>
+        <h2 className="text-xl font-bold font-headline text-foreground">{title}</h2>
         <div className="flex items-center gap-2">
           {viewAllHref && (
             <Link
               href={viewAllHref}
-              className="mr-2 text-xs font-medium text-white/50 hover:text-white transition-colors"
+              className="mr-2 text-xs font-medium text-white/50 hover:text-foreground transition-colors"
             >
               View All
             </Link>
@@ -41,7 +41,7 @@ export function MediaRow({ title, items, viewAllHref }: MediaRowProps) {
             type="button"
             aria-label={`Scroll ${title} left`}
             onClick={() => scroll("left")}
-            className="p-2 rounded-sm bg-[#1a1a1a] hover:bg-[#262626] text-white/50 hover:text-white transition-colors"
+            className="p-2 rounded-sm bg-card hover:bg-[#262626] text-white/50 hover:text-foreground transition-colors"
           >
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
@@ -49,7 +49,7 @@ export function MediaRow({ title, items, viewAllHref }: MediaRowProps) {
             type="button"
             aria-label={`Scroll ${title} right`}
             onClick={() => scroll("right")}
-            className="p-2 rounded-sm bg-[#1a1a1a] hover:bg-[#262626] text-white/50 hover:text-white transition-colors"
+            className="p-2 rounded-sm bg-card hover:bg-[#262626] text-white/50 hover:text-foreground transition-colors"
           >
             <span className="material-symbols-outlined">chevron_right</span>
           </button>

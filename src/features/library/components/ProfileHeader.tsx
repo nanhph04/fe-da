@@ -92,8 +92,8 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
           <span className="rounded border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
             {getStatusLabel(user?.role, user?.isCreator)}
           </span>
-          <div className="flex items-center gap-2 text-zinc-400">
-            <span className="material-symbols-outlined text-zinc-500">calendar_today</span>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span className="material-symbols-outlined text-muted-foreground">calendar_today</span>
             <span className="text-sm font-medium">{formatMemberSince(user?.createdAt)}</span>
           </div>
         </div>

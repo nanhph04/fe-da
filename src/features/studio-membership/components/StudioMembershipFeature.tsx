@@ -19,7 +19,7 @@ export interface StudioTier {
 const INITIAL_TIERS: StudioTier[] = [
   { id: 1, name: "Silver Vongola", price: 500, subscribers: 124, revenue: "62,000", badgeColor: "bg-zinc-400", perks: ["Loyalty badges", "Custom emojis"] },
   { id: 2, name: "Gold Arcobaleno", price: 1500, subscribers: 45, revenue: "67,500", badgeColor: "bg-[#fdc003]", perks: ["Early access to videos", "Members-only chat"] },
-  { id: 3, name: "Platinum Boss", price: 5000, subscribers: 12, revenue: "60,000", badgeColor: "bg-[#ff8e80]", perks: ["Exclusive live streams", "Direct message access"] },
+  { id: 3, name: "Platinum Boss", price: 5000, subscribers: 12, revenue: "60,000", badgeColor: "bg-primary", perks: ["Exclusive live streams", "Direct message access"] },
 ];
 
 export function StudioMembershipFeature() {
@@ -45,7 +45,7 @@ export function StudioMembershipFeature() {
                 price: t.priceCoin,
                 subscribers: 0, // Mock for now until API supports subscriber count per tier
                 revenue: "0",
-                badgeColor: t.level === 3 ? "bg-[#ff8e80]" : t.level === 2 ? "bg-[#fdc003]" : "bg-zinc-400",
+                badgeColor: t.level === 3 ? "bg-primary" : t.level === 2 ? "bg-[#fdc003]" : "bg-zinc-400",
                 perks: t.level === 3 ? ["Exclusive live streams"] : t.level === 2 ? ["Early access"] : ["Loyalty badges"],
               }));
               setTiers(mappedTiers);
@@ -85,7 +85,7 @@ export function StudioMembershipFeature() {
       </header>
 
       {isLoading ? (
-        <div className="text-center text-zinc-500 py-12">Loading membership details...</div>
+        <div className="text-center text-muted-foreground py-12">Loading membership details...</div>
       ) : !isUnlocked ? (
         <EligibilityChecker onUnlock={() => setIsUnlocked(true)} eligibility={channelDetail?.membershipEligibility} />
       ) : (

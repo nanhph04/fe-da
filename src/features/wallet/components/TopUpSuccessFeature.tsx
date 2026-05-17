@@ -42,7 +42,7 @@ export function TopUpSuccessFeature({
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background font-body text-foreground antialiased">
-      <header className="fixed top-0 z-50 flex w-full items-center justify-between bg-zinc-950/40 px-6 py-4 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 flex w-full items-center justify-between bg-background/40 px-6 py-4 backdrop-blur-xl">
         <div className="font-headline text-2xl font-extrabold tracking-tight text-primary">Velvet Gallery</div>
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-2xl text-muted-foreground">account_circle</span>

@@ -180,7 +180,7 @@ export function HomePage() {
 
           {/* Platform Links */}
           <div className="flex flex-col space-y-3">
-            <span className="mb-2 font-semibold text-white">Nền tảng</span>
+            <span className="mb-2 font-semibold text-foreground">Nền tảng</span>
             <Link href="/" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
               Giới thiệu
             </Link>
@@ -194,7 +194,7 @@ export function HomePage() {
 
           {/* Account Links */}
           <div className="flex flex-col space-y-3">
-            <span className="mb-2 font-semibold text-white">Tài khoản</span>
+            <span className="mb-2 font-semibold text-foreground">Tài khoản</span>
             <Link href="/login" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
               Chính sách quyền riêng tư
             </Link>

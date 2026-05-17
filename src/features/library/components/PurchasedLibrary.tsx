@@ -171,7 +171,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
                   <h3 className={isFeatured ? "font-headline text-4xl font-black tracking-tighter text-foreground" : "font-headline text-lg font-bold text-foreground"}>
                     {item.title}
                   </h3>
-                  <p className="line-clamp-2 text-sm text-zinc-300">
+                  <p className="line-clamp-2 text-sm text-foreground/80">
                     {item.description || item.channelName || "Video đã mua"}
                   </p>
                   <p className="text-xs text-muted-foreground">
