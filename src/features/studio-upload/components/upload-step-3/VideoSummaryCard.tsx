@@ -10,10 +10,19 @@ export function VideoSummaryCard({ formData }: VideoSummaryCardProps) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl bg-surface-container-low shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
       <div className="relative aspect-video w-full overflow-hidden bg-surface-container-highest">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,142,128,0.22),transparent_32%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]" />
+        {formData.thumbnailPreviewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={formData.thumbnailPreviewUrl}
+            alt="Custom thumbnail preview"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,142,128,0.22),transparent_32%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]" />
+        )}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-surface-container-low to-transparent" />
         <div className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 font-headline text-xs font-semibold text-foreground">
-          Draft
+          {formData.thumbnailFile ? "Custom thumbnail" : "Draft"}
         </div>
       </div>
 

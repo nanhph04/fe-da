@@ -7,6 +7,14 @@ import type {
   ApiResponse as PublicApiResponse,
 } from "@/shared/api/types";
 
+export type PublicThumbnailSource = "auto" | "custom" | string;
+export type PublicThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
+export type PublicMembershipReviewStatus = "not_requested" | "pending" | "approved" | "rejected";
+
+export function getReadyPublicThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
+  return thumbnailUrl && thumbnailStatus === "ready" ? thumbnailUrl : null;
+}
+
 export interface PublicDiscoveryVideo {
   id: string;
   channelId: string;
@@ -18,6 +26,8 @@ export interface PublicDiscoveryVideo {
   price: number;
   requiredTierLevel: number | null;
   thumbnailUrl: string | null;
+  thumbnailSource: PublicThumbnailSource;
+  thumbnailStatus: PublicThumbnailStatus;
   durationSeconds: number | null;
   resolutions: string[];
   errorMessage: string | null;
@@ -53,6 +63,8 @@ export interface PublicVideoMetadata {
   tagIds: string[];
   tags: string[];
   thumbnailUrl: string | null;
+  thumbnailSource: PublicThumbnailSource;
+  thumbnailStatus: PublicThumbnailStatus;
   viewCount: number;
   status: string;
   visibility: string;
@@ -85,6 +97,8 @@ export interface PublicChannelVideo {
   tags: string[];
   status: string;
   thumbnailUrl: string | null;
+  thumbnailSource: PublicThumbnailSource;
+  thumbnailStatus: PublicThumbnailStatus;
   publishedAt: string | null;
 }
 
@@ -95,6 +109,10 @@ export interface PublicChannelDetail {
   bio: string;
   isEligibleForMembership: boolean;
   isMembershipClosedByAdmin: boolean;
+  membershipReviewStatus: PublicMembershipReviewStatus;
+  membershipRejectionReason: string | null;
+  membershipRequestedAt: string | null;
+  membershipReviewedAt: string | null;
   avatarUrl: string | null;
   bannerUrl: string | null;
   status: string;

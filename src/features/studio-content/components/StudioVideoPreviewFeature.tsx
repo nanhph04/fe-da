@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PlayerContainerClient } from "@/features/watch/components/PlayerContainerClient";
-import { mediaService, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
+import { getReadyThumbnailUrl, mediaService, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 
 interface StudioVideoPreviewFeatureProps {
@@ -166,7 +166,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
       setError(null);
 
       try {
-        const response = await mediaService.getOwnerVideos({ limit: 200 });
+        const response = await mediaService.getOwnerVideos({ limit: 50 });
         const ownerVideos = response.success && response.data ? response.data : [];
         const matchedVideo = ownerVideos.find(item => item.id === videoId) ?? null;
 
@@ -211,7 +211,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
   const status = normalizeStatus(video?.status);
   const isReady = status === READY_STATUS;
   const notReadyCopy = useMemo(() => getNotReadyCopy(status), [status]);
-  const poster = video?.thumbnailUrl || "/images/thumbnail.png";
+  const poster = getReadyThumbnailUrl(video?.thumbnailUrl, video?.thumbnailStatus) || "/images/thumbnail.png";
   const viewCount = video?.viewCount ?? video?.metrics?.viewsCount ?? 0;
   const tags = video?.tags?.filter(Boolean) ?? [];
 

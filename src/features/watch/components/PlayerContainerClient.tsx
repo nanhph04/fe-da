@@ -124,8 +124,7 @@ export function PlayerContainerClient({
         }
 
         if (tokenRes.success && tokenRes.data) {
-          const rawStreamUrl =
-            tokenRes.data.playbackUrl || tokenRes.data.streamUrl || "";
+          const rawStreamUrl = tokenRes.data.playbackUrl || "";
 
           if (!rawStreamUrl) {
             setError("Playback Error: Playback URL was not returned by the media service.");
@@ -146,7 +145,7 @@ export function PlayerContainerClient({
           });
 
           setInitialPositionSeconds(tokenRes.data.resumePositionSeconds || 0);
-          setAvailableResolutions(tokenRes.data.resolutions || []);
+          setAvailableResolutions([]);
           setVideoUrl(finalUrl);
         } else {
           setVideoUrl(null);

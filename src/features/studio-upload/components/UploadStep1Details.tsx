@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { UploadFormData } from "./StudioUploadFeature";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -22,8 +22,46 @@ export function UploadStep1Details({
   onNext,
 }: UploadStep1DetailsProps) {
   const { categories, tags } = useUploadStep1State();
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [isReplacingFile, setIsReplacingFile] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
+  const [thumbnailError, setThumbnailError] = useState<string | null>(null);
+
+  const handleThumbnailSelect = (file: File | null) => {
+    if (!file) {
+      if (formData.thumbnailPreviewUrl) {
+        URL.revokeObjectURL(formData.thumbnailPreviewUrl);
+      }
+
+      updateFormData({ thumbnailFile: null, thumbnailPreviewUrl: null });
+      setThumbnailError(null);
+      return;
+    }
+
+    const isAllowedType = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+    const isAllowedSize = file.size <= 5 * 1024 * 1024;
+
+    if (!isAllowedType) {
+      setThumbnailError("Thumbnail must be a JPG, PNG, or WEBP image.");
+      return;
+    }
+
+    if (!isAllowedSize) {
+      setThumbnailError("Thumbnail must be 5MB or smaller.");
+      return;
+    }
+
+    if (formData.thumbnailPreviewUrl) {
+      URL.revokeObjectURL(formData.thumbnailPreviewUrl);
+    }
+
+    updateFormData({
+      thumbnailFile: file,
+      thumbnailPreviewUrl: URL.createObjectURL(file),
+      draftUpload: null,
+    });
+    setThumbnailError(null);
+  };
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) {
@@ -102,6 +140,17 @@ export function UploadStep1Details({
         />
       </header>
 
+      <input
+        ref={thumbnailInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="sr-only"
+        onChange={event => {
+          handleThumbnailSelect(event.target.files?.[0] ?? null);
+          event.currentTarget.value = "";
+        }}
+      />
+
       <div className="grid grid-cols-1 gap-8 transition-opacity duration-500 lg:grid-cols-12">
         <div className="space-y-8 lg:col-span-8">
           <div className="group">
@@ -143,6 +192,49 @@ export function UploadStep1Details({
         </div>
 
         <div className="space-y-8 lg:col-span-4">
+          <div className="rounded-lg border border-border/30 bg-card p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="font-headline text-sm font-bold text-foreground">Custom Thumbnail</p>
+                <p className="mt-1 text-xs text-muted-foreground">Optional JPG, PNG, or WEBP up to 5MB.</p>
+              </div>
+              {formData.thumbnailFile ? (
+                <button
+                  type="button"
+                  onClick={() => handleThumbnailSelect(null)}
+                  className="rounded-sm border border-border/40 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Clear
+                </button>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => thumbnailInputRef.current?.click()}
+              className="group relative flex aspect-video w-full overflow-hidden rounded-sm border border-dashed border-border/50 bg-muted text-left transition-colors hover:border-primary/60"
+            >
+              {formData.thumbnailPreviewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={formData.thumbnailPreviewUrl}
+                  alt="Selected thumbnail preview"
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+              ) : (
+                <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                  <span className="material-symbols-outlined text-4xl" aria-hidden="true">add_photo_alternate</span>
+                  <span className="font-headline text-xs font-bold uppercase tracking-widest">Choose thumbnail</span>
+                </span>
+              )}
+            </button>
+            {formData.thumbnailFile ? (
+              <p className="mt-3 truncate text-xs text-muted-foreground" title={formData.thumbnailFile.name}>
+                {formData.thumbnailFile.name}
+              </p>
+            ) : null}
+            {thumbnailError ? <p className="mt-3 text-xs text-destructive">{thumbnailError}</p> : null}
+          </div>
+
           <CategorySection
             categories={categories}
             selectedCategoryId={formData.categoryId}

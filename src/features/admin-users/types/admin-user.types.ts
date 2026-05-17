@@ -126,9 +126,9 @@ export interface AdminChannelListResponse {
   pagination: ApiPagination;
 }
 
-export interface AdminChannelStatusPayload {
-  action: "lock" | "unlock";
-}
+export type AdminChannelStatusPayload =
+  | { action: "lock"; reason?: string }
+  | { action: "unlock" };
 
 export type AdminChannelMembershipReviewPayload =
   | { action: "approve" }

@@ -5,6 +5,16 @@ export interface PaginationParams {
   page?: number;
 }
 
+export type MembershipReviewStatus = "not_requested" | "pending" | "approved" | "rejected";
+export type ThumbnailSource = "auto" | "custom" | string;
+export type ThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
+export type MembershipRenewalStatus = "idle" | "pending" | "retrying" | "disabled";
+export type MembershipRecordStatus = "active" | "cancelled";
+
+export function getReadyThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
+  return thumbnailUrl && thumbnailStatus === "ready" ? thumbnailUrl : null;
+}
+
 export interface ChannelResponse {
   id: string;
   userId: string;
@@ -12,6 +22,10 @@ export interface ChannelResponse {
   bio: string;
   isEligibleForMembership: boolean;
   isMembershipClosedByAdmin: boolean;
+  membershipReviewStatus: MembershipReviewStatus;
+  membershipRejectionReason: string | null;
+  membershipRequestedAt: string | null;
+  membershipReviewedAt: string | null;
   avatarUrl: string;
   bannerUrl: string;
   status: string;
@@ -25,6 +39,10 @@ export interface MyChannelResponse {
   status: string;
   isEligibleForMembership: boolean;
   isMembershipClosedByAdmin: boolean;
+  membershipReviewStatus: MembershipReviewStatus;
+  membershipRejectionReason: string | null;
+  membershipRequestedAt: string | null;
+  membershipReviewedAt: string | null;
 }
 
 export interface MembershipEligibilityResponse {
@@ -43,6 +61,8 @@ export interface ChannelPublicVideoResponse {
   tags: string[];
   status: string;
   thumbnailUrl: string | null;
+  thumbnailSource: ThumbnailSource;
+  thumbnailStatus: ThumbnailStatus;
   publishedAt: string | null;
 }
 
@@ -83,10 +103,12 @@ export interface InitUploadBody {
   visibility?: "public" | "private";
   price?: number;
   requiredTierLevel?: number | null;
+  thumbnailExtension?: "jpg" | "jpeg" | "png" | "webp";
 }
 
 export interface ConfirmUploadBody {
   resolutions: Array<"480p" | "720p" | "1080p">;
+  thumbnailObjectKey?: string;
 }
 
 export interface InitUploadResponse {
@@ -95,6 +117,9 @@ export interface InitUploadResponse {
   rawFileKey: string;
   bucket: string;
   uploadUrl: string;
+  thumbnailObjectKey: string | null;
+  thumbnailBucket: string | null;
+  thumbnailUploadUrl: string | null;
 }
 
 export interface UploadRawVideoFileRequest {
@@ -111,8 +136,6 @@ export interface PlaybackInfoResponse {
   playbackUrl: string;
   resumePositionSeconds: number;
   isResumeAvailable: boolean;
-  resolutions?: string[];
-  streamUrl?: string;
 }
 
 export interface RefreshPlaybackTokenResponse {
@@ -137,6 +160,10 @@ export type ModerationDetails = Record<string, unknown>;
 
 export interface VideoMetadataResponse {
   id: string;
+  channelId: string;
+  channelName: string;
+  avatarUrlChannel: string | null;
+  membershipTiers: MembershipTierResponse[];
   title: string;
   description: string;
   categoryId: string;
@@ -144,6 +171,8 @@ export interface VideoMetadataResponse {
   tagIds: string[];
   tags: string[];
   thumbnailUrl: string | null;
+  thumbnailSource: ThumbnailSource;
+  thumbnailStatus: ThumbnailStatus;
   viewCount: number;
   status: string;
   visibility: string;
@@ -180,6 +209,8 @@ export interface DiscoveryVideoResponse {
   price: number;
   requiredTierLevel: number | null;
   thumbnailUrl: string | null;
+  thumbnailSource: ThumbnailSource;
+  thumbnailStatus: ThumbnailStatus;
   durationSeconds: number | null;
   resolutions: string[];
   errorMessage: string | null;
@@ -247,7 +278,24 @@ export interface PurchasedVideoResponse {
   purchasedAt: string;
   publishedAt: string | null;
   viewCount: number;
-  accessStatus: string;
+  accessStatus: "ACTIVE" | string;
+}
+
+export interface AutoRenewMembershipResponse {
+  id: string;
+  userId: string;
+  channelId: string;
+  membershipId: string;
+  expiryDate: string | null;
+  retryCount: number;
+  status: MembershipRecordStatus;
+  autoRenewEnabled: boolean;
+  renewalStatus: MembershipRenewalStatus;
+  renewalReminderSentAt: string | null;
+  lastRenewalAttemptAt: string | null;
+  nextRenewalAttemptAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CategoryResponse {
@@ -331,7 +379,7 @@ const toCommaSeparated = (value?: string | string[]) => {
   return value;
 };
 
-const uploadRawVideoFile = ({ uploadUrl, file, onProgress }: UploadRawVideoFileRequest) => {
+const uploadPresignedFile = ({ uploadUrl, file, onProgress }: UploadRawVideoFileRequest) => {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
@@ -351,14 +399,16 @@ const uploadRawVideoFile = ({ uploadUrl, file, onProgress }: UploadRawVideoFileR
         return;
       }
 
-      reject(new Error(`Raw video upload failed: ${xhr.status}`));
+      reject(new Error(`File upload failed: ${xhr.status}`));
     };
 
-    xhr.onerror = () => reject(new Error("Raw video upload failed. Check your connection and try again."));
-    xhr.onabort = () => reject(new Error("Raw video upload was cancelled."));
+    xhr.onerror = () => reject(new Error("File upload failed. Check your connection and try again."));
+    xhr.onabort = () => reject(new Error("File upload was cancelled."));
     xhr.send(file);
   });
 };
+
+const uploadRawVideoFile = uploadPresignedFile;
 
 export const mediaService = {
   // 1. HEALTH CHECK
@@ -395,6 +445,13 @@ export const mediaService = {
     return api.patch<ChannelResponse>(
       `/api/media/channels/${id}/admin/membership`,
       { action },
+      { requireAuth: true }
+    );
+  },
+  updateMembershipAutoRenew: async (membershipId: string, enabled: boolean) => {
+    return api.patch<AutoRenewMembershipResponse>(
+      `/api/media/memberships/${membershipId}/auto-renew`,
+      { enabled },
       { requireAuth: true }
     );
   },
@@ -460,6 +517,7 @@ export const mediaService = {
     });
   },
   uploadRawVideoFile,
+  uploadPresignedFile,
   confirmUpload: async (id: string, data: ConfirmUploadBody) => {
     return api.post<{ status: string; message: string }>(
       `/api/media/videos/${id}/confirm-upload`,

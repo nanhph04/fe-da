@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { mediaService, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
+import { getReadyThumbnailUrl, mediaService, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
 
@@ -22,10 +22,10 @@ type ContentFilterConfig = {
 
 const CONTENT_FILTERS: ContentFilterConfig[] = [
   { label: "Videos", value: "all", statuses: [] },
-  { label: "Drafts", value: "draft", statuses: ["DRAFT"] },
-  { label: "Processing", value: "processing", statuses: ["PROCESSING"] },
-  { label: "Ready", value: "ready", statuses: ["READY"] },
-  { label: "Failed", value: "failed", statuses: ["FAILED", "REJECTED"] },
+  { label: "Drafts", value: "draft", statuses: ["draft"] },
+  { label: "Processing", value: "processing", statuses: ["pending_moderation", "processing", "pending_manual_review"] },
+  { label: "Ready", value: "ready", statuses: ["ready"] },
+  { label: "Failed", value: "failed", statuses: ["failed", "rejected"] },
 ];
 
 const FILTER_STATUSES = CONTENT_FILTERS.reduce<Record<ContentFilter, Set<string>>>((acc, filter) => {
@@ -306,7 +306,7 @@ export function StudioContentFeature() {
             const visibility = normalizeVisibility(video.visibility);
             const visibilityLabel = toTitleCase(visibility);
             const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString() : "--";
-            const thumbUrl = video.thumbnailUrl || "/images/thumbnail.png";
+            const thumbUrl = getReadyThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || "/images/thumbnail.png";
             const price = video.price ?? 0;
             const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;

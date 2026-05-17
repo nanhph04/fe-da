@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UploadStep1Details } from "./UploadStep1Details";
 import { UploadStep2Monetization } from "./UploadStep2Monetization";
 import { UploadStep3Review } from "./UploadStep3Review";
@@ -13,6 +13,9 @@ export interface DraftUploadSession {
   rawFileKey: string;
   bucket: string;
   uploadUrl: string;
+  thumbnailObjectKey: string | null;
+  thumbnailBucket: string | null;
+  thumbnailUploadUrl: string | null;
 }
 
 export interface UploadFormData {
@@ -25,6 +28,8 @@ export interface UploadFormData {
   price: number;
   requiredTierLevel: number | null;
   file: File | null;
+  thumbnailFile: File | null;
+  thumbnailPreviewUrl: string | null;
   draftUpload: DraftUploadSession | null;
 }
 
@@ -40,8 +45,18 @@ export function StudioUploadFeature() {
     price: 0,
     requiredTierLevel: null,
     file: null,
+    thumbnailFile: null,
+    thumbnailPreviewUrl: null,
     draftUpload: null,
   });
+
+  useEffect(() => {
+    return () => {
+      if (formData.thumbnailPreviewUrl) {
+        URL.revokeObjectURL(formData.thumbnailPreviewUrl);
+      }
+    };
+  }, [formData.thumbnailPreviewUrl]);
 
   const updateFormData = (data: Partial<UploadFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));

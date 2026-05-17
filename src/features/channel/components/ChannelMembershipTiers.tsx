@@ -14,6 +14,10 @@ function getBlockedMessage(channel: PublicChannelDetail) {
     return "Kênh chưa đủ điều kiện mở membership.";
   }
 
+  if (channel.membershipReviewStatus !== "approved") {
+    return "Membership của kênh này chưa được admin duyệt.";
+  }
+
   return null;
 }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   getLatestVideosCached,
+  getReadyPublicThumbnailUrl,
   type PublicDiscoveryVideo,
 } from "@/features/watch/services/publicMediaService";
 
@@ -39,7 +40,7 @@ export async function LatestVideosServer() {
           <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-card transition-colors duration-300 ease-in-out group-hover:border-primary/50">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={video.thumbnailUrl || "/images/thumbnail.png"}
+              src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || "/images/thumbnail.png"}
               alt={video.title}
               className="h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
             />

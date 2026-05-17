@@ -5,6 +5,7 @@ import { VideoInfo } from "./VideoInfo";
 import { WatchChannelCard } from "./WatchChannelCard";
 import { getErrorMessage } from "@/shared/api/client";
 import {
+  getReadyPublicThumbnailUrl,
   getVideoMetadataCached,
   type PublicApiError,
   type PublicMembershipTier,
@@ -31,7 +32,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
     const infoRes = await getVideoMetadataCached(videoId);
     if (infoRes.success && infoRes.data) {
       title = infoRes.data.title;
-      poster = infoRes.data.thumbnailUrl || undefined;
+      poster = getReadyPublicThumbnailUrl(infoRes.data.thumbnailUrl, infoRes.data.thumbnailStatus) || undefined;
       viewCount = infoRes.data.viewCount;
       publishedAt = infoRes.data.publishedAt;
       description = infoRes.data.description;

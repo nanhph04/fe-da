@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PublicChannelVideo } from "@/features/watch/services/publicMediaService";
+import { getReadyPublicThumbnailUrl, type PublicChannelVideo } from "@/features/watch/services/publicMediaService";
 
 interface ChannelVideoGridProps {
   videos: PublicChannelVideo[];
@@ -55,10 +55,10 @@ export function ChannelVideoGrid({ videos, channelName }: ChannelVideoGridProps)
               className="group overflow-hidden rounded-lg border border-border/20 bg-card transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5"
             >
               <div className="relative aspect-video overflow-hidden bg-muted">
-                {video.thumbnailUrl ? (
+                {getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={video.thumbnailUrl}
+                    src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || ""}
                     alt={video.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

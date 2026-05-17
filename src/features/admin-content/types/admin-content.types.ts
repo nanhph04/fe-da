@@ -8,6 +8,8 @@ export type AdminVideoStatus =
   | "failed";
 
 export type AdminVideoVisibility = "public" | "private";
+export type AdminThumbnailSource = "auto" | "custom" | string;
+export type AdminThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
 
 export type AdminVideoModerationDetails = Record<string, unknown> | null;
 
@@ -24,6 +26,8 @@ export interface AdminVideoItem {
   price: number;
   requiredTierLevel: number | null;
   thumbnailUrl: string | null;
+  thumbnailSource: AdminThumbnailSource;
+  thumbnailStatus: AdminThumbnailStatus;
   durationSeconds: number | null;
   resolutions: string[];
   errorMessage: string | null;

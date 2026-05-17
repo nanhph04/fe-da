@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   getLatestVideosCached,
+  getReadyPublicThumbnailUrl,
   type PublicDiscoveryVideo,
 } from "../services/publicMediaService";
 
@@ -74,11 +75,11 @@ export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSide
         {videos.map((video) => (
           <Link key={video.id} href={`/watch/${video.id}`} className="group flex gap-4">
             <div className="relative h-24 w-44 flex-shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted">
-              {video.thumbnailUrl ? (
+              {getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  src={video.thumbnailUrl}
+                  src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || ""}
                   alt={video.title}
                 />
               ) : (

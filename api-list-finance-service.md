@@ -639,6 +639,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 ```json
 {
+  "code": "TOPUP_500K_NEW",
   "name": "Goi 500.000 VND moi",
   "moneyAmount": 500000,
   "baseCoinAmount": 5000,
@@ -653,6 +654,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Backend xu ly:
   - check admin role
   - tim package theo id
+  - neu doi `code` thi check `code` chua ton tai tren package khac
   - update field truyen len
 
 ### 6.8 POST `/api/deposits/admin/:depositId/reconcile`
@@ -702,7 +704,10 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   "walletId": "wallet-id",
   "userId": "user-id",
   "coinAmount": 100,
-  "moneyAmount": 10000,
+  "grossMoneyAmount": 10000,
+  "feePercent": 5,
+  "feeAmount": 500,
+  "moneyAmount": 9500,
   "exchangeRate": 100,
   "bankInfo": {
     "bankCode": "VCB",
@@ -728,13 +733,17 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Backend xu ly:
   - check vi user ton tai
   - lay `exchangeRate` tu server config `WITHDRAWAL_EXCHANGE_RATE`
-  - tinh `moneyAmount = coinAmount * exchangeRate` tren backend
+  - lay `feePercent` tu server config `WITHDRAWAL_FEE_PERCENT`
+  - tinh `grossMoneyAmount = coinAmount * exchangeRate`
+  - tinh `feeAmount = floor(grossMoneyAmount * feePercent / 100)`
+  - tinh `moneyAmount = grossMoneyAmount - feeAmount`
+  - reject neu user dang co payout hold do channel bi suspended
   - tru coin kha dung khoi vi theo co che freeze/rut
   - tao withdrawal `pending`
   - tao transaction `withdrawal`
 
 - FE luu y:
-  - khong gui `moneyAmount` hoac `exchangeRate`
+  - khong gui `grossMoneyAmount`, `feePercent`, `feeAmount`, `moneyAmount` hoac `exchangeRate`
   - request se bi reject neu gui field ngoai DTO do `forbidNonWhitelisted`
 
 ### 7.2 GET `/api/withdrawals/me`
@@ -762,7 +771,10 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
       "walletId": "wallet-id",
       "userId": "user-id",
       "coinAmount": 100,
-      "moneyAmount": 10000,
+      "grossMoneyAmount": 10000,
+      "feePercent": 5,
+      "feeAmount": 500,
+      "moneyAmount": 9500,
       "exchangeRate": 100,
       "bankInfo": {
         "bankCode": "VCB",
@@ -818,8 +830,13 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   "maxCoinAmount": 1000,
   "availableBalance": 1000,
   "exchangeRate": 100,
-  "minMoneyAmount": 100,
-  "maxMoneyAmount": 100000,
+  "feePercent": 5,
+  "minFeeAmount": 5,
+  "maxFeeAmount": 5000,
+  "minGrossMoneyAmount": 100,
+  "maxGrossMoneyAmount": 100000,
+  "minMoneyAmount": 95,
+  "maxMoneyAmount": 95000,
   "currency": "VND"
 }
 ```
@@ -828,7 +845,9 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - lay wallet user hien tai
   - `maxCoinAmount = availableBalance`
   - `exchangeRate` lay tu config `WITHDRAWAL_EXCHANGE_RATE`
-  - khong nhan `moneyAmount`, `exchangeRate`, hay `methodId` tu FE
+  - `feePercent` lay tu config `WITHDRAWAL_FEE_PERCENT`
+  - `moneyAmount` la tien user thuc nhan sau phi
+  - khong nhan `grossMoneyAmount`, `feePercent`, `feeAmount`, `moneyAmount`, `exchangeRate`, hay `methodId` tu FE
 
 ### 7.3 GET `/api/withdrawals/:withdrawalId`
 
@@ -969,7 +988,10 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
       "walletId": "wallet-id",
       "userId": "user-id",
       "coinAmount": 100,
-      "moneyAmount": 10000,
+      "grossMoneyAmount": 10000,
+      "feePercent": 5,
+      "feeAmount": 500,
+      "moneyAmount": 9500,
       "exchangeRate": 100,
       "bankInfo": {
         "bankCode": "VCB",
@@ -1118,6 +1140,48 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - day integration event:
     - `video.payment.success`
     - `membership.payment.success`
+
+### 8.2 Membership auto-renew charge
+
+- Muc dich: finance-service tu dong tru coin khi media-service phat event den han gia han membership.
+- Khong co public HTTP API rieng. Luong nay chay qua Kafka de tranh client gia mao yeu cau charge.
+- Input event:
+  - topic `membership.auto_renew.requested`
+  - `data.membershipRecordId`
+  - `data.userId`
+  - `data.channelId`
+  - `data.channelOwnerId`
+  - `data.membershipTierId`
+  - `data.coinAmount`
+  - `data.currentExpiryDate`
+  - `data.paymentType = renew`
+  - `data.idempotencyKey`
+- Backend xu ly:
+  - reuse payment membership logic hien co
+  - idempotency theo `userId + idempotencyKey`
+  - tru coin user, chia revenue creator/system, tao transaction va settlement
+  - neu thanh cong, day `membership.payment.success`
+  - neu that bai, day `membership.auto_renew.failed`
+- `membership.payment.success` cho membership co them cac field:
+  - `paymentType` (`new` | `renew` | `upgrade`)
+  - `chargedCoinAmount`
+  - `ledgerReferenceId`
+  - `membershipRecordId` optional
+  - `currentExpiryDate` optional
+  - `expiryDate` optional
+- `membership.auto_renew.failed` data:
+
+```json
+{
+  "membershipRecordId": "membership-record-id",
+  "userId": "user-id",
+  "channelId": "channel-id",
+  "membershipTierId": "tier-id",
+  "reasonCode": "INSUFFICIENT_BALANCE",
+  "retryable": true,
+  "idempotencyKey": "membership-renew:membership-record-id:2026-05-18T00:00:00.000Z"
+}
+```
 
 ## 9. Mapping trang thai nghiep vu cho FE
 

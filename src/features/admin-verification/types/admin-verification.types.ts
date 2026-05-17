@@ -17,12 +17,9 @@ export interface AdminMembershipReviewItem {
   minTotalVideoViews: number;
 }
 
-export type MembershipReviewAction = "approve" | "reject";
-
-export interface MembershipReviewDecisionPayload {
-  action: MembershipReviewAction;
-  reason?: string;
-}
+export type MembershipReviewDecisionPayload =
+  | { action: "approve" }
+  | { action: "reject"; reason: string };
 
 export interface AdminMembershipReviewDecisionResponse {
   id: string;

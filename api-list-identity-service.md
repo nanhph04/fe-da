@@ -376,6 +376,32 @@ FE/SSR flow:
   `POST /api/auth/refresh`.
 
 
+1.5.1) GET /api/auth/session/events
+
+Muc dich:
+
+- Protected SSE endpoint cho realtime session control.
+- FE mo stream nay sau login qua gateway path `/api/auth/session/events`.
+- Khi admin suspend account hien tai, backend emit `session.revoked` de FE xoa
+  accessToken trong localStorage va thoat authenticated UI ngay.
+
+Auth:
+
+- Protected, can `Authorization: Bearer <accessToken>`.
+
+SSE event:
+
+```text
+event: session.revoked
+data: {"reason":"ACCOUNT_SUSPENDED","message":"Tài khoản đã bị vô hiệu hóa. Vui lòng kiểm tra email để biết lý do.","revokedAt":"2026-05-17T00:00:00.000Z"}
+```
+
+Ghi chu:
+
+- SSE la best-effort, FE van phai clear auth state khi gap 401/403.
+- Stream chi gui event cua user dang authenticated.
+
+
 1.6) POST /api/auth/resend-otp
 
 Muc dich:
@@ -1064,6 +1090,8 @@ Response:
 Side effects:
 
 - Khi status la `suspended`, backend gui email cho user voi ly do bi khoa.
+- Khi status la `suspended`, backend revoke refresh tokens va emit SSE
+  `session.revoked` cho user dang online.
 - Backend publish Kafka event `user.status.changed`; payload co field
   `data.reason`.
 
@@ -1087,6 +1115,7 @@ Protected, can Authorization Bearer:
 
 - POST /api/auth/change-password
 - POST /api/auth/logout
+- GET /api/auth/session/events
 - GET /api/user/users/profile
 - POST /api/user/users/profile/avatar/upload-url
 - POST /api/user/users/profile/avatar/complete

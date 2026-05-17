@@ -62,6 +62,10 @@ function getStatusClass(video: AdminVideoItem) {
   return "text-primary";
 }
 
+function getReadyThumbnailUrl(video: AdminVideoItem) {
+  return video.thumbnailUrl && video.thumbnailStatus === "ready" ? video.thumbnailUrl : null;
+}
+
 function getStatusIcon(video: AdminVideoItem) {
   const status = getStatusLabel(video);
 
@@ -182,8 +186,8 @@ export function ContentLibraryFeature() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="relative h-14 w-24 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]">
-                          {video.thumbnailUrl ? (
-                            <Image src={video.thumbnailUrl} alt="" fill sizes="96px" className="object-cover opacity-85 transition-transform duration-300 group-hover:scale-105" />
+                          {getReadyThumbnailUrl(video) ? (
+                            <Image src={getReadyThumbnailUrl(video) || ""} alt="" fill sizes="96px" className="object-cover opacity-85 transition-transform duration-300 group-hover:scale-105" />
                           ) : null}
                         </div>
                         <div>

@@ -4,9 +4,10 @@ import { MediaRow } from "./MediaRow";
 import type { MediaCardProps } from "./MediaCard";
 import { TopNavHome } from "./TopNavHome";
 import { formatDuration, formatViewCount } from "../utils/format";
-import type {
-  CategoryPublic,
-  PublicDiscoveryVideo,
+import {
+  getReadyPublicThumbnailUrl,
+  type CategoryPublic,
+  type PublicDiscoveryVideo,
 } from "@/features/watch/services/publicMediaService";
 
 const FALLBACK_HERO = {
@@ -37,7 +38,7 @@ function toMediaCard(video: PublicDiscoveryVideo): MediaCardProps {
     title: video.title,
     creator: video.channel?.name ?? "Velvet Gallery",
     views: formatViewCount(video.viewCount),
-    imageUrl: video.thumbnailUrl ?? FALLBACK_THUMBNAIL,
+    imageUrl: getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ?? FALLBACK_THUMBNAIL,
     duration: formatDuration(video.durationSeconds),
     href: `/watch/${video.id}`,
   };
@@ -63,7 +64,7 @@ export function LandingPage({
     ? {
       title: heroVideo.title,
       subtitle: heroVideo.description || FALLBACK_HERO.subtitle,
-      imageUrl: heroVideo.thumbnailUrl ?? FALLBACK_THUMBNAIL,
+      imageUrl: getReadyPublicThumbnailUrl(heroVideo.thumbnailUrl, heroVideo.thumbnailStatus) ?? FALLBACK_THUMBNAIL,
       videoId: heroVideo.id,
     }
     : FALLBACK_HERO;

@@ -19,6 +19,28 @@ interface UploadStep3ReviewProps {
   onPrev: () => void;
 }
 
+function getThumbnailExtension(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+
+  if (extension === "jpg" || extension === "jpeg" || extension === "png" || extension === "webp") {
+    return extension;
+  }
+
+  if (file.type === "image/jpeg") {
+    return "jpg";
+  }
+
+  if (file.type === "image/png") {
+    return "png";
+  }
+
+  if (file.type === "image/webp") {
+    return "webp";
+  }
+
+  return null;
+}
+
 export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadStep3ReviewProps) {
   const router = useRouter();
   const [isChecked1, setIsChecked1] = useState(false);
@@ -27,7 +49,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [publishStage, setPublishStage] = useState<"idle" | "initializing" | "uploading" | "confirming">("idle");
+  const [publishStage, setPublishStage] = useState<"idle" | "initializing" | "uploading" | "thumbnail" | "confirming">("idle");
 
   const canPublish = isChecked1 && isChecked2 && !!formData.file;
 
@@ -42,6 +64,13 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       let draftUpload = formData.draftUpload;
 
       if (!draftUpload) {
+        const thumbnailExtension = formData.thumbnailFile ? getThumbnailExtension(formData.thumbnailFile) : null;
+
+        if (formData.thumbnailFile && !thumbnailExtension) {
+          setError("Thumbnail must be a JPG, PNG, or WEBP image.");
+          return;
+        }
+
         const initResponse = await mediaService.initUpload({
           title: formData.title.trim(),
           description: formData.description.trim(),
@@ -50,6 +79,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
           visibility: formData.visibility,
           price: formData.price,
           requiredTierLevel: formData.requiredTierLevel,
+          thumbnailExtension: thumbnailExtension ?? undefined,
         });
 
         if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
@@ -61,6 +91,11 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         updateFormData({ draftUpload });
       }
 
+      if (formData.thumbnailFile && (!draftUpload.thumbnailUploadUrl || !draftUpload.thumbnailObjectKey)) {
+        setError("Media service did not return a thumbnail upload URL. Remove the custom thumbnail or try again.");
+        return;
+      }
+
       setPublishStage("uploading");
       await mediaService.uploadRawVideoFile({
         uploadUrl: draftUpload.uploadUrl,
@@ -68,9 +103,20 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         onProgress: setUploadProgress,
       });
 
+      const thumbnailObjectKey = formData.thumbnailFile ? draftUpload.thumbnailObjectKey : null;
+
+      if (formData.thumbnailFile && draftUpload.thumbnailUploadUrl) {
+        setPublishStage("thumbnail");
+        await mediaService.uploadPresignedFile({
+          uploadUrl: draftUpload.thumbnailUploadUrl,
+          file: formData.thumbnailFile,
+        });
+      }
+
       setPublishStage("confirming");
       const confirmResponse = await mediaService.confirmUpload(draftUpload.videoId, {
         resolutions: formData.resolutions,
+        thumbnailObjectKey: thumbnailObjectKey ?? undefined,
       });
 
       if (!(confirmResponse.success || confirmResponse.code === 201 || confirmResponse.code === 200)) {
@@ -205,6 +251,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
             <p className="text-sm text-muted-foreground">
               {publishStage === "initializing" && "Creating secure upload session..."}
               {publishStage === "uploading" && `Uploading raw file... ${uploadProgress}%`}
+              {publishStage === "thumbnail" && "Uploading custom thumbnail..."}
               {publishStage === "confirming" && "Confirming upload for processing..."}
             </p>
             {publishStage === "uploading" ? (

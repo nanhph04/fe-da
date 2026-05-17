@@ -1,33 +1,83 @@
-export function CreatorHero() {
+import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
+
+interface CreatorHeroProps {
+  channel: PublicChannelDetail;
+}
+
+function getInitials(value: string) {
+  const words = value.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) {
+    return "VG";
+  }
+
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
+}
+
+export function CreatorHero({ channel }: CreatorHeroProps) {
+  const subscriberCount = channel.subscriberCount ?? 0;
+  const totalVideos = channel.videoCount ?? channel.publicVideos.length;
+
   return (
-    <section className="relative w-full h-[400px] rounded-xl overflow-hidden mb-16 shadow-2xl">
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e10] via-[#0e0e10]/40 to-transparent z-10"></div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img 
-        className="w-full h-full object-cover" 
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWncoIv8Fez2MojYN5CRu4jPolhXI01BoiI-FHMIruVRPTzmrh5a-M9iLpF4J6dS3GYe-JNQ2Eswz8HgcmhqjjQ3kiZDK6ntriwdvCVgkx5Ym_PITVIUUMMj2SZYf5u_Ox2pHBQUDuVCXcFjgCCqoxFcVZe_c0VDbyGOAUsj42JCWY-m--XNeoUZd5Vrno54yYJXbu5Sa1qie0hnwrRcIEVaBxx4OAG6Hcn9Toirzxc7Rv0HvBNrFz6wVAW0PvdgBt94FJhBLqgEQq" 
-        alt="Creator Banner" 
-      />
-      
-      <div className="absolute bottom-0 left-0 p-10 z-20 flex items-end gap-8">
-        <div className="w-32 h-32 rounded-lg border-4 border-[#0e0e10] shadow-2xl overflow-hidden bg-background">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            className="w-full h-full object-cover" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzuQBWVG30Ho8IEVRKrKUIlVgB0KAUHzO65tNKSMZqDznQosVu8STfpoAr-ZwNHlcU636CLO_3QzvU_A_wBS_J5YwPAiOtWTs00TnUa6aKUch9wCNB-wnAfln3vuy8t13jii-ROeqaWmBKJ6dptpILesiAMpeXYY6UamODNjvxnE6_niyUiq2bvA7k_9xtmDh1E7V7HkMncPAdyCxIqklsvTVE9tPJsPJFHXHa6YoWzEX1w7XpSqvccWjAS_ExKef1_5DE02vfPYCY" 
-            alt="CinemaLabs Avatar" 
-          />
+    <section className="relative mb-16 h-[360px] w-full overflow-hidden rounded-lg border border-border/20 bg-card shadow-2xl md:h-[400px]">
+      {channel.bannerUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className="h-full w-full object-cover"
+          src={channel.bannerUrl}
+          alt={`${channel.name} banner`}
+        />
+      ) : (
+        <div
+          className="h-full w-full"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 34%), radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--secondary) 18%, transparent), transparent 30%), linear-gradient(135deg, var(--card), var(--background))",
+          }}
+        />
+      )}
+
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-background/50 to-transparent" />
+
+      <div className="absolute bottom-0 left-0 z-20 flex flex-col gap-6 p-6 md:flex-row md:items-end md:gap-8 md:p-10">
+        <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border-4 border-background bg-muted text-xl font-black text-foreground shadow-2xl md:h-32 md:w-32">
+          {channel.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              className="h-full w-full object-cover"
+              src={channel.avatarUrl}
+              alt={`${channel.name} avatar`}
+            />
+          ) : (
+            <span>{getInitials(channel.name)}</span>
+          )}
         </div>
-        
+
         <div className="pb-2">
-          <div className="flex items-center gap-3">
-            <h1 className="font-headline text-5xl font-black -tracking-widest text-foreground uppercase italic">CinemaLabs</h1>
-            <span className="material-symbols-outlined text-[#fdc003]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-headline text-4xl font-black uppercase italic tracking-tighter text-foreground md:text-5xl">
+              {channel.name}
+            </h1>
+            <span
+              aria-label="Kênh đã xác minh"
+              className="material-symbols-outlined text-secondary"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              verified
+            </span>
           </div>
-          <p className="text-muted-foreground mt-2 font-medium tracking-wide flex items-center gap-2">
-            <span>4.2M Subscribers</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-muted"></span>
-            <span>Premium Studio Member</span>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium tracking-wide text-muted-foreground">
+            <span>{subscriberCount.toLocaleString()} hội viên</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-border" aria-hidden="true" />
+            <span>{totalVideos.toLocaleString()} video công khai</span>
+            {channel.isMembershipClosedByAdmin ? (
+              <span className="rounded-sm border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-black uppercase tracking-widest text-destructive">
+                Membership đóng
+              </span>
+            ) : null}
           </p>
         </div>
       </div>
