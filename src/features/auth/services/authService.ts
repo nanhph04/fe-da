@@ -92,7 +92,7 @@ export const authService = {
     return api.post<MessageResponse>("/api/auth/verify-email", data);
   },
 
-  // 1.3) Login
+  // 1.3) Login. Refresh token is set via httpOnly cookie; response body only contains accessToken/expiresIn.
   login: async (data: LoginRequest) => {
     return api.post<TokenResponse>("/api/auth/login", data);
   },
@@ -117,9 +117,9 @@ export const authService = {
     return api.post<MessageResponse>("/api/auth/change-password", data, { requireAuth: true });
   },
 
-  // 1.9) Logout
+  // 1.10) Logout
   logout: async () => {
-    return api.post<MessageResponse>("/api/auth/logout", {}, { requireAuth: true });
+    return api.post<MessageResponse>("/api/auth/logout", undefined, { requireAuth: true });
   },
 
   // Lấy session profile bằng refresh_token cookie, không rotate token và không trả accessToken.

@@ -14,7 +14,7 @@ import { PublicBrand } from "@/components/layout/public/PublicBrand";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -82,9 +82,15 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
           return;
         }
         router.push(nextPath);
-      } else {
-        setServerError(res.mess || "Login failed");
+        return;
       }
+
+      if (res.code === 403) {
+        setServerError(res.mess || "Your account has been suspended");
+        return;
+      }
+
+      setServerError(res.mess || "Login failed");
     } catch (err: unknown) {
       setServerError(getErrorMessage(err, "An error occurred during login. Please try again."));
     } finally {

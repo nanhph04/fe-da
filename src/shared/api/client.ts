@@ -262,11 +262,11 @@ export const fetchWrapper = async <T = unknown>(
 export const api = {
   get: <T>(url: string, options?: ApiRequestInit) =>
     fetchWrapper<T>(url, { ...options, method: "GET" }),
-  post: <T>(url: string, body: unknown, options?: ApiRequestInit) =>
+  post: <T>(url: string, body?: unknown, options?: ApiRequestInit) =>
     fetchWrapper<T>(url, {
       ...options,
       method: "POST",
-      body: body instanceof FormData ? body : JSON.stringify(body),
+      body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
     }),
   patch: <T>(url: string, body: unknown, options?: ApiRequestInit) =>
     fetchWrapper<T>(url, {
