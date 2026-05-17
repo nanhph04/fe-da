@@ -1,6 +1,6 @@
 # Media Service API
 
-**Last updated:** 16/05/2026
+**Last updated:** 17/05/2026
 
 **Base URL:** `/api/media`
 
@@ -273,6 +273,43 @@
     - `membershipRejectionReason` (string | null)
     - `membershipRequestedAt` (string ISO | null)
     - `membershipReviewedAt` (string ISO | null)
+
+### 2.7 PATCH `/api/media/memberships/:membershipId/auto-renew`
+
+- Muc dich: user bat/tat tu dong gia han membership cua minh.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-internal-secret`: He thong tu set
+- Path param:
+  - `membershipId` (string): id cua membership record, khong phai tier id.
+- Body:
+
+```json
+{
+  "enabled": true
+}
+```
+
+- Ghi chu:
+  - Chi owner cua membership moi duoc cap nhat.
+  - Khi user tat auto-renew, membership hien tai van giu quyen truy cap den `expiryDate`.
+  - Membership moi/gia han thanh cong se bat auto-renew mac dinh.
+- Response HTTP 200:
+  - Envelope `data`:
+    - `id` (string)
+    - `userId` (string)
+    - `channelId` (string)
+    - `membershipId` (string): tier id dang gan voi membership
+    - `expiryDate` (string ISO | null)
+    - `retryCount` (number)
+    - `status` (`active` | `cancelled`)
+    - `autoRenewEnabled` (boolean)
+    - `renewalStatus` (`idle` | `pending` | `retrying` | `disabled`)
+    - `renewalReminderSentAt` (string ISO | null)
+    - `lastRenewalAttemptAt` (string ISO | null)
+    - `nextRenewalAttemptAt` (string ISO | null)
+    - `createdAt` (string ISO)
+    - `updatedAt` (string ISO)
     - `avatarUrl` (string)
     - `bannerUrl` (string)
     - `status` (string)
@@ -396,6 +433,16 @@
 
 ## 4. VIDEO APIs
 
+### Thumbnail fields
+
+Nhung response video list/detail chinh co cac field thumbnail:
+
+- `thumbnailUrl` (string | null): URL anh thumbnail neu da san sang.
+- `thumbnailSource` (`auto` | `custom`): nguon thumbnail dang active.
+- `thumbnailStatus` (`pending` | `processing` | `ready` | `failed`): trang thai thumbnail.
+
+Frontend nen render `thumbnailUrl` khi `thumbnailStatus = ready`; cac trang thai khac dung placeholder.
+
 ### 4.0 GET `/api/media/videos/me?limit=20&status=draft,processing&visibility=private`
 
 - Muc dich: lay danh sach video Studio cua chinh creator hien tai, gom ca draft/private/trang thai xu ly.
@@ -488,6 +535,7 @@
   - `visibility` (`public` | `private`, optional, default `public`)
   - `price` (number, optional, default 0, min 0)
   - `requiredTierLevel` (number | null, optional, min 1)
+  - `thumbnailExtension` (`jpg` | `jpeg` | `png` | `webp`, optional): neu creator muon upload custom thumbnail, backend se tra them presigned URL rieng cho thumbnail.
 - He thong tu set them khi xu ly:
   - `userId`: lay tu header `x-user-id`
 - Ghi chu:
@@ -495,6 +543,8 @@
   - Backend KHONG nhan `categories` nua; uploader chi duoc gui `categoryId`.
   - Neu thieu `categoryId`, `categoryId` rong sau khi trim, hoac category khong ton tai / khong active thi tra `BAD_REQUEST` / HTTP 400.
   - Neu `tagIds` bi duplicate, co tag khong ton tai, hoac tag khong active thi tra `BAD_REQUEST` / HTTP 400.
+  - Neu co `thumbnailExtension`, client upload anh custom thumbnail vao `thumbnailUploadUrl` truoc khi goi confirm.
+  - Neu khong co `thumbnailExtension`, he thong se auto-generate thumbnail bang Media Processing Service sau moderation/transcode.
 - Response HTTP 201:
   - Envelope `data`:
     - `videoId` (string)
@@ -502,6 +552,9 @@
     - `rawFileKey` (string)
     - `bucket` (string)
     - `uploadUrl` (string)
+    - `thumbnailObjectKey` (string | null): key MinIO cho custom thumbnail neu request co `thumbnailExtension`
+    - `thumbnailBucket` (string | null)
+    - `thumbnailUploadUrl` (string | null): presigned URL de upload custom thumbnail
 
 ### 4.2 POST `/api/media/videos/:id/confirm-upload`
 
@@ -514,12 +567,15 @@
 - Body:
   - `resolutions` (string[], bat buoc, unique, 1-3 phan tu)
   - Gia tri hop le hien tai: `480p`, `720p`, `1080p`
+  - `thumbnailObjectKey` (string, optional): object key custom thumbnail da upload bang URL tra ve tu `init-upload`
 - He thong tu set them khi xu ly:
   - `userId`: lay tu header `x-user-id`
 - Ghi chu:
   - Chi owner duoc confirm.
   - Chi confirm duoc khi video con `status = draft`; cac status khac tra `CONFLICT` / HTTP 409.
   - Backend kiem tra raw object ton tai, size > 0, va khong vuot gioi han upload.
+  - Neu co `thumbnailObjectKey`, backend kiem tra object ton tai trong bucket processed, dung prefix `videos/{videoId}/thumbnails/custom.`, dinh dang `jpg/jpeg/png/webp`, size > 0 va <= 5MB. Hop le thi set `thumbnailSource = custom`, `thumbnailStatus = ready`.
+  - Neu khong co `thumbnailObjectKey`, backend set `thumbnailSource = auto`, `thumbnailStatus = processing`; Media Processing Service tao file `videos/{videoId}/thumbnails/default.jpg`.
   - Khi confirm thanh cong, backend copy raw object sang immutable key `uploads/confirmed/{videoId}/{uuid}.mp4` truoc khi publish moderation event. Presigned URL cu neu con han se khong ghi de file dang moderation/transcode.
 - Response HTTP 201:
   - Envelope `data`:
@@ -1263,7 +1319,25 @@
     - `membershipRejected` (number): so channel bi admin tu choi membership
     - `uploadingNow` (number): so video dang draft/pending_moderation/processing
 
-### 9.2 GET `/api/media/admin/channels/membership-reviews?status=pending`
+### 9.2 GET `/api/media/admin/channels?page=1&limit=20&status=active&ownerId=...&q=...`
+
+- Muc dich: admin list/search channel de quan tri lock/unlock hoac membership review.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-user-role`: Bat buoc la `admin`
+  - `x-internal-secret`: He thong tu set
+- Query:
+  - `page` (number, optional, default 1, min 1)
+  - `limit` (number, optional, default 20, min 1, max 100)
+  - `status` optional: `active`, `inactive`, `suspended`
+  - `ownerId` optional: loc theo owner/user id
+  - `q` optional: search theo `name` hoac `bio`
+- Response HTTP 200:
+  - Envelope `data`:
+    - `items` (array), moi object gom channel summary fields: `id`, `userId`, `name`, `bio`, `status`, membership review fields, avatar/banner, timestamps.
+    - `pagination`: `page`, `limit`, `total`, `totalPages`
+
+### 9.3 GET `/api/media/admin/channels/membership-reviews?status=pending`
 
 - Muc dich: admin lay danh sach channel theo trang thai duyet membership.
 - Header:
@@ -1292,7 +1366,7 @@
     - `totalVideoViews` (number)
     - `minTotalVideoViews` (number)
 
-### 9.3 PATCH `/api/media/admin/channels/:id/membership-review`
+### 9.4 PATCH `/api/media/admin/channels/:id/membership-review`
 
 - Muc dich: admin approve/reject quyen mo membership cua channel.
 - Header:
@@ -1341,7 +1415,7 @@
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-### 9.4 PATCH `/api/media/admin/channels/:id/status`
+### 9.5 PATCH `/api/media/admin/channels/:id/status`
 
 - Muc dich: admin khoa/mo khoa channel bang cach chuyen status `suspended`/`active`.
 - Header:
@@ -1369,7 +1443,7 @@
 - Response HTTP 200:
   - Envelope `data`: channel sau khi cap nhat status.
 
-### 9.5 GET `/api/media/admin/reports/summary`
+### 9.6 GET `/api/media/admin/reports/summary`
 
 - Muc dich: lay summary moderation queue cho admin dashboard.
 - Ghi chu:
@@ -1387,7 +1461,7 @@
     - `rejectedLast30d` (number): video rejected trong 30 ngay gan nhat
     - `averageResolutionHours` (number | null): hien tai `null`
 
-### 9.6 GET `/api/media/admin/reports?status=pending&page=1&limit=5`
+### 9.7 GET `/api/media/admin/reports?status=pending&page=1&limit=5`
 
 - Muc dich: lay danh sach moderation report/queue item cho dashboard.
 - Header:
@@ -1415,7 +1489,7 @@
       - `total` (number)
       - `totalPages` (number)
 
-### 9.7 GET `/api/media/admin/videos?page=1&limit=20&status=ready&visibility=public&channelId=...&ownerId=...&q=...`
+### 9.8 GET `/api/media/admin/videos?page=1&limit=20&status=ready&visibility=public&channelId=...&ownerId=...&q=...`
 
 - Muc dich: admin lay danh sach tat ca video trong he thong, gom public/private/draft/processing/rejected/failed/ready va video da soft delete.
 - Header:
@@ -1469,6 +1543,51 @@
       - `limit` (number)
       - `total` (number)
       - `totalPages` (number)
+
+### 9.9 GET `/api/media/admin/videos/:id`
+
+- Muc dich: admin xem chi tiet video bat ky status, gom ca private/draft/rejected/deleted.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-user-role`: Bat buoc la `admin`
+  - `x-internal-secret`: He thong tu set
+- Path param:
+  - `id` (string): videoId
+- Response HTTP 200:
+  - Envelope `data`: admin video item, gom `ownerId`, `channelId`, metadata, processing/moderation fields, delete fields va timestamps.
+
+### 9.10 PATCH `/api/media/admin/videos/:id/moderation`
+
+- Muc dich: admin approve/reject video dang cho manual review.
+- Header:
+  - `x-user-id`: He thong tu set
+  - `x-user-role`: Bat buoc la `admin`
+  - `x-internal-secret`: He thong tu set
+- Path param:
+  - `id` (string): videoId
+- Body approve:
+
+```json
+{
+  "action": "approve"
+}
+```
+
+- Body reject:
+
+```json
+{
+  "action": "reject",
+  "reason": "Policy issue"
+}
+```
+
+- Ghi chu:
+  - Chi xu ly video co `status = pending_manual_review`.
+  - `reject` bat buoc co `reason`.
+  - Approve chuyen video sang `ready`; reject chuyen video sang `rejected`.
+- Response HTTP 200:
+  - Envelope `data`: admin video item sau khi cap nhat.
 
 ## 10. ERROR RESPONSE CHUNG
 

@@ -311,7 +311,9 @@ export function StudioContentFeature() {
             const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
             const isRejected = status === REJECTED_STATUS;
+            const isReady = READY_STATUSES.has(status);
             const isRejectReasonExpanded = expandedRejectReasonVideoId === video.id;
+            const previewHref = `/studio/content/${video.id}`;
 
             return (
               <article
@@ -321,18 +323,44 @@ export function StudioContentFeature() {
                 {video.requiredTierLevel === 3 ? <div className="absolute inset-0 rounded-lg border border-secondary/10" /> : null}
 
                 <div className="col-span-12 flex items-center gap-4 md:col-span-5">
-                  <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background">
-                    <div
-                      aria-label={video.title}
-                      role="img"
-                      className="h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
-                      style={{ backgroundImage: `url(${thumbUrl})` }}
-                    />
-                  </div>
+                  {isReady ? (
+                    <Link
+                      href={previewHref}
+                      className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
+                      aria-label={`Preview ${video.title}`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="block h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
+                        style={{ backgroundImage: `url(${thumbUrl})` }}
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center bg-background/0 text-foreground opacity-0 transition-opacity duration-300 group-hover:bg-background/50 group-hover:opacity-100">
+                        <span className="material-symbols-outlined text-3xl" aria-hidden="true">play_circle</span>
+                      </span>
+                    </Link>
+                  ) : (
+                    <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background">
+                      <div
+                        aria-label={video.title}
+                        role="img"
+                        className="h-full w-full bg-cover bg-center opacity-70 transition-transform duration-300 group-hover:scale-[1.03]"
+                        style={{ backgroundImage: `url(${thumbUrl})` }}
+                      />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors group-hover:text-primary">
-                      {video.title}
-                    </h3>
+                    {isReady ? (
+                      <Link
+                        href={previewHref}
+                        className="block truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
+                      >
+                        {video.title}
+                      </Link>
+                    ) : (
+                      <h3 className="truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors group-hover:text-primary">
+                        {video.title}
+                      </h3>
+                    )}
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className={`font-label text-xs ${getStatusTone(status)}`}>
                         {status.toUpperCase()}
@@ -407,6 +435,15 @@ export function StudioContentFeature() {
                     </Button>
                   ) : (
                     <>
+                      {isReady ? (
+                        <Link
+                          href={previewHref}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full p-0 text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
+                          aria-label={`Preview ${video.title}`}
+                        >
+                          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">play_arrow</span>
+                        </Link>
+                      ) : null}
                       <Button
                         type="button"
                         variant="ghost"

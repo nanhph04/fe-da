@@ -2,6 +2,13 @@ import { api } from "@/shared/api/client";
 import type { ApiPagination, ApiResponse } from "@/shared/api/types";
 
 import type {
+  AdminChannelActionResponse,
+  AdminChannelListParams,
+  AdminChannelListResponse,
+  AdminChannelMembershipAvailabilityPayload,
+  AdminChannelMembershipReviewPayload,
+  AdminChannelsSummary,
+  AdminChannelStatusPayload,
   AdminUserDetail,
   AdminUserListParams,
   AdminUserListResponse,
@@ -56,9 +63,41 @@ const buildUserListQuery = (params: AdminUserListParams = {}) => {
   return query ? `?${query}` : "";
 };
 
+const buildChannelListQuery = (params: AdminChannelListParams = {}) => {
+  const searchParams = new URLSearchParams();
+
+  if (params.page) {
+    searchParams.set("page", String(params.page));
+  }
+
+  if (params.limit) {
+    searchParams.set("limit", String(params.limit));
+  }
+
+  if (params.status) {
+    searchParams.set("status", params.status);
+  }
+
+  if (params.ownerId?.trim()) {
+    searchParams.set("ownerId", params.ownerId.trim());
+  }
+
+  if (params.q?.trim()) {
+    searchParams.set("q", params.q.trim());
+  }
+
+  const query = searchParams.toString();
+  return query ? `?${query}` : "";
+};
+
 const normalizeUserListResponse = (response: ApiResponse<AdminUserListItemFromApi[]>): AdminUserListResponse => ({
   items: response.data,
   pagination: response.pagination ?? emptyPagination,
+});
+
+const normalizeChannelListResponse = (response: ApiResponse<AdminChannelListResponse>): AdminChannelListResponse => ({
+  items: response.data.items,
+  pagination: response.data.pagination ?? response.pagination ?? emptyPagination,
 });
 
 const emptyPagination: ApiPagination = {
@@ -69,6 +108,7 @@ const emptyPagination: ApiPagination = {
 };
 
 type AdminUserListItemFromApi = AdminUserListResponse["items"][number];
+
 
 export const adminUserService = {
   async getSummary() {
@@ -94,6 +134,55 @@ export const adminUserService = {
     const response = await api.patch<AdminUserDetail>(`/api/user/admin/users/${userId}/status`, payload, {
       requireAuth: true,
     });
+
+    return response.data;
+  },
+};
+
+export const adminChannelService = {
+  async getSummary() {
+    const response = await api.get<AdminChannelsSummary>("/api/media/admin/channels/summary", {
+      requireAuth: true,
+    });
+
+    return response.data;
+  },
+
+  async getChannels(params: AdminChannelListParams = {}) {
+    const response = await api.get<AdminChannelListResponse>(
+      `/api/media/admin/channels${buildChannelListQuery(params)}`,
+      { requireAuth: true }
+    );
+
+    return normalizeChannelListResponse(response);
+  },
+
+  async updateStatus(channelId: string, payload: AdminChannelStatusPayload) {
+    const response = await api.patch<AdminChannelActionResponse>(
+      `/api/media/admin/channels/${channelId}/status`,
+      payload,
+      { requireAuth: true }
+    );
+
+    return response.data;
+  },
+
+  async decideMembershipReview(channelId: string, payload: AdminChannelMembershipReviewPayload) {
+    const response = await api.patch<AdminChannelActionResponse>(
+      `/api/media/admin/channels/${channelId}/membership-review`,
+      payload,
+      { requireAuth: true }
+    );
+
+    return response.data;
+  },
+
+  async updateMembershipAvailability(channelId: string, payload: AdminChannelMembershipAvailabilityPayload) {
+    const response = await api.patch<AdminChannelActionResponse>(
+      `/api/media/channels/${channelId}/admin/membership`,
+      payload,
+      { requireAuth: true }
+    );
 
     return response.data;
   },

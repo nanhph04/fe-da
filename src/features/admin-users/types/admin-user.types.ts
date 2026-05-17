@@ -80,3 +80,78 @@ export interface AdminUserStatusPayload {
   status: AdminUserStatus;
   reason?: string;
 }
+
+export type AdminChannelStatus = "active" | "inactive" | "suspended";
+export type AdminMembershipReviewStatus = "not_requested" | "pending" | "approved" | "rejected";
+
+export interface AdminChannelsSummary {
+  totalChannels: number;
+  activeCreators30d: number;
+  eligibleForMembership: number;
+  membershipClosedByAdmin: number;
+  membershipPendingReview: number;
+  membershipApproved: number;
+  membershipRejected: number;
+  uploadingNow: number;
+}
+
+export interface AdminChannelListItem {
+  id: string;
+  userId: string;
+  name: string;
+  bio: string;
+  status: AdminChannelStatus | string;
+  isEligibleForMembership: boolean;
+  isMembershipClosedByAdmin: boolean;
+  membershipReviewStatus: AdminMembershipReviewStatus;
+  membershipRejectionReason: string | null;
+  membershipRequestedAt: string | null;
+  membershipReviewedAt: string | null;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminChannelListParams {
+  page?: number;
+  limit?: number;
+  status?: AdminChannelStatus;
+  ownerId?: string;
+  q?: string;
+}
+
+export interface AdminChannelListResponse {
+  items: AdminChannelListItem[];
+  pagination: ApiPagination;
+}
+
+export interface AdminChannelStatusPayload {
+  action: "lock" | "unlock";
+}
+
+export type AdminChannelMembershipReviewPayload =
+  | { action: "approve" }
+  | { action: "reject"; reason: string };
+
+export interface AdminChannelMembershipAvailabilityPayload {
+  action: "close" | "open";
+}
+
+export interface AdminChannelActionResponse {
+  id: string;
+  userId: string;
+  name: string;
+  bio: string;
+  isEligibleForMembership: boolean;
+  isMembershipClosedByAdmin: boolean;
+  membershipReviewStatus: AdminMembershipReviewStatus;
+  membershipRejectionReason: string | null;
+  membershipRequestedAt: string | null;
+  membershipReviewedAt: string | null;
+  avatarUrl?: string | null;
+  bannerUrl?: string | null;
+  status?: AdminChannelStatus | string;
+  createdAt?: string;
+  updatedAt?: string;
+}

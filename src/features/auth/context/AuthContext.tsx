@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { api } from "@/shared/api/client";
+import { api, fetchSSE } from "@/shared/api/client";
 import { authService } from "../services/authService";
 import { useRouter } from "next/navigation";
 
@@ -94,6 +94,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.push("/login");
     }
   };
+
+  useEffect(() => {
+    if (!user || !api.getToken()) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    void fetchSSE(
+      "/api/auth/session/events",
+      { requireAuth: true, signal: controller.signal },
+      (_data, event) => {
+        if (event !== "session.revoked") {
+          return;
+        }
+
+        api.clearToken();
+        setUser(null);
+        router.push("/login?reason=account-disabled");
+      },
+      undefined,
+      () => undefined,
+    );
+
+    return () => {
+      controller.abort();
+    };
+  }, [router, user]);
 
   return (
     <AuthContext.Provider
