@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
 import { HomeDiscoverySection, type HomeCategorySection } from "./HomeDiscoverySection";

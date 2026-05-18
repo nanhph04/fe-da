@@ -7,7 +7,7 @@ import { PurchasedLibrary } from "@/features/library/components/PurchasedLibrary
 import { Subscriptions } from "@/features/library/components/Subscriptions";
 import { AccountActivity } from "@/features/library/components/AccountActivity";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 
 export default function LibraryPage() {

@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { usePathname } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useTranslations } from "next-intl";
 import { isNavItemVisible, mobileNavItems, type MainNavRole, type NavItem } from "./navigation";
 
 const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean): MainNavRole => {
@@ -26,6 +27,7 @@ const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean):
 };
 
 function MobileNavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
+  const t = useTranslations("Navigation");
   const className = `flex flex-col items-center gap-1 ${
     item.disabled ? "text-muted-foreground/30 cursor-not-allowed" : isActive ? "text-primary" : "text-muted-foreground"
   }`;
@@ -33,7 +35,7 @@ function MobileNavEntry({ item, isActive }: { item: NavItem; isActive?: boolean 
   const content = (
     <>
       <span className="material-symbols-outlined">{item.icon}</span>
-      <span className="text-[10px] font-bold">{item.label}</span>
+      <span className="text-[10px] font-bold">{t(item.label)}</span>
     </>
   );
 

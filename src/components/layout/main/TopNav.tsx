@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import {
   isNavItemVisible,
   studioEntryByRole,
@@ -50,6 +52,7 @@ export function TopNav() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
   const pathname = usePathname();
+  const t = useTranslations("Navigation");
 
   const role = getRole(user?.role, isAuthenticated, user?.isCreator);
   const visibleNavItems = topNavItems.filter(item => isNavItemVisible(item, role));
@@ -77,7 +80,7 @@ export function TopNav() {
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {item.label}
+                  {t(item.label)}
                 </Link>
               );
             })}
@@ -89,21 +92,22 @@ export function TopNav() {
                   pathname?.startsWith(roleEntry.path!) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {roleEntry.label}
+                {t(roleEntry.label)}
               </Link>
             ) : null}
           </div>
 
           <div className="flex items-center gap-4 relative">
+            <LanguageSwitcher />
             <ThemeToggle />
 
             {role === "guest" ? (
               <div className="flex gap-4">
                 <Link href="/login" className="text-foreground font-bold hover:text-primary transition-colors">
-                  Sign In
+                  {t("signIn")}
                 </Link>
                 <Link href="/register" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-sm font-bold transition-colors">
-                  Sign Up
+                  {t("signUp")}
                 </Link>
               </div>
             ) : (
@@ -139,7 +143,7 @@ export function TopNav() {
                       className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
                       onClick={() => setShowDropdown(false)}
                     >
-                      My Profile
+                      {t("myProfile")}
                     </Link>
                     <button
                       onClick={() => {
@@ -148,7 +152,7 @@ export function TopNav() {
                       }}
                       className="px-4 py-2 text-sm text-destructive hover:bg-accent transition-colors text-left font-bold"
                     >
-                      Sign Out
+                      {t("signOut")}
                     </button>
                   </div>
                 )}

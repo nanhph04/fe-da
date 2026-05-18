@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
 
 function canAccessStudio(user: ReturnType<typeof useAuth>["user"]) {

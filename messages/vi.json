@@ -1,0 +1,19 @@
+{
+  "Navigation": {
+    "explore": "Khám phá",
+    "library": "Thư viện",
+    "wallet": "Ví của bạn",
+    "profile": "Hồ sơ",
+    "purchased": "Đã mua",
+    "subscriptions": "Kênh đăng ký",
+    "become_creator": "Trở thành Nhà sáng tạo",
+    "creator_studio": "Creator Studio",
+    "admin_panel": "Quản trị viên",
+    "settings": "Cài đặt",
+    "help": "Trợ giúp",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "signOut": "Đăng xuất",
+    "myProfile": "Hồ sơ của tôi"
+  }
+}

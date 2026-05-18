@@ -3,12 +3,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { type UserProfile, useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 

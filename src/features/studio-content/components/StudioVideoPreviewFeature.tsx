@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PlayerContainerClient } from "@/features/watch/components/PlayerContainerClient";
 import { getReadyOwnerVideoThumbnailUrl, mediaService, type OwnerVideoDetailResponse } from "@/features/watch/services/mediaService";

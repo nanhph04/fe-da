@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
 import { Loader2 } from "lucide-react";
 

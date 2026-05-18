@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { MediaRow } from "./MediaRow";
 import type { MediaCardProps } from "./MediaCard";
 import { formatDuration, formatViewCount } from "../utils/format";

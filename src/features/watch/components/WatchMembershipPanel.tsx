@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import type { PublicMembershipTier } from "../services/publicMediaService";
 
 interface WatchMembershipPanelProps {

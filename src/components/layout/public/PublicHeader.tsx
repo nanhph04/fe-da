@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { PublicBrand } from "./PublicBrand";
 import type { PublicNavLink } from "@/shared/navigation/branding";
 import { publicMarketingLinks } from "@/shared/navigation/branding";

@@ -6,6 +6,8 @@ import {
   type PublicDiscoveryVideo,
 } from "@/features/watch/services/publicMediaService";
 
+import { setRequestLocale } from "next-intl/server";
+
 const HOME_CATEGORY_SECTION_LIMIT = 3;
 const HOME_CATEGORY_VIDEO_LIMIT = 6;
 
@@ -16,7 +18,10 @@ interface HomeCategorySection {
   videos: PublicDiscoveryVideo[];
 }
 
-export default async function Home() {
+export default async function Home(props: { params: Promise<{ locale: string }> }) {
+  const { locale } = await props.params;
+  setRequestLocale(locale);
+
   const [latestRes, categoriesRes] = await Promise.all([
     getLatestVideosCached(13).catch(() => null),
     getCategoriesCached().catch(() => null),

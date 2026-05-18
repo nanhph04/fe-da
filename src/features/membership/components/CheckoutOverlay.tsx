@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import type { PaymentResponse } from "@/features/wallet/types/wallet.types";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
 import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";

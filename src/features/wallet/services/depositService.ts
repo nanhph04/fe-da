@@ -15,10 +15,15 @@ export class DepositService {
    * @param packageId ID of the deposit package
    * @returns Deposit object containing checkoutUrl
    */
-  static async createDeposit(packageId: string, idempotencyKey?: string): Promise<Deposit> {
+  static async createDeposit(
+    packageId: string, 
+    idempotencyKey?: string,
+    returnUrl?: string,
+    cancelUrl?: string
+  ): Promise<Deposit> {
     const response = await api.post<Deposit>(
       "/api/deposits",
-      { packageId },
+      { packageId, returnUrl, cancelUrl },
       {
         requireAuth: true,
         headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,

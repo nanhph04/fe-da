@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation";
 import "server-only";
 
-import { redirect } from "next/navigation";
 import { getServerSessionProfile } from "@/shared/api/server";
 
 export interface ServerUserProfile {

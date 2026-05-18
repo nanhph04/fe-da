@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService } from "@/features/watch/services/mediaService";

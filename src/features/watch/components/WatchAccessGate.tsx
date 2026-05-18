@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { PaymentService } from "@/features/wallet/services/paymentService";

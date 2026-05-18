@@ -22,6 +22,10 @@ const mediaStorageLanRemotePattern = appHostIp
   ? new URL(`http://${appHostIp}:9000`)
   : null;
 
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
 
@@ -92,4 +96,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

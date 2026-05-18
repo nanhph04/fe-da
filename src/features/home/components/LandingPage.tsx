@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { HeroSection } from "./HeroSection";
 import { MediaRow } from "./MediaRow";
 import type { MediaCardProps } from "./MediaCard";

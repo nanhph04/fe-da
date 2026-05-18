@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { ArrowDownLeft, ArrowUpRight, Clock, WalletCards } from "lucide-react";
 import type { Transaction, Wallet } from "@/features/wallet/types/wallet.types";
 import { formatProfileDateTime, getTransactionAmountLabel, getTransactionTitle, getTransactionTone } from "../utils/profile-formatters";

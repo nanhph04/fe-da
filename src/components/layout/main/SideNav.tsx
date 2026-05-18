@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { usePathname } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useTranslations } from "next-intl";
 import {
   isNavItemVisible,
   sideNavFooterItems,
@@ -33,6 +34,7 @@ const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean):
 };
 
 function NavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
+  const t = useTranslations("Navigation");
   const className = `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
     item.disabled
       ? "text-muted-foreground/30 border border-dashed border-border/20 cursor-not-allowed"
@@ -44,7 +46,7 @@ function NavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
   const content = (
     <>
       <span className="material-symbols-outlined">{item.icon}</span>
-      <span className="font-headline font-semibold text-sm">{item.label}</span>
+      <span className="font-headline font-semibold text-sm">{t(item.label)}</span>
     </>
   );
 
@@ -68,6 +70,7 @@ export function SideNav() {
   const { user, isAuthenticated } = useAuth();
   const role = getRole(user?.role, isAuthenticated, user?.isCreator);
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
+  const t = useTranslations("Navigation");
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 z-40 bg-sidebar flex-col pt-24 px-4 pb-8 hidden md:flex border-r border-sidebar-border/10">
@@ -90,11 +93,11 @@ export function SideNav() {
             href={roleEntry.path!}
             className="w-full mt-4 bg-accent hover:bg-accent/80 text-foreground text-xs font-bold py-2 rounded-lg transition-all inline-flex items-center justify-center"
           >
-            {roleEntry.label}
+            {t(roleEntry.label)}
           </Link>
         ) : (
           <div className="w-full mt-4 bg-accent text-muted-foreground text-xs font-bold py-2 rounded-lg border border-dashed border-border/20 text-center">
-            Sign in for more
+            {t("signIn")} for more
           </div>
         )}
       </div>

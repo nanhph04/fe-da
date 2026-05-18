@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Film, Upload } from "lucide-react";
 import { getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import { formatDuration, formatProfileDate } from "../utils/profile-formatters";

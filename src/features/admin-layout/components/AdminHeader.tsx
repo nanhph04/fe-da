@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/routing";
+import { usePathname } from "@/i18n/routing";
 import { Bell, Menu, Search, X } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { adminFooterItems, adminSidebarItems } from "./navigation";

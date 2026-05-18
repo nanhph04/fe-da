@@ -1,0 +1,19 @@
+{
+  "Navigation": {
+    "explore": "Discover",
+    "library": "Library",
+    "wallet": "Wallet",
+    "profile": "Profile",
+    "purchased": "Purchased",
+    "subscriptions": "Subscriptions",
+    "become_creator": "Become Creator",
+    "creator_studio": "Creator Studio",
+    "admin_panel": "Admin Panel",
+    "settings": "Settings",
+    "help": "Help",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "myProfile": "My Profile"
+  }
+}

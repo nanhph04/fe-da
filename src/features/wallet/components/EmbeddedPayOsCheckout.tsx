@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Loader2, ShieldCheck, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
+import { useLocale } from "next-intl";
 import { DepositService } from "../services/depositService";
 import type { Deposit, DepositPackage } from "../types/wallet.types";
 
@@ -45,6 +46,7 @@ export function EmbeddedPayOsCheckout({
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const locale = useLocale();
 
   useEffect(() => {
     paymentAttemptKeyRef.current = null;
@@ -65,9 +67,14 @@ export function EmbeddedPayOsCheckout({
     }
 
     try {
+      const returnUrl = `${window.location.origin}/${locale}/wallet/success`;
+      const cancelUrl = `${window.location.origin}/${locale}/wallet`;
+
       const createdDeposit = await DepositService.createDeposit(
         selectedPackage.id,
-        paymentAttemptKeyRef.current
+        paymentAttemptKeyRef.current,
+        returnUrl,
+        cancelUrl
       );
 
       if (!createdDeposit.checkoutUrl) {

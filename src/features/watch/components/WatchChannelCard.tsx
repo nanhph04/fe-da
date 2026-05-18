@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useMemo, useState } from "react";
 import type { PublicMembershipTier } from "../services/publicMediaService";
 import { WatchMembershipPanel } from "./WatchMembershipPanel";

@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
 import { api, fetchSSE, getHttpStatus, refreshAccessToken } from "@/shared/api/client";
 import { authService } from "../services/authService";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 
 import { UserProfileResponse } from "../services/authService";
 

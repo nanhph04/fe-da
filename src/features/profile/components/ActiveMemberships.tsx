@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Compass, Crown, LockKeyhole } from "lucide-react";
 import type { UserMembershipResponse } from "@/features/watch/services/mediaService";
 import { formatProfileDate, getAvatarFallbackUrl } from "../utils/profile-formatters";
