@@ -24,7 +24,7 @@ export function PublishActions({ canPublish, isPublishing, onPublish }: PublishA
         ) : (
           <span className="material-symbols-outlined text-lg">upload</span>
         )}
-        Upload & Publish
+        Confirm & Publish
       </button>
 
       <button
@@ -37,7 +37,7 @@ export function PublishActions({ canPublish, isPublishing, onPublish }: PublishA
         Save as Draft
       </button>
       <p id="save-draft-note" className="text-center font-body text-xs text-on-surface-variant">
-        Draft is created when upload is initialized.
+        Draft was created and raw video was uploaded from Step 1.
       </p>
     </div>
   );

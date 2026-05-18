@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getReadyThumbnailUrl, mediaService, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
+import { getReadyThumbnailUrl, mediaService, type ConfirmUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
 
@@ -11,6 +11,8 @@ const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "modera
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
 const READY_STATUSES = new Set(["ready"]);
 const REJECTED_STATUS = "rejected";
+const DRAFT_STATUS = "draft";
+const DEFAULT_CONFIRM_RESOLUTIONS: ConfirmUploadBody["resolutions"] = ["720p", "1080p"];
 
 type ContentFilter = "all" | "draft" | "processing" | "ready" | "failed";
 
@@ -93,6 +95,16 @@ function getRejectReason(video: OwnerVideoResponse) {
   return video.failureReason || video.errorMessage || video.jobStatusMessage || "Chưa có nguyên nhân reject từ hệ thống.";
 }
 
+function getConfirmResolutions(video: OwnerVideoResponse): ConfirmUploadBody["resolutions"] {
+  const allowedResolutions = new Set<ConfirmUploadBody["resolutions"][number]>(["480p", "720p", "1080p"]);
+  const selectedResolutions = (video.resolutions ?? []).filter(
+    (resolution): resolution is ConfirmUploadBody["resolutions"][number] =>
+      allowedResolutions.has(resolution as ConfirmUploadBody["resolutions"][number])
+  );
+
+  return selectedResolutions.length > 0 ? selectedResolutions : DEFAULT_CONFIRM_RESOLUTIONS;
+}
+
 export function StudioContentFeature() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim().toLowerCase() ?? "";
@@ -104,7 +116,11 @@ export function StudioContentFeature() {
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
+  const [confirmingVideoId, setConfirmingVideoId] = useState<string | null>(null);
+  const [reuploadingVideoId, setReuploadingVideoId] = useState<string | null>(null);
+  const [reuploadProgress, setReuploadProgress] = useState(0);
   const [expandedRejectReasonVideoId, setExpandedRejectReasonVideoId] = useState<string | null>(null);
+  const draftFileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter) => {
     if (showLoading) {
@@ -212,6 +228,61 @@ export function StudioContentFeature() {
     }
   };
 
+  const handleConfirmDraftUpload = async (video: OwnerVideoResponse) => {
+    setConfirmingVideoId(video.id);
+    setError(null);
+
+    try {
+      const response = await mediaService.confirmUpload(video.id, {
+        resolutions: getConfirmResolutions(video),
+      });
+
+      if (!(response.success || response.code === 200 || response.code === 201)) {
+        showActionMessage(response.mess || "Không thể confirm-upload video draft. Nếu raw file chưa upload, hãy bấm Upload lại file.");
+        return;
+      }
+
+      showActionMessage("Đã confirm-upload. Video sẽ chuyển sang hàng đợi xử lý.");
+      await fetchVideos(false, activeFilter);
+    } catch (err) {
+      showActionMessage(getErrorMessage(err, "Không thể confirm-upload video draft. Nếu raw file chưa upload, hãy bấm Upload lại file."));
+    } finally {
+      setConfirmingVideoId(null);
+    }
+  };
+
+  const handleDraftFileReupload = async (video: OwnerVideoResponse, file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    setReuploadingVideoId(video.id);
+    setReuploadProgress(0);
+    setError(null);
+
+    try {
+      const replaceResponse = await mediaService.replaceUpload(video.id);
+      if (!replaceResponse.success || !replaceResponse.data) {
+        showActionMessage(replaceResponse.mess || "Không thể tạo upload URL mới cho draft.");
+        return;
+      }
+
+      await mediaService.uploadRawVideoFile({
+        uploadUrl: replaceResponse.data.uploadUrl,
+        file,
+        onProgress: setReuploadProgress,
+      });
+
+      showActionMessage("Đã upload lại file cho draft. Bấm dấu tích để confirm-upload khi sẵn sàng xử lý.");
+      await fetchVideos(false, activeFilter);
+    } catch (err) {
+      showActionMessage(getErrorMessage(err, "Không thể upload lại file cho draft."));
+    } finally {
+      setReuploadingVideoId(null);
+      setReuploadProgress(0);
+    }
+  };
+
   return (
     <section className="mx-auto w-full max-w-7xl space-y-8 p-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -311,6 +382,7 @@ export function StudioContentFeature() {
             const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
             const isRejected = status === REJECTED_STATUS;
+            const isDraft = status === DRAFT_STATUS;
             const isReady = READY_STATUSES.has(status);
             const isRejectReasonExpanded = expandedRejectReasonVideoId === video.id;
             const previewHref = `/studio/content/${video.id}`;
@@ -323,50 +395,56 @@ export function StudioContentFeature() {
                 {video.requiredTierLevel === 3 ? <div className="absolute inset-0 rounded-lg border border-secondary/10" /> : null}
 
                 <div className="col-span-12 flex items-center gap-4 md:col-span-5">
-                  {isReady ? (
+                  <Link
+                    href={previewHref}
+                    className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
+                    aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`block h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03] ${isReady ? "" : "opacity-70"}`}
+                      style={{ backgroundImage: `url(${thumbUrl})` }}
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center bg-background/0 text-foreground opacity-0 transition-opacity duration-300 group-hover:bg-background/50 group-hover:opacity-100">
+                      <span className="material-symbols-outlined text-3xl" aria-hidden="true">{isReady ? "play_circle" : "visibility"}</span>
+                    </span>
+                  </Link>
+                  <div className="min-w-0 flex-1">
                     <Link
                       href={previewHref}
-                      className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
-                      aria-label={`Preview ${video.title}`}
+                      className="block truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
                     >
-                      <span
-                        aria-hidden="true"
-                        className="block h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
-                        style={{ backgroundImage: `url(${thumbUrl})` }}
-                      />
-                      <span className="absolute inset-0 flex items-center justify-center bg-background/0 text-foreground opacity-0 transition-opacity duration-300 group-hover:bg-background/50 group-hover:opacity-100">
-                        <span className="material-symbols-outlined text-3xl" aria-hidden="true">play_circle</span>
-                      </span>
+                      {video.title}
                     </Link>
-                  ) : (
-                    <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background">
-                      <div
-                        aria-label={video.title}
-                        role="img"
-                        className="h-full w-full bg-cover bg-center opacity-70 transition-transform duration-300 group-hover:scale-[1.03]"
-                        style={{ backgroundImage: `url(${thumbUrl})` }}
-                      />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    {isReady ? (
-                      <Link
-                        href={previewHref}
-                        className="block truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
-                      >
-                        {video.title}
-                      </Link>
-                    ) : (
-                      <h3 className="truncate pr-4 font-headline text-base font-semibold text-foreground transition-colors group-hover:text-primary">
-                        {video.title}
-                      </h3>
-                    )}
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className={`font-label text-xs ${getStatusTone(status)}`}>
                         {status.toUpperCase()}
                       </span>
                       <span className="font-label text-xs text-muted-foreground">• {formattedDate}</span>
                     </div>
+                    {isDraft ? (
+                      <div className="mt-2 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 px-3 py-2 text-xs text-secondary">
+                        <div className="flex items-start gap-2">
+                          <span className="material-symbols-outlined mt-0.5 text-[16px]" aria-hidden="true">check_circle</span>
+                          <p className="text-muted-foreground">
+                            Video sẽ bị xoá sau 24h nếu bạn không confirm-upload. Bấm upload để thay file draft, sau đó bấm dấu tích để confirm-upload khi sẵn sàng xử lý.
+                          </p>
+                        </div>
+                        {reuploadingVideoId === video.id ? (
+                          <div className="mt-3 space-y-1">
+                            <div className="h-1.5 overflow-hidden rounded-full bg-background/70">
+                              <div
+                                className="h-full rounded-full bg-secondary transition-[width] duration-300"
+                                style={{ width: `${reuploadProgress}%` }}
+                              />
+                            </div>
+                            <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
+                              Uploading {reuploadProgress}%
+                            </p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                     {FAILED_STATUSES.has(status) && (!isRejected || isRejectReasonExpanded) ? (
                       <div className="mt-2 max-w-sm rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                         <span className="font-bold uppercase tracking-widest">
@@ -420,6 +498,57 @@ export function StudioContentFeature() {
                 </div>
 
                 <div className="col-span-12 flex justify-end gap-2 md:col-span-2">
+                  <Link
+                    href={previewHref}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full p-0 text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
+                    aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden="true">{isReady ? "play_arrow" : "visibility"}</span>
+                  </Link>
+                  {isDraft ? (
+                    <>
+                      <input
+                        ref={node => {
+                          draftFileInputRefs.current[video.id] = node;
+                        }}
+                        type="file"
+                        accept="video/*"
+                        className="sr-only"
+                        disabled={reuploadingVideoId === video.id}
+                        onChange={event => {
+                          const file = event.target.files?.[0] ?? null;
+                          event.currentTarget.value = "";
+                          void handleDraftFileReupload(video, file);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => draftFileInputRefs.current[video.id]?.click()}
+                        disabled={reuploadingVideoId === video.id || confirmingVideoId === video.id}
+                        title="Chọn file video để thay raw file cho draft. Không tự confirm-upload."
+                        className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label={`Upload replacement file for ${video.title}`}
+                      >
+                        <span className={`material-symbols-outlined text-[18px] ${reuploadingVideoId === video.id ? "animate-spin" : ""}`}>
+                          {reuploadingVideoId === video.id ? "progress_activity" : "upload_file"}
+                        </span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => void handleConfirmDraftUpload(video)}
+                        disabled={confirmingVideoId === video.id || reuploadingVideoId === video.id}
+                        title="Video sẽ bị xoá sau 24h nếu bạn không confirm-upload. Bấm để confirm-upload nếu raw file đã upload."
+                        className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label={`Confirm upload for ${video.title}. Video will be deleted after 24 hours if you do not confirm upload.`}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {confirmingVideoId === video.id ? "hourglass_top" : "check_circle"}
+                        </span>
+                      </Button>
+                    </>
+                  ) : null}
                   {isRejected ? (
                     <Button
                       type="button"
@@ -435,15 +564,6 @@ export function StudioContentFeature() {
                     </Button>
                   ) : (
                     <>
-                      {isReady ? (
-                        <Link
-                          href={previewHref}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full p-0 text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
-                          aria-label={`Preview ${video.title}`}
-                        >
-                          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">play_arrow</span>
-                        </Link>
-                      ) : null}
                       <Button
                         type="button"
                         variant="ghost"
@@ -466,18 +586,20 @@ export function StudioContentFeature() {
                       */}
                     </>
                   )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => void handleDeleteVideo(video)}
-                    disabled={deletingVideoId === video.id || PROCESSING_STATUSES.has(status)}
-                    className="h-8 w-8 rounded-full p-0 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    aria-label={`Delete ${video.title}`}
-                  >
-                    <span className="material-symbols-outlined text-[18px]">
-                      {deletingVideoId === video.id ? "hourglass_top" : "delete"}
-                    </span>
-                  </Button>
+                  {!isDraft ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => void handleDeleteVideo(video)}
+                      disabled={deletingVideoId === video.id || PROCESSING_STATUSES.has(status)}
+                      className="h-8 w-8 rounded-full p-0 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label={`Delete ${video.title}`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {deletingVideoId === video.id ? "hourglass_top" : "delete"}
+                      </span>
+                    </Button>
+                  ) : null}
                 </div>
               </article>
             );

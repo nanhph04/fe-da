@@ -10,10 +10,12 @@ export class PaymentService {
   static async createPayment(
     payload: PaymentRequest,
     idempotencyKey: string,
+    userId: string,
     requestId?: string
   ): Promise<PaymentResponse> {
     const headers: Record<string, string> = {
       "idempotency-key": idempotencyKey,
+      "x-user-id": userId,
     };
 
     if (requestId) {

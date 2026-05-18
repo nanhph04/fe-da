@@ -153,9 +153,10 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
 
   useEffect(() => {
     let cancelled = false;
-    const isNewVideo = loadedVideoIdRef.current !== videoId;
 
     async function loadVideo() {
+      const isNewVideo = loadedVideoIdRef.current !== videoId;
+
       if (isNewVideo) {
         setVideo(null);
         setIsLoading(true);
@@ -166,27 +167,19 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
       setError(null);
 
       try {
-        const response = await mediaService.getOwnerVideos({ limit: 50 });
-        const ownerVideos = response.success && response.data ? response.data : [];
-        const matchedVideo = ownerVideos.find(item => item.id === videoId) ?? null;
+        const response = await mediaService.getOwnerVideoDetail(videoId);
 
         if (cancelled) {
           return;
         }
 
-        if (!response.success) {
-          setError(response.mess || "Unable to load this Studio video.");
-          setVideo(null);
+        if (response.success && response.data) {
+          setVideo(response.data);
           return;
         }
 
-        if (!matchedVideo) {
-          setError("Video not found in your Studio library, or you do not have owner access.");
-          setVideo(null);
-          return;
-        }
-
-        setVideo(matchedVideo);
+        setError(response.mess || "Unable to load this Studio video.");
+        setVideo(null);
       } catch (err) {
         if (!cancelled) {
           setError(getErrorMessage(err, "Unable to load this Studio video. Please try again."));

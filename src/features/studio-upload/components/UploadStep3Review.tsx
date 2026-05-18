@@ -19,28 +19,6 @@ interface UploadStep3ReviewProps {
   onPrev: () => void;
 }
 
-function getThumbnailExtension(file: File) {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-
-  if (extension === "jpg" || extension === "jpeg" || extension === "png" || extension === "webp") {
-    return extension;
-  }
-
-  if (file.type === "image/jpeg") {
-    return "jpg";
-  }
-
-  if (file.type === "image/png") {
-    return "png";
-  }
-
-  if (file.type === "image/webp") {
-    return "webp";
-  }
-
-  return null;
-}
-
 export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadStep3ReviewProps) {
   const router = useRouter();
   const [isChecked1, setIsChecked1] = useState(false);
@@ -48,60 +26,38 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [publishStage, setPublishStage] = useState<"idle" | "initializing" | "uploading" | "thumbnail" | "confirming">("idle");
+  const [publishStage, setPublishStage] = useState<"idle" | "metadata" | "thumbnail" | "confirming">("idle");
 
-  const canPublish = isChecked1 && isChecked2 && !!formData.file;
+  const canPublish = isChecked1 && isChecked2 && !!formData.draftUpload && formData.rawUploadCompleted;
 
   const handlePublish = async () => {
-    if (!canPublish || !formData.file) return;
+    if (!canPublish || !formData.draftUpload) return;
     setIsPublishing(true);
-    setUploadProgress(0);
     setError(null);
 
     try {
-      setPublishStage("initializing");
-      let draftUpload = formData.draftUpload;
+      const draftUpload = formData.draftUpload;
 
-      if (!draftUpload) {
-        const thumbnailExtension = formData.thumbnailFile ? getThumbnailExtension(formData.thumbnailFile) : null;
+      setPublishStage("metadata");
+      const metadataResponse = await mediaService.updateVideoMetadata(draftUpload.videoId, {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        categoryId: formData.categoryId,
+        tagIds: formData.tagIds,
+        visibility: formData.visibility,
+        price: formData.price,
+        requiredTierLevel: formData.requiredTierLevel,
+      });
 
-        if (formData.thumbnailFile && !thumbnailExtension) {
-          setError("Thumbnail must be a JPG, PNG, or WEBP image.");
-          return;
-        }
-
-        const initResponse = await mediaService.initUpload({
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          categoryId: formData.categoryId,
-          tagIds: formData.tagIds,
-          visibility: formData.visibility,
-          price: formData.price,
-          requiredTierLevel: formData.requiredTierLevel,
-          thumbnailExtension: thumbnailExtension ?? undefined,
-        });
-
-        if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
-          setError(initResponse.mess || "Failed to initialize upload");
-          return;
-        }
-
-        draftUpload = initResponse.data;
-        updateFormData({ draftUpload });
+      if (!metadataResponse.success) {
+        setError(metadataResponse.mess || "Failed to update draft metadata");
+        return;
       }
 
       if (formData.thumbnailFile && (!draftUpload.thumbnailUploadUrl || !draftUpload.thumbnailObjectKey)) {
         setError("Media service did not return a thumbnail upload URL. Remove the custom thumbnail or try again.");
         return;
       }
-
-      setPublishStage("uploading");
-      await mediaService.uploadRawVideoFile({
-        uploadUrl: draftUpload.uploadUrl,
-        file: formData.file,
-        onProgress: setUploadProgress,
-      });
 
       const thumbnailObjectKey = formData.thumbnailFile ? draftUpload.thumbnailObjectKey : null;
 
@@ -249,19 +205,10 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
             <h3 className="font-headline font-bold text-xl text-on-surface">Publishing your Masterpiece...</h3>
             <p className="text-sm text-muted-foreground">
-              {publishStage === "initializing" && "Creating secure upload session..."}
-              {publishStage === "uploading" && `Uploading raw file... ${uploadProgress}%`}
+              {publishStage === "metadata" && "Syncing final metadata..."}
               {publishStage === "thumbnail" && "Uploading custom thumbnail..."}
               {publishStage === "confirming" && "Confirming upload for processing..."}
             </p>
-            {publishStage === "uploading" ? (
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            ) : null}
           </div>
         </div>
       )}

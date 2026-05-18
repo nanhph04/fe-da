@@ -16,6 +16,28 @@ interface UploadStep1DetailsProps {
   onNext: () => void;
 }
 
+function getThumbnailExtension(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+
+  if (extension === "jpg" || extension === "jpeg" || extension === "png" || extension === "webp") {
+    return extension;
+  }
+
+  if (file.type === "image/jpeg") {
+    return "jpg";
+  }
+
+  if (file.type === "image/png") {
+    return "png";
+  }
+
+  if (file.type === "image/webp") {
+    return "webp";
+  }
+
+  return null;
+}
+
 export function UploadStep1Details({
   formData,
   updateFormData,
@@ -26,6 +48,9 @@ export function UploadStep1Details({
   const [isReplacingFile, setIsReplacingFile] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
   const [thumbnailError, setThumbnailError] = useState<string | null>(null);
+  const [isUploadingRaw, setIsUploadingRaw] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleThumbnailSelect = (file: File | null) => {
     if (!file) {
@@ -55,10 +80,15 @@ export function UploadStep1Details({
       URL.revokeObjectURL(formData.thumbnailPreviewUrl);
     }
 
+    if (formData.draftUpload) {
+      void mediaService.cancelUpload(formData.draftUpload.videoId).catch(() => undefined);
+    }
+
     updateFormData({
       thumbnailFile: file,
       thumbnailPreviewUrl: URL.createObjectURL(file),
       draftUpload: null,
+      rawUploadCompleted: false,
     });
     setThumbnailError(null);
   };
@@ -66,8 +96,10 @@ export function UploadStep1Details({
   const handleFileSelect = async (file: File | null) => {
     if (!file) {
       if (!formData.draftUpload) {
-        updateFormData({ file: null });
+        updateFormData({ file: null, rawUploadCompleted: false });
         setReplaceError(null);
+        setUploadError(null);
+        setUploadProgress(0);
         return;
       }
 
@@ -77,7 +109,8 @@ export function UploadStep1Details({
       try {
         const res = await mediaService.cancelUpload(formData.draftUpload.videoId);
         if (res.success) {
-          updateFormData({ file: null, draftUpload: null });
+          updateFormData({ file: null, draftUpload: null, rawUploadCompleted: false });
+          setUploadProgress(0);
           return;
         }
 
@@ -91,8 +124,10 @@ export function UploadStep1Details({
     }
 
     if (!formData.draftUpload) {
-      updateFormData({ file });
+      updateFormData({ file, rawUploadCompleted: false });
       setReplaceError(null);
+      setUploadError(null);
+      setUploadProgress(0);
       return;
     }
 
@@ -102,7 +137,13 @@ export function UploadStep1Details({
     try {
       const res = await mediaService.replaceUpload(formData.draftUpload.videoId);
       if (res.success && res.data) {
-        updateFormData({ file, draftUpload: res.data });
+        updateFormData({
+          file,
+          draftUpload: { ...formData.draftUpload, ...res.data },
+          rawUploadCompleted: false,
+        });
+        setUploadError(null);
+        setUploadProgress(0);
         return;
       }
 
@@ -120,6 +161,67 @@ export function UploadStep1Details({
     formData.categoryId.trim().length > 0 &&
     formData.resolutions.length > 0;
 
+  const handleNext = async () => {
+    if (!canContinue || !formData.file || isUploadingRaw) {
+      return;
+    }
+
+    if (formData.draftUpload && formData.rawUploadCompleted) {
+      onNext();
+      return;
+    }
+
+    setIsUploadingRaw(true);
+    setUploadProgress(0);
+    setUploadError(null);
+
+    try {
+      let draftUpload = formData.draftUpload;
+
+      if (!draftUpload) {
+        const thumbnailExtension = formData.thumbnailFile ? getThumbnailExtension(formData.thumbnailFile) : null;
+
+        if (formData.thumbnailFile && !thumbnailExtension) {
+          setThumbnailError("Thumbnail must be a JPG, PNG, or WEBP image.");
+          return;
+        }
+
+        const initResponse = await mediaService.initUpload({
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          categoryId: formData.categoryId,
+          tagIds: formData.tagIds,
+          visibility: formData.visibility,
+          price: formData.price,
+          requiredTierLevel: formData.requiredTierLevel,
+          thumbnailExtension: thumbnailExtension ?? undefined,
+        });
+
+        if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
+          setUploadError(initResponse.mess || "Không thể tạo draft upload.");
+          return;
+        }
+
+        draftUpload = initResponse.data;
+        updateFormData({ draftUpload, rawUploadCompleted: false });
+      }
+
+      await mediaService.uploadRawVideoFile({
+        uploadUrl: draftUpload.uploadUrl,
+        file: formData.file,
+        onProgress: setUploadProgress,
+      });
+
+      updateFormData({ draftUpload, rawUploadCompleted: true });
+      onNext();
+    } catch (err) {
+      setUploadError(getErrorMessage(err, "Không thể upload video. Vui lòng thử lại."));
+      updateFormData({ rawUploadCompleted: false });
+    } finally {
+      setIsUploadingRaw(false);
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-6xl animate-in fade-in slide-in-from-right-4 p-8 pb-32 duration-500">
       <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -135,7 +237,11 @@ export function UploadStep1Details({
         <UploadProgressCard
           file={formData.file}
           isReplacing={isReplacingFile}
+          isUploading={isUploadingRaw}
+          isUploaded={formData.rawUploadCompleted}
+          uploadProgress={uploadProgress}
           replaceError={replaceError}
+          uploadError={uploadError}
           onFileSelect={handleFileSelect}
         />
       </header>
@@ -263,21 +369,22 @@ export function UploadStep1Details({
               {formData.file ? (
                 <span className="material-symbols-outlined text-[14px]">check</span>
               ) : null}
-              {formData.file ? "File selected" : "Draft"}
+              {formData.rawUploadCompleted ? "Raw uploaded" : formData.file ? "File selected" : "Draft"}
             </span>
           </div>
         </div>
         <div className="flex gap-4">
           <button
-            onClick={onNext}
-            disabled={!canContinue}
+            type="button"
+            onClick={() => void handleNext()}
+            disabled={!canContinue || isUploadingRaw}
             className={`rounded-sm px-8 py-2.5 text-sm font-bold transition-all active:scale-95 ${
-              canContinue
+              canContinue && !isUploadingRaw
                 ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]"
                 : "pointer-events-none bg-muted text-muted-foreground"
             }`}
           >
-            Next: Pricing & Monetization
+            {isUploadingRaw ? `Uploading ${uploadProgress}%` : formData.rawUploadCompleted ? "Next: Pricing & Monetization" : "Upload & Continue"}
           </button>
         </div>
       </div>

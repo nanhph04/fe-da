@@ -14,6 +14,14 @@ const avatarStorageLanRemotePattern = appHostIp
   ? new URL(`http://${appHostIp}:9000`)
   : null;
 
+const mediaStorageUrl =
+  process.env.NEXT_PUBLIC_MEDIA_STORAGE_URL ??
+  avatarStorageUrl;
+const mediaStorageRemotePattern = new URL(mediaStorageUrl);
+const mediaStorageLanRemotePattern = appHostIp
+  ? new URL(`http://${appHostIp}:9000`)
+  : null;
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
 
@@ -47,6 +55,27 @@ const nextConfig: NextConfig = {
               hostname: avatarStorageLanRemotePattern.hostname,
               port: avatarStorageLanRemotePattern.port,
               pathname: "/identity-avatars/**",
+            },
+          ]
+        : []),
+      {
+        protocol: mediaStorageRemotePattern.protocol.replace(":", "") as
+          | "http"
+          | "https",
+        hostname: mediaStorageRemotePattern.hostname,
+        port: mediaStorageRemotePattern.port,
+        pathname: "/media-processed/**",
+      },
+      ...(mediaStorageLanRemotePattern
+        ? [
+            {
+              protocol: mediaStorageLanRemotePattern.protocol.replace(
+                ":",
+                "",
+              ) as "http" | "https",
+              hostname: mediaStorageLanRemotePattern.hostname,
+              port: mediaStorageLanRemotePattern.port,
+              pathname: "/media-processed/**",
             },
           ]
         : []),

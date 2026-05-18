@@ -39,5 +39,5 @@ export const adminFooterItems: AdminNavItem[] = [
   { label: "System Settings", path: "/admin/settings", icon: Settings },
   { label: "Content Policies", path: "/admin/settings/policies", icon: FileClock, matchStartsWith: true },
   { label: "Support", path: "/admin/support", icon: LifeBuoy, disabled: true },
-  { label: "View Live Platform", path: "/landing", icon: Landmark },
+  { label: "View Live Platform", path: "/", icon: Landmark },
 ];

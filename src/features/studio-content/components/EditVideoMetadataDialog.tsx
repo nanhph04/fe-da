@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   mediaService,
   type CategoryResponse,
+  type OwnerVideoDetailResponse,
   type TagResponse,
-  type VideoMetadataResponse,
+  type UpdateVideoMetadataBody,
 } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 
@@ -18,9 +19,38 @@ interface EditVideoMetadataDialogProps {
   onSaved: () => void;
 }
 
+type VideoVisibility = NonNullable<UpdateVideoMetadataBody["visibility"]>;
+
+const normalizeLookupValue = (value?: string | null) => value?.trim().toLowerCase() ?? "";
+
+function normalizeEditableVisibility(value?: string | null): VideoVisibility {
+  return value === "public" ? "public" : "private";
+}
+
+function resolveCategoryId(video: OwnerVideoDetailResponse, categories: CategoryResponse[]) {
+  if (video.categoryId) {
+    return video.categoryId;
+  }
+
+  const categoryValue = normalizeLookupValue(video.category);
+  return categories.find(category =>
+    normalizeLookupValue(category.name) === categoryValue || normalizeLookupValue(category.slug) === categoryValue
+  )?.id ?? "";
+}
+
+function resolveTagIds(video: OwnerVideoDetailResponse, tags: TagResponse[]) {
+  if (Array.isArray(video.tagIds) && video.tagIds.length > 0) {
+    return video.tagIds.filter(Boolean);
+  }
+
+  const videoTags = new Set((video.tags ?? []).map(normalizeLookupValue).filter(Boolean));
+  return tags
+    .filter(tag => videoTags.has(normalizeLookupValue(tag.name)) || videoTags.has(normalizeLookupValue(tag.slug)))
+    .map(tag => tag.id);
+}
 
 export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideoMetadataDialogProps) {
-  const [metadata, setMetadata] = useState<VideoMetadataResponse | null>(null);
+  const [metadata, setMetadata] = useState<OwnerVideoDetailResponse | null>(null);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [tags, setTags] = useState<TagResponse[]>([]);
   const [title, setTitle] = useState("");
@@ -28,6 +58,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [tagIds, setTagIds] = useState<string[]>([]);
+  const [visibility, setVisibility] = useState<VideoVisibility>("private");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +72,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
 
       try {
         const [metadataRes, categoriesRes, tagsRes] = await Promise.all([
-          mediaService.getVideoMetadata(videoId),
+          mediaService.getOwnerVideoDetail(videoId),
           mediaService.getCategories(),
           mediaService.getTags(),
         ]);
@@ -61,8 +92,9 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
           setTitle(metadataRes.data.title ?? "");
           setDescription(metadataRes.data.description ?? "");
           setThumbnailUrl(metadataRes.data.thumbnailUrl ?? "");
-          setCategoryId(metadataRes.data.categoryId ?? "");
-          setTagIds(metadataRes.data.tagIds ?? []);
+          setCategoryId(resolveCategoryId(metadataRes.data, loadedCategories));
+          setTagIds(resolveTagIds(metadataRes.data, loadedTags));
+          setVisibility(normalizeEditableVisibility(metadataRes.data.visibility));
           return;
         }
 
@@ -108,6 +140,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
         thumbnailUrl: thumbnailUrl.trim() || null,
         categoryId: categoryId || undefined,
         tagIds,
+        visibility,
       });
 
       if (res.success && res.data) {
@@ -171,6 +204,24 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                 onChange={event => setDescription(event.target.value)}
                 className="min-h-32 resize-none border-border/40 bg-background text-foreground focus-visible:ring-primary"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="video-visibility" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Visibility
+              </label>
+              <select
+                id="video-visibility"
+                value={visibility}
+                onChange={event => setVisibility(event.target.value as VideoVisibility)}
+                className="h-10 w-full rounded-md border border-border/40 bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/60"
+              >
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Public videos can be discovered by viewers. Private videos stay hidden from public discovery.
+              </p>
             </div>
 
             <div className="space-y-2">

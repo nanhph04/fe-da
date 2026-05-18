@@ -12,12 +12,14 @@ export interface NavItem {
 }
 
 export const topNavItems: NavItem[] = [
+  { label: "Khám phá", icon: "explore", path: "/", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Library", icon: "video_library", path: "/library", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Wallet", icon: "account_balance_wallet", path: "/wallet", roles: ["viewer", "creator", "admin"] },
   { label: "Profile", icon: "person", path: "/profile", roles: ["viewer", "creator", "admin"] },
 ];
 
 export const sideNavItems: NavItem[] = [
+  { label: "Khám phá", icon: "explore", path: "/", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Library", icon: "video_library", path: "/library", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Wallet", icon: "account_balance_wallet", path: "/wallet", roles: ["viewer", "creator", "admin"] },
   { label: "Profile", icon: "person", path: "/profile", roles: ["viewer", "creator", "admin"] },
@@ -26,7 +28,7 @@ export const sideNavItems: NavItem[] = [
 ];
 
 export const mobileNavItems: NavItem[] = [
-  { label: "Home", icon: "home", path: "/", roles: ["guest", "viewer", "creator", "admin"] },
+  { label: "Khám phá", icon: "explore", path: "/", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Library", icon: "video_library", path: "/library", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "Wallet", icon: "account_balance_wallet", path: "/wallet", roles: ["viewer", "creator", "admin"] },
   { label: "Profile", icon: "person", path: "/profile", roles: ["viewer", "creator", "admin"] },

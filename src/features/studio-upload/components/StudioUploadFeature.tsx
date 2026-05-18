@@ -31,6 +31,7 @@ export interface UploadFormData {
   thumbnailFile: File | null;
   thumbnailPreviewUrl: string | null;
   draftUpload: DraftUploadSession | null;
+  rawUploadCompleted: boolean;
 }
 
 export function StudioUploadFeature() {
@@ -48,6 +49,7 @@ export function StudioUploadFeature() {
     thumbnailFile: null,
     thumbnailPreviewUrl: null,
     draftUpload: null,
+    rawUploadCompleted: false,
   });
 
   useEffect(() => {

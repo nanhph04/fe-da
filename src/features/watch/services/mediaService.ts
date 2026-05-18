@@ -122,6 +122,14 @@ export interface InitUploadResponse {
   thumbnailUploadUrl: string | null;
 }
 
+export interface ReplaceUploadResponse {
+  videoId: string;
+  status: string;
+  rawFileKey: string;
+  bucket: string;
+  uploadUrl: string;
+}
+
 export interface UploadRawVideoFileRequest {
   uploadUrl: string;
   file: File;
@@ -176,6 +184,13 @@ export interface VideoMetadataResponse {
   viewCount: number;
   status: string;
   visibility: string;
+  price?: number | null;
+  priceCoin?: number | null;
+  coinAmount?: number | null;
+  requiredTierLevel?: number | null;
+  requiredTier?: number | null;
+  minTierLevel?: number | null;
+  requiredMembershipLevel?: number | null;
   errorMessage: string | null;
   jobStatus: string | null;
   jobStatusMessage: string | null;
@@ -195,6 +210,9 @@ export interface UpdateVideoMetadataBody {
   thumbnailUrl?: string | null;
   categoryId?: string;
   tagIds?: string[];
+  visibility?: "public" | "private";
+  price?: number;
+  requiredTierLevel?: number | null;
 }
 
 export interface DiscoveryVideoResponse {
@@ -232,6 +250,11 @@ export interface OwnerVideoResponse extends DiscoveryVideoResponse {
   deletedAt: string | null;
   deletedBy: string | null;
   deleteReason: string | null;
+}
+
+export interface OwnerVideoDetailResponse extends OwnerVideoResponse {
+  categoryId?: string | null;
+  tagIds?: string[] | null;
 }
 
 export interface ContinueWatchingVideoResponse {
@@ -498,7 +521,7 @@ export const mediaService = {
     return api.post<InitUploadResponse>("/api/media/videos/init-upload", data, { requireAuth: true });
   },
   replaceUpload: async (id: string) => {
-    return api.post<InitUploadResponse>(`/api/media/videos/${id}/replace-upload`, undefined, { requireAuth: true });
+    return api.post<ReplaceUploadResponse>(`/api/media/videos/${id}/replace-upload`, undefined, { requireAuth: true });
   },
   cancelUpload: async (id: string) => {
     return api.delete<{ videoId: string; cancelled: boolean }>(`/api/media/videos/${id}/upload`, {
@@ -596,6 +619,9 @@ export const mediaService = {
       visibility: toCommaSeparated(params?.visibility),
     });
     return api.get<OwnerVideoResponse[]>(`/api/media/videos/me${qs}`, { requireAuth: true });
+  },
+  getOwnerVideoDetail: async (id: string) => {
+    return api.get<OwnerVideoDetailResponse>(`/api/media/videos/me/${id}/detail`, { requireAuth: true });
   },
   searchMedia: async (params: SearchMediaParams) => {
     const qs = buildQueryString({ q: params.q, category: params.category, limit: params.limit });

@@ -6,6 +6,7 @@ interface CreateMembershipPaymentInput {
   channel: MembershipPaymentChannel;
   tier: MembershipPaymentTier;
   idempotencyKey: string;
+  userId: string;
   requestId?: string;
 }
 
@@ -13,6 +14,7 @@ export async function createMembershipPayment({
   channel,
   tier,
   idempotencyKey,
+  userId,
   requestId,
 }: CreateMembershipPaymentInput): Promise<PaymentResponse> {
   return PaymentService.createPayment(
@@ -29,6 +31,7 @@ export async function createMembershipPayment({
       },
     },
     idempotencyKey,
+    userId,
     requestId,
   );
 }

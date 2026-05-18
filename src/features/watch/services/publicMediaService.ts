@@ -68,6 +68,13 @@ export interface PublicVideoMetadata {
   viewCount: number;
   status: string;
   visibility: string;
+  price?: number | null;
+  priceCoin?: number | null;
+  coinAmount?: number | null;
+  requiredTierLevel?: number | null;
+  requiredTier?: number | null;
+  minTierLevel?: number | null;
+  requiredMembershipLevel?: number | null;
   errorMessage: string | null;
   jobStatus: string | null;
   jobStatusMessage: string | null;

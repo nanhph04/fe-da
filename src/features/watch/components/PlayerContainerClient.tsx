@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService } from "@/features/watch/services/mediaService";
-import { CinematicPlayer } from "./CinematicPlayer";
 import { getErrorMessage } from "@/shared/api/client";
+import type { ApiError } from "@/shared/api/types";
+import { CinematicPlayer } from "./CinematicPlayer";
+import { WatchAccessGate, type WatchAccessData } from "./WatchAccessGate";
 
 interface PlayerContainerClientProps {
   videoId: string;
   poster?: string;
   title?: string;
+  access?: WatchAccessData;
 }
 
 function redactUrlForLogs(rawUrl: string) {
@@ -79,17 +82,56 @@ function buildPlaybackUrl(streamUrl: string, token?: string) {
   }
 }
 
+function isPermissionError(error: unknown) {
+  const apiError = error as ApiError;
+  const statusCode = apiError.code ?? apiError.status;
+
+  if (statusCode === 402 || statusCode === 403) {
+    return true;
+  }
+
+  const message = getErrorMessage(error, "").toLowerCase();
+
+  return (
+    message.includes("permission") ||
+    message.includes("forbidden") ||
+    message.includes("access denied") ||
+    message.includes("not have access") ||
+    message.includes("không có quyền")
+  );
+}
+
 export function PlayerContainerClient({
   videoId,
   poster,
   title,
+  access,
 }: PlayerContainerClientProps) {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [initialPositionSeconds, setInitialPositionSeconds] = useState(0);
   const [availableResolutions, setAvailableResolutions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [accessDeniedMessage, setAccessDeniedMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [playbackReloadKey, setPlaybackReloadKey] = useState(0);
+  const [hasCompletedPurchase, setHasCompletedPurchase] = useState(false);
+
+  const retryPlayback = useCallback(() => {
+    setPlaybackReloadKey((current) => current + 1);
+  }, []);
+
+  const handleUnlocked = useCallback(() => {
+    setHasCompletedPurchase(true);
+    setAccessDeniedMessage(null);
+    setError(null);
+    setIsLoading(true);
+    retryPlayback();
+  }, [retryPlayback]);
+
+  useEffect(() => {
+    setHasCompletedPurchase(false);
+  }, [videoId]);
 
   useEffect(() => {
     let isActive = true;
@@ -105,6 +147,7 @@ export function PlayerContainerClient({
       setVideoUrl(null);
       setInitialPositionSeconds(0);
       setAvailableResolutions([]);
+      setAccessDeniedMessage(null);
       setError(null);
       setIsLoading(false);
       return () => {
@@ -116,6 +159,7 @@ export function PlayerContainerClient({
       try {
         setIsLoading(true);
         setError(null);
+        setAccessDeniedMessage(null);
 
         const tokenRes = await mediaService.getPlaybackInfo(videoId);
 
@@ -127,14 +171,14 @@ export function PlayerContainerClient({
           const rawStreamUrl = tokenRes.data.playbackUrl || "";
 
           if (!rawStreamUrl) {
-            setError("Playback Error: Playback URL was not returned by the media service.");
+            setError("Playback URL was not returned by the media service.");
             setVideoUrl(null);
             return;
           }
 
           const finalUrl = buildPlaybackUrl(
             rawStreamUrl,
-            tokenRes.data.playbackToken
+            tokenRes.data.playbackToken,
           );
 
           console.info("[watch] playback source resolved", {
@@ -147,6 +191,9 @@ export function PlayerContainerClient({
           setInitialPositionSeconds(tokenRes.data.resumePositionSeconds || 0);
           setAvailableResolutions([]);
           setVideoUrl(finalUrl);
+        } else if (isPermissionError({ code: tokenRes.code, mess: tokenRes.mess })) {
+          setVideoUrl(null);
+          setAccessDeniedMessage(tokenRes.mess || "Bạn chưa có quyền xem video này.");
         } else {
           setVideoUrl(null);
           setError(tokenRes.mess || "Failed to load video stream.");
@@ -157,6 +204,13 @@ export function PlayerContainerClient({
         }
 
         setVideoUrl(null);
+
+        if (isPermissionError(err)) {
+          setAccessDeniedMessage(getErrorMessage(err, "Bạn chưa có quyền xem video này."));
+          setError(null);
+          return;
+        }
+
         setError(`Playback Error: ${getErrorMessage(err, "Unknown error")}`);
       } finally {
         if (isActive) {
@@ -172,7 +226,7 @@ export function PlayerContainerClient({
     return () => {
       isActive = false;
     };
-  }, [videoId, isAuthenticated, isAuthLoading]);
+  }, [videoId, isAuthenticated, isAuthLoading, playbackReloadKey]);
 
   if (isLoading) {
     return (
@@ -195,7 +249,7 @@ export function PlayerContainerClient({
       <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
         {poster ? (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-45 blur-sm scale-105"
+            className="absolute inset-0 scale-105 bg-cover bg-center opacity-45 blur-sm"
             style={{ backgroundImage: `url(${poster})` }}
             aria-hidden="true"
           />
@@ -224,13 +278,51 @@ export function PlayerContainerClient({
     );
   }
 
+  if (accessDeniedMessage && access) {
+    return (
+      <WatchAccessGate
+        videoId={videoId}
+        poster={poster}
+        title={title}
+        access={access}
+        purchaseCompleted={hasCompletedPurchase}
+        onUnlocked={handleUnlocked}
+      />
+    );
+  }
+
+  if (accessDeniedMessage) {
+    return (
+      <div className="flex aspect-video flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card px-6 text-center">
+        <span className="material-symbols-outlined text-6xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+          lock
+        </span>
+        <div className="max-w-xl space-y-2">
+          <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
+            Bạn chưa có quyền xem video này
+          </h2>
+          <p className="text-sm leading-6 text-muted-foreground">
+            {accessDeniedMessage}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
-      <div className="flex aspect-video flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card">
+      <div className="flex aspect-video flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card px-6 text-center">
         <span className="material-symbols-outlined text-6xl text-destructive">
           error
         </span>
-        <p className="font-headline text-xl font-bold text-foreground">{error}</p>
+        <p className="max-w-xl font-headline text-xl font-bold text-foreground">{error}</p>
+        <button
+          type="button"
+          onClick={retryPlayback}
+          className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border/50 px-5 text-xs font-black uppercase tracking-widest text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          Thử lại
+        </button>
       </div>
     );
   }

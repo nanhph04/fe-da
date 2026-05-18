@@ -106,6 +106,7 @@ export function MembershipCheckoutClient({
         },
         tier: checkoutTier,
         idempotencyKey: activeSession.idempotencyKey,
+        userId,
         requestId: activeSession.requestId,
       });
 

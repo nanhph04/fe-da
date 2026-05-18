@@ -1,10 +1,25 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
+import { HomeDiscoverySection, type HomeCategorySection } from "./HomeDiscoverySection";
 import { HomePageAccountCta } from "./HomePageAccountCta";
 import { HomePageStudioCta } from "./HomePageStudioCta";
+import type {
+  CategoryPublic,
+  PublicDiscoveryVideo,
+} from "@/features/watch/services/publicMediaService";
 
-export function HomePage() {
+interface HomePageProps {
+  latestVideos: PublicDiscoveryVideo[];
+  categories: CategoryPublic[];
+  categorySections: HomeCategorySection[];
+}
+
+export function HomePage({
+  latestVideos,
+  categories,
+  categorySections,
+}: HomePageProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PublicHeader currentPath="/" />
@@ -52,7 +67,7 @@ export function HomePage() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
             <Link
-              href="/landing"
+              href="#discover"
               className="group relative flex w-full items-center justify-center space-x-2 overflow-hidden rounded-sm bg-gradient-to-br from-primary to-primary/75 px-8 py-4 font-semibold tracking-wide text-primary-foreground shadow-[0_20px_40px_rgba(229,9,20,0.25)] transition-all duration-300 hover:brightness-110 sm:w-auto"
             >
               <span className="relative z-10">Khám phá kho phim</span>
@@ -65,70 +80,104 @@ export function HomePage() {
         </div>
       </section>
 
+      <HomeDiscoverySection
+        latestVideos={latestVideos}
+        categories={categories}
+        categorySections={categorySections}
+      />
+
       {/* Features Section */}
-      <section className="relative bg-card py-24">
-        <div className="max-w-7xl mx-auto px-8 md:px-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="group relative flex min-h-[320px] flex-col justify-between overflow-hidden rounded-lg border border-border/15 bg-card px-8 py-8 transition-colors duration-500 hover:bg-muted">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-                <span className="material-symbols-outlined text-8xl text-secondary">local_activity</span>
+      <section className="relative overflow-hidden bg-background py-24">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="absolute left-1/2 top-16 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative z-10 mx-auto max-w-7xl px-8 md:px-12">
+          <div className="mb-10 flex max-w-3xl flex-col gap-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
+              Vì sao chọn Velvet Gallery
+            </p>
+            <h2 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-5xl">
+              Một không gian xem phim gắn liền với quyền truy cập và kinh tế sáng tạo.
+            </h2>
+            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+              Từ nội dung khóa theo cấp độ, giao dịch Aura Coin đến công cụ Studio, mọi phần được thiết kế để người xem và nhà sáng tạo gặp nhau trong cùng một hệ sinh thái.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <article className="group relative overflow-hidden rounded-lg border border-border bg-card p-7 transition-all duration-300 hover:-translate-y-1 hover:border-secondary/50 hover:bg-muted/60 lg:col-span-4">
+              <div className="absolute right-5 top-5 opacity-10 transition-opacity duration-300 group-hover:opacity-20">
+                <span className="material-symbols-outlined text-7xl text-secondary">local_activity</span>
               </div>
-              <div>
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-sm bg-secondary/10">
-                  <span className="material-symbols-outlined text-2xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <div className="relative z-10 flex h-full min-h-[240px] flex-col justify-between gap-10">
+                <div className="flex h-11 w-11 items-center justify-center rounded-sm bg-secondary/10 text-secondary ring-1 ring-secondary/20">
+                  <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                     local_activity
                   </span>
                 </div>
-                <h3 className="font-display text-2xl font-bold mb-4 tracking-[-0.01em]">
-                  Cấp truy cập độc quyền (Lv1-Lv3)
-                </h3>
-                <p className="font-body text-base leading-relaxed text-muted-foreground">
-                  Mở khóa nội dung cao cấp theo từng cấp độ. Từ trải nghiệm xem tiêu chuẩn đến bản director&apos;s cut
-                  độc quyền và các buổi chiếu riêng tư.
-                </p>
+                <div>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
+                    Membership levels
+                  </p>
+                  <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
+                    Cấp truy cập độc quyền Lv1-Lv3
+                  </h3>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    Mở khóa nội dung cao cấp theo từng cấp độ, từ trải nghiệm xem tiêu chuẩn đến bản director&apos;s cut và các buổi chiếu riêng tư.
+                  </p>
+                </div>
               </div>
-            </div>
+            </article>
 
-            {/* Feature 2 */}
-            <div className="group relative flex min-h-[320px] flex-col justify-between overflow-hidden rounded-lg border border-secondary/20 bg-gradient-to-b from-card to-background shadow-[0_10px_30px_rgba(251,191,36,0.05)] transition-all duration-500 hover:border-secondary/40">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.1)_0%,transparent_70%)]" />
-              <div>
-                <div className="relative z-10 mb-6 flex h-12 w-12 items-center justify-center rounded-sm bg-secondary/20">
-                  <span className="material-symbols-outlined text-2xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    monetization_on
+            <article className="group relative overflow-hidden rounded-lg border border-secondary/30 bg-gradient-to-br from-card via-card to-secondary/10 p-7 shadow-[0_24px_80px_rgba(245,158,11,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-secondary/60 lg:col-span-5">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.18)_0%,transparent_62%)]" />
+              <div className="relative z-10 flex h-full min-h-[240px] flex-col justify-between gap-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-sm bg-secondary/15 text-secondary ring-1 ring-secondary/25">
+                    <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      monetization_on
+                    </span>
+                  </div>
+                  <span className="rounded-sm border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-secondary">
+                    Aura Coin
                   </span>
                 </div>
-                <h3 className="relative z-10 mb-4 font-display text-2xl font-bold tracking-[-0.01em] text-secondary">
-                  Kinh tế Aura
-                </h3>
-                <p className="relative z-10 font-body text-base leading-relaxed text-muted-foreground">
-                  Giao dịch an toàn bằng Aura Coins. Ủng hộ nhà sáng tạo trực tiếp, mua quyền xem
-                  nội dung và tham gia vào nền kinh tế phi tập trung.
-                </p>
+                <div>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
+                    Creator economy
+                  </p>
+                  <h3 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-secondary">
+                    Kinh tế Aura
+                  </h3>
+                  <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+                    Giao dịch an toàn bằng Aura Coins. Người xem có thể ủng hộ nhà sáng tạo trực tiếp, mua quyền xem nội dung và giữ lịch sử giao dịch minh bạch.
+                  </p>
+                </div>
               </div>
-            </div>
+            </article>
 
-            {/* Feature 3 */}
-            <div className="group relative flex min-h-[320px] flex-col justify-between overflow-hidden rounded-lg border border-border/15 bg-card px-8 py-8 transition-colors duration-500 hover:bg-muted">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-                <span className="material-symbols-outlined text-8xl text-primary">movie</span>
+            <article className="group relative overflow-hidden rounded-lg border border-border bg-muted/70 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-muted lg:col-span-3">
+              <div className="absolute right-5 top-5 opacity-10 transition-opacity duration-300 group-hover:opacity-20">
+                <span className="material-symbols-outlined text-7xl text-primary">movie</span>
               </div>
-              <div>
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10">
-                  <span className="material-symbols-outlined text-2xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <div className="relative z-10 flex h-full min-h-[240px] flex-col justify-between gap-10">
+                <div className="flex h-11 w-11 items-center justify-center rounded-sm bg-primary/10 text-primary ring-1 ring-primary/20">
+                  <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                     movie
                   </span>
                 </div>
-                <h3 className="font-display text-2xl font-bold mb-4 tracking-[-0.01em]">
-                  Xưởng sáng tạo
-                </h3>
-                <p className="font-body text-base leading-relaxed text-muted-foreground">
-                  Trao quyền cho thế hệ nhà làm phim mới với hạ tầng lưu trữ chất lượng cao,
-                  phân tích minh bạch và kết nối trực tiếp với khán giả.
-                </p>
+                <div>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    Creator tools
+                  </p>
+                  <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
+                    Xưởng sáng tạo
+                  </h3>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    Hạ tầng lưu trữ chất lượng cao, phân tích minh bạch và công cụ kết nối trực tiếp với khán giả.
+                  </p>
+                </div>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       </section>

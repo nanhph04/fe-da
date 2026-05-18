@@ -31,7 +31,9 @@ export function VideoSummaryCard({ formData }: VideoSummaryCardProps) {
           <h3 className="font-headline text-base font-bold leading-snug text-on-surface">
             {formData.title || "Untitled upload"}
           </h3>
-          <p className="font-body text-xs text-on-surface-variant">Draft metadata • Ready to initialize</p>
+          <p className="font-body text-xs text-on-surface-variant">
+            {formData.rawUploadCompleted ? "Raw uploaded • Ready to confirm" : "Draft metadata • Waiting for raw upload"}
+          </p>
         </div>
 
         {formData.requiredTierLevel ? (
