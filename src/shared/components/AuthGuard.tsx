@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from "@/i18n/routing";
+import { normalizeInternalPath } from "@/shared/utils/locale-path";
 import { useAuthStore } from '@/store/authStore';
 
 interface AuthGuardProps {
@@ -22,7 +23,8 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
     if (!isLoading) {
       // If not authenticated, redirect to login
       if (!user) {
-        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        const redirectPath = normalizeInternalPath(pathname) ?? "/";
+        router.push(`/login?redirect=${encodeURIComponent(redirectPath)}`);
         return;
       }
 

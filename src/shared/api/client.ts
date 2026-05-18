@@ -1,3 +1,4 @@
+import { buildLocalizedHref, normalizeInternalPath } from "@/shared/utils/locale-path";
 import type { ApiError, ApiRequestInit, ApiResponse, ApiResponseType } from "./types";
 
 export const API_BASE_URL =
@@ -42,18 +43,20 @@ const redirectToLogin = (reason?: string) => {
     return;
   }
 
+  const loginPath = buildLocalizedHref("/login", window.location.pathname);
+
   if (reason) {
-    window.location.href = `/login?reason=${encodeURIComponent(reason)}`;
+    window.location.href = `${loginPath}?reason=${encodeURIComponent(reason)}`;
     return;
   }
 
-  if (window.location.pathname === "/login") {
-    window.location.href = "/login";
+  if (normalizeInternalPath(window.location.pathname) === "/login") {
+    window.location.href = loginPath;
     return;
   }
 
-  const redirectPath = `${window.location.pathname}${window.location.search}`;
-  window.location.href = `/login?redirect=${encodeURIComponent(redirectPath || "/")}`;
+  const redirectPath = normalizeInternalPath(`${window.location.pathname}${window.location.search}`) ?? "/";
+  window.location.href = `${loginPath}?redirect=${encodeURIComponent(redirectPath)}`;
 };
 
 export const buildApiUrl = (endpoint: string) => {

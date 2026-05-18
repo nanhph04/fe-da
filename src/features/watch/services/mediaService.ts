@@ -17,6 +17,10 @@ function encodeVideoPathId(videoId: string) {
   return encodeURIComponent(videoId);
 }
 
+function encodeCategoryPathSlug(categorySlug: string) {
+  return encodeURIComponent(categorySlug.trim());
+}
+
 export function buildPublicVideoThumbnailUrl(videoId: string) {
   return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
 }
@@ -647,13 +651,17 @@ export const mediaService = {
     const qs = buildQueryString({ limit: params?.limit });
     return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/latest${qs}`);
   },
-  getVideosByCategory: async (category: string, params?: PaginationParams) => {
-    const qs = buildQueryString({ category, page: params?.page, limit: params?.limit });
-    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/by-category${qs}`);
+  getVideosByCategory: async (categorySlug: string, params?: PaginationParams) => {
+    const qs = buildQueryString({ page: params?.page, limit: params?.limit });
+    return api.get<DiscoveryVideoResponse[]>(
+      `/api/media/categories/${encodeCategoryPathSlug(categorySlug)}/videos${qs}`
+    );
   },
   getVideosByCategorySlug: async (slug: string, params?: PaginationParams) => {
     const qs = buildQueryString({ page: params?.page, limit: params?.limit });
-    return api.get<DiscoveryVideoResponse[]>(`/api/media/categories/${slug}/videos${qs}`);
+    return api.get<DiscoveryVideoResponse[]>(
+      `/api/media/categories/${encodeCategoryPathSlug(slug)}/videos${qs}`
+    );
   },
   getSubscribedVideos: async (params?: Pick<PaginationParams, "limit">) => {
     const qs = buildQueryString({ limit: params?.limit });

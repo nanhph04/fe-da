@@ -14,8 +14,6 @@ export interface NavItem {
 export const topNavItems: NavItem[] = [
   { label: "explore", icon: "explore", path: "/", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "library", icon: "video_library", path: "/library", roles: ["guest", "viewer", "creator", "admin"] },
-  { label: "wallet", icon: "account_balance_wallet", path: "/wallet", roles: ["viewer", "creator", "admin"] },
-  { label: "profile", icon: "person", path: "/profile", roles: ["viewer", "creator", "admin"] },
 ];
 
 export const sideNavItems: NavItem[] = [
@@ -30,8 +28,6 @@ export const sideNavItems: NavItem[] = [
 export const mobileNavItems: NavItem[] = [
   { label: "explore", icon: "explore", path: "/", roles: ["guest", "viewer", "creator", "admin"] },
   { label: "library", icon: "video_library", path: "/library", roles: ["guest", "viewer", "creator", "admin"] },
-  { label: "wallet", icon: "account_balance_wallet", path: "/wallet", roles: ["viewer", "creator", "admin"] },
-  { label: "profile", icon: "person", path: "/profile", roles: ["viewer", "creator", "admin"] },
 ];
 
 export const studioEntryByRole: Partial<Record<MainNavRole, NavItem>> = {
@@ -41,8 +37,8 @@ export const studioEntryByRole: Partial<Record<MainNavRole, NavItem>> = {
 };
 
 export const sideNavFooterItems: NavItem[] = [
-  { label: "settings", icon: "settings", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
-  { label: "help", icon: "help_outline", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
+  // { label: "settings", icon: "settings", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
+  // { label: "help", icon: "help_outline", disabled: true, roles: ["guest", "viewer", "creator", "admin"] },
 ];
 
 export { platformBrand };

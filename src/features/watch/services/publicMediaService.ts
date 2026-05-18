@@ -17,6 +17,10 @@ function encodeVideoPathId(videoId: string) {
   return encodeURIComponent(videoId);
 }
 
+function encodeCategoryPathSlug(categorySlug: string) {
+  return encodeURIComponent(categorySlug.trim());
+}
+
 export function buildPublicVideoThumbnailUrl(videoId: string) {
   return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
 }
@@ -217,17 +221,19 @@ export async function getCategoriesCached() {
   }
 }
 
-export async function getVideosByCategoryCached(category: string, limit = 6) {
+export async function getVideosByCategoryCached(categorySlug: string, limit = 6) {
   "use cache";
 
-  cacheLife("minutes");
-  cacheTag("media:category-videos", `media:category:${category}`);
+  const normalizedSlug = categorySlug.trim();
 
-  const query = new URLSearchParams({ category, limit: String(limit) });
+  cacheLife("minutes");
+  cacheTag("media:category-videos", `media:category:${normalizedSlug}`);
+
+  const query = new URLSearchParams({ limit: String(limit) });
 
   try {
     return await fetchPublicApi<PublicDiscoveryVideo[]>(
-      `/api/media/videos/discovery/by-category?${query.toString()}`
+      `/api/media/categories/${encodeCategoryPathSlug(normalizedSlug)}/videos?${query.toString()}`
     );
   } catch (error) {
     const apiError = error as PublicApiError;

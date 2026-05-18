@@ -11,6 +11,7 @@ import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
+import { getSafeInternalRedirectPath } from "@/shared/utils/locale-path";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -29,20 +30,12 @@ const loginReasonMessages: Record<string, string> = {
   "session-expired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
 };
 
-const isSafeRedirectPath = (path?: string) => {
-  if (!path || !path.startsWith("/") || path.startsWith("//")) {
-    return false;
-  }
-
-  return !path.startsWith("/login") && !path.startsWith("/register");
-};
-
 const getRedirectAfterLogin = (profile: UserProfile | null, redirectTo?: string) => {
   if (!profile) {
     return null;
   }
 
-  const safeRedirectPath = isSafeRedirectPath(redirectTo) ? redirectTo : null;
+  const safeRedirectPath = getSafeInternalRedirectPath(redirectTo);
 
   if (safeRedirectPath) {
     if (safeRedirectPath.startsWith("/admin")) {

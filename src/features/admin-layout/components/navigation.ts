@@ -31,8 +31,7 @@ export const adminSidebarItems: AdminNavItem[] = [
   { label: "Membership Review", path: "/admin/verifications", icon: ShieldCheck, matchStartsWith: true },
   { label: "Categories", path: "/admin/categories", icon: SlidersHorizontal, matchStartsWith: true },
   { label: "Finance", path: "/admin/finance", icon: CircleDollarSign, matchStartsWith: true },
-  { label: "Payouts", path: "/admin/payouts", icon: Banknote, matchStartsWith: true },
-  { label: "Logs", path: "/admin/audit", icon: History, disabled: true },
+  { label: "Payouts", path: "/admin/payouts", icon: Banknote, matchStartsWith: true }
 ];
 
 export const adminFooterItems: AdminNavItem[] = [

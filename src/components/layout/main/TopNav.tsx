@@ -112,7 +112,6 @@ export function TopNav() {
               </div>
             ) : (
               <>
-                <span className="material-symbols-outlined text-muted-foreground hover:text-foreground cursor-pointer transition-colors">notifications</span>
                 <button
                   type="button"
                   aria-label="Mở menu tài khoản"

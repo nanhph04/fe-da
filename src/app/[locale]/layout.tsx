@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import "@fontsource/material-symbols-outlined";
 import { Inter, Manrope } from "next/font/google";
-import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from "next/navigation";
-import { AuthProvider } from "@/features/auth/context/AuthContext";
-import { ThemeProvider } from "@/shared/providers/theme-provider";
+import { AppProviders } from "@/shared/providers/app-providers";
 import "../globals.css";
 
 const inter = Inter({
@@ -57,27 +55,45 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: `(function () {
-  function removeInjectedAttrs(root) {
-    if (!root || !root.querySelectorAll) return;
-    root.querySelectorAll('[bis_skin_checked]').forEach(function (element) {
-      element.removeAttribute('bis_skin_checked');
+  var injectedAttributePattern = /^(bis_|__processed_)/;
+
+  function isInjectedAttribute(attributeName) {
+    return attributeName === 'bis_register' || injectedAttributePattern.test(attributeName);
+  }
+
+  function removeInjectedAttrsFromElement(element) {
+    if (!element || !element.attributes) return;
+
+    Array.prototype.slice.call(element.attributes).forEach(function (attribute) {
+      if (isInjectedAttribute(attribute.name)) {
+        element.removeAttribute(attribute.name);
+      }
     });
   }
 
-  removeInjectedAttrs(document);
+  function removeInjectedAttrs(root) {
+    if (!root) return;
+
+    if (root.nodeType === 1) {
+      removeInjectedAttrsFromElement(root);
+    }
+
+    if (!root.querySelectorAll) return;
+
+    root.querySelectorAll('*').forEach(removeInjectedAttrsFromElement);
+  }
+
+  removeInjectedAttrs(document.documentElement);
 
   var observer = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'bis_skin_checked') {
-        mutation.target.removeAttribute('bis_skin_checked');
+      if (mutation.type === 'attributes') {
+        removeInjectedAttrsFromElement(mutation.target);
         return;
       }
 
       mutation.addedNodes.forEach(function (node) {
         if (node.nodeType === 1) {
-          if (node.hasAttribute && node.hasAttribute('bis_skin_checked')) {
-            node.removeAttribute('bis_skin_checked');
-          }
           removeInjectedAttrs(node);
         }
       });
@@ -87,27 +103,17 @@ export default async function RootLayout({
   observer.observe(document.documentElement, {
     attributes: true,
     childList: true,
-    subtree: true,
-    attributeFilter: ['bis_skin_checked']
+    subtree: true
   });
 
   window.addEventListener('load', function () {
-    removeInjectedAttrs(document);
+    removeInjectedAttrs(document.documentElement);
     window.setTimeout(function () { observer.disconnect(); }, 1000);
   });
 })();` }} />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
-          </NextIntlClientProvider>
-        </ThemeProvider>
+        <AppProviders locale={locale} messages={messages}>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

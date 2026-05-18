@@ -565,12 +565,15 @@ Public/list/metadata response tra `/api/media/videos/:id/thumbnail`. Studio/owne
 - Muc dich: tim kiem/list public videos truc tiep tu video controller.
 - Public API: khong can `x-internal-secret`.
 - Query:
-  - `q` (string, optional): keyword search.
+  - `q` (string, optional): keyword search theo `title` hoac `description`.
   - `category` (string, optional): category slug.
-  - `tags` (string, optional): danh sach tag slug/name phan tach bang dau phay; backend trim, bo rong, va unique.
+  - `tags` (string, optional): danh sach tag slug phan tach bang dau phay; backend trim, bo rong, va unique.
   - `limit` (number, optional, default 20, min 1, max 50)
 - Ghi chu:
-  - Endpoint nay chi tra public videos co the expose cho discovery.
+  - Endpoint nay chi tra video `ready + public + active`, chua bi delete, va channel dang `active`.
+  - Neu truyen nhieu `tags`, video phai co du tat ca tag slug da truyen.
+  - Khi co `q`, ket qua uu tien title exact/prefix/partial match truoc, sau do moi sap xep theo `publishedAt DESC`.
+  - Khi khong co `q`, ket qua sap xep theo `publishedAt DESC`, fallback `createdAt DESC`.
   - Khac voi `GET /api/media/search`: endpoint nay chi tra videos, khong tra channels.
 - Response HTTP 200:
   - Envelope `data`: array, moi object gom:
@@ -932,6 +935,9 @@ Public/list/metadata response tra `/api/media/videos/:id/thumbnail`. Studio/owne
   - `limit` (number, optional, default 20, min 1, max 50)
 - He thong tu set them khi xu ly:
   - Neu thieu `limit` thi he thong dung `20`
+- Ghi chu:
+  - Endpoint nay chi tra video `ready + public + active`, chua bi delete, va channel dang `active`.
+  - Ket qua sap xep theo `publishedAt DESC`, fallback `createdAt DESC`.
 - Response HTTP 200:
   - Envelope `data`: array, moi object gom:
     - `id` (string)
@@ -991,21 +997,22 @@ Public/list/metadata response tra `/api/media/videos/:id/thumbnail`. Studio/owne
     - `total` (number)
     - `totalPages` (number)
 
-### 4.14 GET `/api/media/videos/discovery/by-category?category=...&page=1&limit=20`
+### 4.14 GET `/api/media/categories/:slug/videos?page=1&limit=20`
 
-- Muc dich: lay danh sach video theo category.
+- Muc dich: lay danh sach video public theo category slug qua nested category route.
 - Public API: khong can `x-internal-secret`.
+- Path param:
+  - `slug` (string): category slug
 - Query:
-  - `category` (string, bat buoc)
   - `page` (number, optional, default 1, min 1)
   - `limit` (number, optional, default 20, min 1, max 50)
 - He thong tu set them khi xu ly:
   - Neu thieu `page` thi he thong dung `1`
   - Neu thieu `limit` thi he thong dung `20`
 - Ghi chu:
-  - `category` duoc lookup theo `slug`.
-  - Neu `category` rong sau khi trim thi tra `BAD_REQUEST` / HTTP 400.
-  - Neu `category` khong ton tai hoac khong `active` thi tra `NOT_FOUND` / HTTP 404.
+  - `slug` duoc lookup theo category slug.
+  - Neu `slug` rong sau khi trim thi tra `BAD_REQUEST` / HTTP 400.
+  - Neu category khong ton tai hoac khong `active` thi tra `NOT_FOUND` / HTTP 404.
   - Danh sach video duoc sap xep mac dinh theo `publishedAt DESC`, fallback `createdAt DESC`.
 - Response HTTP 200:
   - Envelope `data`: array, moi object gom:
@@ -1034,27 +1041,7 @@ Public/list/metadata response tra `/api/media/videos/:id/thumbnail`. Studio/owne
     - `total` (number)
     - `totalPages` (number)
 
-### 4.15 GET `/api/media/categories/:slug/videos?page=1&limit=20`
-
-- Muc dich: lay danh sach video public theo category slug qua nested category route.
-- Public API: khong can `x-internal-secret`.
-- Path param:
-  - `slug` (string): category slug
-- Query:
-  - `page` (number, optional, default 1, min 1)
-  - `limit` (number, optional, default 20, min 1, max 50)
-- Ghi chu:
-  - Endpoint nay dung chung logic voi `GET /api/media/videos/discovery/by-category?category=...`.
-  - Neu category khong ton tai hoac khong `active` thi tra `NOT_FOUND` / HTTP 404.
-- Response HTTP 200:
-  - Envelope `data`: array, moi object giong shape cua `GET /api/media/videos/discovery/by-category`
-  - Envelope `pagination`:
-    - `page` (number)
-    - `limit` (number)
-    - `total` (number)
-    - `totalPages` (number)
-
-### 4.16 GET `/api/media/videos/discovery/subscribed?limit=20`
+### 4.15 GET `/api/media/videos/discovery/subscribed?limit=20`
 
 - Muc dich: lay video public moi tu cac channel ma user dang co membership active.
 - Header:
@@ -1092,7 +1079,7 @@ Public/list/metadata response tra `/api/media/videos/:id/thumbnail`. Studio/owne
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
 
-### 4.17 GET `/api/media/videos/continue-watching?limit=20`
+### 4.16 GET `/api/media/videos/continue-watching?limit=20`
 
 - Muc dich: lay danh sach video user dang xem do de hien thi muc xem tiep.
 - Header:

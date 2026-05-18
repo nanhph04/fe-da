@@ -2,14 +2,16 @@
 
 import { useEffect } from "react";
 import type { ReactNode } from "react";
-import { useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { normalizeInternalPath } from "@/shared/utils/locale-path";
 
 export function AdminLayoutFeature({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (isLoading) {
@@ -17,9 +19,10 @@ export function AdminLayoutFeature({ children }: { children: ReactNode }) {
     }
 
     if (!isAuthenticated) {
-      const redirectPath = typeof window === "undefined"
-        ? "/admin"
+      const currentPath = typeof window === "undefined"
+        ? pathname
         : `${window.location.pathname}${window.location.search}`;
+      const redirectPath = normalizeInternalPath(currentPath) ?? "/admin";
       router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}`);
       return;
     }
@@ -27,7 +30,7 @@ export function AdminLayoutFeature({ children }: { children: ReactNode }) {
     if (user?.role !== "admin") {
       router.replace("/library");
     }
-  }, [isAuthenticated, isLoading, router, user?.role]);
+  }, [isAuthenticated, isLoading, pathname, router, user?.role]);
 
   if (isLoading || !isAuthenticated || user?.role !== "admin") {
     return (
