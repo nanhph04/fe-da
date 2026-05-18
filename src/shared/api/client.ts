@@ -37,8 +37,13 @@ export const clearLocalAccessToken = () => {
   }
 };
 
-const redirectToLogin = () => {
+const redirectToLogin = (reason?: string) => {
   if (typeof window === "undefined") {
+    return;
+  }
+
+  if (reason) {
+    window.location.href = `/login?reason=${encodeURIComponent(reason)}`;
     return;
   }
 
@@ -57,6 +62,14 @@ export const buildApiUrl = (endpoint: string) => {
   }
 
   if (typeof window !== "undefined") {
+    return endpoint;
+  }
+
+  return `${API_BASE_URL}${endpoint}`;
+};
+
+const buildStreamingApiUrl = (endpoint: string) => {
+  if (endpoint.startsWith("http")) {
     return endpoint;
   }
 
@@ -152,9 +165,67 @@ const createConnectionError = (): ApiError => ({
   mess: "Unable to connect to the API server. Check that the backend is running and reachable.",
 });
 
-const refreshAccessToken = async () => {
+export class ApiHttpError extends Error {
+  status: number;
+  payload?: unknown;
+
+  constructor(status: number, message: string, payload?: unknown) {
+    super(message);
+    this.name = "ApiHttpError";
+    this.status = status;
+    this.payload = payload;
+  }
+}
+
+export const getHttpStatus = (error: unknown) => {
+  if (error instanceof ApiHttpError) {
+    return error.status;
+  }
+
+  if (error && typeof error === "object") {
+    const apiError = error as ApiError;
+    return apiError.status ?? apiError.code ?? null;
+  }
+
+  return null;
+};
+
+const isAccountSuspendedPayload = (payload: unknown) => {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  const { mess, message, errors } = payload as ApiError;
+  const text = [mess, message, ...(errors ?? [])]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    text.includes("suspended") ||
+    text.includes("revoked") ||
+    text.includes("disabled") ||
+    text.includes("vô hiệu hóa") ||
+    text.includes("vo hieu hoa") ||
+    text.includes("khoa") ||
+    text.includes("khóa")
+  );
+};
+
+const handleRevokedAuthResponse = (status: number, payload: unknown, requireAuth?: boolean) => {
+  if (!requireAuth) {
+    return;
+  }
+
+  if (status === 401 || (status === 403 && isAccountSuspendedPayload(payload))) {
+    clearLocalAccessToken();
+    redirectToLogin(status === 403 ? "account-disabled" : undefined);
+  }
+};
+
+export const refreshAccessToken = async () => {
   try {
-    const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    const refreshResponse = await fetch(buildApiUrl("/api/auth/refresh"), {
       method: "POST",
       credentials: "include",
       headers: {
@@ -214,6 +285,7 @@ export const fetchWrapper = async <T = unknown>(
           )) as ApiResponse<T>;
 
           if (!retryResponse.ok) {
+            handleRevokedAuthResponse(retryResponse.status, retryPayload, options.requireAuth);
             return Promise.reject(retryPayload);
           }
 
@@ -222,20 +294,35 @@ export const fetchWrapper = async <T = unknown>(
           isRefreshing = false;
           clearLocalAccessToken();
 
-          redirectToLogin();
+          redirectToLogin(
+            getHttpStatus(error) === 403 || isAccountSuspendedPayload(error)
+              ? "account-disabled"
+              : undefined
+          );
 
           return Promise.reject(error);
         }
       }
 
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         addRefreshSubscriber(token => {
           headers.set("Authorization", `Bearer ${token}`);
-          resolve(
-            fetch(url, { ...config, headers }).then(response =>
-              parseResponseBody(response, options.responseType)
-            ) as Promise<ApiResponse<T>>
-          );
+          fetch(url, { ...config, headers })
+            .then(async retryResponse => {
+              const retryPayload = (await parseResponseBody(
+                retryResponse,
+                options.responseType
+              )) as ApiResponse<T>;
+
+              if (!retryResponse.ok) {
+                handleRevokedAuthResponse(retryResponse.status, retryPayload, options.requireAuth);
+                reject(retryPayload);
+                return;
+              }
+
+              resolve(retryPayload);
+            })
+            .catch(reject);
         });
       });
     }
@@ -246,6 +333,7 @@ export const fetchWrapper = async <T = unknown>(
     )) as ApiResponse<T>;
 
     if (!response.ok) {
+      handleRevokedAuthResponse(response.status, payload, options.requireAuth);
       return Promise.reject(payload);
     }
 
@@ -335,7 +423,7 @@ export const fetchSSE = async (
   onEnd?: () => void,
   onError?: (error: unknown) => void
 ) => {
-  const url = buildApiUrl(endpoint);
+  const url = buildStreamingApiUrl(endpoint);
   const headers = new Headers(options.headers || {});
   headers.set("Accept", "text/event-stream");
 
@@ -371,25 +459,33 @@ export const fetchSSE = async (
           isRefreshing = false;
           clearLocalAccessToken();
 
-          redirectToLogin();
+          redirectToLogin(
+            getHttpStatus(error) === 403 || isAccountSuspendedPayload(error)
+              ? "account-disabled"
+              : undefined
+          );
 
           throw error;
         }
       } else {
-        await new Promise<void>(resolve => {
+        await new Promise<void>((resolve, reject) => {
           addRefreshSubscriber(token => {
             headers.set("Authorization", `Bearer ${token}`);
-            fetch(url, { ...config, headers }).then(nextResponse => {
-              response = nextResponse;
-              resolve();
-            });
+            fetch(url, { ...config, headers })
+              .then(nextResponse => {
+                response = nextResponse;
+                resolve();
+              })
+              .catch(reject);
           });
         });
       }
     }
 
     if (!response.ok) {
-      throw new Error(`SSE HTTP error: ${response.status}`);
+      const payload = await parseResponseBody(response);
+      handleRevokedAuthResponse(response.status, payload, options.requireAuth);
+      throw new ApiHttpError(response.status, `SSE HTTP error: ${response.status}`, payload);
     }
 
     if (!response.body) {

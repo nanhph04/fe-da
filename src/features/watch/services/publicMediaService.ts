@@ -11,8 +11,26 @@ export type PublicThumbnailSource = "auto" | "custom" | string;
 export type PublicThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
 export type PublicMembershipReviewStatus = "not_requested" | "pending" | "approved" | "rejected";
 
-export function getReadyPublicThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
-  return thumbnailUrl && thumbnailStatus === "ready" ? thumbnailUrl : null;
+const READY_PUBLIC_THUMBNAIL_STATUS = "ready";
+
+function encodeVideoPathId(videoId: string) {
+  return encodeURIComponent(videoId);
+}
+
+export function buildPublicVideoThumbnailUrl(videoId: string) {
+  return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
+}
+
+export function getReadyPublicThumbnailUrl(
+  thumbnailUrl?: string | null,
+  thumbnailStatus?: string | null,
+  videoId?: string | null
+) {
+  if (thumbnailStatus !== READY_PUBLIC_THUMBNAIL_STATUS) {
+    return null;
+  }
+
+  return videoId ? buildPublicVideoThumbnailUrl(videoId) : thumbnailUrl || null;
 }
 
 export interface PublicDiscoveryVideo {
@@ -28,6 +46,8 @@ export interface PublicDiscoveryVideo {
   thumbnailUrl: string | null;
   thumbnailSource: PublicThumbnailSource;
   thumbnailStatus: PublicThumbnailStatus;
+  thumbnailObjectKey?: string | null;
+  thumbnailBucket?: string | null;
   durationSeconds: number | null;
   resolutions: string[];
   errorMessage: string | null;
@@ -65,13 +85,15 @@ export interface PublicVideoMetadata {
   thumbnailUrl: string | null;
   thumbnailSource: PublicThumbnailSource;
   thumbnailStatus: PublicThumbnailStatus;
+  thumbnailObjectKey?: string | null;
+  thumbnailBucket?: string | null;
   viewCount: number;
   status: string;
   visibility: string;
-  price?: number | null;
+  price: number;
   priceCoin?: number | null;
   coinAmount?: number | null;
-  requiredTierLevel?: number | null;
+  requiredTierLevel: number | null;
   requiredTier?: number | null;
   minTierLevel?: number | null;
   requiredMembershipLevel?: number | null;

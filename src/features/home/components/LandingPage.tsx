@@ -38,7 +38,7 @@ function toMediaCard(video: PublicDiscoveryVideo): MediaCardProps {
     title: video.title,
     creator: video.channel?.name ?? "Velvet Gallery",
     views: formatViewCount(video.viewCount),
-    imageUrl: getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ?? FALLBACK_THUMBNAIL,
+    imageUrl: getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ?? FALLBACK_THUMBNAIL,
     duration: formatDuration(video.durationSeconds),
     href: `/watch/${video.id}`,
   };
@@ -64,7 +64,7 @@ export function LandingPage({
     ? {
       title: heroVideo.title,
       subtitle: heroVideo.description || FALLBACK_HERO.subtitle,
-      imageUrl: getReadyPublicThumbnailUrl(heroVideo.thumbnailUrl, heroVideo.thumbnailStatus) ?? FALLBACK_THUMBNAIL,
+      imageUrl: getReadyPublicThumbnailUrl(heroVideo.thumbnailUrl, heroVideo.thumbnailStatus, heroVideo.id) ?? FALLBACK_THUMBNAIL,
       videoId: heroVideo.id,
     }
     : FALLBACK_HERO;

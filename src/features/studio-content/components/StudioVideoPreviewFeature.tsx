@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PlayerContainerClient } from "@/features/watch/components/PlayerContainerClient";
-import { getReadyThumbnailUrl, mediaService, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
+import { getReadyOwnerVideoThumbnailUrl, mediaService, type OwnerVideoDetailResponse } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
+import { StudioVideoDraftActions } from "./StudioVideoDraftActions";
 
 interface StudioVideoPreviewFeatureProps {
   videoId: string;
@@ -18,6 +19,8 @@ type NotReadyCopy = {
 };
 
 const READY_STATUS = "ready";
+const DRAFT_STATUS = "draft";
+const PLAYABLE_STATUSES = new Set([READY_STATUS, "private"]);
 const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
 
@@ -62,7 +65,7 @@ function formatDuration(seconds?: number | null) {
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function getAccessLabel(video: OwnerVideoResponse) {
+function getAccessLabel(video: OwnerVideoDetailResponse) {
   if (video.requiredTierLevel) {
     return `LV${video.requiredTierLevel}`;
   }
@@ -75,7 +78,7 @@ function getAccessLabel(video: OwnerVideoResponse) {
 }
 
 function getStatusClass(status: string) {
-  if (status === READY_STATUS) {
+  if (PLAYABLE_STATUSES.has(status)) {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
   }
 
@@ -144,7 +147,7 @@ function StudioVideoPreviewSkeleton() {
 }
 
 export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeatureProps) {
-  const [video, setVideo] = useState<OwnerVideoResponse | null>(null);
+  const [video, setVideo] = useState<OwnerVideoDetailResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -202,11 +205,16 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
   }, [refreshKey, videoId]);
 
   const status = normalizeStatus(video?.status);
-  const isReady = status === READY_STATUS;
+  const isReady = PLAYABLE_STATUSES.has(status);
   const notReadyCopy = useMemo(() => getNotReadyCopy(status), [status]);
-  const poster = getReadyThumbnailUrl(video?.thumbnailUrl, video?.thumbnailStatus) || "/images/thumbnail.png";
+  const isDraft = status === DRAFT_STATUS;
+  const poster = getReadyOwnerVideoThumbnailUrl(video?.id, video?.thumbnailUrl, video?.thumbnailStatus) || "/images/thumbnail.png";
   const viewCount = video?.viewCount ?? video?.metrics?.viewsCount ?? 0;
   const tags = video?.tags?.filter(Boolean) ?? [];
+
+  const refreshDetail = () => {
+    setRefreshKey(value => value + 1);
+  };
 
   if (isLoading) {
     return <StudioVideoPreviewSkeleton />;
@@ -278,11 +286,16 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
               <PlayerContainerClient videoId={video.id} poster={poster} title={video.title} />
             ) : (
               <div className="relative flex aspect-video overflow-hidden rounded-lg border border-border/30 bg-card">
-                <div
-                  aria-label={video.title}
-                  role="img"
-                  className="absolute inset-0 bg-cover bg-center opacity-35 blur-sm scale-105"
-                  style={{ backgroundImage: `url(${poster})` }}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={poster}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full scale-105 object-cover opacity-35 blur-sm"
+                  onError={event => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = "/images/thumbnail.png";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
                 <div className="relative z-10 flex w-full flex-col items-center justify-center gap-4 px-6 text-center">
@@ -296,6 +309,10 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
                 </div>
               </div>
             )}
+
+            {isDraft ? (
+              <StudioVideoDraftActions video={video} onChanged={refreshDetail} />
+            ) : null}
 
             <article className="rounded-lg border border-border/30 bg-card p-6">
               <div className="flex flex-wrap items-center gap-3">

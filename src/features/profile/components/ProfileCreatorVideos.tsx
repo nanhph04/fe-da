@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Film, Upload } from "lucide-react";
-import { getReadyThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
+import { getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import { formatDuration, formatProfileDate } from "../utils/profile-formatters";
 
 interface ProfileCreatorVideosProps {
@@ -39,13 +39,13 @@ export function ProfileCreatorVideos({ videos, error }: ProfileCreatorVideosProp
       {videos.map(video => (
         <Link
           key={video.id}
-          href={`/studio/content`}
+          href={`/studio/content/${video.id}`}
           className="group overflow-hidden rounded-lg border border-border/20 bg-card shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40"
         >
           <div className="relative aspect-video bg-muted">
-            {getReadyThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ? (
+            {getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={getReadyThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || ""} alt={video.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) || ""} alt={video.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                 <Film className="h-10 w-10" />

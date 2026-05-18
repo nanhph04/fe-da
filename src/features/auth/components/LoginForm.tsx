@@ -21,6 +21,12 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 type LoginFormProps = {
   redirectTo?: string;
+  reason?: string;
+};
+
+const loginReasonMessages: Record<string, string> = {
+  "account-disabled": "Tài khoản đã bị vô hiệu hóa. Vui lòng kiểm tra email để biết lý do.",
+  "session-expired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
 };
 
 const isSafeRedirectPath = (path?: string) => {
@@ -53,9 +59,11 @@ const getRedirectAfterLogin = (profile: UserProfile | null, redirectTo?: string)
   return !profile.displayName ? "/onboarding/profile" : "/library";
 };
 
-export function LoginForm({ redirectTo }: LoginFormProps) {
+export function LoginForm({ redirectTo, reason }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(
+    reason ? loginReasonMessages[reason] ?? null : null
+  );
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 

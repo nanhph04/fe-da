@@ -55,10 +55,10 @@ export function ChannelVideoGrid({ videos, channelName }: ChannelVideoGridProps)
               className="group overflow-hidden rounded-lg border border-border/20 bg-card transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5"
             >
               <div className="relative aspect-video overflow-hidden bg-muted">
-                {getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ? (
+                {getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || ""}
+                    src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) || ""}
                     alt={video.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

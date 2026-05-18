@@ -1,28 +1,72 @@
 import { useRef, useState } from "react";
-import { StudioTier } from "./StudioMembershipFeature";
+import { TIER_LEVELS, type TierEditorPayload, type TierEditorState, type TierLevel } from "./StudioMembershipFeature";
 
 interface TierEditorOverlayProps {
-  tier: StudioTier | null;
+  editorState: TierEditorState;
+  availableLevels: TierLevel[];
+  isSaving: boolean;
+  error: string | null;
   onClose: () => void;
-  onSave: (tier: StudioTier) => void;
+  onSave: (payload: TierEditorPayload) => void;
 }
 
-export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayProps) {
-  const [name, setName] = useState(tier?.name || "");
-  const [price, setPrice] = useState(tier?.price || 500);
-  const [perks, setPerks] = useState<string[]>(tier?.perks || ["Loyalty badges", "Custom emojis"]);
+const DEFAULT_PERKS: Record<TierLevel, string[]> = {
+  1: ["Access to Lv1 videos", "Community badge"],
+  2: ["Access to Lv1-Lv2 videos", "Early access releases"],
+  3: ["Access to all videos", "Direct creator updates"],
+};
+
+export function TierEditorOverlay({
+  editorState,
+  availableLevels,
+  isSaving,
+  error,
+  onClose,
+  onSave,
+}: TierEditorOverlayProps) {
+  const editingTier = editorState.mode === "edit" ? editorState.tier : null;
+  const initialLevel = editorState.mode === "create" ? editorState.level : editingTier?.level ?? 1;
+  const [level, setLevel] = useState<TierLevel>(initialLevel);
+  const [name, setName] = useState(editingTier?.name || `Level ${initialLevel} Membership`);
+  const [price, setPrice] = useState(editingTier?.price || 500);
+  const [isAcceptingNew, setIsAcceptingNew] = useState(editingTier?.isAcceptingNew ?? true);
+  const [perks, setPerks] = useState<string[]>(editingTier?.perks || DEFAULT_PERKS[initialLevel]);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const newPerkRef = useRef<HTMLInputElement>(null);
 
+  const selectableLevels = editorState.mode === "edit"
+    ? [editingTier?.level ?? level]
+    : availableLevels.length > 0
+      ? availableLevels
+      : [level];
+
+  const handleLevelChange = (nextLevel: TierLevel) => {
+    setLevel(nextLevel);
+    if (!name.trim() || name.startsWith("Level ")) {
+      setName(`Level ${nextLevel} Membership`);
+    }
+    setPerks(DEFAULT_PERKS[nextLevel]);
+  };
+
   const handleSave = () => {
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setValidationError("Please enter a tier name.");
+      return;
+    }
+
+    if (price < 100) {
+      setValidationError("Tier price must be at least 100 AC.");
+      return;
+    }
+
+    setValidationError(null);
     onSave({
-      ...tier,
-      name,
-      price,
-      perks,
-      id: tier?.id || Date.now(),
-      subscribers: tier?.subscribers || 0,
-      revenue: tier?.revenue || "0",
-      badgeColor: tier?.badgeColor || "bg-muted-foreground",
+      level,
+      name: trimmedName,
+      priceCoin: price,
+      isAcceptingNew,
     });
   };
 
@@ -44,20 +88,20 @@ export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayPr
         <aside className="hidden border-r border-border/30 bg-muted/30 p-8 lg:flex lg:flex-col lg:justify-between">
           <div>
             <span className="mb-4 inline-flex rounded-sm bg-primary/15 px-3 py-1 font-label text-xs font-bold uppercase tracking-widest text-primary">
-              Tier Editor
+              {editorState.mode === "edit" ? "Edit Tier" : "Create Tier"}
             </span>
             <h3 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">
               Shape the member room
             </h3>
             <p className="mt-4 font-body text-sm leading-6 text-muted-foreground">
-              Tune pricing, perks, and access language before publishing changes to the creator membership surface.
+              Pricing and join status are saved directly to Media Service. Perks are preview text until backend exposes perk storage.
             </p>
           </div>
 
           <div className="rounded-lg border border-secondary/20 bg-secondary/10 p-5">
             <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">Monthly Price</p>
-            <p className="mt-2 font-headline text-4xl font-black text-secondary">{price.toLocaleString()} AC</p>
-            <p className="mt-2 font-body text-xs text-muted-foreground">Changes are local until saved.</p>
+            <p className="mt-2 font-headline text-4xl font-black text-secondary">{price.toLocaleString("vi-VN")} AC</p>
+            <p className="mt-2 font-body text-xs text-muted-foreground">Level {level} membership tier.</p>
           </div>
         </aside>
 
@@ -65,14 +109,15 @@ export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayPr
           <header className="flex items-center justify-between border-b border-border/30 bg-muted/40 px-6 py-4">
             <div>
               <h3 className="font-headline text-xl font-bold text-foreground">
-                {tier?.id ? "Edit Tier" : "Create New Tier"}
+                {editorState.mode === "edit" ? "Edit Tier" : "Create New Tier"}
               </h3>
-              <p className="font-body text-xs text-muted-foreground">Configure tier name, AC price, and included perks.</p>
+              <p className="font-body text-xs text-muted-foreground">Configure tier level, name, AC price, and join status.</p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              disabled={isSaving}
+              className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
               aria-label="Close tier editor"
             >
               <span className="material-symbols-outlined">close</span>
@@ -82,13 +127,36 @@ export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayPr
           <div className="grid gap-6 overflow-y-auto p-6 md:grid-cols-2">
             <div className="space-y-6">
               <div className="space-y-2">
+                <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Access Level</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {TIER_LEVELS.map((option) => {
+                    const disabled = !selectableLevels.includes(option);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        disabled={disabled || editorState.mode === "edit" || isSaving}
+                        onClick={() => handleLevelChange(option)}
+                        className={`rounded-sm py-3 font-headline text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                          level === option ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        Lv{option}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Tier Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="e.g. Silver Member"
-                  className="w-full rounded-md border border-border/40 bg-input px-4 py-3 font-headline font-bold text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                  disabled={isSaving}
+                  className="w-full rounded-md border border-border/40 bg-input px-4 py-3 font-headline font-bold text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
 
@@ -102,18 +170,33 @@ export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayPr
                   </span>
                   <input
                     type="number"
-                    min={0}
+                    min={100}
                     value={price}
                     onChange={(event) => setPrice(Number(event.target.value))}
-                    className="w-full rounded-md border border-border/40 bg-input py-3 pl-12 pr-4 font-headline font-bold text-foreground outline-none transition-colors focus:border-secondary focus:ring-1 focus:ring-secondary/50"
+                    disabled={isSaving}
+                    className="w-full rounded-md border border-border/40 bg-input py-3 pl-12 pr-4 font-headline font-bold text-foreground outline-none transition-colors focus:border-secondary focus:ring-1 focus:ring-secondary/50 disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
-                <p className="font-body text-[10px] text-muted-foreground">Pricing should stay between 100 AC and 10,000 AC.</p>
+                <p className="font-body text-[10px] text-muted-foreground">Pricing should stay at 100 AC or above.</p>
               </div>
+
+              <label className="flex items-center justify-between rounded-md border border-border/30 bg-muted/40 p-4">
+                <span>
+                  <span className="block font-label text-xs font-bold uppercase tracking-widest text-foreground">Accept new members</span>
+                  <span className="font-body text-xs text-muted-foreground">Disable this when tier should remain visible but closed.</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={isAcceptingNew}
+                  disabled={isSaving}
+                  onChange={(event) => setIsAcceptingNew(event.target.checked)}
+                  className="h-5 w-5 accent-primary"
+                />
+              </label>
             </div>
 
             <div className="space-y-4">
-              <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Included Perks</label>
+              <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Preview Perks</label>
               <ul className="space-y-2">
                 {perks.map((perk, index) => (
                   <li key={`${perk}-${index}`} className="flex items-center justify-between rounded-md border border-border/30 bg-muted/40 p-3">
@@ -121,7 +204,8 @@ export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayPr
                     <button
                       type="button"
                       onClick={() => setPerks((currentPerks) => currentPerks.filter((_, itemIndex) => itemIndex !== index))}
-                      className="rounded p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                      disabled={isSaving}
+                      className="rounded p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
                       aria-label={`Remove ${perk}`}
                     >
                       <span className="material-symbols-outlined text-sm">delete</span>
@@ -133,26 +217,47 @@ export function TierEditorOverlay({ tier, onClose, onSave }: TierEditorOverlayPr
                 <input
                   ref={newPerkRef}
                   type="text"
-                  placeholder="Add a new perk"
-                  className="min-w-0 flex-1 border-0 border-b border-border/50 bg-transparent py-2 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  placeholder="Add a preview perk"
+                  disabled={isSaving}
+                  className="min-w-0 flex-1 border-0 border-b border-border/50 bg-transparent py-2 font-body text-sm text-foreground outline-none transition-colors focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
                 />
                 <button
                   type="button"
                   onClick={handleAddPerk}
-                  className="rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold text-primary transition-colors hover:border-primary"
+                  disabled={isSaving}
+                  className="rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold text-primary transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Add
                 </button>
               </div>
+              <p className="font-body text-[10px] leading-5 text-muted-foreground">
+                Current API stores level, name, price, and join status only. Perks are generated for UI preview and will need a backend field before persistence.
+              </p>
             </div>
           </div>
 
+          {validationError || error ? (
+            <p className="border-t border-destructive/30 bg-destructive/10 px-6 py-3 text-sm text-destructive" role="alert">
+              {validationError || error}
+            </p>
+          ) : null}
+
           <footer className="flex gap-4 border-t border-border/30 bg-muted/40 p-6">
-            <button type="button" onClick={onClose} className="flex-1 py-3 font-headline text-sm font-bold text-muted-foreground transition-colors hover:text-foreground">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSaving}
+              className="flex-1 py-3 font-headline text-sm font-bold text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+            >
               Cancel
             </button>
-            <button type="button" onClick={handleSave} className="flex-[2] rounded-sm bg-primary py-3 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90">
-              Save Tier
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex-[2] rounded-sm bg-primary py-3 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSaving ? "Saving..." : "Save Tier"}
             </button>
           </footer>
         </section>

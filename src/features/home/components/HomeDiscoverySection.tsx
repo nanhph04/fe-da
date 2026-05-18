@@ -29,7 +29,7 @@ function toMediaCard(video: PublicDiscoveryVideo): MediaCardProps {
     creator: video.channel?.name ?? "Velvet Gallery",
     views: formatViewCount(video.viewCount),
     imageUrl:
-      getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) ??
+      getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ??
       FALLBACK_THUMBNAIL,
     duration: formatDuration(video.durationSeconds),
     href: `/watch/${video.id}`,

@@ -1,5 +1,5 @@
-import { StudioTierEditorFeature } from "@/features/studio-membership";
+import { redirect } from "next/navigation";
 
 export default function StudioMembershipTierEditorPage() {
-  return <StudioTierEditorFeature />;
+  redirect("/studio/memberships");
 }

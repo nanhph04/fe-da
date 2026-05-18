@@ -1,104 +1,339 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getErrorMessage } from "@/shared/api/client";
+import {
+  mediaService,
+  type ChannelDetailResponse,
+  type MembershipTierResponse,
+} from "@/features/watch/services/mediaService";
 import { EligibilityChecker } from "./EligibilityChecker";
 import { MembershipManagement } from "./MembershipManagement";
 import { TierEditorOverlay } from "./TierEditorOverlay";
-import { mediaService, ChannelDetailResponse } from "@/features/watch/services/mediaService";
+
+export const TIER_LEVELS = [1, 2, 3] as const;
+
+export type TierLevel = (typeof TIER_LEVELS)[number];
 
 export interface StudioTier {
-  id: number;
+  id: string;
+  channelId: string;
+  level: TierLevel;
   name: string;
   price: number;
-  subscribers: number;
-  revenue: string;
-  badgeColor?: string;
+  isAcceptingNew: boolean;
+  createdAt: string;
+  updatedAt: string;
   perks: string[];
 }
 
-const INITIAL_TIERS: StudioTier[] = [
-  { id: 1, name: "Silver Vongola", price: 500, subscribers: 124, revenue: "62,000", badgeColor: "bg-zinc-400", perks: ["Loyalty badges", "Custom emojis"] },
-  { id: 2, name: "Gold Arcobaleno", price: 1500, subscribers: 45, revenue: "67,500", badgeColor: "bg-[#fdc003]", perks: ["Early access to videos", "Members-only chat"] },
-  { id: 3, name: "Platinum Boss", price: 5000, subscribers: 12, revenue: "60,000", badgeColor: "bg-primary", perks: ["Exclusive live streams", "Direct message access"] },
-];
+export type TierEditorState =
+  | { mode: "create"; level: TierLevel }
+  | { mode: "edit"; tier: StudioTier };
+
+export interface TierEditorPayload {
+  level: TierLevel;
+  name: string;
+  priceCoin: number;
+  isAcceptingNew: boolean;
+}
+
+const DEFAULT_TIER_PERKS: Record<TierLevel, string[]> = {
+  1: ["Access to Lv1 videos", "Community badge", "Member-only comments"],
+  2: ["Access to Lv1-Lv2 videos", "Early access releases", "Monthly creator livestreams"],
+  3: ["Access to all videos", "Behind-the-scenes footage", "Direct creator updates"],
+};
+
+function normalizeTierLevel(level: number): TierLevel {
+  if (level === 2 || level === 3) {
+    return level;
+  }
+
+  return 1;
+}
+
+function mapMembershipTier(tier: MembershipTierResponse): StudioTier {
+  const level = normalizeTierLevel(tier.level);
+
+  return {
+    id: tier.id,
+    channelId: tier.channelId,
+    level,
+    name: tier.name,
+    price: tier.priceCoin,
+    isAcceptingNew: tier.isAcceptingNew,
+    createdAt: tier.createdAt,
+    updatedAt: tier.updatedAt,
+    perks: DEFAULT_TIER_PERKS[level],
+  };
+}
+
+function sortTiers(tiers: StudioTier[]) {
+  return [...tiers].sort((a, b) => a.level - b.level || a.price - b.price);
+}
 
 export function StudioMembershipFeature() {
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [editingTier, setEditingTier] = useState<StudioTier | null>(null);
-  const [tiers, setTiers] = useState(INITIAL_TIERS);
+  const [editorState, setEditorState] = useState<TierEditorState | null>(null);
+  const [tiers, setTiers] = useState<StudioTier[]>([]);
   const [channelDetail, setChannelDetail] = useState<ChannelDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingTier, setIsSavingTier] = useState(false);
+  const [mutatingTierId, setMutatingTierId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMembershipData = async () => {
-      try {
-        const myChannelRes = await mediaService.getMyChannel();
-        if (myChannelRes.success && myChannelRes.data?.channelId) {
-          const detailRes = await mediaService.getChannel(myChannelRes.data.channelId);
-          if (detailRes.success && detailRes.data) {
-            setChannelDetail(detailRes.data);
-            if (detailRes.data.membershipTiers && detailRes.data.membershipTiers.length > 0) {
-              // Map API tiers to StudioTier
-              const mappedTiers = detailRes.data.membershipTiers.map(t => ({
-                id: parseInt(t.id) || Math.floor(Math.random() * 1000), // Note: UI uses number id, API uses string
-                name: t.name,
-                price: t.priceCoin,
-                subscribers: 0, // Mock for now until API supports subscriber count per tier
-                revenue: "0",
-                badgeColor: t.level === 3 ? "bg-primary" : t.level === 2 ? "bg-[#fdc003]" : "bg-zinc-400",
-                perks: t.level === 3 ? ["Exclusive live streams"] : t.level === 2 ? ["Early access"] : ["Loyalty badges"],
-              }));
-              setTiers(mappedTiers);
-              setIsUnlocked(true);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load channel membership data", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchMembershipData();
+  const showActionMessage = useCallback((message: string) => {
+    setActionMessage(message);
+    window.setTimeout(() => setActionMessage(null), 3500);
   }, []);
 
-  const handleSaveTier = (updatedTier: StudioTier) => {
-    setTiers((currentTiers) => {
-      const existingTier = currentTiers.find((tier) => tier.id === updatedTier.id);
-      if (!existingTier) {
-        return [...currentTiers, updatedTier];
+  const fetchMembershipData = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (!silent) {
+      setIsLoading(true);
+    }
+
+    setError(null);
+
+    try {
+      const myChannelRes = await mediaService.getMyChannel();
+      const channelId = myChannelRes.data?.channelId;
+
+      if (!myChannelRes.success || !channelId) {
+        throw new Error(myChannelRes.mess || "Creator channel is not available.");
       }
 
-      return currentTiers.map((tier) =>
-        tier.id === updatedTier.id ? { ...tier, ...updatedTier } : tier
-      );
-    });
-    setEditingTier(null);
-  };
+      const detailRes = await mediaService.getChannel(channelId);
+
+      if (!detailRes.success || !detailRes.data) {
+        throw new Error(detailRes.mess || "Membership data is not available.");
+      }
+
+      setChannelDetail(detailRes.data);
+      setTiers(sortTiers((detailRes.data.membershipTiers ?? []).map(mapMembershipTier)));
+    } catch (err) {
+      setError(getErrorMessage(err, "Unable to load membership data. Please try again."));
+      setTiers([]);
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchMembershipData();
+  }, [fetchMembershipData]);
+
+  const availableLevels = useMemo(() => {
+    const usedLevels = new Set(tiers.map((tier) => tier.level));
+    return TIER_LEVELS.filter((level) => !usedLevels.has(level));
+  }, [tiers]);
+
+  const openCreateTierEditor = useCallback(() => {
+    const nextLevel = availableLevels[0];
+
+    if (!nextLevel) {
+      showActionMessage("All 3 membership levels already exist. Edit an existing tier instead.");
+      return;
+    }
+
+    setEditorError(null);
+    setEditorState({ mode: "create", level: nextLevel });
+  }, [availableLevels, showActionMessage]);
+
+  const openEditTierEditor = useCallback((tier: StudioTier) => {
+    setEditorError(null);
+    setEditorState({ mode: "edit", tier });
+  }, []);
+
+  const handleSaveTier = useCallback(async (payload: TierEditorPayload) => {
+    if (!channelDetail?.id) {
+      setEditorError("Creator channel was not found for saving this tier.");
+      return;
+    }
+
+    setIsSavingTier(true);
+    setEditorError(null);
+
+    try {
+      let response = editorState?.mode === "edit"
+        ? await mediaService.updateMembershipTier(channelDetail.id, editorState.tier.id, {
+            name: payload.name,
+            priceCoin: payload.priceCoin,
+            isAcceptingNew: payload.isAcceptingNew,
+          })
+        : await mediaService.createMembershipTier(channelDetail.id, {
+            level: payload.level,
+            name: payload.name,
+            priceCoin: payload.priceCoin,
+          });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.mess || "Unable to save membership tier.");
+      }
+
+      if (editorState?.mode !== "edit" && !payload.isAcceptingNew) {
+        response = await mediaService.updateMembershipTier(channelDetail.id, response.data.id, {
+          isAcceptingNew: false,
+        });
+
+        if (!response.success || !response.data) {
+          throw new Error(response.mess || "Unable to update the new tier status.");
+        }
+      }
+
+      const savedTier = mapMembershipTier(response.data);
+      setTiers((currentTiers) => {
+        const existingTier = currentTiers.some((tier) => tier.id === savedTier.id);
+        const nextTiers = existingTier
+          ? currentTiers.map((tier) => (tier.id === savedTier.id ? savedTier : tier))
+          : [...currentTiers, savedTier];
+
+        return sortTiers(nextTiers);
+      });
+      setEditorState(null);
+      showActionMessage(editorState?.mode === "edit" ? "Membership tier updated." : "Membership tier created.");
+      void fetchMembershipData({ silent: true });
+    } catch (err) {
+      setEditorError(getErrorMessage(err, "Unable to save membership tier. Please try again."));
+    } finally {
+      setIsSavingTier(false);
+    }
+  }, [channelDetail?.id, editorState, fetchMembershipData, showActionMessage]);
+
+  const handleToggleTierStatus = useCallback(async (tier: StudioTier) => {
+    if (!channelDetail?.id) {
+      showActionMessage("Creator channel was not found for updating this tier.");
+      return;
+    }
+
+    setMutatingTierId(tier.id);
+
+    try {
+      const response = await mediaService.updateMembershipTier(channelDetail.id, tier.id, {
+        isAcceptingNew: !tier.isAcceptingNew,
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.mess || "Unable to update tier status.");
+      }
+
+      const updatedTier = mapMembershipTier(response.data);
+      setTiers((currentTiers) => sortTiers(currentTiers.map((item) => item.id === updatedTier.id ? updatedTier : item)));
+      showActionMessage(updatedTier.isAcceptingNew ? "Tier is accepting new members again." : "Tier is paused for new members.");
+      void fetchMembershipData({ silent: true });
+    } catch (err) {
+      showActionMessage(getErrorMessage(err, "Unable to update tier status."));
+    } finally {
+      setMutatingTierId(null);
+    }
+  }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
+
+  const handleDisableTier = useCallback(async (tier: StudioTier) => {
+    if (!channelDetail?.id) {
+      showActionMessage("Creator channel was not found for disabling this tier.");
+      return;
+    }
+
+    const confirmed = window.confirm(`Disable tier ${tier.name}? New members will not be able to join this tier.`);
+    if (!confirmed) {
+      return;
+    }
+
+    setMutatingTierId(tier.id);
+
+    try {
+      const response = await mediaService.disableMembershipTier(channelDetail.id, tier.id);
+
+      if (!response.success || !response.data) {
+        throw new Error(response.mess || "Unable to disable tier.");
+      }
+
+      const updatedTier = mapMembershipTier(response.data);
+      setTiers((currentTiers) => sortTiers(currentTiers.map((item) => item.id === updatedTier.id ? updatedTier : item)));
+      showActionMessage("Tier has been disabled for new members.");
+      void fetchMembershipData({ silent: true });
+    } catch (err) {
+      showActionMessage(getErrorMessage(err, "Unable to disable tier."));
+    } finally {
+      setMutatingTierId(null);
+    }
+  }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
+
+  const canCreateTier = Boolean(
+    !channelDetail?.isMembershipClosedByAdmin &&
+    availableLevels.length > 0 &&
+    (channelDetail?.membershipEligibility?.isEligible || tiers.length > 0)
+  );
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-12 p-8">
+    <div className="mx-auto w-full max-w-7xl space-y-8 p-8">
       <header>
         <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Memberships</p>
         <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tight text-foreground">Community Memberships</h1>
-        <p className="max-w-2xl font-body text-sm text-muted-foreground">Offer exclusive perks, member-only releases, and loyalty badges to your most dedicated viewers.</p>
+        <p className="max-w-2xl font-body text-sm text-muted-foreground">Offer exclusive member-only releases and Aura Coin tiers to your most dedicated viewers.</p>
       </header>
 
-      {isLoading ? (
-        <div className="text-center text-muted-foreground py-12">Loading membership details...</div>
-      ) : !isUnlocked ? (
-        <EligibilityChecker onUnlock={() => setIsUnlocked(true)} eligibility={channelDetail?.membershipEligibility} />
-      ) : (
-        <MembershipManagement tiers={tiers} onEditTier={setEditingTier} />
-      )}
+      {actionMessage ? (
+        <div className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-3 font-body text-sm text-foreground" role="status">
+          {actionMessage}
+        </div>
+      ) : null}
 
-      {editingTier && (
-        <TierEditorOverlay 
-          tier={editingTier} 
-          onClose={() => setEditingTier(null)} 
-          onSave={handleSaveTier}
+      {error ? (
+        <section className="rounded-lg border border-destructive/30 bg-destructive/10 p-8">
+          <p className="font-headline text-xl font-bold text-foreground">Unable to load membership data</p>
+          <p className="mt-2 font-body text-sm text-muted-foreground">{error}</p>
+          <button
+            type="button"
+            onClick={() => void fetchMembershipData()}
+            className="mt-6 rounded-sm bg-primary px-5 py-3 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Try again
+          </button>
+        </section>
+      ) : isLoading ? (
+        <div className="grid gap-6 md:grid-cols-3" aria-label="Loading membership details">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="h-56 rounded-lg border border-border/30 bg-card">
+              <div className="h-full animate-pulse bg-muted/20" />
+            </div>
+          ))}
+        </div>
+      ) : tiers.length === 0 ? (
+        <EligibilityChecker
+          eligibility={channelDetail?.membershipEligibility}
+          isAdminClosed={Boolean(channelDetail?.isMembershipClosedByAdmin)}
+          reviewStatus={channelDetail?.membershipReviewStatus ?? "not_requested"}
+          rejectionReason={channelDetail?.membershipRejectionReason ?? null}
+          onCreateFirstTier={openCreateTierEditor}
+        />
+      ) : (
+        <MembershipManagement
+          tiers={tiers}
+          canCreateTier={canCreateTier}
+          isAdminClosed={Boolean(channelDetail?.isMembershipClosedByAdmin)}
+          reviewStatus={channelDetail?.membershipReviewStatus ?? "not_requested"}
+          onCreateTier={openCreateTierEditor}
+          onEditTier={openEditTierEditor}
+          onToggleTierStatus={(tier) => void handleToggleTierStatus(tier)}
+          onDisableTier={(tier) => void handleDisableTier(tier)}
+          mutatingTierId={mutatingTierId}
         />
       )}
+
+      {editorState ? (
+        <TierEditorOverlay
+          key={editorState.mode === "edit" ? editorState.tier.id : `create-${editorState.level}`}
+          editorState={editorState}
+          availableLevels={availableLevels}
+          isSaving={isSavingTier}
+          error={editorError}
+          onClose={() => setEditorState(null)}
+          onSave={(payload) => void handleSaveTier(payload)}
+        />
+      ) : null}
     </div>
   );
 }

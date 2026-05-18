@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { api, fetchSSE } from "@/shared/api/client";
+import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
+import { api, fetchSSE, getHttpStatus, refreshAccessToken } from "@/shared/api/client";
 import { authService } from "../services/authService";
 import { useRouter } from "next/navigation";
 
@@ -36,7 +36,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return "/library";
   };
 
-  const fetchProfile = async () => {
+  const forceLogout = useCallback((reason = "account-disabled") => {
+    api.clearToken();
+    setUser(null);
+    router.push(`/login?reason=${encodeURIComponent(reason)}`);
+  }, [router]);
+
+  const fetchProfile = useCallback(async () => {
     try {
       const res = await authService.getProfile();
       if (res.success && res.data) {
@@ -48,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
     }
     return null;
-  };
+  }, []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -60,19 +66,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       try {
-        const sessionRes = await authService.getSessionProfile();
-        if (sessionRes.success && sessionRes.data) {
-          setUser(sessionRes.data);
-        }
+        const refreshedToken = await refreshAccessToken();
+        api.setToken(refreshedToken);
+        await fetchProfile();
       } catch {
+        api.clearToken();
         setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initAuth();
-  }, []);
+    void initAuth();
+  }, [fetchProfile]);
 
   const setAuthData = async (token: string, userData?: UserProfile) => {
     api.setToken(token);
@@ -110,18 +116,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        api.clearToken();
-        setUser(null);
-        router.push("/login?reason=account-disabled");
+        forceLogout("account-disabled");
       },
       undefined,
-      () => undefined,
+      (error) => {
+        const status = getHttpStatus(error);
+        if (status === 401 || status === 403) {
+          forceLogout(status === 403 ? "account-disabled" : "session-expired");
+        }
+      },
     );
 
     return () => {
       controller.abort();
     };
-  }, [router, user]);
+  }, [forceLogout, user]);
 
   return (
     <AuthContext.Provider

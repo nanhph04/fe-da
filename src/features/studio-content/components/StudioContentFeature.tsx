@@ -3,13 +3,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getReadyThumbnailUrl, mediaService, type ConfirmUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
+import { getReadyOwnerVideoThumbnailUrl, mediaService, type ConfirmUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
 
 const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
-const READY_STATUSES = new Set(["ready"]);
+const READY_STATUSES = new Set(["ready", "private"]);
 const REJECTED_STATUS = "rejected";
 const DRAFT_STATUS = "draft";
 const DEFAULT_CONFIRM_RESOLUTIONS: ConfirmUploadBody["resolutions"] = ["720p", "1080p"];
@@ -26,7 +26,7 @@ const CONTENT_FILTERS: ContentFilterConfig[] = [
   { label: "Videos", value: "all", statuses: [] },
   { label: "Drafts", value: "draft", statuses: ["draft"] },
   { label: "Processing", value: "processing", statuses: ["pending_moderation", "processing", "pending_manual_review"] },
-  { label: "Ready", value: "ready", statuses: ["ready"] },
+  { label: "Ready", value: "ready", statuses: ["ready", "private"] },
   { label: "Failed", value: "failed", statuses: ["failed", "rejected"] },
 ];
 
@@ -377,7 +377,7 @@ export function StudioContentFeature() {
             const visibility = normalizeVisibility(video.visibility);
             const visibilityLabel = toTitleCase(visibility);
             const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString() : "--";
-            const thumbUrl = getReadyThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus) || "/images/thumbnail.png";
+            const thumbUrl = getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) || "/images/thumbnail.png";
             const price = video.price ?? 0;
             const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
@@ -400,10 +400,16 @@ export function StudioContentFeature() {
                     className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
                     aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
                   >
-                    <span
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={thumbUrl}
+                      alt=""
                       aria-hidden="true"
-                      className={`block h-full w-full bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03] ${isReady ? "" : "opacity-70"}`}
-                      style={{ backgroundImage: `url(${thumbUrl})` }}
+                      className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] ${isReady ? "" : "opacity-70"}`}
+                      onError={event => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = "/images/thumbnail.png";
+                      }}
                     />
                     <span className="absolute inset-0 flex items-center justify-center bg-background/0 text-foreground opacity-0 transition-opacity duration-300 group-hover:bg-background/50 group-hover:opacity-100">
                       <span className="material-symbols-outlined text-3xl" aria-hidden="true">{isReady ? "play_circle" : "visibility"}</span>

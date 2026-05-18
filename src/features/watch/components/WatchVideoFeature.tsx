@@ -49,24 +49,26 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
 
   try {
     const infoRes = await getVideoMetadataCached(videoId);
-    if (infoRes.success && infoRes.data) {
-      title = infoRes.data.title;
-      poster = getReadyPublicThumbnailUrl(infoRes.data.thumbnailUrl, infoRes.data.thumbnailStatus) || undefined;
-      viewCount = infoRes.data.viewCount;
-      publishedAt = infoRes.data.publishedAt;
-      description = infoRes.data.description;
-      category = infoRes.data.category;
-      tags = infoRes.data.tags;
-      channelId = infoRes.data.channelId;
-      channelName = infoRes.data.channelName;
-      avatarUrlChannel = infoRes.data.avatarUrlChannel;
-      priceCoin = resolveVideoPriceCoin(infoRes.data);
-      requiredTierLevel = resolveRequiredTierLevel(infoRes.data);
-      membershipTiers = infoRes.data.membershipTiers ?? [];
+    if (!infoRes.success || !infoRes.data) {
+      notFound();
     }
+
+    title = infoRes.data.title;
+    poster = getReadyPublicThumbnailUrl(infoRes.data.thumbnailUrl, infoRes.data.thumbnailStatus, infoRes.data.id) || undefined;
+    viewCount = infoRes.data.viewCount;
+    publishedAt = infoRes.data.publishedAt;
+    description = infoRes.data.description;
+    category = infoRes.data.category;
+    tags = infoRes.data.tags;
+    channelId = infoRes.data.channelId;
+    channelName = infoRes.data.channelName;
+    avatarUrlChannel = infoRes.data.avatarUrlChannel;
+    priceCoin = resolveVideoPriceCoin(infoRes.data);
+    requiredTierLevel = resolveRequiredTierLevel(infoRes.data);
+    membershipTiers = infoRes.data.membershipTiers ?? [];
   } catch (err: unknown) {
     const apiError = err as PublicApiError;
-    if (apiError.code === 404) {
+    if (apiError.code === 403 || apiError.code === 404) {
       notFound();
     }
 

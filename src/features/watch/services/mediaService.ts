@@ -11,8 +11,46 @@ export type ThumbnailStatus = "pending" | "processing" | "ready" | "failed" | st
 export type MembershipRenewalStatus = "idle" | "pending" | "retrying" | "disabled";
 export type MembershipRecordStatus = "active" | "cancelled";
 
+const READY_THUMBNAIL_STATUS = "ready";
+
+function encodeVideoPathId(videoId: string) {
+  return encodeURIComponent(videoId);
+}
+
+export function buildPublicVideoThumbnailUrl(videoId: string) {
+  return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
+}
+
+export function buildOwnerVideoThumbnailUrl(videoId: string) {
+  return `/api/media/videos/me/${encodeVideoPathId(videoId)}/thumbnail`;
+}
+
 export function getReadyThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
-  return thumbnailUrl && thumbnailStatus === "ready" ? thumbnailUrl : null;
+  return thumbnailUrl && thumbnailStatus === READY_THUMBNAIL_STATUS ? thumbnailUrl : null;
+}
+
+export function getReadyPublicVideoThumbnailUrl(
+  videoId?: string | null,
+  thumbnailUrl?: string | null,
+  thumbnailStatus?: string | null
+) {
+  if (thumbnailStatus !== READY_THUMBNAIL_STATUS) {
+    return null;
+  }
+
+  return videoId ? buildPublicVideoThumbnailUrl(videoId) : thumbnailUrl || null;
+}
+
+export function getReadyOwnerVideoThumbnailUrl(
+  videoId?: string | null,
+  thumbnailUrl?: string | null,
+  thumbnailStatus?: string | null
+) {
+  if (thumbnailStatus !== READY_THUMBNAIL_STATUS) {
+    return null;
+  }
+
+  return videoId ? buildOwnerVideoThumbnailUrl(videoId) : thumbnailUrl || null;
 }
 
 export interface ChannelResponse {
@@ -181,13 +219,15 @@ export interface VideoMetadataResponse {
   thumbnailUrl: string | null;
   thumbnailSource: ThumbnailSource;
   thumbnailStatus: ThumbnailStatus;
+  thumbnailObjectKey?: string | null;
+  thumbnailBucket?: string | null;
   viewCount: number;
   status: string;
   visibility: string;
-  price?: number | null;
+  price: number;
   priceCoin?: number | null;
   coinAmount?: number | null;
-  requiredTierLevel?: number | null;
+  requiredTierLevel: number | null;
   requiredTier?: number | null;
   minTierLevel?: number | null;
   requiredMembershipLevel?: number | null;
@@ -229,6 +269,8 @@ export interface DiscoveryVideoResponse {
   thumbnailUrl: string | null;
   thumbnailSource: ThumbnailSource;
   thumbnailStatus: ThumbnailStatus;
+  thumbnailObjectKey?: string | null;
+  thumbnailBucket?: string | null;
   durationSeconds: number | null;
   resolutions: string[];
   errorMessage: string | null;
@@ -468,6 +510,13 @@ export const mediaService = {
     return api.patch<ChannelResponse>(
       `/api/media/channels/${id}/admin/membership`,
       { action },
+      { requireAuth: true }
+    );
+  },
+  requestChannelMembershipReview: async (id: string) => {
+    return api.post<ChannelResponse>(
+      `/api/media/channels/${id}/membership-review/request`,
+      undefined,
       { requireAuth: true }
     );
   },

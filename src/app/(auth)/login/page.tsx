@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const redirectParam = resolvedSearchParams?.redirect;
+  const reasonParam = resolvedSearchParams?.reason;
   const redirectTo = Array.isArray(redirectParam) ? redirectParam[0] : redirectParam;
+  const reason = Array.isArray(reasonParam) ? reasonParam[0] : reasonParam;
 
-  return <LoginForm redirectTo={redirectTo} />;
+  return <LoginForm redirectTo={redirectTo} reason={reason} />;
 }
