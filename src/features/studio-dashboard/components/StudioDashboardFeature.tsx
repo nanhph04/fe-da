@@ -6,14 +6,12 @@ import { EarningsService } from "@/features/studio-wallet/services/earningsServi
 import { StudioWalletService } from "@/features/studio-wallet/services/studioWalletService";
 import { getErrorMessage } from "@/shared/api/client";
 import { StatCards } from "./StatCards";
-import { EarningsGraph } from "./EarningsGraph";
 import { RecentActivities } from "./RecentActivities";
 import { TopVideos } from "./TopVideos";
 import type { StudioDashboardData, StudioDashboardRange } from "../types/studio-dashboard.types";
 import {
   buildActivities,
   buildDashboardStats,
-  buildEarningsTrend,
   buildTopVideos,
   getEarningsPeriod,
 } from "../utils/studio-dashboard.utils";
@@ -106,10 +104,6 @@ export function StudioDashboardFeature() {
     [dashboardData]
   );
   const activities = useMemo(() => buildActivities(dashboardData.videos), [dashboardData.videos]);
-  const earningsTrend = useMemo(
-    () => buildEarningsTrend(dashboardData.monthlyEarnings),
-    [dashboardData.monthlyEarnings]
-  );
 
   return (
     <section className="mx-auto w-full max-w-7xl space-y-12 p-8">
@@ -155,16 +149,10 @@ export function StudioDashboardFeature() {
       <StatCards cards={stats} isLoading={isLoading} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="flex flex-col lg:col-span-2">
-          <EarningsGraph points={earningsTrend} isLoading={isLoading} dateRange={dateRange} />
-        </div>
-        <RecentActivities activities={activities} isLoading={isLoading} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-8 pb-12 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <TopVideos videos={topVideos} isLoading={isLoading} />
         </div>
+        <RecentActivities activities={activities} isLoading={isLoading} />
       </div>
     </section>
   );

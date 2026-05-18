@@ -1,4 +1,5 @@
 "use client";
+import { CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -119,7 +120,7 @@ export function StudioContentFeature() {
   const [confirmingVideoId, setConfirmingVideoId] = useState<string | null>(null);
   const [reuploadingVideoId, setReuploadingVideoId] = useState<string | null>(null);
   const [reuploadProgress, setReuploadProgress] = useState(0);
-  const [expandedRejectReasonVideoId, setExpandedRejectReasonVideoId] = useState<string | null>(null);
+  const [expandedNoticeVideoId, setExpandedNoticeVideoId] = useState<string | null>(null);
   const draftFileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter) => {
@@ -383,8 +384,12 @@ export function StudioContentFeature() {
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
             const isRejected = status === REJECTED_STATUS;
             const isDraft = status === DRAFT_STATUS;
+            const isFailed = FAILED_STATUSES.has(status);
             const isReady = READY_STATUSES.has(status);
-            const isRejectReasonExpanded = expandedRejectReasonVideoId === video.id;
+            const isNoticeExpanded = expandedNoticeVideoId === video.id;
+            const hasInlineNotice = isDraft || isFailed;
+            const noticeLabel = isDraft ? "lưu ý draft" : isRejected ? "lý do reject" : "lỗi xử lý";
+            const noticePanelId = `content-notice-${video.id}`;
             const previewHref = `/studio/content/${video.id}`;
 
             return (
@@ -427,32 +432,52 @@ export function StudioContentFeature() {
                         {status.toUpperCase()}
                       </span>
                       <span className="font-label text-xs text-muted-foreground">• {formattedDate}</span>
+                      {hasInlineNotice ? (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedNoticeVideoId(current => current === video.id ? null : video.id)}
+                          className={`inline-flex h-6 w-6 items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring/70 ${
+                            isFailed
+                              ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                              : "bg-secondary/10 text-secondary hover:bg-secondary/20"
+                          }`}
+                          title={`Xem ${noticeLabel}`}
+                          aria-label={`${isNoticeExpanded ? "Ẩn" : "Xem"} ${noticeLabel} cho ${video.title}`}
+                          aria-controls={noticePanelId}
+                          aria-expanded={isNoticeExpanded}
+                        >
+                          <CircleAlert className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden="true" />
+                        </button>
+                      ) : null}
                     </div>
-                    {isDraft ? (
-                      <div className="mt-2 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 px-3 py-2 text-xs text-secondary">
-                        <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined mt-0.5 text-[16px]" aria-hidden="true">check_circle</span>
-                          <p className="text-muted-foreground">
-                            Video sẽ bị xoá sau 24h nếu bạn không confirm-upload. Bấm upload để thay file draft, sau đó bấm dấu tích để confirm-upload khi sẵn sàng xử lý.
-                          </p>
-                        </div>
-                        {reuploadingVideoId === video.id ? (
-                          <div className="mt-3 space-y-1">
-                            <div className="h-1.5 overflow-hidden rounded-full bg-background/70">
-                              <div
-                                className="h-full rounded-full bg-secondary transition-[width] duration-300"
-                                style={{ width: `${reuploadProgress}%` }}
-                              />
-                            </div>
-                            <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
-                              Uploading {reuploadProgress}%
-                            </p>
-                          </div>
-                        ) : null}
+                    {isDraft && isNoticeExpanded ? (
+                      <div
+                        id={noticePanelId}
+                        role="note"
+                        className="mt-2 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 px-3 py-2 text-xs text-muted-foreground"
+                      >
+                        Video sẽ bị xoá sau 24h nếu bạn không confirm-upload. Bấm upload để thay file draft, sau đó bấm dấu tích để confirm-upload khi sẵn sàng xử lý.
                       </div>
                     ) : null}
-                    {FAILED_STATUSES.has(status) && (!isRejected || isRejectReasonExpanded) ? (
-                      <div className="mt-2 max-w-sm rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                    {isDraft && reuploadingVideoId === video.id ? (
+                      <div className="mt-3 max-w-sm space-y-1">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-background/70">
+                          <div
+                            className="h-full rounded-full bg-secondary transition-[width] duration-300"
+                            style={{ width: `${reuploadProgress}%` }}
+                          />
+                        </div>
+                        <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
+                          Uploading {reuploadProgress}%
+                        </p>
+                      </div>
+                    ) : null}
+                    {isFailed && isNoticeExpanded ? (
+                      <div
+                        id={noticePanelId}
+                        role="alert"
+                        className="mt-2 max-w-sm rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+                      >
                         <span className="font-bold uppercase tracking-widest">
                           {isRejected ? "Reject reason" : "Processing failed"}
                         </span>
@@ -555,20 +580,7 @@ export function StudioContentFeature() {
                       </Button>
                     </>
                   ) : null}
-                  {isRejected ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => setExpandedRejectReasonVideoId(current => current === video.id ? null : video.id)}
-                      className="h-8 w-8 rounded-full p-0 text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
-                      aria-label={`${isRejectReasonExpanded ? "Hide" : "View"} reject reason for ${video.title}`}
-                      aria-expanded={isRejectReasonExpanded}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {isRejectReasonExpanded ? "error" : "report"}
-                      </span>
-                    </Button>
-                  ) : (
+                  {!isRejected ? (
                     <>
                       <Button
                         type="button"
@@ -591,7 +603,7 @@ export function StudioContentFeature() {
                       </Button>
                       */}
                     </>
-                  )}
+                  ) : null}
                   {!isDraft ? (
                     <Button
                       type="button"
