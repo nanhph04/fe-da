@@ -9,7 +9,6 @@ import { StatCards } from "./StatCards";
 import { EarningsGraph } from "./EarningsGraph";
 import { RecentActivities } from "./RecentActivities";
 import { TopVideos } from "./TopVideos";
-import { LatestComments } from "./LatestComments";
 import type { StudioDashboardData, StudioDashboardRange } from "../types/studio-dashboard.types";
 import {
   buildActivities,
@@ -128,9 +127,8 @@ export function StudioDashboardFeature() {
                 key={range}
                 type="button"
                 onClick={() => setDateRange(range)}
-                className={`rounded px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest transition-all ${
-                  dateRange === range ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`rounded px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest transition-all ${dateRange === range ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 Last {range === "7D" ? "7" : "30"} Days
               </button>
@@ -167,7 +165,6 @@ export function StudioDashboardFeature() {
         <div className="lg:col-span-2">
           <TopVideos videos={topVideos} isLoading={isLoading} />
         </div>
-        <LatestComments />
       </div>
     </section>
   );

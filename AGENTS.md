@@ -391,85 +391,7 @@ Nếu alias thực tế khác, phải theo cấu trúc project đang có.
 
 ---
 
-## 10. Convert HTML sang Next.js
-
-Khi convert HTML tĩnh sang Next.js:
-
-### Bắt buộc làm trước
-
-AI phải phân tích HTML và đề xuất:
-
-1. Feature name.
-2. Route.
-3. Component tree.
-4. File tree.
-5. Component nào là Server Component.
-6. Component nào là Client Component.
-7. Dữ liệu nào cần tách sang constants.
-8. Asset nào cần bổ sung.
-
-### Quy tắc convert
-
-- Không copy toàn bộ HTML vào một component lớn.
-- Không nhét toàn bộ UI vào `page.tsx`.
-- Section lớn phải tách component riêng.
-- Card/list/table/menu lặp lại phải map từ array.
-- Inline style chuyển sang TailwindCSS nếu có thể.
-- Style phức tạp có thể chuyển sang CSS module nếu Tailwind không phù hợp.
-- Script DOM thuần phải chuyển sang React state/ref/effect đúng cách.
-- Không dùng `document.querySelector` nếu có thể thay bằng state/ref.
-- Không tự thêm API call nếu HTML gốc chỉ là UI tĩnh.
-- Giữ visual giống HTML gốc nhất có thể.
-- Không đổi text, spacing, màu sắc, layout nếu không có lý do.
-- Nếu HTML dùng màu tím/violet, phải chuyển sang tone hợp rule trừ khi người dùng yêu cầu giữ nguyên.
-- Nếu thiếu ảnh/icon/font, ghi chú rõ cần đặt asset ở đâu.
-
-### Cấu trúc convert gợi ý
-
-```txt
-src/
-  app/
-    <route>/
-      page.tsx
-
-  features/
-    <feature-name>/
-      components/
-        <FeaturePage>.tsx
-        <SectionA>.tsx
-        <SectionB>.tsx
-      constants/
-        <feature>.mock.ts
-      types/
-        <feature>.types.ts
-      index.ts
-```
-
-Ví dụ:
-
-```txt
-src/
-  app/
-    wallet/
-      page.tsx
-
-  features/
-    wallet/
-      components/
-        WalletPage.tsx
-        WalletBalanceCard.tsx
-        DepositPackages.tsx
-        TransactionHistory.tsx
-      constants/
-        wallet.mock.ts
-      types/
-        wallet.types.ts
-      index.ts
-```
-
----
-
-## 11. TypeScript Rules
+## 10. TypeScript Rules
 
 - Không dùng `any` nếu có thể tránh.
 - Ưu tiên type/interface rõ ràng cho props.
@@ -492,7 +414,7 @@ export type DepositPackage = {
 
 ---
 
-## 12. Component Rules
+## 11. Component Rules
 
 ### Component nên
 
@@ -532,7 +454,7 @@ export function PackageCard({ title, price, bonus }: PackageCardProps) {
 
 ---
 
-## 13. Naming Conventions
+## 12. Naming Conventions
 
 ### File/folder
 
@@ -564,7 +486,7 @@ features/
 
 ---
 
-## 14. Error, Loading, Empty State
+## 13. Error, Loading, Empty State
 
 > 📖 **Chi tiết visual specs:** `DESIGN.md` — Section 10.
 
@@ -579,7 +501,7 @@ Không bao giờ render màn hình trắng khi lỗi.
 
 ---
 
-## 15. Accessibility
+## 14. Accessibility
 
 > 📖 **Contrast ratios & chi tiết:** `DESIGN.md` — Section 11.
 
@@ -594,7 +516,7 @@ Không bao giờ render màn hình trắng khi lỗi.
 
 ---
 
-## 16. Image & Asset Rules
+## 15. Image & Asset Rules
 
 - Dùng `next/image` khi phù hợp.
 - Asset nội bộ đặt trong `public/` hoặc theo convention project.
@@ -605,7 +527,7 @@ Không bao giờ render màn hình trắng khi lỗi.
 
 ---
 
-## 17. Security Rules
+## 16. Security Rules
 
 - Không expose token nhạy cảm.
 - Không lưu refresh token vào `localStorage` hoặc `sessionStorage`.
@@ -618,7 +540,7 @@ Không bao giờ render màn hình trắng khi lỗi.
 
 ---
 
-## 18. API Contract Sync
+## 17. API Contract Sync
 
 Khi UI cần field không có trong API contract, AI phải báo rõ.
 
@@ -637,7 +559,7 @@ Không tự đổi response shape nếu chưa được xác nhận.
 
 ---
 
-## 19. Socratic Gate
+## 18. Socratic Gate
 
 Trước khi code tính năng mới hoặc refactor lớn, AI phải tạo plan trước.
 
@@ -818,246 +740,6 @@ Khi sửa code:
 - Không xoá code cũ nếu chưa chắc không dùng.
 - Với refactor lớn, nên giữ compatibility tạm thời nếu có thể.
 - Nếu đổi public API của feature, phải ghi rõ ảnh hưởng.
-
----
-
-## 26. Interface Groups & HTML Mockup Reference
-
-Dự án có **37 giao diện mẫu** (HTML + ảnh) trong thư mục `stitch_media_commerce_platform/`. Mỗi thư mục chứa:
-
-- `code.html` — Giao diện mẫu dạng HTML tĩnh, là **bản thiết kế chuẩn**.
-- `screen.png` — Ảnh chụp giao diện để tra cứu nhanh.
-
-Khi code mới hoặc refactor giao diện, AI **phải** tham chiếu đến giao diện mẫu tương ứng.
-
-### 26.1 Bốn nhóm giao diện
-
-| Nhóm | Mô tả | Đối tượng | Prefix route |
-|------|-------|-----------|-------------|
-| **Public / Auth** | Trang công khai, đăng nhập, đăng ký | Guest / chưa đăng nhập | `/(auth)`, `/(main)/landing` |
-| **Viewer (User)** | Giao diện người xem — thư viện, ví, xem video, profile | Viewer đã đăng nhập | `/(main)/*` |
-| **Creator (Studio)** | Giao diện nhà sáng tạo — dashboard, upload, quản lý nội dung, ví | Creator | `/studio/*` |
-| **Admin Console** | Giao diện quản trị — duyệt nội dung, quản lý user, cài đặt hệ thống | Admin | `/admin/*` |
-
-### 26.2 Bảng tham chiếu giao diện mẫu
-
-#### Nhóm 1: Public / Authentication
-
-| Thư mục mockup | Route | Feature | Trạng thái |
-|----------------|-------|---------|-----------|
-| `home_velvet_gallery_landing_page` | `/landing` | `home` | ✅ Đã đối chiếu |
-| `sign_in_velvet_gallery` | `/(auth)/login` | `auth` | ✅ Đã đối chiếu |
-| `sign_up_velvet_gallery` | `/(auth)/register` | `auth` | ✅ Đã đối chiếu |
-| `forgot_password_velvet_gallery` | `/(auth)/forgot-password` | `auth` | ✅ Đã đối chiếu |
-| `otp_verification_velvet_gallery` | `/(auth)/verify-otp` | `auth` | ✅ Đã đối chiếu |
-| `change_password_velvet_gallery` | `/(auth)/change-password` | `auth` | ✅ Đã đối chiếu |
-
-#### Nhóm 2: Viewer / User
-
-| Thư mục mockup | Route | Feature | Trạng thái |
-|----------------|-------|---------|-----------|
-| `complete_your_profile_velvet_gallery` | `/onboarding/profile` | `onboarding` | ✅ Đã đối chiếu |
-| `viewer_dashboard_personal_library` | `/(main)/library` | `library` | ✅ Đã đối chiếu |
-| `viewer_profile_velvet_gallery` | `/(main)/profile` | `profile` | ✅ Đã đối chiếu |
-| `video_library_discovery_levels` | `/(main)/category/[slug]` | `discovery` | ✅ Đã đối chiếu |
-| `watch_video_synchronized` | `/(main)/watch/[videoId]` | `watch` | ✅ Đã đối chiếu |
-| `top_up_coins_select_package` | `/(main)/wallet` | `wallet` | ✅ Đã đối chiếu |
-| `top_up_coins_payment_gateway` | `/(main)/wallet/checkout` | `wallet` | ✅ Đã đối chiếu |
-| `top_up_success_velvet_gallery` | `/(main)/wallet/success` | `wallet` | ✅ Đã đối chiếu |
-| `join_membership_cinemalabs` | `/(main)/creator/[id]/join` | `membership` | ✅ Đã đối chiếu |
-
-#### Nhóm 3: Creator / Studio
-
-| Thư mục mockup | Route | Feature | Trạng thái |
-|----------------|-------|---------|-----------|
-| `creator_dashboard_velvet_gallery` | `/studio` | `studio-dashboard` | ✅ Đã code |
-| `creator_studio_content_library` | `/studio/content` | `studio-content` | ✅ Đã code |
-| `step_1_details_access_level` | `/studio/upload` (step 1) | `studio-upload` | ✅ Đã code |
-| `step_2_pricing_monetization` | `/studio/upload` (step 2) | `studio-upload` | ✅ Đã code |
-| `step_3_visibility_review_final_sync` | `/studio/upload` (step 3) | `studio-upload` | ✅ Đã code |
-| `creator_wallet_payouts_synchronized_ac_logic` | `/studio/wallet` | `studio-wallet` | ✅ Đã code |
-| `withdraw_funds_creator_studio` | `/studio/wallet/withdraw` | `studio-wallet` | ✅ Đã code |
-| `membership_eligibility_creator_studio` | `/studio/memberships` | `studio-membership` | ✅ Đã code |
-| `membership_management_creator_studio` | `/studio/memberships` | `studio-membership` | ✅ Đã code |
-| `membership_tier_editor_velvet_gallery` | `/studio/memberships/edit` | `studio-membership` | ✅ Đã code |
-
-#### Nhóm 4: Admin Console
-
-| Thư mục mockup | Route | Feature | Trạng thái |
-|----------------|-------|---------|-----------|
-| `content_review_admin_dashboard` | `/admin/(dashboard)/content/review` | `admin-content` | ✅ Đã code |
-| `video_detail_moderation_admin` | `/admin/(dashboard)/content/[id]` | `admin-content` | ✅ Đã code |
-| `content_library_admin_console` | `/admin/(dashboard)/content` | `admin-content` | ✅ Đã code |
-| `user_management_admin_console` | `/admin/(dashboard)/users` | `admin-users` | ✅ Đã code |
-| `channel_management_admin_console` | `/admin/(dashboard)/channels` | `admin-users` | ✅ Đã code |
-| `verification_queue_admin_console` | `/admin/(dashboard)/verifications` | `admin-verification` | ✅ Đã code |
-| `verification_detail_admin_console` | `/admin/(dashboard)/verifications/[id]` | `admin-verification` | ✅ Đã code |
-| `category_management_admin_console` | `/admin/(dashboard)/categories` | `admin-content` | ✅ Đã code |
-| `payout_management_admin_console` | `/admin/(dashboard)/payouts` | `admin-payouts` | ✅ Đã code |
-| `payout_request_detail_admin` | `/admin/(dashboard)/payouts/[id]` | `admin-payouts` | ✅ Đã code |
-| `admin_system_settings` | `/admin/(dashboard)/settings` | `admin-settings` | ✅ Đã code |
-| `admin_system_settings_content_policy_editor` | `/admin/(dashboard)/settings/policies` | `admin-settings` | ✅ Đã code |
-
-> **Ký hiệu trạng thái:**
-> - ✅ = Đã code xong trong Next.js
-> - ⚠️ = Chưa code hoặc chưa khớp với giao diện mẫu — cần kiểm tra khi refactor
-
-### 26.3 Quy tắc đồng bộ visual theo nhóm
-
-Tất cả 4 nhóm dùng chung **Design System** (`DESIGN.md`): cùng bảng màu, font, spacing, animation rules. Điểm khác nhau nằm ở **layout, mật độ thông tin, và sub-branding**.
-
-#### Nhóm Public / Auth
-
-```txt
-Layout:       1 cột, full-width, không sidebar
-Navbar:       Nhẹ, blur glass, chứa CTA (Sign In / Sign Up)
-Đặc trưng:    Hero section lớn, cinematic background image
-              Gradient overlay mạnh (from surface/20 → surface)
-              CTA nổi bật gradient primary → primary-container
-              Footer đầy đủ (links, legal)
-Density:      Thoáng, rất nhiều khoảng trắng (breathing room)
-Sub-brand:    "Velvet Gallery" — logo đỏ, uppercase, tracking-tighter
-Tham chiếu:   home_velvet_gallery_landing_page/screen.png
-```
-
-#### Nhóm Viewer / User
-
-```txt
-Layout:       Top navbar fixed + optional sidebar (viewer dashboard)
-              Hoặc 1 cột cho watch page
-Navbar:       Blur glass, chứa: Search, Aura Coins balance, Avatar, Notifications
-Sidebar:      Chỉ ở viewer dashboard: Library, Purchased, Subscriptions, Wallet
-              256px width, nền zinc-950, có "Switch to Creator"
-Đặc trưng:    Card-based grids cho video thumbnails (16:9)
-              Progress bar trên card video đang xem
-              Aura Coins balance luôn visible
-              Immersive: ảnh lớn, hover scale nhẹ (1.05-1.10)
-Density:      Thoáng, ưu tiên trải nghiệm xem
-Sub-brand:    "Velvet Gallery" — logo đỏ trên navbar
-Tham chiếu:   viewer_dashboard_personal_library/screen.png
-```
-
-#### Nhóm Creator / Studio
-
-```txt
-Layout:       Sidebar fixed 256px + Top header sticky
-              Main content có max-width 7xl
-Sidebar:      Nền neutral-950, shadow đậm
-              Logo "Velvet Gallery" + sub-text "Creator Studio"
-              Nav items: Dashboard, Analytics, Content Library, Monetization, Settings
-              Upload CTA nổi bật (button primary) ở dưới sidebar
-              "Switch to Viewer" + Help + Sign Out ở footer sidebar
-Top header:   Blur glass, chứa: sub-nav links, search, notifications, wallet icon, avatar
-Đặc trưng:    Data-dense: stat cards (grid 4 cột), charts SVG, tables
-              Stat cards: rounded-sm, bg surface-container, icon lớn mờ góc phải
-              Active nav: text primary + border-right primary + bg tối hơn
-              Aura Coins card có border-left secondary nhấn mạnh
-Density:      Compact hơn Viewer, nhiều thông tin trên 1 màn hình
-Sub-brand:    "Creator Studio" — sub-text dưới logo chính
-Tham chiếu:   creator_dashboard_velvet_gallery/screen.png
-```
-
-#### Nhóm Admin Console
-
-```txt
-Layout:       Sidebar fixed 256px + Top header sticky
-              Main content padding lớn hơn (px-16)
-Sidebar:      Nền zinc-950/zinc-900, shadow cạnh phải
-              Title "System Admin" hoặc "Admin Console" (không phải "Velvet Gallery")
-              Nav items: Dashboard, Content Review, Users, Finance, Settings, Logs
-              "Deploy Updates" hoặc "View Live Platform" CTA ở footer sidebar
-Top header:   Blur glass, full search bar, admin profile + role hiển thị
-Đặc trưng:    Data-centric: tables với pagination, filter/sort controls
-              Summary cards: rounded-lg, số liệu lớn (text-5xl), icon mờ góc phải
-              Review panel: side panel fixed bên phải cho preview + approve/reject
-              Badge trạng thái: Level 1/2/3, FLAGGED, Approved
-              Rejection presets (checkboxes) trong review panel
-Density:      Đậm đặc nhất — bảng dữ liệu, nhiều actions, pagination
-Sub-brand:    "System Admin" / "Admin Console" — tone nghiêm túc
-Tham chiếu:   content_review_admin_dashboard/screen.png
-              admin_system_settings/screen.png
-```
-
-### 26.4 Mockup Lookup Protocol
-
-Khi được yêu cầu **code mới** hoặc **refactor** một giao diện, AI **bắt buộc** phải:
-
-1. **Xác định nhóm**: Giao diện thuộc Public, Viewer, Creator, hay Admin?
-2. **Tìm mockup tương ứng**: Tra bảng Section 26.2 → mở file tại:
-   ```
-   stitch_media_commerce_platform/<tên_thư_mục>/code.html
-   stitch_media_commerce_platform/<tên_thư_mục>/screen.png
-   ```
-3. **Đọc code.html**: Phân tích layout, cấu trúc DOM, class Tailwind, font, màu sắc.
-4. **Áp dụng visual rules**: Tuân thủ quy tắc của nhóm tương ứng (Section 26.3).
-5. **So sánh kết quả**: Code Next.js phải **giống giao diện mẫu nhất có thể** — không tự sáng tạo thêm layout, màu sắc, hoặc cấu trúc khác nếu không được yêu cầu.
-
-#### Ưu tiên tham chiếu
-
-```txt
-Giao diện mẫu (code.html + screen.png)  >  Sáng tạo mới
-Quy tắc nhóm (Section 26.3)             >  Quy tắc chung
-DESIGN.md                                >  Style riêng trong mockup HTML
-```
-
-> Nếu giao diện mẫu HTML có style khác với `DESIGN.md` (ví dụ mockup dùng `rounded-xl` nhưng DESIGN.md nói `rounded-lg`), **ưu tiên DESIGN.md** vì đó là Single Source of Truth cho design tokens. Tuy nhiên **layout và cấu trúc** phải theo mockup.
-
-#### Khi không có mockup
-
-Nếu giao diện cần code **không có mockup tương ứng**:
-1. Xác định nhóm giao diện.
-2. Tham khảo mockup **cùng nhóm** gần nhất về chức năng.
-3. Áp dụng visual rules của nhóm.
-4. Ghi rõ trong output: *"Không có mockup tham chiếu trực tiếp, tham khảo [tên_mockup] cùng nhóm."*
-
-### 26.5 Cập nhật trạng thái
-
-Khi hoàn thành code một giao diện:
-- Cập nhật trạng thái trong bảng Section 26.2 từ ⚠️ sang ✅.
-- Ghi chú nếu có khác biệt đáng kể so với mockup (và lý do).
-
----
-
-# Prompt mẫu: Convert HTML sang Next.js
-
-Dùng prompt này khi muốn AI convert file HTML:
-
-```txt
-Acting as: Senior Next.js Frontend Architect.
-
-Đọc kỹ frontend rules của project trước khi làm.
-
-Tôi có một file HTML giao diện tĩnh. Hãy convert sang Next.js App Router + TypeScript + TailwindCSS + Shadcn UI theo feature-based architecture.
-
-Yêu cầu:
-- Tuân thủ tuyệt đối frontend rules.
-- Không dùng Axios.
-- SSR-first.
-- Không lạm dụng "use client".
-- Không dùng màu tím/violet làm màu chủ đạo.
-- Không gom toàn bộ UI vào page.tsx.
-- Không tạo global components nếu không thật sự shared.
-- Giữ giao diện giống HTML gốc nhất có thể.
-
-Feature name: <điền tên feature>
-
-Route mong muốn:
-src/app/<route>/page.tsx
-
-Trước tiên hãy:
-1. Phân tích HTML.
-2. Đề xuất file tree.
-3. Chỉ rõ component nào là Server Component.
-4. Chỉ rõ component nào là Client Component.
-5. Chỉ rõ data nào nên tách constants.
-6. Chỉ rõ asset nào cần bổ sung.
-7. Sau khi có plan, generate code từng file.
-
-HTML:
-```html
-<!-- Dán HTML vào đây -->
-```
-```
 
 ---
 

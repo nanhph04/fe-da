@@ -119,6 +119,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 ### 4.3 GET `/api/studio/wallet/me`
 
 - Muc dich: lay wallet read model cho Creator Studio.
+- Dung khi FE can hien thi so du vi studio hien tai cua creator/channel owner.
 - Gateway public contract:
   - `GET /api/studio/wallet/me`
 - Headers:
@@ -151,12 +152,18 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - tim wallet theo `x-user-id`
   - tinh `totalEarnings` tu transaction `channel_revenue`
   - tinh `revenueThisMonth` tu transaction `channel_revenue` trong thang hien tai
+  - `balance`: coin da kha dung, co the rut/chi tieu theo rule cua wallet
+  - `frozenBalance`: coin revenue dang bi giu trong vi, thuong la phan chua release ve available balance
   - cac chi so media chua co trong finance DB (`videoCount`, `totalViews`, `subscribersCount`) tam thoi tra `0`
   - neu khong co wallet thi tra `404 Wallet not found`
+- Luu y:
+  - Neu can dung duy nhat so coin revenue dang pending cua channel/studio, uu tien
+    `GET /api/studio/earnings/summary` va doc `pendingEarnings`.
 
 ### 4.4 GET `/api/studio/wallet/stats`
 
 - Muc dich: lay thong ke tong hop cho Studio Wallet dashboard.
+- Dung cho card/tong quan vi, bao gom available balance va withdrawal dang cho xu ly.
 - Gateway public contract:
   - `GET /api/studio/wallet/stats`
 - Headers:
@@ -188,12 +195,17 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `monthlyEarnings`: tong transaction `channel_revenue` trong thang hien tai
   - `monthlyGrowth`: so sanh `monthlyEarnings` voi thang truoc
   - cac chi so media/top video chua co metadata media trong finance DB nen tam thoi tra `0`/`null`
+- Luu y:
+  - `pendingPayouts` la coin dang nam trong luong rut tien, khong phai revenue pending cua channel.
+  - De hien thi coin revenue dang cho release cua channel/studio, dung `pendingEarnings`
+    tu `GET /api/studio/earnings/summary`.
 
 ## 4.5 Studio Earnings GET APIs
 
 ### 4.5.1 GET `/api/studio/earnings/summary`
 
 - Muc dich: lay tong quan earnings cho Creator Studio.
+- Dung khi FE can so coin revenue dang pending cua channel/studio.
 - Gateway public contract:
   - `GET /api/studio/earnings/summary`
 - Headers:
@@ -232,6 +244,14 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `paidEarnings`: tong withdrawal `completed`
   - `nextPayoutDate`: `MIN(releaseAfter)` cua settlement `pending`
   - cac chi so view/watch/video tam thoi tra `0`
+- Field quan trong:
+  - `pendingEarnings`: so coin revenue cua channel/studio dang pending, chua release ve available balance.
+  - `confirmedEarnings`: revenue da release.
+  - `paidEarnings`: coin da rut thanh cong.
+- Luu y:
+  - `pendingEarnings` lay tu bang `payment_revenue_settlements` voi status `pending`.
+  - Neu co `startDate/endDate`, `totalEarnings` duoc filter theo range; cac tong settlement
+    `pendingEarnings`/`confirmedEarnings` hien tai la tong theo wallet.
 
 ### 4.5.2 GET `/api/studio/earnings/monthly`
 

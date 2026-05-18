@@ -78,6 +78,7 @@ export function StudioMembershipFeature() {
   const [channelDetail, setChannelDetail] = useState<ChannelDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingTier, setIsSavingTier] = useState(false);
+  const [isRequestingReview, setIsRequestingReview] = useState(false);
   const [mutatingTierId, setMutatingTierId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -131,6 +132,16 @@ export function StudioMembershipFeature() {
   }, [tiers]);
 
   const openCreateTierEditor = useCallback(() => {
+    if (channelDetail?.isMembershipClosedByAdmin) {
+      showActionMessage("Membership is closed by admin for this channel.");
+      return;
+    }
+
+    if (channelDetail?.membershipReviewStatus !== "approved") {
+      showActionMessage("Admin approval is required before creating membership tiers.");
+      return;
+    }
+
     const nextLevel = availableLevels[0];
 
     if (!nextLevel) {
@@ -140,16 +151,46 @@ export function StudioMembershipFeature() {
 
     setEditorError(null);
     setEditorState({ mode: "create", level: nextLevel });
-  }, [availableLevels, showActionMessage]);
+  }, [availableLevels, channelDetail?.isMembershipClosedByAdmin, channelDetail?.membershipReviewStatus, showActionMessage]);
 
   const openEditTierEditor = useCallback((tier: StudioTier) => {
     setEditorError(null);
     setEditorState({ mode: "edit", tier });
   }, []);
 
+  const handleRequestMembershipReview = useCallback(async () => {
+    if (!channelDetail?.id) {
+      showActionMessage("Creator channel was not found for requesting membership review.");
+      return;
+    }
+
+    setIsRequestingReview(true);
+
+    try {
+      const response = await mediaService.requestChannelMembershipReview(channelDetail.id);
+
+      if (!response.success || !response.data) {
+        throw new Error(response.mess || "Unable to request membership review.");
+      }
+
+      setChannelDetail((current) => current ? { ...current, ...response.data } : current);
+      showActionMessage("Membership review request sent. Admin approval is now pending.");
+      void fetchMembershipData({ silent: true });
+    } catch (err) {
+      showActionMessage(getErrorMessage(err, "Unable to request membership review. Please check eligibility and try again."));
+    } finally {
+      setIsRequestingReview(false);
+    }
+  }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
+
   const handleSaveTier = useCallback(async (payload: TierEditorPayload) => {
     if (!channelDetail?.id) {
       setEditorError("Creator channel was not found for saving this tier.");
+      return;
+    }
+
+    if (editorState?.mode !== "edit" && channelDetail.membershipReviewStatus !== "approved") {
+      setEditorError("Admin approval is required before creating membership tiers.");
       return;
     }
 
@@ -200,7 +241,7 @@ export function StudioMembershipFeature() {
     } finally {
       setIsSavingTier(false);
     }
-  }, [channelDetail?.id, editorState, fetchMembershipData, showActionMessage]);
+  }, [channelDetail?.id, channelDetail?.membershipReviewStatus, editorState, fetchMembershipData, showActionMessage]);
 
   const handleToggleTierStatus = useCallback(async (tier: StudioTier) => {
     if (!channelDetail?.id) {
@@ -261,10 +302,17 @@ export function StudioMembershipFeature() {
     }
   }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
 
+  const reviewStatus = channelDetail?.membershipReviewStatus ?? "not_requested";
+  const isReviewApproved = reviewStatus === "approved";
+  const canRequestReview = Boolean(
+    channelDetail?.membershipEligibility?.isEligible &&
+    !channelDetail?.isMembershipClosedByAdmin &&
+    (reviewStatus === "not_requested" || reviewStatus === "rejected")
+  );
   const canCreateTier = Boolean(
     !channelDetail?.isMembershipClosedByAdmin &&
-    availableLevels.length > 0 &&
-    (channelDetail?.membershipEligibility?.isEligible || tiers.length > 0)
+    isReviewApproved &&
+    availableLevels.length > 0
   );
 
   return (
@@ -305,8 +353,12 @@ export function StudioMembershipFeature() {
         <EligibilityChecker
           eligibility={channelDetail?.membershipEligibility}
           isAdminClosed={Boolean(channelDetail?.isMembershipClosedByAdmin)}
-          reviewStatus={channelDetail?.membershipReviewStatus ?? "not_requested"}
+          reviewStatus={reviewStatus}
           rejectionReason={channelDetail?.membershipRejectionReason ?? null}
+          canRequestReview={canRequestReview}
+          canCreateFirstTier={canCreateTier}
+          isRequestingReview={isRequestingReview}
+          onRequestReview={() => void handleRequestMembershipReview()}
           onCreateFirstTier={openCreateTierEditor}
         />
       ) : (
@@ -314,7 +366,7 @@ export function StudioMembershipFeature() {
           tiers={tiers}
           canCreateTier={canCreateTier}
           isAdminClosed={Boolean(channelDetail?.isMembershipClosedByAdmin)}
-          reviewStatus={channelDetail?.membershipReviewStatus ?? "not_requested"}
+          reviewStatus={reviewStatus}
           onCreateTier={openCreateTierEditor}
           onEditTier={openEditTierEditor}
           onToggleTierStatus={(tier) => void handleToggleTierStatus(tier)}

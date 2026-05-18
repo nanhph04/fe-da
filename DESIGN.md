@@ -1,5 +1,3 @@
-web application/stitch/projects/16831986920904964967/screens/f76f3e31052740769da041908a94e36c
-
 # Design System: Velvet Gallery — Cinematic Canvas
 
 > Tài liệu thiết kế chính thức của dự án. Mọi component, page, và feature **phải** tuân thủ hệ thống này.
