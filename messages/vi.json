@@ -2,6 +2,13 @@
   "Navigation": {
     "explore": "Khám phá",
     "library": "Thư viện",
+    "categories": "Thể loại",
+    "browseCategories": "Duyệt thể loại",
+    "categoryMenuHint": "Chọn một danh mục để mở bộ sưu tập video public.",
+    "latestCategory": "Mới phát hành",
+    "categoryMenuEmpty": "Chưa có thể loại nào đang hoạt động.",
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tìm video, kênh...",
     "wallet": "Ví của bạn",
     "profile": "Hồ sơ",
     "purchased": "Đã mua",
@@ -15,5 +22,22 @@
     "signUp": "Đăng ký",
     "signOut": "Đăng xuất",
     "myProfile": "Hồ sơ của tôi"
+  },
+  "Wallet": {
+    "TopUpPackages": {
+      "title": "Gói nạp Aura Coin",
+      "loadingLabel": "Đang tải gói nạp",
+      "errorTitle": "Không thể tải gói nạp",
+      "errorDescription": "Đường truyền hoặc máy chủ thanh toán đang gặp sự cố. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "emptyTitle": "Chưa có gói nạp",
+      "emptyDescription": "Hiện chưa có gói nạp nào đang mở. Vui lòng quay lại sau.",
+      "popularBadge": "Phổ biến nhất",
+      "packageName": "Gói {amount} VND",
+      "coinUnit": "AC",
+      "bonusAmount": "+ {amount} coin thưởng",
+      "currencyUnit": "VND",
+      "buyNow": "Nạp ngay"
+    }
   }
 }

@@ -1,6 +1,6 @@
 File này không phải coding style guide.
 File này chỉ mô tả ngữ cảnh sản phẩm, nghiệp vụ, vai trò người dùng và các hành vi UI quan trọng.
-Về kiến trúc thư mục, naming convention, component structure, API client và code style, hãy tuân theo file AGENTS.md.
+Về kiến trúc thư mục, naming convention, component structure, API client và code style, hãy bắt đầu từ AGENTS.md rồi tuân theo CORE_RULES.md, PERFORMANCE_RULES.md, REVIEW_RULES.md và DESIGN.md theo phạm vi task.
 
 # PRODUCT CONTEXT & BUSINESS SPECIFICATION
 

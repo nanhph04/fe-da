@@ -55,7 +55,7 @@ export function HomeDiscoverySection({
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
-              Kho phim đang mở
+              Kho nội dung đa dạng
             </p>
             <h2 className="font-headline text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
               Khám phá nội dung mới nhất

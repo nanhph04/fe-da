@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
+import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
@@ -19,8 +20,14 @@ export function AppProviders({ children, locale, messages }: AppProvidersProps) 
       enableSystem
       disableTransitionOnChange
     >
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <AuthProvider>{children}</AuthProvider>
+      <NextIntlClientProvider
+        locale={locale}
+        messages={messages}
+        timeZone="Asia/Ho_Chi_Minh"
+      >
+        <Suspense fallback={null}>
+          <AuthProvider>{children}</AuthProvider>
+        </Suspense>
       </NextIntlClientProvider>
     </ThemeProvider>
   );

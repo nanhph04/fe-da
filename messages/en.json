@@ -2,6 +2,13 @@
   "Navigation": {
     "explore": "Discover",
     "library": "Library",
+    "categories": "Categories",
+    "browseCategories": "Browse categories",
+    "categoryMenuHint": "Choose a category to open its public video collection.",
+    "latestCategory": "Latest releases",
+    "categoryMenuEmpty": "No active categories are available yet.",
+    "search": "Search",
+    "searchPlaceholder": "Search videos, channels...",
     "wallet": "Wallet",
     "profile": "Profile",
     "purchased": "Purchased",
@@ -15,5 +22,22 @@
     "signUp": "Sign Up",
     "signOut": "Sign Out",
     "myProfile": "My Profile"
+  },
+  "Wallet": {
+    "TopUpPackages": {
+      "title": "Aura Coin Top-up Packages",
+      "loadingLabel": "Loading top-up packages",
+      "errorTitle": "Unable to load packages",
+      "errorDescription": "The payment service or network is temporarily unavailable. Please try again.",
+      "retry": "Try again",
+      "emptyTitle": "No packages available",
+      "emptyDescription": "There are no active top-up packages right now. Please check back later.",
+      "popularBadge": "Most popular",
+      "packageName": "{amount} VND Package",
+      "coinUnit": "AC",
+      "bonusAmount": "+ {amount} bonus coins",
+      "currencyUnit": "VND",
+      "buyNow": "Top up now"
+    }
   }
 }

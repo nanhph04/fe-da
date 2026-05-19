@@ -35,18 +35,26 @@ const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean):
 
 function NavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
   const t = useTranslations("Navigation");
-  const className = `flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
+  const className = `relative flex items-center gap-3 rounded-lg px-3 py-3 transition-all duration-200 ${
     item.disabled
-      ? "text-muted-foreground/30 border border-dashed border-border/20 cursor-not-allowed"
+      ? "cursor-not-allowed border border-dashed border-border/20 text-muted-foreground/30"
       : isActive
-        ? "text-foreground bg-accent"
+        ? "bg-accent text-foreground"
         : "text-muted-foreground hover:bg-accent hover:text-foreground"
   }`;
 
   const content = (
     <>
-      <span className="material-symbols-outlined">{item.icon}</span>
-      <span className="font-headline font-semibold text-sm">{t(item.label)}</span>
+      {isActive && !item.disabled ? (
+        <span
+          aria-hidden="true"
+          className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-secondary"
+        />
+      ) : null}
+      <span className={`material-symbols-outlined ${isActive && !item.disabled ? "text-secondary" : ""}`}>
+        {item.icon}
+      </span>
+      <span className="font-headline text-sm font-semibold">{t(item.label)}</span>
     </>
   );
 

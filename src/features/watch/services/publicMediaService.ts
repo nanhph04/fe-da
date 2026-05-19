@@ -170,13 +170,81 @@ export interface CategoryPublic {
   updatedAt: string;
 }
 
+export interface TagPublic {
+  id: string;
+  name: string;
+  slug: string;
+  status: "active";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicVideosQuery {
+  q?: string;
+  category?: string;
+  tags?: string[];
+  limit?: number;
+}
+
+export interface PublicSearchChannel {
+  id: string;
+  userId: string;
+  name: string;
+  bio: string;
+  avatarUrl: string;
+  bannerUrl: string;
+  status: string;
+  isEligibleForMembership: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicMediaSearchQuery {
+  q?: string;
+  category?: string;
+  limit?: number;
+}
+
+export interface PublicMediaSearchResponse {
+  videos: PublicDiscoveryVideo[];
+  channels: PublicSearchChannel[];
+  query: {
+    q: string | null;
+    category: string | null;
+    limit: number;
+  };
+}
+
+function normalizePositiveInteger(value: number, fallback: number) {
+  if (!Number.isFinite(value) || value < 1) {
+    return fallback;
+  }
+
+  return Math.floor(value);
+}
+
+function normalizePublicVideoLimit(limit: number, fallback = 20) {
+  return Math.min(50, normalizePositiveInteger(limit, fallback));
+}
+
+function normalizeUniqueSlugs(values?: string[]) {
+  if (!values) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(values.map((value) => value.trim()).filter(Boolean))
+  );
+}
+
 export async function getLatestVideosCached(limit = 10) {
   "use cache";
 
   cacheLife("minutes");
   cacheTag("media:latest");
 
-  const query = limit ? `?limit=${limit}` : "";
+  const normalizedLimit = normalizePublicVideoLimit(limit, 20);
+  const query = `?limit=${normalizedLimit}`;
   try {
     return await fetchPublicApi<PublicDiscoveryVideo[]>(
       `/api/media/videos/discovery/latest${query}`
@@ -221,15 +289,99 @@ export async function getCategoriesCached() {
   }
 }
 
+export async function getTagsCached() {
+  "use cache";
+
+  cacheLife("hours");
+  cacheTag("media:tags");
+
+  try {
+    return await fetchPublicApi<TagPublic[]>("/api/media/tags");
+  } catch (error) {
+    const apiError = error as PublicApiError;
+
+    return {
+      success: false,
+      code: apiError.code ?? 503,
+      data: [],
+      mess:
+        apiError.mess ||
+        apiError.message ||
+        "Unable to load tags from the media service.",
+      errors: apiError.errors,
+    } satisfies PublicApiResponse<TagPublic[]>;
+  }
+}
+
+export async function getPublicVideosCached(params: PublicVideosQuery = {}) {
+  "use cache";
+
+  const normalizedQuery = params.q?.trim();
+  const normalizedCategory = params.category?.trim();
+  const normalizedTags = normalizeUniqueSlugs(params.tags);
+  const normalizedLimit = normalizePublicVideoLimit(params.limit ?? 20, 20);
+  const query = new URLSearchParams({ limit: String(normalizedLimit) });
+
+  if (normalizedQuery) {
+    query.set("q", normalizedQuery);
+  }
+
+  if (normalizedCategory) {
+    query.set("category", normalizedCategory);
+  }
+
+  if (normalizedTags.length > 0) {
+    query.set("tags", normalizedTags.join(","));
+  }
+
+  cacheLife("minutes");
+  cacheTag(
+    "media:videos",
+    normalizedCategory ? `media:category:${normalizedCategory}` : "media:all-categories"
+  );
+
+  return fetchPublicApi<PublicDiscoveryVideo[]>(
+    `/api/media/videos?${query.toString()}`
+  );
+}
+
+export async function searchPublicMediaCached(params: PublicMediaSearchQuery) {
+  "use cache";
+
+  const normalizedQuery = params.q?.trim();
+  const normalizedCategory = params.category?.trim();
+  const normalizedLimit = normalizePublicVideoLimit(params.limit ?? 20, 20);
+  const query = new URLSearchParams({ limit: String(normalizedLimit) });
+
+  if (normalizedQuery) {
+    query.set("q", normalizedQuery);
+  }
+
+  if (normalizedCategory) {
+    query.set("category", normalizedCategory);
+  }
+
+  cacheLife("minutes");
+  cacheTag(
+    "media:search",
+    normalizedCategory ? `media:category:${normalizedCategory}` : "media:all-categories"
+  );
+
+  return fetchPublicApi<PublicMediaSearchResponse>(
+    `/api/media/search?${query.toString()}`
+  );
+}
+
 export async function getVideosByCategoryCached(categorySlug: string, limit = 6) {
   "use cache";
 
   const normalizedSlug = categorySlug.trim();
+  const normalizedLimit = normalizePublicVideoLimit(limit, 6);
 
   cacheLife("minutes");
   cacheTag("media:category-videos", `media:category:${normalizedSlug}`);
 
-  const query = new URLSearchParams({ limit: String(limit) });
+  const query = new URLSearchParams({ limit: String(normalizedLimit) });
 
   try {
     return await fetchPublicApi<PublicDiscoveryVideo[]>(
@@ -249,6 +401,58 @@ export async function getVideosByCategoryCached(categorySlug: string, limit = 6)
       errors: apiError.errors,
     } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
   }
+}
+
+export async function getCategoryBySlugCached(categorySlug: string) {
+  "use cache";
+
+  const normalizedSlug = categorySlug.trim();
+
+  cacheLife("hours");
+  cacheTag("media:categories", `media:category:${normalizedSlug}`);
+
+  if (!normalizedSlug) {
+    return null;
+  }
+
+  const query = new URLSearchParams({ q: normalizedSlug });
+  const response = await fetchPublicApi<CategoryPublic[]>(
+    `/api/media/categories?${query.toString()}`
+  );
+
+  if (!response.success || !response.data) {
+    return null;
+  }
+
+  return response.data.find((category) => category.slug === normalizedSlug) ?? null;
+}
+
+export async function getCategoryVideosPageCached(
+  categorySlug: string,
+  page = 1,
+  limit = 20
+) {
+  "use cache";
+
+  const normalizedSlug = categorySlug.trim();
+  const normalizedPage = normalizePositiveInteger(page, 1);
+  const normalizedLimit = normalizePublicVideoLimit(limit, 20);
+
+  cacheLife("minutes");
+  cacheTag(
+    "media:category-videos",
+    `media:category:${normalizedSlug}`,
+    `media:category:${normalizedSlug}:page:${normalizedPage}:limit:${normalizedLimit}`
+  );
+
+  const query = new URLSearchParams({
+    page: String(normalizedPage),
+    limit: String(normalizedLimit),
+  });
+
+  return fetchPublicApi<PublicDiscoveryVideo[]>(
+    `/api/media/categories/${encodeCategoryPathSlug(normalizedSlug)}/videos?${query.toString()}`
+  );
 }
 
 export async function getVideoMetadataCached(videoId: string) {
