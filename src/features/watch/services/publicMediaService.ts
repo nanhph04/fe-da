@@ -2,35 +2,24 @@ import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
 import { fetchPublicApi, fetchServerApi } from "@/shared/api/server";
+import { getReadyPublicVideoThumbnailUrl } from "./mediaService.helpers";
 import type {
   ApiError as PublicApiError,
   ApiResponse as PublicApiResponse,
 } from "@/shared/api/types";
 
+export { buildPublicVideoThumbnailUrl } from "./mediaService.helpers";
+
 export type PublicThumbnailSource = "auto" | "custom" | string;
 export type PublicThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
 export type PublicMembershipReviewStatus = "not_requested" | "pending" | "approved" | "rejected";
-
-const READY_PUBLIC_THUMBNAIL_STATUS = "ready";
-
-function encodeVideoPathId(videoId: string) {
-  return encodeURIComponent(videoId);
-}
-
-export function buildPublicVideoThumbnailUrl(videoId: string) {
-  return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
-}
 
 export function getReadyPublicThumbnailUrl(
   thumbnailUrl?: string | null,
   thumbnailStatus?: string | null,
   videoId?: string | null
 ) {
-  if (thumbnailStatus !== READY_PUBLIC_THUMBNAIL_STATUS) {
-    return null;
-  }
-
-  return videoId ? buildPublicVideoThumbnailUrl(videoId) : thumbnailUrl || null;
+  return getReadyPublicVideoThumbnailUrl(videoId, thumbnailUrl, thumbnailStatus);
 }
 
 export interface PublicDiscoveryVideo {
