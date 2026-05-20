@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "@/i18n/routing";
 import {
   mediaService,
-  type ConfirmUploadBody,
+  type SubmitUploadBody,
   type OwnerVideoDetailResponse,
 } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -14,17 +14,17 @@ interface StudioVideoDraftActionsProps {
   onChanged: () => void;
 }
 
-const DEFAULT_CONFIRM_RESOLUTIONS: ConfirmUploadBody["resolutions"] = ["720p", "1080p"];
+const DEFAULT_CONFIRM_RESOLUTIONS: SubmitUploadBody["resolutions"] = ["720p"];
 
-function getConfirmResolutions(video: OwnerVideoDetailResponse): ConfirmUploadBody["resolutions"] {
-  const allowedResolutions = new Set<ConfirmUploadBody["resolutions"][number]>([
+function getConfirmResolutions(video: OwnerVideoDetailResponse): SubmitUploadBody["resolutions"] {
+  const allowedResolutions = new Set<SubmitUploadBody["resolutions"][number]>([
     "480p",
     "720p",
     "1080p",
   ]);
   const selectedResolutions = (video.resolutions ?? []).filter(
-    (resolution): resolution is ConfirmUploadBody["resolutions"][number] =>
-      allowedResolutions.has(resolution as ConfirmUploadBody["resolutions"][number])
+    (resolution): resolution is SubmitUploadBody["resolutions"][number] =>
+      allowedResolutions.has(resolution as SubmitUploadBody["resolutions"][number])
   );
 
   return selectedResolutions.length > 0 ? selectedResolutions : DEFAULT_CONFIRM_RESOLUTIONS;
@@ -46,26 +46,36 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
     setMessage(null);
 
     try {
-      const response = await mediaService.confirmUpload(video.id, {
+      if (!video.uploadId) {
+        setError("Không tìm thấy thông tin phiên upload của bản nháp này.");
+        return;
+      }
+
+      const response = await mediaService.submitUpload(video.id, video.uploadId, {
         resolutions: getConfirmResolutions(video),
       });
 
       if (!(response.success || response.code === 200 || response.code === 201)) {
-        setError(response.mess || "Khong the confirm-upload video draft.");
+        setError(response.mess || "Không thể confirm-upload video draft.");
         return;
       }
 
-      setMessage("Da confirm-upload. Video se chuyen sang hang doi xu ly.");
+      setMessage("Đã confirm-upload. Video sẽ chuyển sang hàng đợi xử lý.");
       onChanged();
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the confirm-upload video draft."));
+      setError(getErrorMessage(err, "Không thể confirm-upload video draft."));
     } finally {
       setActiveAction(null);
     }
   };
 
-  const handleReplaceUpload = async (file: File | null) => {
+  const handleResumeUpload = async (file: File | null) => {
     if (!file) {
+      return;
+    }
+
+    if (!video.uploadId) {
+      setError("Không tìm thấy thông tin phiên upload của bản nháp này.");
       return;
     }
 
@@ -75,22 +85,18 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
     setMessage(null);
 
     try {
-      const replaceResponse = await mediaService.replaceUpload(video.id);
-      if (!replaceResponse.success || !replaceResponse.data) {
-        setError(replaceResponse.mess || "Khong the tao upload URL moi cho draft.");
-        return;
-      }
-
-      await mediaService.uploadRawVideoFile({
-        uploadUrl: replaceResponse.data.uploadUrl,
+      await mediaService.uploadResumableVideoFile({
+        videoId: video.id,
+        uploadId: video.uploadId,
         file,
+        partSizeBytes: video.partSizeBytes || 5 * 1024 * 1024,
         onProgress: setUploadProgress,
       });
 
-      setMessage("Da upload file thay the. Bam Confirm upload de dua video vao hang doi xu ly.");
+      setMessage("Đã hoàn tất tải tệp tin lên S3. Bấm Confirm upload để đưa video vào hàng đợi xử lý.");
       onChanged();
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the upload file thay the cho draft."));
+      setError(getErrorMessage(err, "Không thể tải tiếp video cho draft."));
     } finally {
       setActiveAction(null);
       setUploadProgress(0);
@@ -103,16 +109,16 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
     setMessage(null);
 
     try {
-      const response = await mediaService.cancelUpload(video.id);
+      const response = await mediaService.cancelUpload(video.id, video.uploadId || "");
       if (!response.success) {
-        setError(response.mess || "Khong the huy upload draft.");
+        setError(response.mess || "Không thể hủy upload draft.");
         return;
       }
 
-      setMessage("Da huy upload draft.");
+      setMessage("Đã hủy upload draft.");
       router.push("/studio/content");
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the huy upload draft."));
+      setError(getErrorMessage(err, "Không thể hủy upload draft."));
     } finally {
       setActiveAction(null);
     }
@@ -126,11 +132,11 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             Draft upload
           </p>
           <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
-            Hoan tat hoac huy ban nhap nay
+            Hoàn tất hoặc hủy bản nháp này
           </h2>
           <p className="font-body text-sm leading-6 text-muted-foreground">
-            Video dang o trang thai draft. Ban co the upload file thay the, confirm-upload de bat dau xu ly,
-            hoac huy upload neu khong tiep tuc.
+            Video đang ở trạng thái draft. Bạn có thể tiếp tục tải lên tệp tin (Resume upload), confirm-upload để bắt đầu xử lý,
+            hoặc hủy upload nếu không tiếp tục.
           </p>
         </div>
 
@@ -144,7 +150,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             onChange={event => {
               const file = event.target.files?.[0] ?? null;
               event.currentTarget.value = "";
-              void handleReplaceUpload(file);
+              void handleResumeUpload(file);
             }}
           />
           <button
@@ -156,7 +162,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             <span className={`material-symbols-outlined text-[18px] ${activeAction === "replace" ? "animate-spin" : ""}`} aria-hidden="true">
               {activeAction === "replace" ? "progress_activity" : "upload_file"}
             </span>
-            Replace file
+            Resume upload
           </button>
           <button
             type="button"

@@ -70,13 +70,13 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       }
 
       setPublishStage("confirming");
-      const confirmResponse = await mediaService.confirmUpload(draftUpload.videoId, {
+      const confirmResponse = await mediaService.submitUpload(draftUpload.videoId, draftUpload.uploadId, {
         resolutions: formData.resolutions,
         thumbnailObjectKey: thumbnailObjectKey ?? undefined,
       });
 
       if (!(confirmResponse.success || confirmResponse.code === 201 || confirmResponse.code === 200)) {
-        setError(confirmResponse.mess || "Failed to confirm upload");
+        setError(confirmResponse.mess || "Failed to submit upload");
         return;
       }
 

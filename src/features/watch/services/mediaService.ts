@@ -145,37 +145,96 @@ export interface InitUploadBody {
   visibility?: "public" | "private";
   price?: number;
   requiredTierLevel?: number | null;
+  fileName: string;
+  fileSize: number;
+  fileLastModified: string;
   thumbnailExtension?: "jpg" | "jpeg" | "png" | "webp";
 }
 
-export interface ConfirmUploadBody {
-  resolutions: Array<"480p" | "720p" | "1080p">;
-  thumbnailObjectKey?: string;
-}
 
 export interface InitUploadResponse {
   videoId: string;
   status: string;
   rawFileKey: string;
   bucket: string;
-  uploadUrl: string;
+  uploadId: string;
+  partSizeBytes: number;
+  expiresAt: string;
   thumbnailObjectKey: string | null;
   thumbnailBucket: string | null;
   thumbnailUploadUrl: string | null;
 }
 
-export interface ReplaceUploadResponse {
+export interface GetPartUrlsResponse {
+  parts: Array<{
+    partNumber: number;
+    uploadUrl: string;
+    expiresAt: string;
+  }>;
+}
+
+export interface CompletePartBody {
+  etag: string;
+  sizeBytes: number;
+}
+
+export interface CompletePartResponse {
   videoId: string;
-  status: string;
+  uploadId: string;
+  partNumber: number;
+  completed: boolean;
+}
+
+export interface UploadPartStatus {
+  partNumber: number;
+  etag: string;
+  sizeBytes: number;
+  uploadedAt: string;
+}
+
+export interface UploadStatusResponse {
+  videoId: string;
+  uploadId: string;
   rawFileKey: string;
-  bucket: string;
-  uploadUrl: string;
+  partSizeBytes: number;
+  fileName: string;
+  fileSize: number;
+  fileLastModified: string;
+  status: string;
+  expiresAt: string;
+  parts: UploadPartStatus[];
+}
+
+export interface CompleteUploadResponse {
+  videoId: string;
+  uploadId: string;
+  rawFileKey: string;
+  completed: boolean;
+}
+
+export interface SubmitUploadBody {
+  resolutions: Array<"480p" | "720p" | "1080p">;
+  thumbnailObjectKey?: string;
+}
+
+export interface SubmitUploadResponse {
+  status: string;
+  message: string;
 }
 
 export interface UploadRawVideoFileRequest {
   uploadUrl: string;
   file: File;
   onProgress?: (progress: number) => void;
+}
+
+export interface UploadResumableParams {
+  videoId: string;
+  uploadId: string;
+  file: File;
+  partSizeBytes: number;
+  onProgress?: (progress: number) => void;
+  signal?: AbortSignal;
 }
 
 export interface PlaybackInfoResponse {
@@ -245,6 +304,8 @@ export interface VideoMetadataResponse {
   deletedAt: string | null;
   deletedBy: string | null;
   deleteReason: string | null;
+  uploadId?: string | null;
+  partSizeBytes?: number | null;
   updatedAt: string;
 }
 
@@ -296,6 +357,8 @@ export interface OwnerVideoResponse extends DiscoveryVideoResponse {
   deletedAt: string | null;
   deletedBy: string | null;
   deleteReason: string | null;
+  uploadId?: string | null;
+  partSizeBytes?: number | null;
 }
 
 export interface OwnerVideoDetailResponse extends OwnerVideoResponse {
@@ -477,7 +540,164 @@ const uploadPresignedFile = ({ uploadUrl, file, onProgress }: UploadRawVideoFile
   });
 };
 
-const uploadRawVideoFile = uploadPresignedFile;
+const uploadResumableVideoFile = async ({
+  videoId,
+  uploadId,
+  file,
+  partSizeBytes,
+  onProgress,
+  signal,
+}: UploadResumableParams): Promise<void> => {
+  const fileSize = file.size;
+  const totalParts = Math.ceil(fileSize / partSizeBytes);
+
+  // 1. Fetch current status of upload to see if there are already completed parts
+  let completedParts: number[] = [];
+  try {
+    const statusRes = await mediaService.getUploadStatus(videoId, uploadId);
+    if (statusRes.success && statusRes.data) {
+      const { fileName: dbFileName, fileSize: dbFileSize } = statusRes.data;
+      if (dbFileName && dbFileSize) {
+        if (file.name !== dbFileName || file.size !== dbFileSize) {
+          throw new Error(
+            `Tệp tin được chọn không khớp với video ban đầu của phiên upload này. Bản nháp này yêu cầu tệp "${dbFileName}" (${(dbFileSize / (1024 * 1024)).toFixed(2)} MB), nhưng bạn đã chọn tệp "${file.name}" (${(file.size / (1024 * 1024)).toFixed(2)} MB).`
+          );
+        }
+      }
+      if (statusRes.data.parts) {
+        completedParts = statusRes.data.parts.map(p => p.partNumber);
+      }
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("không khớp với video ban đầu")) {
+      throw err;
+    }
+    console.warn("Failed to fetch upload status, starting from scratch:", err);
+  }
+
+  // 2. Identify which parts need to be uploaded
+  const partsToUpload: number[] = [];
+  for (let i = 1; i <= totalParts; i++) {
+    if (!completedParts.includes(i)) {
+      partsToUpload.push(i);
+    }
+  }
+
+  // Track loaded bytes across all parts for progress calculation
+  let uploadedBytes = completedParts.reduce((acc, partNum) => {
+    const isLastPart = partNum === totalParts;
+    const size = isLastPart ? (fileSize - (totalParts - 1) * partSizeBytes) : partSizeBytes;
+    return acc + size;
+  }, 0);
+
+  const updateProgress = () => {
+    if (onProgress) {
+      const percentage = Math.round((uploadedBytes / fileSize) * 100);
+      onProgress(Math.min(percentage, 100));
+    }
+  };
+
+  updateProgress();
+
+  if (partsToUpload.length === 0) {
+    // All parts are already uploaded, call complete
+    const completeRes = await mediaService.completeUpload(videoId, uploadId);
+    if (!completeRes.success) {
+      throw new Error(completeRes.mess || "Failed to complete upload session");
+    }
+    return;
+  }
+
+  // 3. Upload parts in sequence
+  for (const partNumber of partsToUpload) {
+    if (signal?.aborted) {
+      throw new DOMException("Upload aborted", "AbortError");
+    }
+
+    const startByte = (partNumber - 1) * partSizeBytes;
+    const endByte = Math.min(partNumber * partSizeBytes, fileSize);
+    const chunk = file.slice(startByte, endByte);
+    const chunkSize = chunk.size;
+
+    // A. Get presigned URL for this part
+    const urlRes = await mediaService.getPartUrls(videoId, uploadId, [partNumber]);
+    if (!urlRes.success || !urlRes.data || !urlRes.data.parts || urlRes.data.parts.length === 0) {
+      throw new Error(urlRes.mess || `Failed to get upload URL for part ${partNumber}`);
+    }
+
+    const partInfo = urlRes.data.parts.find(p => p.partNumber === partNumber);
+    if (!partInfo) {
+      throw new Error(`Upload URL for part ${partNumber} not found in response`);
+    }
+
+    const uploadUrl = partInfo.uploadUrl;
+
+    // B. Upload chunk to MinIO/S3 using XMLHttpRequest
+    let lastLoadedBytes = 0;
+    const etag = await new Promise<string>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", uploadUrl);
+      xhr.setRequestHeader("Content-Type", "application/octet-stream");
+
+      if (signal) {
+        const handleAbort = () => {
+          xhr.abort();
+          reject(new DOMException("Upload aborted", "AbortError"));
+        };
+        signal.addEventListener("abort", handleAbort);
+      }
+
+      xhr.upload.onprogress = event => {
+        if (event.lengthComputable) {
+          const newLoaded = event.loaded;
+          const delta = newLoaded - lastLoadedBytes;
+          lastLoadedBytes = newLoaded;
+          uploadedBytes += delta;
+          updateProgress();
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const etagHeader = xhr.getResponseHeader("ETag");
+          if (!etagHeader) {
+            reject(new Error(`No ETag header returned for part ${partNumber}`));
+          } else {
+            resolve(etagHeader.replace(/"/g, ""));
+          }
+        } else {
+          reject(new Error(`Failed to upload part ${partNumber}: status ${xhr.status}`));
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error(`Failed to upload part ${partNumber} due to network error`));
+      };
+
+      xhr.send(chunk);
+    });
+
+    // C. Register chunk completion
+    const completedRes = await mediaService.completePart(videoId, uploadId, partNumber, {
+      etag,
+      sizeBytes: chunkSize,
+    });
+
+    if (!completedRes.success) {
+      throw new Error(completedRes.mess || `Failed to register completion of part ${partNumber}`);
+    }
+  }
+
+  // 4. Finalize the multipart upload session
+  if (signal?.aborted) {
+    throw new DOMException("Upload aborted", "AbortError");
+  }
+
+  const completeRes = await mediaService.completeUpload(videoId, uploadId);
+  if (!completeRes.success) {
+    throw new Error(completeRes.mess || "Failed to complete upload session");
+  }
+};
 
 export const mediaService = {
   // 1. HEALTH CHECK
@@ -571,15 +791,47 @@ export const mediaService = {
 
   // 4. VIDEO
   initUpload: async (data: InitUploadBody) => {
-    return api.post<InitUploadResponse>("/api/media/videos/init-upload", data, { requireAuth: true });
+    return api.post<InitUploadResponse>("/api/media/videos/uploads", data, { requireAuth: true });
   },
-  replaceUpload: async (id: string) => {
-    return api.post<ReplaceUploadResponse>(`/api/media/videos/${id}/replace-upload`, undefined, { requireAuth: true });
+  getPartUrls: async (videoId: string, uploadId: string, partNumbers: number[]) => {
+    return api.post<GetPartUrlsResponse>(
+      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/part-urls`,
+      { partNumbers },
+      { requireAuth: true }
+    );
   },
-  cancelUpload: async (id: string) => {
-    return api.delete<{ videoId: string; cancelled: boolean }>(`/api/media/videos/${id}/upload`, {
-      requireAuth: true,
-    });
+  completePart: async (videoId: string, uploadId: string, partNumber: number, data: CompletePartBody) => {
+    return api.post<CompletePartResponse>(
+      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/parts/${partNumber}/completed`,
+      data,
+      { requireAuth: true }
+    );
+  },
+  getUploadStatus: async (videoId: string, uploadId: string) => {
+    return api.get<UploadStatusResponse>(
+      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/status`,
+      { requireAuth: true }
+    );
+  },
+  completeUpload: async (videoId: string, uploadId: string) => {
+    return api.post<CompleteUploadResponse>(
+      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/complete`,
+      undefined,
+      { requireAuth: true }
+    );
+  },
+  submitUpload: async (videoId: string, uploadId: string, data: SubmitUploadBody) => {
+    return api.post<SubmitUploadResponse>(
+      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/submit`,
+      data,
+      { requireAuth: true }
+    );
+  },
+  cancelUpload: async (videoId: string, uploadId: string) => {
+    return api.delete<{ videoId: string; cancelled: boolean }>(
+      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}`,
+      { requireAuth: true }
+    );
   },
   deleteFailedUpload: async (id: string) => {
     return api.delete<{ videoId: string; deleted: boolean }>(
@@ -592,15 +844,8 @@ export const mediaService = {
       requireAuth: true,
     });
   },
-  uploadRawVideoFile,
   uploadPresignedFile,
-  confirmUpload: async (id: string, data: ConfirmUploadBody) => {
-    return api.post<{ status: string; message: string }>(
-      `/api/media/videos/${id}/confirm-upload`,
-      data,
-      { requireAuth: true }
-    );
-  },
+  uploadResumableVideoFile,
   getPlaybackInfo: async (id: string) => {
     return api.get<PlaybackInfoResponse>(`/api/media/videos/${id}/play`, { requireAuth: true });
   },

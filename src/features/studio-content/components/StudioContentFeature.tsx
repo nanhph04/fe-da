@@ -4,7 +4,7 @@ import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getReadyOwnerVideoThumbnailUrl, mediaService, type ConfirmUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
+import { getReadyOwnerVideoThumbnailUrl, mediaService, type SubmitUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import {
   getModerationDetailsReason,
@@ -22,7 +22,7 @@ const FAILED_STATUSES = new Set(["failed", "rejected"]);
 const READY_STATUSES = new Set(["ready", "private"]);
 const REJECTED_STATUS = "rejected";
 const DRAFT_STATUS = "draft";
-const DEFAULT_CONFIRM_RESOLUTIONS: ConfirmUploadBody["resolutions"] = ["720p", "1080p"];
+const DEFAULT_CONFIRM_RESOLUTIONS: SubmitUploadBody["resolutions"] = ["720p"];
 
 type ContentFilter = "all" | "draft" | "processing" | "ready" | "failed";
 
@@ -106,11 +106,11 @@ function getRejectReason(video: OwnerVideoResponse) {
   return video.failureReason || getModerationDetailsReason(video.moderationDetails) || video.errorMessage || video.jobStatusMessage || "Chưa có nguyên nhân reject từ hệ thống.";
 }
 
-function getConfirmResolutions(video: OwnerVideoResponse): ConfirmUploadBody["resolutions"] {
-  const allowedResolutions = new Set<ConfirmUploadBody["resolutions"][number]>(["480p", "720p", "1080p"]);
+function getConfirmResolutions(video: OwnerVideoResponse): SubmitUploadBody["resolutions"] {
+  const allowedResolutions = new Set<SubmitUploadBody["resolutions"][number]>(["480p", "720p", "1080p"]);
   const selectedResolutions = (video.resolutions ?? []).filter(
-    (resolution): resolution is ConfirmUploadBody["resolutions"][number] =>
-      allowedResolutions.has(resolution as ConfirmUploadBody["resolutions"][number])
+    (resolution): resolution is SubmitUploadBody["resolutions"][number] =>
+      allowedResolutions.has(resolution as SubmitUploadBody["resolutions"][number])
   );
 
   return selectedResolutions.length > 0 ? selectedResolutions : DEFAULT_CONFIRM_RESOLUTIONS;
@@ -300,7 +300,12 @@ export function StudioContentFeature() {
     setError(null);
 
     try {
-      const response = await mediaService.confirmUpload(video.id, {
+      if (!video.uploadId) {
+        showActionMessage("Không tìm thấy thông tin phiên upload của bản nháp này.");
+        return;
+      }
+
+      const response = await mediaService.submitUpload(video.id, video.uploadId, {
         resolutions: getConfirmResolutions(video),
       });
 
@@ -323,27 +328,28 @@ export function StudioContentFeature() {
       return;
     }
 
+    if (!video.uploadId) {
+      showActionMessage("Không tìm thấy thông tin phiên upload của bản nháp này.");
+      return;
+    }
+
     setReuploadingVideoId(video.id);
     setReuploadProgress(0);
     setError(null);
 
     try {
-      const replaceResponse = await mediaService.replaceUpload(video.id);
-      if (!replaceResponse.success || !replaceResponse.data) {
-        showActionMessage(replaceResponse.mess || "Không thể tạo upload URL mới cho draft.");
-        return;
-      }
-
-      await mediaService.uploadRawVideoFile({
-        uploadUrl: replaceResponse.data.uploadUrl,
+      await mediaService.uploadResumableVideoFile({
+        videoId: video.id,
+        uploadId: video.uploadId,
         file,
+        partSizeBytes: video.partSizeBytes || 5 * 1024 * 1024,
         onProgress: setReuploadProgress,
       });
 
-      showActionMessage("Đã upload lại file cho draft. Bấm dấu tích để confirm-upload khi sẵn sàng xử lý.");
+      showActionMessage("Đã hoàn tất tải tệp tin lên S3. Bấm dấu tích để confirm-upload khi sẵn sàng xử lý.");
       await fetchVideos(false, activeFilter);
     } catch (err) {
-      showActionMessage(getErrorMessage(err, "Không thể upload lại file cho draft."));
+      showActionMessage(getErrorMessage(err, "Không thể tải tiếp video cho draft."));
     } finally {
       setReuploadingVideoId(null);
       setReuploadProgress(0);
@@ -614,9 +620,9 @@ export function StudioContentFeature() {
                         variant="ghost"
                         onClick={() => draftFileInputRefs.current[video.id]?.click()}
                         disabled={reuploadingVideoId === video.id || confirmingVideoId === video.id}
-                        title="Chọn file video để thay raw file cho draft. Không tự confirm-upload."
+                        title="Chọn file video để tiếp tục tải lên (Resume upload). Không tự confirm-upload."
                         className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label={`Upload replacement file for ${video.title}`}
+                        aria-label={`Resume upload for ${video.title}`}
                       >
                         <span className={`material-symbols-outlined text-[18px] ${reuploadingVideoId === video.id ? "animate-spin" : ""}`}>
                           {reuploadingVideoId === video.id ? "progress_activity" : "upload_file"}

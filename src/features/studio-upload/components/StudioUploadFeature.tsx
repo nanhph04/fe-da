@@ -12,7 +12,9 @@ export interface DraftUploadSession {
   status: string;
   rawFileKey: string;
   bucket: string;
-  uploadUrl: string;
+  uploadId: string;
+  partSizeBytes: number;
+  expiresAt: string;
   thumbnailObjectKey: string | null;
   thumbnailBucket: string | null;
   thumbnailUploadUrl: string | null;
@@ -41,7 +43,7 @@ export function StudioUploadFeature() {
     description: "",
     categoryId: "",
     tagIds: [],
-    resolutions: ["720p", "1080p"],
+    resolutions: ["720p"],
     visibility: "public",
     price: 0,
     requiredTierLevel: null,

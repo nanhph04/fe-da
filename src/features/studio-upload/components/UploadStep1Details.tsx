@@ -81,7 +81,7 @@ export function UploadStep1Details({
     }
 
     if (formData.draftUpload) {
-      void mediaService.cancelUpload(formData.draftUpload.videoId).catch(() => undefined);
+      void mediaService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId).catch(() => undefined);
     }
 
     updateFormData({
@@ -107,7 +107,7 @@ export function UploadStep1Details({
       setReplaceError(null);
 
       try {
-        const res = await mediaService.cancelUpload(formData.draftUpload.videoId);
+        const res = await mediaService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
         if (res.success) {
           updateFormData({ file: null, draftUpload: null, rawUploadCompleted: false });
           setUploadProgress(0);
@@ -135,11 +135,12 @@ export function UploadStep1Details({
     setReplaceError(null);
 
     try {
-      const res = await mediaService.replaceUpload(formData.draftUpload.videoId);
-      if (res.success && res.data) {
+      // Hủy session upload cũ của bản nháp trước khi đổi sang file mới
+      const res = await mediaService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
+      if (res.success) {
         updateFormData({
           file,
-          draftUpload: { ...formData.draftUpload, ...res.data },
+          draftUpload: null,
           rawUploadCompleted: false,
         });
         setUploadError(null);
@@ -147,7 +148,7 @@ export function UploadStep1Details({
         return;
       }
 
-      setReplaceError(res.mess || "Không thể tạo upload URL mới cho video thay thế.");
+      setReplaceError(res.mess || "Không thể hủy upload cũ để thay thế file.");
     } catch (err) {
       setReplaceError(getErrorMessage(err, "Không thể đổi file video. Vui lòng thử lại."));
     } finally {
@@ -194,6 +195,9 @@ export function UploadStep1Details({
           visibility: formData.visibility,
           price: formData.price,
           requiredTierLevel: formData.requiredTierLevel,
+          fileName: formData.file.name,
+          fileSize: formData.file.size,
+          fileLastModified: new Date(formData.file.lastModified).toISOString(),
           thumbnailExtension: thumbnailExtension ?? undefined,
         });
 
@@ -206,9 +210,11 @@ export function UploadStep1Details({
         updateFormData({ draftUpload, rawUploadCompleted: false });
       }
 
-      await mediaService.uploadRawVideoFile({
-        uploadUrl: draftUpload.uploadUrl,
+      await mediaService.uploadResumableVideoFile({
+        videoId: draftUpload.videoId,
+        uploadId: draftUpload.uploadId,
         file: formData.file,
+        partSizeBytes: draftUpload.partSizeBytes,
         onProgress: setUploadProgress,
       });
 
