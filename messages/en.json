@@ -39,5 +39,53 @@
       "currencyUnit": "VND",
       "buyNow": "Top up now"
     }
+  },
+  "StudioUpload": {
+    "Monetization": {
+      "eyebrow": "Monetization",
+      "title": "Pricing Strategy",
+      "description": "Configure how viewers access your content. Aura Coins power unlocks and creator settlements.",
+      "coinAmount": "{amount} AC",
+      "coinUnit": "AC",
+      "price": {
+        "title": "Video Listing Price",
+        "description": "Set the access fee in Aura Coins. Use 0 AC for free releases.",
+        "badge": "Premium Content",
+        "free": "Free"
+      },
+      "tier": {
+        "title": "Required Membership Tier",
+        "description": "Optional. Pulled from your channel membership tiers to restrict access by level.",
+        "syncing": "Syncing tiers",
+        "count": "{count, plural, =0 {0 tiers} one {# tier} other {# tiers}}",
+        "none": "None (Available to all)",
+        "loading": "Loading channel tiers...",
+        "option": "Lv{level} - {name} ({price}, {status})",
+        "selected": "Selected: {name} at Lv{level} ({price})",
+        "empty": "No membership tiers found. Create tiers in Studio Membership first.",
+        "retry": "Retry sync",
+        "status": {
+          "open": "Open",
+          "closed": "Closed"
+        }
+      },
+      "earnings": {
+        "title": "Earnings Breakdown",
+        "grossPrice": "Gross Price",
+        "platformFee": "Platform Fee",
+        "estimatedNet": "Estimated Net",
+        "perPurchase": "Per purchase",
+        "drmNote": "Aura DRM protects premium releases. Unlock payments settle automatically to your Wallet."
+      },
+      "actions": {
+        "back": "Back",
+        "next": "Next: Review & Publish"
+      },
+      "errors": {
+        "channelUnavailable": "Creator channel is not available.",
+        "tiersUnavailable": "Channel membership tiers are not available.",
+        "loadFailed": "Unable to load this channel's membership tiers."
+      }
+    }
   }
 }

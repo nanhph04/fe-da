@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { TIER_LEVELS, type TierEditorPayload, type TierEditorState, type TierLevel } from "./StudioMembershipFeature";
 
 interface TierEditorOverlayProps {
@@ -10,10 +10,10 @@ interface TierEditorOverlayProps {
   onSave: (payload: TierEditorPayload) => void;
 }
 
-const DEFAULT_PERKS: Record<TierLevel, string[]> = {
-  1: ["Access to Lv1 videos", "Community badge"],
-  2: ["Access to Lv1-Lv2 videos", "Early access releases"],
-  3: ["Access to all videos", "Direct creator updates"],
+const MIN_PRICE_BY_LEVEL: Record<TierLevel, number> = {
+  1: 50,
+  2: 100,
+  3: 200,
 };
 
 export function TierEditorOverlay({
@@ -28,11 +28,10 @@ export function TierEditorOverlay({
   const initialLevel = editorState.mode === "create" ? editorState.level : editingTier?.level ?? 1;
   const [level, setLevel] = useState<TierLevel>(initialLevel);
   const [name, setName] = useState(editingTier?.name || `Level ${initialLevel} Membership`);
-  const [price, setPrice] = useState(editingTier?.price || 500);
+  const [price, setPrice] = useState(editingTier?.price || MIN_PRICE_BY_LEVEL[initialLevel]);
   const [isAcceptingNew, setIsAcceptingNew] = useState(editingTier?.isAcceptingNew ?? true);
-  const [perks, setPerks] = useState<string[]>(editingTier?.perks || DEFAULT_PERKS[initialLevel]);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const newPerkRef = useRef<HTMLInputElement>(null);
+  const minPrice = MIN_PRICE_BY_LEVEL[level];
 
   const selectableLevels = editorState.mode === "edit"
     ? [editingTier?.level ?? level]
@@ -42,10 +41,10 @@ export function TierEditorOverlay({
 
   const handleLevelChange = (nextLevel: TierLevel) => {
     setLevel(nextLevel);
+    setPrice((currentPrice) => Math.max(currentPrice, MIN_PRICE_BY_LEVEL[nextLevel]));
     if (!name.trim() || name.startsWith("Level ")) {
       setName(`Level ${nextLevel} Membership`);
     }
-    setPerks(DEFAULT_PERKS[nextLevel]);
   };
 
   const handleSave = () => {
@@ -56,8 +55,8 @@ export function TierEditorOverlay({
       return;
     }
 
-    if (price < 100) {
-      setValidationError("Tier price must be at least 100 AC.");
+    if (price < minPrice) {
+      setValidationError(`Tier price must be at least ${minPrice} AC for Level ${level}.`);
       return;
     }
 
@@ -68,18 +67,6 @@ export function TierEditorOverlay({
       priceCoin: price,
       isAcceptingNew,
     });
-  };
-
-  const handleAddPerk = () => {
-    const newPerk = newPerkRef.current?.value?.trim();
-    if (!newPerk) {
-      return;
-    }
-
-    setPerks((currentPerks) => [...currentPerks, newPerk]);
-    if (newPerkRef.current) {
-      newPerkRef.current.value = "";
-    }
   };
 
   return (
@@ -94,7 +81,7 @@ export function TierEditorOverlay({
               Shape the member room
             </h3>
             <p className="mt-4 font-body text-sm leading-6 text-muted-foreground">
-              Pricing and join status are saved directly to Media Service. Perks are preview text until backend exposes perk storage.
+              Pricing and join status are saved directly to Media Service.
             </p>
           </div>
 
@@ -170,69 +157,79 @@ export function TierEditorOverlay({
                   </span>
                   <input
                     type="number"
-                    min={100}
+                    min={minPrice}
                     value={price}
                     onChange={(event) => setPrice(Number(event.target.value))}
                     disabled={isSaving}
                     className="w-full rounded-md border border-border/40 bg-input py-3 pl-12 pr-4 font-headline font-bold text-foreground outline-none transition-colors focus:border-secondary focus:ring-1 focus:ring-secondary/50 disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
-                <p className="font-body text-[10px] text-muted-foreground">Pricing should stay at 100 AC or above.</p>
+                <p className="font-body text-[10px] text-muted-foreground">
+                  Pricing starts at {minPrice} AC for Level {level}.
+                </p>
               </div>
 
-              <label className="flex items-center justify-between rounded-md border border-border/30 bg-muted/40 p-4">
-                <span>
-                  <span className="block font-label text-xs font-bold uppercase tracking-widest text-foreground">Accept new members</span>
-                  <span className="font-body text-xs text-muted-foreground">Disable this when tier should remain visible but closed.</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={isAcceptingNew}
+              <div className="flex items-center justify-between gap-4 rounded-md border border-border/30 bg-muted/40 p-4">
+                <div className="min-w-0 space-y-1">
+                  <span id="accept-new-members-label" className="block font-label text-xs font-bold uppercase tracking-widest text-foreground">
+                    Accept new members
+                  </span>
+                  <span className="block font-body text-xs leading-5 text-muted-foreground">
+                    Disable this when the tier should remain visible but closed.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isAcceptingNew}
+                  aria-labelledby="accept-new-members-label"
+                  onClick={() => setIsAcceptingNew((current) => !current)}
                   disabled={isSaving}
-                  onChange={(event) => setIsAcceptingNew(event.target.checked)}
-                  className="h-5 w-5 accent-primary"
-                />
-              </label>
+                  className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
+                    isAcceptingNew ? "border-primary bg-primary/90" : "border-border/50 bg-input"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform duration-200 ${
+                      isAcceptingNew ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4">
-              <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Preview Perks</label>
-              <ul className="space-y-2">
-                {perks.map((perk, index) => (
-                  <li key={`${perk}-${index}`} className="flex items-center justify-between rounded-md border border-border/30 bg-muted/40 p-3">
-                    <span className="font-body text-sm text-foreground">{perk}</span>
-                    <button
-                      type="button"
-                      onClick={() => setPerks((currentPerks) => currentPerks.filter((_, itemIndex) => itemIndex !== index))}
-                      disabled={isSaving}
-                      className="rounded p-1 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
-                      aria-label={`Remove ${perk}`}
-                    >
-                      <span className="material-symbols-outlined text-sm">delete</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex gap-2">
-                <input
-                  ref={newPerkRef}
-                  type="text"
-                  placeholder="Add a preview perk"
-                  disabled={isSaving}
-                  className="min-w-0 flex-1 border-0 border-b border-border/50 bg-transparent py-2 font-body text-sm text-foreground outline-none transition-colors focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddPerk}
-                  disabled={isSaving}
-                  className="rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold text-primary transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Add
-                </button>
+              <div className="rounded-md border border-border/30 bg-muted/40 p-4">
+                <p className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Join Status</p>
+                <div className="mt-3 flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="font-body text-sm font-semibold text-foreground">
+                      {isAcceptingNew ? "Open to new members" : "Closed to new members"}
+                    </p>
+                    <p className="font-body text-xs leading-5 text-muted-foreground">
+                      {isAcceptingNew
+                        ? "Fans can join this tier immediately after save."
+                        : "The tier stays visible, but new joins are paused."}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-sm border px-3 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${
+                      isAcceptingNew
+                        ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
+                        : "border-border/40 bg-muted/30 text-muted-foreground"
+                    }`}
+                  >
+                    {isAcceptingNew ? "On" : "Off"}
+                  </span>
+                </div>
               </div>
-              <p className="font-body text-[10px] leading-5 text-muted-foreground">
-                Current API stores level, name, price, and join status only. Perks are generated for UI preview and will need a backend field before persistence.
-              </p>
+
+              <div className="rounded-md border border-secondary/20 bg-secondary/10 p-4">
+                <p className="font-label text-xs font-bold uppercase tracking-widest text-secondary">Payout Notice</p>
+                <p className="mt-2 font-body text-xs leading-5 text-foreground">
+                  Membership income becomes available after 72 hours.
+                </p>
+              </div>
             </div>
           </div>
 

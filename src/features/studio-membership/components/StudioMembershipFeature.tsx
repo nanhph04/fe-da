@@ -104,14 +104,21 @@ export function StudioMembershipFeature() {
         throw new Error(myChannelRes.mess || "Creator channel is not available.");
       }
 
-      const detailRes = await mediaService.getChannel(channelId);
+      const [detailRes, tiersRes] = await Promise.all([
+        mediaService.getChannel(channelId),
+        mediaService.getMembershipTiers(channelId),
+      ]);
 
       if (!detailRes.success || !detailRes.data) {
         throw new Error(detailRes.mess || "Membership data is not available.");
       }
 
+      if (!tiersRes.success) {
+        throw new Error(tiersRes.mess || "Membership tiers are not available.");
+      }
+
       setChannelDetail(detailRes.data);
-      setTiers(sortTiers((detailRes.data.membershipTiers ?? []).map(mapMembershipTier)));
+      setTiers(sortTiers((tiersRes.data ?? []).map(mapMembershipTier)));
     } catch (err) {
       setError(getErrorMessage(err, "Unable to load membership data. Please try again."));
       setTiers([]);
@@ -271,37 +278,6 @@ export function StudioMembershipFeature() {
     }
   }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
 
-  const handleDisableTier = useCallback(async (tier: StudioTier) => {
-    if (!channelDetail?.id) {
-      showActionMessage("Creator channel was not found for disabling this tier.");
-      return;
-    }
-
-    const confirmed = window.confirm(`Disable tier ${tier.name}? New members will not be able to join this tier.`);
-    if (!confirmed) {
-      return;
-    }
-
-    setMutatingTierId(tier.id);
-
-    try {
-      const response = await mediaService.disableMembershipTier(channelDetail.id, tier.id);
-
-      if (!response.success || !response.data) {
-        throw new Error(response.mess || "Unable to disable tier.");
-      }
-
-      const updatedTier = mapMembershipTier(response.data);
-      setTiers((currentTiers) => sortTiers(currentTiers.map((item) => item.id === updatedTier.id ? updatedTier : item)));
-      showActionMessage("Tier has been disabled for new members.");
-      void fetchMembershipData({ silent: true });
-    } catch (err) {
-      showActionMessage(getErrorMessage(err, "Unable to disable tier."));
-    } finally {
-      setMutatingTierId(null);
-    }
-  }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
-
   const reviewStatus = channelDetail?.membershipReviewStatus ?? "not_requested";
   const isReviewApproved = reviewStatus === "approved";
   const canRequestReview = Boolean(
@@ -370,7 +346,6 @@ export function StudioMembershipFeature() {
           onCreateTier={openCreateTierEditor}
           onEditTier={openEditTierEditor}
           onToggleTierStatus={(tier) => void handleToggleTierStatus(tier)}
-          onDisableTier={(tier) => void handleDisableTier(tier)}
           mutatingTierId={mutatingTierId}
         />
       )}

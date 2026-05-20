@@ -9,7 +9,6 @@ interface MembershipManagementProps {
   onCreateTier: () => void;
   onEditTier: (tier: StudioTier) => void;
   onToggleTierStatus: (tier: StudioTier) => void;
-  onDisableTier: (tier: StudioTier) => void;
   mutatingTierId: string | null;
 }
 
@@ -37,7 +36,6 @@ export function MembershipManagement({
   onCreateTier,
   onEditTier,
   onToggleTierStatus,
-  onDisableTier,
   mutatingTierId,
 }: MembershipManagementProps) {
   const acceptingTierCount = tiers.filter((tier) => tier.isAcceptingNew).length;
@@ -134,22 +132,14 @@ export function MembershipManagement({
                 </ul>
               </div>
 
-              <div className="relative mt-6 grid gap-3 border-t border-border/30 pt-5 sm:grid-cols-2">
+              <div className="relative mt-6 border-t border-border/30 pt-5">
                 <button
                   type="button"
                   onClick={() => onToggleTierStatus(tier)}
                   disabled={isMutating || isAdminClosed}
-                  className="rounded-sm border border-border/40 bg-muted px-4 py-3 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-sm border border-border/40 bg-muted px-4 py-3 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isMutating ? "Saving..." : tier.isAcceptingNew ? "Pause Joins" : "Resume Joins"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDisableTier(tier)}
-                  disabled={isMutating || isAdminClosed || !tier.isAcceptingNew}
-                  className="rounded-sm border border-destructive/40 bg-destructive/10 px-4 py-3 font-headline text-xs font-bold uppercase tracking-widest text-destructive transition-colors hover:bg-destructive/20 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Disable
                 </button>
               </div>
             </article>

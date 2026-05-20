@@ -1,7 +1,9 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { mediaService, type UserMembershipResponse } from "../services/mediaService";
 import type { PublicMembershipTier } from "../services/publicMediaService";
 import { WatchMembershipPanel } from "./WatchMembershipPanel";
 
@@ -26,6 +28,31 @@ function getInitials(value: string) {
   return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
 }
 
+function mapMembershipToTier(membership: UserMembershipResponse): PublicMembershipTier {
+  return {
+    id: membership.tierId,
+    channelId: membership.channelId,
+    name: membership.tierName,
+    level: membership.tierLevel,
+    priceCoin: membership.priceCoin,
+    isAcceptingNew: false,
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
+function getViewerVisibleTiers(
+  tiers: PublicMembershipTier[],
+  activeMembershipTiers: PublicMembershipTier[],
+) {
+  const activeTierIds = new Set(activeMembershipTiers.map((tier) => tier.id));
+  const visibleTiers = tiers.filter((tier) => tier.isAcceptingNew || activeTierIds.has(tier.id));
+  const visibleTierIds = new Set(visibleTiers.map((tier) => tier.id));
+  const missingActiveTiers = activeMembershipTiers.filter((tier) => !visibleTierIds.has(tier.id));
+
+  return [...visibleTiers, ...missingActiveTiers];
+}
+
 export function WatchChannelCard({
   channelId,
   channelName,
@@ -33,16 +60,54 @@ export function WatchChannelCard({
   description,
   membershipTiers,
 }: WatchChannelCardProps) {
+  const { isAuthenticated } = useAuth();
   const [isMembershipOpen, setIsMembershipOpen] = useState(false);
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
+  const [activeMembershipTiers, setActiveMembershipTiers] = useState<PublicMembershipTier[]>([]);
   const hasChannelLink = Boolean(channelId);
   const hasDescription = Boolean(description.trim());
-  const acceptingTierCount = useMemo(
-    () => membershipTiers.filter((tier) => tier.isAcceptingNew).length,
-    [membershipTiers]
+  const visibleTiers = useMemo(
+    () => getViewerVisibleTiers(membershipTiers, activeMembershipTiers),
+    [activeMembershipTiers, membershipTiers]
   );
+  const hasJoinableTier = visibleTiers.some((tier) => tier.isAcceptingNew);
   const canShowAvatar = Boolean(avatarUrl && !avatarFailed);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadViewerMemberships = async () => {
+      if (!isAuthenticated) {
+        if (isMounted) {
+          setActiveMembershipTiers([]);
+        }
+        return;
+      }
+
+      try {
+        const response = await mediaService.getMyMemberships({ page: 1, limit: 100 });
+        const memberships: UserMembershipResponse[] = response.success && response.data ? response.data : [];
+        const nextActiveMembershipTiers = memberships
+          .filter((membership) => membership.channelId === channelId && membership.isActive)
+          .map(mapMembershipToTier);
+
+        if (isMounted) {
+          setActiveMembershipTiers(nextActiveMembershipTiers);
+        }
+      } catch {
+        if (isMounted) {
+          setActiveMembershipTiers([]);
+        }
+      }
+    };
+
+    void loadViewerMemberships();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [channelId, isAuthenticated]);
 
   const channelTitle = (
     <span className="inline-flex items-center gap-2 transition-colors hover:text-primary">
@@ -88,9 +153,9 @@ export function WatchChannelCard({
               )}
             </h2>
             <p className="mt-1 text-sm font-medium text-muted-foreground">
-              {membershipTiers.length > 0
-                ? `${membershipTiers.length} gói membership • ${acceptingTierCount} gói đang mở`
-                : "Kênh chưa mở membership"}
+              {visibleTiers.length > 0
+                ? `${visibleTiers.length} gói membership`
+                : "Kênh chưa có gói membership có thể đăng ký"}
             </p>
           </div>
         </div>
@@ -98,14 +163,21 @@ export function WatchChannelCard({
         <button
           type="button"
           onClick={() => setIsMembershipOpen((current) => !current)}
+          disabled={visibleTiers.length === 0}
           className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground md:px-8"
         >
-          {isMembershipOpen ? "Ẩn gói" : "Đăng ký membership"}
+          {visibleTiers.length === 0
+            ? "Chưa mở gói"
+            : isMembershipOpen
+              ? "Ẩn gói"
+              : hasJoinableTier
+                ? "Đăng ký membership"
+                : "Xem gói membership"}
         </button>
       </div>
 
       {isMembershipOpen ? (
-        <WatchMembershipPanel channelId={channelId} tiers={membershipTiers} />
+        <WatchMembershipPanel channelId={channelId} tiers={visibleTiers} />
       ) : null}
 
       <div className="rounded-lg border border-border/20 bg-background/30 p-6 md:p-8">

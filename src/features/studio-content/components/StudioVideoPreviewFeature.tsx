@@ -1,11 +1,14 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PlayerContainerClient } from "@/features/watch/components/PlayerContainerClient";
 import { getReadyOwnerVideoThumbnailUrl, mediaService, type OwnerVideoDetailResponse } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
+import { getVideoJobStatusLabel, getVideoStatusFailureReason, isVideoJobStatus, useVideoStatusEventSubscription, type VideoStatusChangedPayload } from "@/shared/hooks/use-video-status-events";
+import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 import { StudioVideoDraftActions } from "./StudioVideoDraftActions";
+import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
 
 interface StudioVideoPreviewFeatureProps {
   videoId: string;
@@ -21,7 +24,7 @@ type NotReadyCopy = {
 const READY_STATUS = "ready";
 const DRAFT_STATUS = "draft";
 const PLAYABLE_STATUSES = new Set([READY_STATUS, "private"]);
-const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating", "pending_manual_review"]);
+const PROCESSING_STATUSES = new Set(["waiting", "processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
 
 function normalizeStatus(status?: string | null) {
@@ -78,6 +81,10 @@ function getAccessLabel(video: OwnerVideoDetailResponse) {
 }
 
 function getStatusClass(status: string) {
+  if (status === "succeeded") {
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+  }
+
   if (PLAYABLE_STATUSES.has(status)) {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
   }
@@ -91,6 +98,25 @@ function getStatusClass(status: string) {
   }
 
   return "border-border/40 bg-muted text-muted-foreground";
+}
+
+function getVideoStatusMessage(video: OwnerVideoDetailResponse, status: string) {
+  if (status === "rejected" || status === "failed") {
+    return getVideoStatusFailureReason({
+      failureReason: video.failureReason || video.errorMessage || null,
+      moderationDetails: video.moderationDetails,
+    }) || video.jobStatusMessage || "Video xử lý thất bại.";
+  }
+
+  if (PROCESSING_STATUSES.has(status)) {
+    return video.jobStatusMessage || "Video đang được xử lý. Hệ thống sẽ tự cập nhật khi có thay đổi.";
+  }
+
+  if (status === "succeeded" || status === "ready") {
+    return "Video đã xử lý xong và sẵn sàng phát.";
+  }
+
+  return "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player.";
 }
 
 function getNotReadyCopy(status: string): NotReadyCopy {
@@ -121,11 +147,34 @@ function getNotReadyCopy(status: string): NotReadyCopy {
     };
   }
 
+  if (status === "succeeded") {
+    return {
+      icon: "play_circle",
+      title: "Video processing completed",
+      message: "The asset is ready. The preview will unlock once the public-ready state is synced.",
+      className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+    };
+  }
+
   return {
     icon: "lock_clock",
     title: "Preview is not available yet",
     message: "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player.",
     className: "border-border/40 bg-muted text-muted-foreground",
+  };
+}
+
+function mergeVideoDetail(video: OwnerVideoDetailResponse, payload: VideoStatusChangedPayload): OwnerVideoDetailResponse {
+  return {
+    ...video,
+    status: payload.status,
+    jobStatus: payload.jobStatus,
+    jobStatusMessage: payload.jobStatusMessage,
+    failureReason: payload.failureReason,
+    thumbnailStatus: payload.thumbnailStatus,
+    thumbnailUrl: payload.thumbnailUrl,
+    moderationDetails: payload.moderationDetails,
+    updatedAt: payload.updatedAt,
   };
 }
 
@@ -204,7 +253,24 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
     };
   }, [refreshKey, videoId]);
 
+  const handleVideoStatusChanged = useCallback((payload: VideoStatusChangedPayload) => {
+    if (payload.videoId !== videoId) {
+      return;
+    }
+
+    setVideo(currentVideo => currentVideo ? mergeVideoDetail(currentVideo, payload) : currentVideo);
+
+    if (payload.jobStatus === "succeeded" || payload.jobStatus === "failed" || payload.jobStatus === "rejected") {
+      setRefreshKey(value => value + 1);
+    }
+  }, [videoId]);
+
+  useVideoStatusEventSubscription(handleVideoStatusChanged);
+
   const status = normalizeStatus(video?.status);
+  const normalizedJobStatus = video?.jobStatus?.toLowerCase();
+  const displayStatus = isVideoJobStatus(normalizedJobStatus) ? normalizedJobStatus : status;
+  const statusLabel = isVideoJobStatus(normalizedJobStatus) ? getVideoJobStatusLabel(normalizedJobStatus) : formatStatus(video?.status);
   const isReady = PLAYABLE_STATUSES.has(status);
   const notReadyCopy = useMemo(() => getNotReadyCopy(status), [status]);
   const isDraft = status === DRAFT_STATUS;
@@ -286,16 +352,11 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
               <PlayerContainerClient videoId={video.id} poster={poster} title={video.title} />
             ) : (
               <div className="relative flex aspect-video overflow-hidden rounded-lg border border-border/30 bg-card">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <StudioThumbnail
                   src={poster}
                   alt=""
                   aria-hidden="true"
                   className="absolute inset-0 h-full w-full scale-105 object-cover opacity-35 blur-sm"
-                  onError={event => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = "/images/thumbnail.png";
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
                 <div className="relative z-10 flex w-full flex-col items-center justify-center gap-4 px-6 text-center">
@@ -304,7 +365,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
                   </div>
                   <div className="max-w-lg space-y-2">
                     <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">{notReadyCopy.title}</h2>
-                    <p className="font-body text-sm leading-6 text-muted-foreground">{notReadyCopy.message}</p>
+                    <p className="font-body text-sm leading-6 text-muted-foreground">{video ? getVideoStatusMessage(video, status) : notReadyCopy.message}</p>
                   </div>
                 </div>
               </div>
@@ -316,8 +377,8 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
 
             <article className="rounded-lg border border-border/30 bg-card p-6">
               <div className="flex flex-wrap items-center gap-3">
-                <span className={`rounded-sm border px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(status)}`}>
-                  {formatStatus(video.status)}
+                <span className={`rounded-sm border px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(displayStatus)}`}>
+                  {statusLabel}
                 </span>
                 <span className="rounded-sm border border-secondary/30 bg-secondary/10 px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
                   {getAccessLabel(video)}
@@ -329,6 +390,16 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
               <p className="mt-5 whitespace-pre-line font-body text-sm leading-7 text-muted-foreground">
                 {video.description || "No description has been added yet."}
               </p>
+              {video.jobStatus || PROCESSING_STATUSES.has(status) || FAILED_STATUSES.has(status) ? (
+                <ProcessingProgressTracker
+                  initialStatus={video.status}
+                  jobStatus={video.jobStatus}
+                  jobStatusMessage={video.jobStatusMessage}
+                  failureReason={video.failureReason || video.errorMessage}
+                  moderationDetails={video.moderationDetails}
+                  onRefreshStatus={refreshDetail}
+                />
+              ) : null}
             </article>
           </div>
 
@@ -337,7 +408,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
             <dl className="mt-5 space-y-4 text-sm">
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
                 <dt className="text-muted-foreground">Status</dt>
-                <dd className="text-right font-headline font-bold text-foreground">{formatStatus(video.status)}</dd>
+                <dd className="text-right font-headline font-bold text-foreground">{statusLabel}</dd>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
                 <dt className="text-muted-foreground">Published</dt>

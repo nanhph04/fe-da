@@ -404,6 +404,9 @@ const parseSSEBlock = (block: string): SSEMessage | null => {
   }
 
   if (dataLines.length === 0) {
+    if (event !== "message") {
+      return { event, data: null };
+    }
     return null;
   }
 

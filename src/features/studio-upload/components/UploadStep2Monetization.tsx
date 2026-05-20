@@ -1,5 +1,9 @@
 "use client";
-import { UploadFormData } from "./StudioUploadFeature";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getErrorMessage } from "@/shared/api/client";
+import { mediaService, type MembershipTierResponse } from "@/features/watch/services/mediaService";
+import type { UploadFormData } from "./StudioUploadFeature";
 
 interface UploadStep2MonetizationProps {
   formData: UploadFormData;
@@ -9,8 +13,93 @@ interface UploadStep2MonetizationProps {
 }
 
 const pricePresets = [0, 100, 500, 1000];
+const coinFormatter = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
+
+function formatCoins(value: number) {
+  return `${coinFormatter.format(value)} AC`;
+}
+
+function sortMembershipTiers(tiers: MembershipTierResponse[]) {
+  return [...tiers].sort((a, b) => a.level - b.level || a.priceCoin - b.priceCoin);
+}
+
+function formatTierOption(tier: MembershipTierResponse) {
+  const status = tier.isAcceptingNew ? "Open" : "Closed";
+
+  return `Lv${tier.level} - ${tier.name} (${formatCoins(tier.priceCoin)}, ${status})`;
+}
 
 export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNext }: UploadStep2MonetizationProps) {
+  const [membershipTiers, setMembershipTiers] = useState<MembershipTierResponse[]>([]);
+  const [isLoadingTiers, setIsLoadingTiers] = useState(true);
+  const [tierError, setTierError] = useState<string | null>(null);
+
+  const sortedMembershipTiers = useMemo(() => sortMembershipTiers(membershipTiers), [membershipTiers]);
+
+  const selectedTier = useMemo(
+    () => sortedMembershipTiers.find((tier) => tier.level === formData.requiredTierLevel) ?? null,
+    [formData.requiredTierLevel, sortedMembershipTiers]
+  );
+
+  const loadMembershipTiers = useCallback(async (isCancelled?: () => boolean) => {
+    setIsLoadingTiers(true);
+    setTierError(null);
+
+    try {
+      const channelResponse = await mediaService.getMyChannel();
+      const channelId = channelResponse.data?.channelId;
+
+      if (!channelResponse.success || !channelId) {
+        throw new Error(channelResponse.mess || "Creator channel is not available.");
+      }
+
+      const tiersResponse = await mediaService.getMembershipTiers(channelId);
+
+      if (!tiersResponse.success) {
+        throw new Error(tiersResponse.mess || "Channel membership tiers are not available.");
+      }
+
+      if (isCancelled?.()) {
+        return;
+      }
+
+      setMembershipTiers(tiersResponse.data ?? []);
+    } catch (err) {
+      if (isCancelled?.()) {
+        return;
+      }
+
+      setMembershipTiers([]);
+      setTierError(getErrorMessage(err, "Unable to load this channel's membership tiers."));
+    } finally {
+      if (!isCancelled?.()) {
+        setIsLoadingTiers(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void loadMembershipTiers(() => cancelled);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loadMembershipTiers]);
+
+  useEffect(() => {
+    if (isLoadingTiers || tierError || !formData.requiredTierLevel) {
+      return;
+    }
+
+    const hasSelectedTier = sortedMembershipTiers.some((tier) => tier.level === formData.requiredTierLevel);
+
+    if (!hasSelectedTier) {
+      updateFormData({ requiredTierLevel: null });
+    }
+  }, [formData.requiredTierLevel, isLoadingTiers, sortedMembershipTiers, tierError, updateFormData]);
+
   return (
     <div className="mx-auto w-full max-w-6xl p-8 pb-32 animate-in fade-in slide-in-from-right-4 duration-500">
       <header className="mb-12">
@@ -58,27 +147,58 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
                       : "border-border/40 bg-muted text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {price === 0 ? "Free" : `${price.toLocaleString()} AC`}
+                  {price === 0 ? "Free" : formatCoins(price)}
                 </button>
               ))}
             </div>
           </section>
 
           <section className="space-y-4 rounded-lg border border-border/30 bg-card p-8">
-            <div>
-              <h2 className="font-headline text-lg font-bold text-foreground">Required Membership Tier</h2>
-              <p className="font-body text-sm text-muted-foreground">Optional. Restrict access to viewers with a specific tier level.</p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="font-headline text-lg font-bold text-foreground">Required Membership Tier</h2>
+                <p className="font-body text-sm text-muted-foreground">
+                  Optional. Pulled from your channel membership tiers to restrict access by level.
+                </p>
+              </div>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-secondary">
+                {isLoadingTiers ? "Syncing tiers" : `${sortedMembershipTiers.length} tiers`}
+              </span>
             </div>
             <select
-              value={formData.requiredTierLevel || ""}
+              value={formData.requiredTierLevel ?? ""}
               onChange={(event) => updateFormData({ requiredTierLevel: event.target.value ? Number(event.target.value) : null })}
-              className="w-full rounded-lg border border-border/40 bg-input px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+              disabled={isLoadingTiers && sortedMembershipTiers.length === 0}
+              className="w-full rounded-lg border border-border/40 bg-input px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">None (Available to all)</option>
-              <option value="1">Tier Level 1</option>
-              <option value="2">Tier Level 2</option>
-              <option value="3">Tier Level 3</option>
+              {isLoadingTiers ? <option value="" disabled>Loading channel tiers...</option> : null}
+              {sortedMembershipTiers.map((tier) => (
+                <option key={tier.id} value={tier.level}>
+                  {formatTierOption(tier)}
+                </option>
+              ))}
             </select>
+            {selectedTier ? (
+              <p className="font-body text-xs text-muted-foreground">
+                Selected: {selectedTier.name} at Lv{selectedTier.level} ({formatCoins(selectedTier.priceCoin)})
+              </p>
+            ) : null}
+            {tierError ? <p className="font-body text-xs text-destructive">{tierError}</p> : null}
+            {tierError ? (
+              <button
+                type="button"
+                onClick={() => void loadMembershipTiers()}
+                className="w-fit rounded border border-border/40 px-3 py-1.5 font-label text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+              >
+                Retry sync
+              </button>
+            ) : null}
+            {!isLoadingTiers && !tierError && sortedMembershipTiers.length === 0 ? (
+              <p className="font-body text-xs text-muted-foreground">
+                No membership tiers found. Create tiers in Studio Membership first.
+              </p>
+            ) : null}
           </section>
         </div>
 
@@ -90,8 +210,8 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="font-body text-sm">Gross Price ({formData.price} AC)</span>
-                  <span className="font-headline text-foreground">{formData.price * 100} VND</span>
+                  <span className="font-body text-sm">Gross Price</span>
+                  <span className="font-headline text-foreground">{formatCoins(formData.price)}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -99,14 +219,14 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
                     <span className="font-body text-sm text-muted-foreground">Platform Fee</span>
                     <span className="rounded bg-muted px-1.5 py-0.5 font-label text-[10px] font-bold text-muted-foreground">10%</span>
                   </div>
-                  <span className="font-headline text-primary">- {formData.price * 10} VND</span>
+                  <span className="font-headline text-primary">- {formatCoins(formData.price * 0.1)}</span>
                 </div>
 
                 <div className="h-px bg-border/30" />
 
                 <div className="pt-2">
                   <p className="mb-1 font-label text-xs font-bold uppercase tracking-widest text-secondary">Estimated Net</p>
-                  <p className="font-headline text-4xl font-extrabold text-foreground">{formData.price * 90} VND</p>
+                  <p className="font-headline text-4xl font-extrabold text-foreground">{formatCoins(formData.price * 0.9)}</p>
                   <p className="mt-1 font-body text-xs text-muted-foreground">Per purchase</p>
                 </div>
 

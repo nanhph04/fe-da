@@ -6,9 +6,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getReadyOwnerVideoThumbnailUrl, mediaService, type ConfirmUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
+import {
+  getModerationDetailsReason,
+  getVideoJobStatusLabel,
+  isVideoJobStatus,
+  useVideoStatusEventSubscription,
+  type VideoStatusChangedPayload,
+} from "@/shared/hooks/use-video-status-events";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
+import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
+import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
 
-const PROCESSING_STATUSES = new Set(["processing", "pending_moderation", "moderating", "pending_manual_review"]);
+const PROCESSING_STATUSES = new Set(["waiting", "processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
 const READY_STATUSES = new Set(["ready", "private"]);
 const REJECTED_STATUS = "rejected";
@@ -47,7 +56,8 @@ function matchesActiveFilter(video: OwnerVideoResponse, filter: ContentFilter) {
     return true;
   }
 
-  return FILTER_STATUSES[filter].has(normalizeStatus(video.status));
+  const status = normalizeStatus(video.status);
+  return FILTER_STATUSES[filter].has(status);
 }
 
 function normalizeStatus(status?: string | null) {
@@ -77,7 +87,7 @@ function toTitleCase(value: string) {
 }
 
 function getStatusTone(status: string) {
-  if (READY_STATUSES.has(status)) {
+  if (status === "succeeded" || READY_STATUSES.has(status)) {
     return "text-emerald-400";
   }
 
@@ -93,7 +103,7 @@ function getStatusTone(status: string) {
 }
 
 function getRejectReason(video: OwnerVideoResponse) {
-  return video.failureReason || video.errorMessage || video.jobStatusMessage || "Chưa có nguyên nhân reject từ hệ thống.";
+  return video.failureReason || getModerationDetailsReason(video.moderationDetails) || video.errorMessage || video.jobStatusMessage || "Chưa có nguyên nhân reject từ hệ thống.";
 }
 
 function getConfirmResolutions(video: OwnerVideoResponse): ConfirmUploadBody["resolutions"] {
@@ -104,6 +114,34 @@ function getConfirmResolutions(video: OwnerVideoResponse): ConfirmUploadBody["re
   );
 
   return selectedResolutions.length > 0 ? selectedResolutions : DEFAULT_CONFIRM_RESOLUTIONS;
+}
+
+function getVideoJobStatusText(payload: Pick<VideoStatusChangedPayload, "jobStatus" | "jobStatusMessage" | "failureReason" | "moderationDetails">) {
+  const normalizedJobStatus = payload.jobStatus.toLowerCase();
+
+  if (normalizedJobStatus === "failed" || normalizedJobStatus === "rejected") {
+    return getModerationDetailsReason(payload.moderationDetails) || payload.failureReason || payload.jobStatusMessage;
+  }
+
+  return payload.jobStatusMessage || getVideoJobStatusLabel(payload.jobStatus);
+}
+
+function mergeVideoStatus(video: OwnerVideoResponse, payload: VideoStatusChangedPayload): OwnerVideoResponse {
+  return {
+    ...video,
+    status: payload.status,
+    jobStatus: payload.jobStatus,
+    jobStatusMessage: payload.jobStatusMessage,
+    failureReason: payload.failureReason,
+    thumbnailStatus: payload.thumbnailStatus,
+    thumbnailUrl: payload.thumbnailUrl,
+    moderationDetails: payload.moderationDetails,
+    updatedAt: payload.updatedAt,
+  };
+}
+
+function isStatusRelevantForFilter(video: OwnerVideoResponse, filter: ContentFilter) {
+  return filter === "all" || matchesActiveFilter(video, filter);
 }
 
 export function StudioContentFeature() {
@@ -122,6 +160,11 @@ export function StudioContentFeature() {
   const [reuploadProgress, setReuploadProgress] = useState(0);
   const [expandedNoticeVideoId, setExpandedNoticeVideoId] = useState<string | null>(null);
   const draftFileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const videosRef = useRef<OwnerVideoResponse[]>([]);
+
+  useEffect(() => {
+    videosRef.current = videos;
+  }, [videos]);
 
   const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter) => {
     if (showLoading) {
@@ -161,9 +204,37 @@ export function StudioContentFeature() {
     void fetchVideos(true, activeFilter);
   }, [activeFilter, fetchVideos]);
 
+  const showActionMessage = useCallback((message: string) => {
+    setActionMessage(message);
+    window.setTimeout(() => setActionMessage(null), 3500);
+  }, []);
+
   const refreshAfterProcessing = useCallback(() => {
     void fetchVideos(false, activeFilter);
   }, [activeFilter, fetchVideos]);
+
+  const handleVideoStatusChanged = useCallback((payload: VideoStatusChangedPayload) => {
+    const existingVideo = videosRef.current.find(video => video.id === payload.videoId);
+
+    if (!existingVideo) {
+      void fetchVideos(false, activeFilter);
+      return;
+    }
+
+    const nextVideo = mergeVideoStatus(existingVideo, payload);
+    setVideos(currentVideos => currentVideos
+      .map(video => video.id === payload.videoId ? mergeVideoStatus(video, payload) : video)
+      .filter(video => isStatusRelevantForFilter(video, activeFilter))
+    );
+
+    showActionMessage(`${existingVideo.title}: ${getVideoJobStatusLabel(payload.jobStatus)}${getVideoJobStatusText(payload) ? ` - ${getVideoJobStatusText(payload)}` : ""}`);
+
+    if (!isStatusRelevantForFilter(nextVideo, activeFilter) || payload.jobStatus === "succeeded" || payload.jobStatus === "failed" || payload.jobStatus === "rejected") {
+      void fetchVideos(false, activeFilter);
+    }
+  }, [activeFilter, fetchVideos, showActionMessage]);
+
+  useVideoStatusEventSubscription(handleVideoStatusChanged);
 
   const handleFilterChange = (filter: ContentFilter) => {
     setActiveFilter(filter);
@@ -194,11 +265,6 @@ export function StudioContentFeature() {
 
   const handleRefresh = () => {
     void fetchVideos(false, activeFilter);
-  };
-
-  const showActionMessage = (message: string) => {
-    setActionMessage(message);
-    window.setTimeout(() => setActionMessage(null), 3500);
   };
 
   const handleDeleteVideo = async (video: OwnerVideoResponse) => {
@@ -382,10 +448,15 @@ export function StudioContentFeature() {
             const price = video.price ?? 0;
             const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
-            const isRejected = status === REJECTED_STATUS;
+            const normalizedJobStatus = video.jobStatus?.toLowerCase();
+            const displayStatus = isVideoJobStatus(normalizedJobStatus) ? normalizedJobStatus : status;
+            const statusLabel = isVideoJobStatus(normalizedJobStatus) ? getVideoJobStatusLabel(normalizedJobStatus) : status.toUpperCase();
+            const isRejected = status === REJECTED_STATUS || normalizedJobStatus === "rejected";
             const isDraft = status === DRAFT_STATUS;
-            const isFailed = FAILED_STATUSES.has(status);
+            const isFailed = FAILED_STATUSES.has(status) || normalizedJobStatus === "failed" || normalizedJobStatus === "rejected";
             const isReady = READY_STATUSES.has(status);
+            const isProcessing = PROCESSING_STATUSES.has(status) || normalizedJobStatus === "waiting" || normalizedJobStatus === "processing";
+            const statusTone = getStatusTone(displayStatus);
             const isNoticeExpanded = expandedNoticeVideoId === video.id;
             const hasInlineNotice = isDraft || isFailed;
             const noticeLabel = isDraft ? "lưu ý draft" : isRejected ? "lý do reject" : "lỗi xử lý";
@@ -405,16 +476,11 @@ export function StudioContentFeature() {
                     className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
                     aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <StudioThumbnail
                       src={thumbUrl}
                       alt=""
                       aria-hidden="true"
                       className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] ${isReady ? "" : "opacity-70"}`}
-                      onError={event => {
-                        event.currentTarget.onerror = null;
-                        event.currentTarget.src = "/images/thumbnail.png";
-                      }}
                     />
                     <span className="absolute inset-0 flex items-center justify-center bg-background/0 text-foreground opacity-0 transition-opacity duration-300 group-hover:bg-background/50 group-hover:opacity-100">
                       <span className="material-symbols-outlined text-3xl" aria-hidden="true">{isReady ? "play_circle" : "visibility"}</span>
@@ -428,8 +494,8 @@ export function StudioContentFeature() {
                       {video.title}
                     </Link>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className={`font-label text-xs ${getStatusTone(status)}`}>
-                        {status.toUpperCase()}
+                      <span className={`font-label text-xs ${statusTone}`}>
+                        {statusLabel}
                       </span>
                       <span className="font-label text-xs text-muted-foreground">• {formattedDate}</span>
                       {hasInlineNotice ? (
@@ -486,24 +552,15 @@ export function StudioContentFeature() {
                         </p>
                       </div>
                     ) : null}
-                    {PROCESSING_STATUSES.has(status) ? (
-                      <div className="mt-3 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 p-3 text-xs text-secondary">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="font-semibold uppercase tracking-widest">
-                            {(video.jobStatus || status).replaceAll("_", " ")}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={refreshAfterProcessing}
-                            className="rounded-sm border border-secondary/30 px-2 py-1 font-bold uppercase tracking-widest transition-colors hover:bg-secondary/10"
-                          >
-                            Refresh
-                          </button>
-                        </div>
-                        <p className="mt-2 text-muted-foreground">
-                          {video.jobStatusMessage || "Video đang được xử lý. Nhấn Refresh để cập nhật trạng thái mới nhất."}
-                        </p>
-                      </div>
+                    {isProcessing ? (
+                      <ProcessingProgressTracker
+                        initialStatus={video.status}
+                        jobStatus={video.jobStatus}
+                        jobStatusMessage={video.jobStatusMessage}
+                        failureReason={video.failureReason || video.errorMessage}
+                        moderationDetails={video.moderationDetails}
+                        onRefreshStatus={refreshAfterProcessing}
+                      />
                     ) : null}
                   </div>
                 </div>

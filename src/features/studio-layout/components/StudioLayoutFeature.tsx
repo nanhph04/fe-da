@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { StudioSidebar } from "./StudioSidebar";
 import { StudioHeader } from "./StudioHeader";
+import { StudioVideoStatusEventsProvider } from "./StudioVideoStatusEventsProvider";
 
 export function StudioLayoutFeature({ children }: { children: ReactNode }) {
   return (
-    <>
+    <StudioVideoStatusEventsProvider>
       <StudioSidebar />
       <main className="md:ml-64 min-h-screen bg-background flex flex-col">
         <StudioHeader />
@@ -12,6 +13,6 @@ export function StudioLayoutFeature({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
-    </>
+    </StudioVideoStatusEventsProvider>
   );
 }

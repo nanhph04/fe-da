@@ -1,5 +1,13 @@
+"use client";
+
 import { Link } from "@/i18n/routing";
-import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import {
+  mediaService,
+  type UserMembershipResponse,
+} from "@/features/watch/services/mediaService";
+import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";
 
 interface ChannelMembershipTiersProps {
   channel: PublicChannelDetail;
@@ -21,9 +29,75 @@ function getBlockedMessage(channel: PublicChannelDetail) {
   return null;
 }
 
+function mapMembershipToTier(membership: UserMembershipResponse): PublicMembershipTier {
+  return {
+    id: membership.tierId,
+    channelId: membership.channelId,
+    name: membership.tierName,
+    level: membership.tierLevel,
+    priceCoin: membership.priceCoin,
+    isAcceptingNew: false,
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
+function getViewerVisibleTiers(
+  tiers: PublicMembershipTier[],
+  activeMembershipTiers: PublicMembershipTier[],
+) {
+  const activeTierIds = new Set(activeMembershipTiers.map((tier) => tier.id));
+  const visibleTiers = tiers.filter((tier) => tier.isAcceptingNew || activeTierIds.has(tier.id));
+  const visibleTierIds = new Set(visibleTiers.map((tier) => tier.id));
+  const missingActiveTiers = activeMembershipTiers.filter((tier) => !visibleTierIds.has(tier.id));
+
+  return [...visibleTiers, ...missingActiveTiers];
+}
+
 export function ChannelMembershipTiers({ channel }: ChannelMembershipTiersProps) {
+  const { isAuthenticated } = useAuth();
+  const [activeMembershipTiers, setActiveMembershipTiers] = useState<PublicMembershipTier[]>([]);
   const blockedMessage = getBlockedMessage(channel);
-  const tiers = [...channel.membershipTiers].sort((a, b) => a.level - b.level || a.priceCoin - b.priceCoin);
+  const tiers = useMemo(
+    () => getViewerVisibleTiers(channel.membershipTiers, activeMembershipTiers)
+      .sort((a, b) => a.level - b.level || a.priceCoin - b.priceCoin),
+    [activeMembershipTiers, channel.membershipTiers],
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadViewerMemberships = async () => {
+      if (!isAuthenticated) {
+        if (isMounted) {
+          setActiveMembershipTiers([]);
+        }
+        return;
+      }
+
+      try {
+        const response = await mediaService.getMyMemberships({ page: 1, limit: 100 });
+        const memberships: UserMembershipResponse[] = response.success && response.data ? response.data : [];
+        const nextActiveMembershipTiers = memberships
+          .filter((membership) => membership.channelId === channel.id && membership.isActive)
+          .map(mapMembershipToTier);
+
+        if (isMounted) {
+          setActiveMembershipTiers(nextActiveMembershipTiers);
+        }
+      } catch {
+        if (isMounted) {
+          setActiveMembershipTiers([]);
+        }
+      }
+    };
+
+    void loadViewerMemberships();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [channel.id, isAuthenticated]);
 
   return (
     <aside className="h-fit rounded-lg border border-border/20 bg-card p-6 shadow-2xl">

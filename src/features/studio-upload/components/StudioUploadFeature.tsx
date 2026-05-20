@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UploadStep1Details } from "./UploadStep1Details";
 import { UploadStep2Monetization } from "./UploadStep2Monetization";
 import { UploadStep3Review } from "./UploadStep3Review";
@@ -60,9 +60,9 @@ export function StudioUploadFeature() {
     };
   }, [formData.thumbnailPreviewUrl]);
 
-  const updateFormData = (data: Partial<UploadFormData>) => {
+  const updateFormData = useCallback((data: Partial<UploadFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">

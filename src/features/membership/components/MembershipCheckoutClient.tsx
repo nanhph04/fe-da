@@ -1,9 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getErrorMessage } from "@/shared/api/client";
 import { WalletService } from "@/features/wallet/services/walletService";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
+import {
+  mediaService,
+  type UserMembershipResponse,
+} from "@/features/watch/services/mediaService";
 import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";
 import { CheckoutOverlay, type MembershipPaymentState } from "./CheckoutOverlay";
 import { MembershipTiers } from "./MembershipTiers";
@@ -18,15 +22,40 @@ interface MembershipCheckoutClientProps {
   blockedMessage?: string | null;
 }
 
+function mapMembershipToTier(membership: UserMembershipResponse): PublicMembershipTier {
+  return {
+    id: membership.tierId,
+    channelId: membership.channelId,
+    name: membership.tierName,
+    level: membership.tierLevel,
+    priceCoin: membership.priceCoin,
+    isAcceptingNew: false,
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
+function getViewerVisibleTiers(
+  tiers: PublicMembershipTier[],
+  activeMembershipTiers: PublicMembershipTier[],
+) {
+  const activeTierIds = new Set(activeMembershipTiers.map((tier) => tier.id));
+  const visibleTiers = tiers.filter((tier) => tier.isAcceptingNew || activeTierIds.has(tier.id));
+  const visibleTierIds = new Set(visibleTiers.map((tier) => tier.id));
+  const missingActiveTiers = activeMembershipTiers.filter((tier) => !visibleTierIds.has(tier.id));
+
+  return [...visibleTiers, ...missingActiveTiers];
+}
+
 function findInitialTier(tiers: PublicMembershipTier[], initialTierId?: string | null) {
-  const acceptingTiers = tiers.filter((tier) => tier.isAcceptingNew);
   const selectedFromUrl = tiers.find((tier) => tier.id === initialTierId);
 
   if (selectedFromUrl) {
     return selectedFromUrl;
   }
 
-  return acceptingTiers.find((tier) => tier.level === 2) ?? acceptingTiers[0] ?? tiers[0] ?? null;
+  const joinableTiers = tiers.filter((tier) => tier.isAcceptingNew);
+  return joinableTiers.find((tier) => tier.level === 2) ?? joinableTiers[0] ?? tiers[0] ?? null;
 }
 
 export function MembershipCheckoutClient({
@@ -35,9 +64,14 @@ export function MembershipCheckoutClient({
   userId,
   blockedMessage,
 }: MembershipCheckoutClientProps) {
+  const [activeMembershipTiers, setActiveMembershipTiers] = useState<PublicMembershipTier[]>([]);
+  const visibleTiers = useMemo(
+    () => getViewerVisibleTiers(channel.membershipTiers, activeMembershipTiers),
+    [activeMembershipTiers, channel.membershipTiers],
+  );
   const initialTier = useMemo(
-    () => findInitialTier(channel.membershipTiers, initialTierId),
-    [channel.membershipTiers, initialTierId],
+    () => findInitialTier(visibleTiers, initialTierId),
+    [initialTierId, visibleTiers],
   );
   const [selectedTier, setSelectedTier] = useState<PublicMembershipTier | null>(initialTier);
   const [checkoutTier, setCheckoutTier] = useState<PublicMembershipTier | null>(null);
@@ -50,6 +84,44 @@ export function MembershipCheckoutClient({
     response: null,
   });
   const [paymentSession, setPaymentSession] = useState<MembershipPaymentSession | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadActiveMemberships = async () => {
+      try {
+        const response = await mediaService.getMyMemberships({ page: 1, limit: 100 });
+        const memberships: UserMembershipResponse[] = response.success && response.data ? response.data : [];
+        const nextActiveMembershipTiers = memberships
+          .filter((membership) => membership.channelId === channel.id && membership.isActive)
+          .map(mapMembershipToTier);
+
+        if (isMounted) {
+          setActiveMembershipTiers(nextActiveMembershipTiers);
+        }
+      } catch {
+        if (isMounted) {
+          setActiveMembershipTiers([]);
+        }
+      }
+    };
+
+    void loadActiveMemberships();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [channel.id]);
+
+  useEffect(() => {
+    setSelectedTier((currentTier) => {
+      if (currentTier && visibleTiers.some((tier) => tier.id === currentTier.id)) {
+        return currentTier;
+      }
+
+      return findInitialTier(visibleTiers, initialTierId);
+    });
+  }, [initialTierId, visibleTiers]);
 
   const loadWallet = useCallback(async () => {
     setWalletLoading(true);
@@ -131,7 +203,7 @@ export function MembershipCheckoutClient({
   return (
     <>
       <MembershipTiers
-        tiers={channel.membershipTiers}
+        tiers={visibleTiers}
         selectedTierId={selectedTier?.id ?? null}
         blockedMessage={blockedMessage}
         onSelectTier={setSelectedTier}

@@ -59,22 +59,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       const token = api.getToken();
-      if (token) {
-        await fetchProfile();
+      if (!token) {
         setIsLoading(false);
         return;
       }
 
-      try {
-        const refreshedToken = await refreshAccessToken();
-        api.setToken(refreshedToken);
-        await fetchProfile();
-      } catch {
-        api.clearToken();
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
+      await fetchProfile();
+      setIsLoading(false);
     };
 
     void initAuth();
