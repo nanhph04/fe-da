@@ -21,7 +21,97 @@
     "signIn": "Đăng nhập",
     "signUp": "Đăng ký",
     "signOut": "Đăng xuất",
-    "myProfile": "Hồ sơ của tôi"
+    "myProfile": "Hồ sơ của tôi",
+    "visitorAccess": "Khách truy cập",
+    "memberAccess": "Quyền hội viên",
+    "browseMode": "Chế độ xem",
+    "signInForMore": "Đăng nhập để xem thêm",
+    "accountMenuLabel": "Mở menu tài khoản",
+    "userAvatarAlt": "Ảnh đại diện người dùng",
+    "changeLanguage": "Đổi ngôn ngữ",
+    "roles": {
+      "guest": "khách",
+      "user": "người dùng",
+      "viewer": "người xem",
+      "creator": "nhà sáng tạo",
+      "admin": "quản trị viên"
+    }
+  },
+  "Library": {
+    "SubscriptionsPage": {
+      "backToLibrary": "Thư viện",
+      "eyebrow": "Quyền hội viên",
+      "title": "Quản lý quyền hội viên trong một nơi",
+      "description": "Theo dõi kênh đã tham gia, trạng thái gia hạn, ngày hết hạn và kiểm soát chu kỳ tự động gia hạn khi cần.",
+      "controlEyebrow": "Bảng điều khiển",
+      "controlTitle": "Chu kỳ hiện tại",
+      "summary": {
+        "statusLabel": "Trạng thái",
+        "statusValue": "Đang đồng bộ",
+        "renewalLabel": "Gia hạn",
+        "renewalValue": "Tự động",
+        "accessLabel": "Quyền xem",
+        "accessValue": "Giữ đến hạn"
+      },
+      "autoRenew": {
+        "title": "Tự động gia hạn",
+        "description": "Membership mới mặc định bật tự động gia hạn. Khi hủy gia hạn, quyền truy cập hiện tại vẫn được giữ đến ngày hết hạn của chu kỳ."
+      },
+      "note": {
+        "eyebrow": "Cần nhớ",
+        "title": "Quyền truy cập an toàn",
+        "cancel": "Hủy gia hạn chỉ dừng chu kỳ kế tiếp, không xóa quyền xem đang còn hạn.",
+        "admin": "Nếu kênh tạm dừng nhận hội viên mới, bạn vẫn xem được nội dung đến hết chu kỳ hiện tại."
+      }
+    },
+    "Subscriptions": {
+      "eyebrow": "Ví hội viên",
+      "title": "Gói hội viên",
+      "loadingCount": "Đang tải",
+      "channelCount": "{count, plural, =0 {Chưa có kênh} one {# kênh} other {# kênh}}",
+      "errorTitle": "Không tải được gói hội viên",
+      "emptyTitle": "Bạn chưa tham gia kênh nào",
+      "emptyDescription": "Khi đăng ký gói hội viên, các kênh và quyền truy cập sẽ xuất hiện tại đây.",
+      "emptyCta": "Khám phá kênh",
+      "levelShort": "Lv{level}",
+      "tierLine": "Lv{level} / {tierName}",
+      "metricLevel": "Cấp",
+      "metricPlan": "Gói",
+      "metricPrice": "Giá",
+      "price": "{amount} AC",
+      "status": {
+        "expired": "Đã hết hạn",
+        "accessUntil": "Giữ quyền truy cập",
+        "active": "Đang hoạt động"
+      },
+      "expiry": {
+        "active": "Đang hoạt động",
+        "noExpiry": "Không có ngày hết hạn",
+        "unknown": "Không rõ ngày hết hạn",
+        "expires": "Hết hạn {date}",
+        "expired": "Đã hết hạn {date}"
+      },
+      "autoRenew": {
+        "statusInactive": "Không có chu kỳ đang hoạt động",
+        "statusDisabled": "Đã hủy gia hạn tự động",
+        "statusEnabled": "Tự động gia hạn đang bật",
+        "enabledDescription": "Membership mới mặc định bật tự động gia hạn. Bạn có thể hủy gia hạn nhưng vẫn xem được đến ngày hết hạn.",
+        "inactiveDescription": "Bạn có thể gia hạn lại từ trang quản lý kênh nếu gói còn khả dụng.",
+        "accessUntilFallback": "Bạn vẫn giữ quyền truy cập đến hết chu kỳ hiện tại.",
+        "accessUntilDate": "Bạn vẫn giữ quyền truy cập đến {date}."
+      },
+      "actions": {
+        "cancel": "Hủy gia hạn",
+        "cancelling": "Đang hủy...",
+        "cancelled": "Đã hủy gia hạn",
+        "manage": "Quản lý gói"
+      },
+      "errors": {
+        "loadFailed": "Không thể tải gói hội viên.",
+        "cancelFailed": "Không thể hủy gia hạn tự động.",
+        "cancelFailedRetry": "Không thể hủy gia hạn tự động. Vui lòng thử lại."
+      }
+    }
   },
   "Wallet": {
     "TopUpPackages": {

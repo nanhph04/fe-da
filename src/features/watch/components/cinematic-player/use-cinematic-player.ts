@@ -8,6 +8,7 @@ import {
   buildMediaSource,
   buildPlaybackDiagnostic,
   createPlaybackErrorMessage,
+  getQualityLevelResolutions,
   isTypingTarget,
   redactUrlForLogs,
   SEEK_STEP_SECONDS,
@@ -20,6 +21,28 @@ interface UseCinematicPlayerOptions {
   src: string;
   poster?: string;
   initialPositionSeconds: number;
+}
+
+function areResolutionListsEqual(left: string[], right: string[]) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function applyQualityResolution(
+  qualityLevels: QualityLevelListLike,
+  selectedResolution: string,
+) {
+  const targetHeight =
+    selectedResolution === "auto" ? null : parseInt(selectedResolution, 10);
+
+  for (let index = 0; index < qualityLevels.length; index += 1) {
+    const level = qualityLevels[index];
+    if (!level) {
+      continue;
+    }
+
+    level.enabled =
+      targetHeight === null ? true : (level.height ?? 0) === targetHeight;
+  }
 }
 
 export function useCinematicPlayer({
@@ -37,12 +60,18 @@ export function useCinematicPlayer({
   const lastSavedPositionRef = useRef(0);
   const inFlightProgressKeyRef = useRef<string | null>(null);
   const lastForcedProgressKeyRef = useRef<string | null>(null);
+  const selectedResolutionRef = useRef("auto");
   const [selectedResolution, setSelectedResolution] = useState("auto");
+  const [detectedResolutions, setDetectedResolutions] = useState<string[]>([]);
   const [playerError, setPlayerError] = useState<string | null>(null);
 
   useEffect(() => {
     videoIdRef.current = videoId;
   }, [videoId]);
+
+  useEffect(() => {
+    selectedResolutionRef.current = selectedResolution;
+  }, [selectedResolution]);
 
   useEffect(() => {
     resumePositionRef.current = initialPositionSeconds;
@@ -69,6 +98,9 @@ export function useCinematicPlayer({
       notSupportedMessage: "Unable to load this video source.",
       playbackRates: [0.5, 1, 1.25, 1.5, 2],
       controlBar: {
+        volumePanel: {
+          inline: false,
+        },
         children: [
           "playToggle",
           "volumePanel",
@@ -155,6 +187,22 @@ export function useCinematicPlayer({
       }
     };
 
+    const syncDetectedResolutions = () => {
+      const qualityLevels = (player as Player & {
+        qualityLevels?: () => QualityLevelListLike;
+      }).qualityLevels?.();
+
+      if (!qualityLevels) {
+        return;
+      }
+
+      const nextResolutions = getQualityLevelResolutions(qualityLevels);
+      setDetectedResolutions((current) =>
+        areResolutionListsEqual(current, nextResolutions) ? current : nextResolutions
+      );
+      applyQualityResolution(qualityLevels, selectedResolutionRef.current);
+    };
+
     const handleCanPlay = () => {
       setPlayerError(null);
 
@@ -164,6 +212,8 @@ export function useCinematicPlayer({
           type: sourceRef.current.type,
         });
       }
+
+      syncDetectedResolutions();
     };
 
     const handleLoadedMetadata = () => {
@@ -189,6 +239,8 @@ export function useCinematicPlayer({
           type: sourceRef.current.type,
         });
       }
+
+      syncDetectedResolutions();
     };
 
     const handleError = () => {
@@ -267,6 +319,12 @@ export function useCinematicPlayer({
       void persistProgress("watching", true);
     };
 
+    const qualityLevels = (player as Player & {
+      qualityLevels?: () => QualityLevelListLike;
+    }).qualityLevels?.();
+    qualityLevels?.on?.("addqualitylevel", syncDetectedResolutions);
+    qualityLevels?.on?.("change", syncDetectedResolutions);
+
     player.on("canplay", handleCanPlay);
     player.on("loadedmetadata", handleLoadedMetadata);
     player.on("error", handleError);
@@ -285,6 +343,8 @@ export function useCinematicPlayer({
       player.off("timeupdate", handleTimeUpdate);
       player.off("pause", handlePause);
       player.off("ended", handleEnded);
+      qualityLevels?.off?.("addqualitylevel", syncDetectedResolutions);
+      qualityLevels?.off?.("change", syncDetectedResolutions);
       window.removeEventListener("pagehide", handlePageHide);
       window.removeEventListener("keydown", handleArrowSeek);
 
@@ -316,6 +376,9 @@ export function useCinematicPlayer({
 
     sourceRef.current = nextSource;
     hasRestoredProgressRef.current = false;
+    setDetectedResolutions([]);
+    selectedResolutionRef.current = "auto";
+    setSelectedResolution("auto");
     console.info("[watch] assigning player source", {
       source: redactUrlForLogs(nextSource.src),
       type: nextSource.type,
@@ -342,19 +405,7 @@ export function useCinematicPlayer({
       return;
     }
 
-    const qualityLevels = player.qualityLevels();
-    const targetHeight =
-      selectedResolution === "auto" ? null : parseInt(selectedResolution, 10);
-
-    for (let index = 0; index < qualityLevels.length; index += 1) {
-      const level = qualityLevels[index];
-      if (!level) {
-        continue;
-      }
-
-      level.enabled =
-        targetHeight === null ? true : (level.height ?? 0) === targetHeight;
-    }
+    applyQualityResolution(player.qualityLevels(), selectedResolution);
   }, [selectedResolution, src]);
 
   return {
@@ -362,5 +413,6 @@ export function useCinematicPlayer({
     playerError,
     selectedResolution,
     setSelectedResolution,
+    detectedResolutions,
   };
 }

@@ -181,6 +181,13 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
   const avatarLabel = user?.displayName || user?.email || "User";
   const avatarInitials = getInitials(avatarLabel);
   const canRenderAvatar = Boolean(user?.avatarUrl && user.avatarUrl !== failedAvatarUrl);
+  const roleLabel: Record<MainNavRole, string> = {
+    guest: t("roles.guest"),
+    user: t("roles.user"),
+    viewer: t("roles.viewer"),
+    creator: t("roles.creator"),
+    admin: t("roles.admin"),
+  };
 
   return (
     <nav className="fixed top-0 z-50 flex h-20 w-full items-center gap-6 bg-background/40 bg-gradient-to-b from-muted to-transparent px-6 backdrop-blur-xl md:px-8">
@@ -249,14 +256,14 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
               <>
                 <button
                   type="button"
-                  aria-label="Mở menu tài khoản"
+                  aria-label={t("accountMenuLabel")}
                   className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-sm font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
                   onClick={() => setShowDropdown(value => !value)}
                 >
                   {user?.avatarUrl && canRenderAvatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      alt="Ảnh đại diện người dùng"
+                      alt={t("userAvatarAlt")}
                       src={user.avatarUrl}
                       className="h-full w-full object-cover"
                       onError={() => setFailedAvatarUrl(user.avatarUrl || null)}
@@ -270,7 +277,7 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
                   <div className="absolute top-12 right-0 w-48 bg-popover border border-border rounded-sm shadow-2xl py-2 flex flex-col">
                     <div className="px-4 py-2 border-b border-border mb-2">
                       <p className="text-foreground font-bold truncate">{user?.displayName || user?.email}</p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-widest">{role}</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest">{roleLabel[role]}</p>
                     </div>
                     <Link
                       href="/profile"

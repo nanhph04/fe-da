@@ -39,6 +39,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let description = "";
   let category = "";
   let tags: string[] = [];
+  let videoResolutions: string[] = [];
   let channelId = "";
   let channelName = "Velvet Gallery";
   let channelOwnerId: string | null = null;
@@ -60,6 +61,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
     description = infoRes.data.description;
     category = infoRes.data.category;
     tags = infoRes.data.tags;
+    videoResolutions = infoRes.data.resolutions ?? [];
     channelId = infoRes.data.channelId;
     channelName = infoRes.data.channelName;
     avatarUrlChannel = infoRes.data.avatarUrlChannel;
@@ -104,6 +106,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
           videoId={videoId}
           poster={poster}
           title={title}
+          metadataResolutions={videoResolutions}
           access={{
             channelId,
             channelName,

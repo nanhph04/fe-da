@@ -76,6 +76,7 @@ export interface PublicVideoMetadata {
   thumbnailStatus: PublicThumbnailStatus;
   thumbnailObjectKey?: string | null;
   thumbnailBucket?: string | null;
+  resolutions?: string[];
   viewCount: number;
   status: string;
   visibility: string;

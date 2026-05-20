@@ -21,7 +21,97 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
-    "myProfile": "My Profile"
+    "myProfile": "My Profile",
+    "visitorAccess": "Visitor Access",
+    "memberAccess": "Member Access",
+    "browseMode": "Browse Mode",
+    "signInForMore": "Sign in for more",
+    "accountMenuLabel": "Open account menu",
+    "userAvatarAlt": "User avatar",
+    "changeLanguage": "Change language",
+    "roles": {
+      "guest": "guest",
+      "user": "user",
+      "viewer": "viewer",
+      "creator": "creator",
+      "admin": "admin"
+    }
+  },
+  "Library": {
+    "SubscriptionsPage": {
+      "backToLibrary": "Library",
+      "eyebrow": "Membership Access",
+      "title": "Manage membership access in one place",
+      "description": "Track joined channels, renewal status, expiry dates, and auto-renewal controls when you need them.",
+      "controlEyebrow": "Control panel",
+      "controlTitle": "Current cycle",
+      "summary": {
+        "statusLabel": "Status",
+        "statusValue": "Syncing",
+        "renewalLabel": "Renewal",
+        "renewalValue": "Auto",
+        "accessLabel": "Access",
+        "accessValue": "Kept until expiry"
+      },
+      "autoRenew": {
+        "title": "Auto-renewal",
+        "description": "New memberships enable auto-renewal by default. If you cancel renewal, your current access stays active until the cycle expires."
+      },
+      "note": {
+        "eyebrow": "Good to know",
+        "title": "Protected access",
+        "cancel": "Canceling renewal only stops the next cycle; it does not remove access that is still valid.",
+        "admin": "If a channel pauses new memberships, you can still watch member content until your current cycle ends."
+      }
+    },
+    "Subscriptions": {
+      "eyebrow": "Membership wallet",
+      "title": "Membership plans",
+      "loadingCount": "Loading",
+      "channelCount": "{count, plural, =0 {No channels} one {# channel} other {# channels}}",
+      "errorTitle": "Unable to load memberships",
+      "emptyTitle": "No channel memberships yet",
+      "emptyDescription": "When you join a channel membership, its access level and renewal details will appear here.",
+      "emptyCta": "Discover channels",
+      "levelShort": "Lv{level}",
+      "tierLine": "Lv{level} / {tierName}",
+      "metricLevel": "Level",
+      "metricPlan": "Plan",
+      "metricPrice": "Price",
+      "price": "{amount} AC",
+      "status": {
+        "expired": "Expired",
+        "accessUntil": "Access retained",
+        "active": "Active"
+      },
+      "expiry": {
+        "active": "Active",
+        "noExpiry": "No expiry date",
+        "unknown": "Unknown expiry date",
+        "expires": "Expires {date}",
+        "expired": "Expired {date}"
+      },
+      "autoRenew": {
+        "statusInactive": "No active cycle",
+        "statusDisabled": "Auto-renewal cancelled",
+        "statusEnabled": "Auto-renewal enabled",
+        "enabledDescription": "New memberships enable auto-renewal by default. You can cancel renewal and keep watching until the expiry date.",
+        "inactiveDescription": "You can renew from the channel management page if this plan is still available.",
+        "accessUntilFallback": "You will keep access through the current cycle.",
+        "accessUntilDate": "You will keep access until {date}."
+      },
+      "actions": {
+        "cancel": "Cancel renewal",
+        "cancelling": "Cancelling...",
+        "cancelled": "Renewal cancelled",
+        "manage": "Manage plan"
+      },
+      "errors": {
+        "loadFailed": "Unable to load memberships.",
+        "cancelFailed": "Unable to cancel auto-renewal.",
+        "cancelFailedRetry": "Unable to cancel auto-renewal. Please try again."
+      }
+    }
   },
   "Wallet": {
     "TopUpPackages": {

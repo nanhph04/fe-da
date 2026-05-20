@@ -196,6 +196,7 @@ export interface PlaybackInfoResponse {
   playbackUrl: string;
   resumePositionSeconds: number;
   isResumeAvailable: boolean;
+  resolutions?: string[];
 }
 
 export interface RefreshPlaybackTokenResponse {

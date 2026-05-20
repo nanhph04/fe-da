@@ -8,12 +8,34 @@ export type MediaSourceDescriptor = {
 export type QualityLevelLike = {
   enabled: boolean;
   height?: number;
+  width?: number;
+  bitrate?: number;
+  id?: string;
+  label?: string;
 };
 
 export type QualityLevelListLike = {
   length: number;
   [index: number]: QualityLevelLike;
+  on?: (eventName: string, callback: () => void) => void;
+  off?: (eventName: string, callback: () => void) => void;
 };
+
+export function getQualityLevelResolutions(qualityLevels: QualityLevelListLike) {
+  const heights = new Set<number>();
+
+  for (let index = 0; index < qualityLevels.length; index += 1) {
+    const height = qualityLevels[index]?.height;
+
+    if (typeof height === "number" && Number.isFinite(height) && height > 0) {
+      heights.add(Math.round(height));
+    }
+  }
+
+  return Array.from(heights)
+    .sort((left, right) => right - left)
+    .map((height) => `${height}p`);
+}
 
 export const SEEK_STEP_SECONDS = 5;
 

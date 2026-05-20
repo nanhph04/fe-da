@@ -54,63 +54,6 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>
-        <script dangerouslySetInnerHTML={{ __html: `(function () {
-  var injectedAttributePattern = /^(bis_|__processed_)/;
-
-  function isInjectedAttribute(attributeName) {
-    return attributeName === 'bis_register' || injectedAttributePattern.test(attributeName);
-  }
-
-  function removeInjectedAttrsFromElement(element) {
-    if (!element || !element.attributes) return;
-
-    Array.prototype.slice.call(element.attributes).forEach(function (attribute) {
-      if (isInjectedAttribute(attribute.name)) {
-        element.removeAttribute(attribute.name);
-      }
-    });
-  }
-
-  function removeInjectedAttrs(root) {
-    if (!root) return;
-
-    if (root.nodeType === 1) {
-      removeInjectedAttrsFromElement(root);
-    }
-
-    if (!root.querySelectorAll) return;
-
-    root.querySelectorAll('*').forEach(removeInjectedAttrsFromElement);
-  }
-
-  removeInjectedAttrs(document.documentElement);
-
-  var observer = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutation) {
-      if (mutation.type === 'attributes') {
-        removeInjectedAttrsFromElement(mutation.target);
-        return;
-      }
-
-      mutation.addedNodes.forEach(function (node) {
-        if (node.nodeType === 1) {
-          removeInjectedAttrs(node);
-        }
-      });
-    });
-  });
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    childList: true,
-    subtree: true
-  });
-
-  window.addEventListener('load', function () {
-    removeInjectedAttrs(document.documentElement);
-    window.setTimeout(function () { observer.disconnect(); }, 1000);
-  });
-})();` }} />
         <AppProviders locale={locale} messages={messages}>
           {children}
         </AppProviders>

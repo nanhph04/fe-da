@@ -9,10 +9,13 @@ import type { ApiError } from "@/shared/api/types";
 import { CinematicPlayer } from "./CinematicPlayer";
 import { WatchAccessGate, type WatchAccessData } from "./WatchAccessGate";
 
+const DEFAULT_METADATA_RESOLUTIONS: string[] = [];
+
 interface PlayerContainerClientProps {
   videoId: string;
   poster?: string;
   title?: string;
+  metadataResolutions?: string[];
   access?: WatchAccessData;
 }
 
@@ -105,12 +108,13 @@ export function PlayerContainerClient({
   videoId,
   poster,
   title,
+  metadataResolutions = DEFAULT_METADATA_RESOLUTIONS,
   access,
 }: PlayerContainerClientProps) {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [initialPositionSeconds, setInitialPositionSeconds] = useState(0);
-  const [availableResolutions, setAvailableResolutions] = useState<string[]>([]);
+  const [availableResolutions, setAvailableResolutions] = useState<string[]>(metadataResolutions);
   const [error, setError] = useState<string | null>(null);
   const [accessDeniedMessage, setAccessDeniedMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -189,7 +193,11 @@ export function PlayerContainerClient({
           });
 
           setInitialPositionSeconds(tokenRes.data.resumePositionSeconds || 0);
-          setAvailableResolutions([]);
+          setAvailableResolutions(
+            tokenRes.data.resolutions?.length
+              ? tokenRes.data.resolutions
+              : metadataResolutions,
+          );
           setVideoUrl(finalUrl);
         } else if (isPermissionError({ code: tokenRes.code, mess: tokenRes.mess })) {
           setVideoUrl(null);
@@ -226,7 +234,7 @@ export function PlayerContainerClient({
     return () => {
       isActive = false;
     };
-  }, [videoId, isAuthenticated, isAuthLoading, playbackReloadKey]);
+  }, [videoId, isAuthenticated, isAuthLoading, metadataResolutions, playbackReloadKey]);
 
   if (isLoading) {
     return (

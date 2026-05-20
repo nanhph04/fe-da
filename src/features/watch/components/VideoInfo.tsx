@@ -24,7 +24,7 @@ function formatPublishedDate(value: string | null) {
 }
 
 export function VideoInfo({ title, viewCount, publishedAt, category, tags = [] }: VideoInfoProps) {
-  const badges = [category, ...tags].filter(Boolean).slice(0, 3);
+  const badges = Array.from(new Set([category, ...tags].filter(Boolean))).slice(0, 3);
 
   return (
     <section className="mt-10 space-y-8">

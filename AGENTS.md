@@ -29,10 +29,12 @@ Before writing or modifying code, the AI must:
 ## Routing Rules
 
 - Start with this file, then open only the relevant linked files.
-- For any code change, apply `CORE_RULES.md`; read the specific section needed instead of scanning everything.
+- For any code change, apply only the relevant section of `CORE_RULES.md`.
+- Do not read the full `CORE_RULES.md` unless the task affects multiple frontend architecture areas.
 - For UI changes, apply `DESIGN.md` in addition to `CORE_RULES.md`.
 - For performance, hydration, media, upload, SSE, or bundle work, apply `PERFORMANCE_RULES.md`.
-- For product-sensitive flows, apply the relevant section of `PRODUCT.md`; do not invent business rules or API fields.
+- Read `PRODUCT.md` only when the task changes business behavior, API contracts, roles, permissions, wallet/membership/video lifecycle, upload/SSE/search/admin logic.
+- Do not read `PRODUCT.md` for purely visual, refactor, typo, styling, or local component fixes.
 - For review tasks or substantial generated code, apply `REVIEW_RULES.md`.
 - If rules conflict, priority is: explicit user request -> source code/API contract -> `PRODUCT.md` business rules -> `DESIGN.md` visual rules -> `CORE_RULES.md`/`PERFORMANCE_RULES.md`/`REVIEW_RULES.md` -> this router.
 

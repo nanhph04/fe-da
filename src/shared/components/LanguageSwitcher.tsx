@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { Globe } from 'lucide-react';
 
 export function LanguageSwitcher() {
   const locale = useLocale();
+  const t = useTranslations('Navigation');
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -28,7 +29,7 @@ export function LanguageSwitcher() {
     <div className="relative">
       <button
         type="button"
-        aria-label="Change language"
+        aria-label={t('changeLanguage')}
         className="flex h-9 items-center justify-center gap-2 rounded-md px-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         onClick={() => setOpen(prev => !prev)}
       >

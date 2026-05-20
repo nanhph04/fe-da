@@ -33,6 +33,18 @@ const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean):
   return "viewer";
 };
 
+const isRouteMatch = (pathname: string | null, path?: string) => {
+  if (!pathname || !path) {
+    return false;
+  }
+
+  if (path === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === path || pathname.startsWith(`${path}/`);
+};
+
 function NavEntry({ item, isActive }: { item: NavItem; isActive?: boolean }) {
   const t = useTranslations("Navigation");
   const className = `relative flex items-center gap-3 rounded-lg px-3 py-3 transition-all duration-200 ${
@@ -79,6 +91,17 @@ export function SideNav() {
   const role = getRole(user?.role, isAuthenticated, user?.isCreator);
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
   const t = useTranslations("Navigation");
+  const visibleSideNavItems = sideNavItems.filter(item => isNavItemVisible(item, role));
+  const activePath = visibleSideNavItems
+    .filter(item => isRouteMatch(pathname, item.path))
+    .sort((current, next) => (next.path?.length ?? 0) - (current.path?.length ?? 0))[0]?.path;
+  const roleLabel: Record<MainNavRole, string> = {
+    guest: t("roles.guest"),
+    user: t("roles.user"),
+    viewer: t("roles.viewer"),
+    creator: t("roles.creator"),
+    admin: t("roles.admin"),
+  };
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 z-40 bg-sidebar flex-col pt-24 px-4 pb-8 hidden md:flex border-r border-sidebar-border/10">
@@ -89,10 +112,10 @@ export function SideNav() {
           </div>
           <div>
             <div className="font-headline font-semibold text-sm text-foreground">
-              {role === "guest" ? "Visitor Access" : "Member Access"}
+              {role === "guest" ? t("visitorAccess") : t("memberAccess")}
             </div>
             <div className="text-xs text-secondary font-medium uppercase tracking-widest">
-              {role === "guest" ? "Browse Mode" : role}
+              {role === "guest" ? t("browseMode") : roleLabel[role]}
             </div>
           </div>
         </div>
@@ -105,21 +128,19 @@ export function SideNav() {
           </Link>
         ) : (
           <div className="w-full mt-4 bg-accent text-muted-foreground text-xs font-bold py-2 rounded-lg border border-dashed border-border/20 text-center">
-            {t("signIn")} for more
+            {t("signInForMore")}
           </div>
         )}
       </div>
 
       <nav className="flex-1 space-y-1">
-        {sideNavItems
-          .filter(item => isNavItemVisible(item, role))
-          .map(item => (
-            <NavEntry
-              key={item.label}
-              item={item}
-              isActive={!!item.path && (pathname === item.path || pathname?.startsWith(`${item.path}/`))}
-            />
-          ))}
+        {visibleSideNavItems.map(item => (
+          <NavEntry
+            key={item.label}
+            item={item}
+            isActive={!!item.path && item.path === activePath}
+          />
+        ))}
       </nav>
 
       <div className="pt-8 border-t border-border/10 space-y-1">

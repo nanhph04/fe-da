@@ -108,13 +108,7 @@ export function CheckoutOverlay({
                 <span className="text-xs text-secondary">AC</span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span>Phí nền tảng</span>
-              <div className="flex items-center gap-1 font-headline font-bold text-foreground">
-                <span>0</span>
-                <span className="text-xs text-secondary">AC</span>
-              </div>
-            </div>
+
 
             <div className="flex items-center justify-between border-t border-border/20 pt-6">
               <span className="font-headline text-lg font-bold text-foreground">Tổng thanh toán</span>
@@ -165,22 +159,6 @@ export function CheckoutOverlay({
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Membership đang được đồng bộ vào thư viện của bạn. Nếu chưa thấy ngay, hãy mở lại trang gói hội viên sau vài giây.
               </p>
-              {paymentState.response ? (
-                <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                  <div className="rounded-md bg-background p-3">
-                    <p className="uppercase tracking-widest text-muted-foreground">Creator nhận</p>
-                    <p className="mt-1 font-headline text-lg font-black text-foreground">
-                      {formatCoins(paymentState.response.creatorCoins)} AC
-                    </p>
-                  </div>
-                  <div className="rounded-md bg-background p-3">
-                    <p className="uppercase tracking-widest text-muted-foreground">Platform</p>
-                    <p className="mt-1 font-headline text-lg font-black text-foreground">
-                      {formatCoins(paymentState.response.systemCoins)} AC
-                    </p>
-                  </div>
-                </div>
-              ) : null}
             </div>
           ) : null}
         </div>
