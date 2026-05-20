@@ -17,10 +17,6 @@ function encodeVideoPathId(videoId: string) {
   return encodeURIComponent(videoId);
 }
 
-function encodeCategoryPathSlug(categorySlug: string) {
-  return encodeURIComponent(categorySlug.trim());
-}
-
 export function buildPublicVideoThumbnailUrl(videoId: string) {
   return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
 }
@@ -247,7 +243,7 @@ export async function getLatestVideosCached(limit = 10) {
   const query = `?limit=${normalizedLimit}`;
   try {
     return await fetchPublicApi<PublicDiscoveryVideo[]>(
-      `/api/media/videos/discovery/latest${query}`
+      `/api/media/videos/latest${query}`
     );
   } catch (error) {
     const apiError = error as PublicApiError;
@@ -381,11 +377,14 @@ export async function getVideosByCategoryCached(categorySlug: string, limit = 6)
   cacheLife("minutes");
   cacheTag("media:category-videos", `media:category:${normalizedSlug}`);
 
-  const query = new URLSearchParams({ limit: String(normalizedLimit) });
+  const query = new URLSearchParams({
+    category: normalizedSlug,
+    limit: String(normalizedLimit),
+  });
 
   try {
     return await fetchPublicApi<PublicDiscoveryVideo[]>(
-      `/api/media/categories/${encodeCategoryPathSlug(normalizedSlug)}/videos?${query.toString()}`
+      `/api/media/videos/by-category?${query.toString()}`
     );
   } catch (error) {
     const apiError = error as PublicApiError;
@@ -446,12 +445,13 @@ export async function getCategoryVideosPageCached(
   );
 
   const query = new URLSearchParams({
+    category: normalizedSlug,
     page: String(normalizedPage),
     limit: String(normalizedLimit),
   });
 
   return fetchPublicApi<PublicDiscoveryVideo[]>(
-    `/api/media/categories/${encodeCategoryPathSlug(normalizedSlug)}/videos?${query.toString()}`
+    `/api/media/videos/by-category?${query.toString()}`
   );
 }
 

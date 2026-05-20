@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getLocalAccessToken, refreshAccessToken, setLocalAccessToken } from "@/shared/api/client";
+import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
 import type { DashboardTopVideo } from "../types/studio-dashboard.types";
-
-const FALLBACK_THUMBNAIL = "/images/thumbnail.png";
 
 interface TopVideosProps {
   videos: DashboardTopVideo[];
@@ -21,90 +18,6 @@ function getBadgeClass(tone: DashboardTopVideo["badgeTone"]) {
   }
 
   return "bg-muted text-muted-foreground";
-}
-
-function isOwnerThumbnailUrl(url: string) {
-  return url.startsWith("/api/media/videos/me/");
-}
-
-interface StudioThumbnailProps {
-  alt: string;
-  src: string;
-}
-
-function StudioThumbnail({ alt, src }: StudioThumbnailProps) {
-  const [resolvedSrc, setResolvedSrc] = useState(src || FALLBACK_THUMBNAIL);
-
-  useEffect(() => {
-    if (!src || !isOwnerThumbnailUrl(src)) {
-      setResolvedSrc(src || FALLBACK_THUMBNAIL);
-      return;
-    }
-
-    const controller = new AbortController();
-    let objectUrl: string | null = null;
-
-    const fetchThumbnail = (token: string) => fetch(src, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
-      signal: controller.signal,
-    });
-
-    const loadPrivateThumbnail = async () => {
-      try {
-        let token = getLocalAccessToken();
-
-        if (!token) {
-          token = await refreshAccessToken();
-          setLocalAccessToken(token);
-        }
-
-        let response = await fetchThumbnail(token);
-
-        if (response.status === 401) {
-          token = await refreshAccessToken();
-          setLocalAccessToken(token);
-          response = await fetchThumbnail(token);
-        }
-
-        if (!response.ok) {
-          throw new Error(`Thumbnail request failed with status ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        objectUrl = URL.createObjectURL(blob);
-        setResolvedSrc(objectUrl);
-      } catch {
-        if (!controller.signal.aborted) {
-          setResolvedSrc(FALLBACK_THUMBNAIL);
-        }
-      }
-    };
-
-    void loadPrivateThumbnail();
-
-    return () => {
-      controller.abort();
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [src]);
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      src={resolvedSrc}
-      alt={alt}
-      onError={event => {
-        event.currentTarget.onerror = null;
-        event.currentTarget.src = FALLBACK_THUMBNAIL;
-      }}
-    />
-  );
 }
 
 export function TopVideos({ videos, isLoading = false }: TopVideosProps) {
@@ -130,7 +43,11 @@ export function TopVideos({ videos, isLoading = false }: TopVideosProps) {
           videos.map(video => (
             <div key={video.id} className="group flex items-center gap-6 rounded-sm border border-border/30 bg-card p-4 transition-colors hover:bg-muted/40">
               <div className="aspect-video w-32 shrink-0 overflow-hidden rounded-sm bg-background">
-                <StudioThumbnail src={video.thumbnailUrl} alt={video.title} />
+                <StudioThumbnail
+                  src={video.thumbnailUrl}
+                  alt={video.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <h4 className="truncate font-headline text-sm font-bold text-foreground">{video.title}</h4>

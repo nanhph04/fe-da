@@ -179,7 +179,7 @@ export const adminChannelService = {
 
   async updateMembershipAvailability(channelId: string, payload: AdminChannelMembershipAvailabilityPayload) {
     const response = await api.patch<AdminChannelActionResponse>(
-      `/api/media/channels/${channelId}/admin/membership`,
+      `/api/media/admin/channels/${channelId}/membership`,
       payload,
       { requireAuth: true }
     );

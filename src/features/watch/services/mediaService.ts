@@ -17,16 +17,12 @@ function encodeVideoPathId(videoId: string) {
   return encodeURIComponent(videoId);
 }
 
-function encodeCategoryPathSlug(categorySlug: string) {
-  return encodeURIComponent(categorySlug.trim());
-}
-
 export function buildPublicVideoThumbnailUrl(videoId: string) {
   return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
 }
 
 export function buildOwnerVideoThumbnailUrl(videoId: string) {
-  return `/api/media/videos/me/${encodeVideoPathId(videoId)}/thumbnail`;
+  return `/api/media/studio/videos/${encodeVideoPathId(videoId)}/thumbnail`;
 }
 
 export function getReadyThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
@@ -707,19 +703,20 @@ export const mediaService = {
 
   // 2. CHANNEL
   createChannel: async (data: { name: string; bio: string }) => {
-    return api.post<ChannelResponse>("/api/media/channels", data, { requireAuth: true });
+    return api.post<ChannelResponse>("/api/media/me/channel", data, { requireAuth: true });
   },
   updateChannel: async (
     id: string,
     data: { name?: string; bio?: string; avatarUrl?: string; bannerUrl?: string }
   ) => {
-    return api.patch<ChannelResponse>(`/api/media/channels/${id}`, data, { requireAuth: true });
+    void id;
+    return api.patch<ChannelResponse>("/api/media/me/channel", data, { requireAuth: true });
   },
   getChannel: async (id: string) => {
     return api.get<ChannelDetailResponse>(`/api/media/channels/${id}`);
   },
   getMyChannel: async () => {
-    return api.get<MyChannelResponse>("/api/media/channels/me", { requireAuth: true });
+    return api.get<MyChannelResponse>("/api/media/me/channel", { requireAuth: true });
   },
   getMembershipStatus: async (id: string) => {
     return api.get<MembershipStatusResponse>(`/api/media/channels/${id}/membership-status`, {
@@ -732,14 +729,14 @@ export const mediaService = {
   },
   updateChannelAdminMembership: async (id: string, action: "close" | "open") => {
     return api.patch<ChannelResponse>(
-      `/api/media/channels/${id}/admin/membership`,
+      `/api/media/admin/channels/${id}/membership`,
       { action },
       { requireAuth: true }
     );
   },
   requestChannelMembershipReview: async (id: string) => {
     return api.post<ChannelResponse>(
-      `/api/media/channels/${id}/membership-review/request`,
+      `/api/media/channels/${id}/membership-review-requests`,
       undefined,
       { requireAuth: true }
     );
@@ -791,93 +788,93 @@ export const mediaService = {
 
   // 4. VIDEO
   initUpload: async (data: InitUploadBody) => {
-    return api.post<InitUploadResponse>("/api/media/videos/uploads", data, { requireAuth: true });
+    return api.post<InitUploadResponse>("/api/media/studio/videos/uploads", data, { requireAuth: true });
   },
   getPartUrls: async (videoId: string, uploadId: string, partNumbers: number[]) => {
     return api.post<GetPartUrlsResponse>(
-      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/part-urls`,
+      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/part-urls`,
       { partNumbers },
       { requireAuth: true }
     );
   },
   completePart: async (videoId: string, uploadId: string, partNumber: number, data: CompletePartBody) => {
     return api.post<CompletePartResponse>(
-      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/parts/${partNumber}/completed`,
+      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/parts/${partNumber}/completed`,
       data,
       { requireAuth: true }
     );
   },
   getUploadStatus: async (videoId: string, uploadId: string) => {
     return api.get<UploadStatusResponse>(
-      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/status`,
+      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/status`,
       { requireAuth: true }
     );
   },
   completeUpload: async (videoId: string, uploadId: string) => {
     return api.post<CompleteUploadResponse>(
-      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/complete`,
+      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/complete`,
       undefined,
       { requireAuth: true }
     );
   },
   submitUpload: async (videoId: string, uploadId: string, data: SubmitUploadBody) => {
     return api.post<SubmitUploadResponse>(
-      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/submit`,
+      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/submit`,
       data,
       { requireAuth: true }
     );
   },
   cancelUpload: async (videoId: string, uploadId: string) => {
     return api.delete<{ videoId: string; cancelled: boolean }>(
-      `/api/media/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}`,
+      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}`,
       { requireAuth: true }
     );
   },
   deleteFailedUpload: async (id: string) => {
     return api.delete<{ videoId: string; deleted: boolean }>(
-      `/api/media/videos/${id}/failed-upload`,
+      `/api/media/studio/videos/${encodeURIComponent(id)}/failed-upload`,
       { requireAuth: true }
     );
   },
   deleteVideo: async (id: string) => {
-    return api.delete<{ videoId: string; unpublished: boolean }>(`/api/media/videos/${id}`, {
+    return api.delete<{ videoId: string; unpublished: boolean }>(`/api/media/studio/videos/${encodeURIComponent(id)}`, {
       requireAuth: true,
     });
   },
   uploadPresignedFile,
   uploadResumableVideoFile,
   getPlaybackInfo: async (id: string) => {
-    return api.get<PlaybackInfoResponse>(`/api/media/videos/${id}/play`, { requireAuth: true });
+    return api.get<PlaybackInfoResponse>(`/api/media/me/videos/${encodeURIComponent(id)}/play`, { requireAuth: true });
   },
   saveVideoProgress: async (id: string, data: SaveVideoProgressBody) => {
-    return api.post<SaveVideoProgressResponse>(`/api/media/videos/${id}/progress`, data, {
+    return api.post<SaveVideoProgressResponse>(`/api/media/me/videos/${encodeURIComponent(id)}/progress`, data, {
       requireAuth: true,
     });
   },
   refreshPlaybackToken: async (id: string) => {
     return api.post<RefreshPlaybackTokenResponse>(
-      `/api/media/videos/${id}/playback-token/refresh`,
+      `/api/media/me/videos/${encodeURIComponent(id)}/playback-token/refresh`,
       {},
       { requireAuth: true }
     );
   },
   getContinueWatching: async (params?: Pick<PaginationParams, "limit">) => {
     const qs = buildQueryString({ limit: params?.limit });
-    return api.get<ContinueWatchingVideoResponse[]>(`/api/media/videos/continue-watching${qs}`, {
+    return api.get<ContinueWatchingVideoResponse[]>(`/api/media/me/videos/continue-watching${qs}`, {
       requireAuth: true,
     });
   },
   getPurchasedVideos: async (params?: PaginationParams) => {
     const qs = buildQueryString({ page: params?.page, limit: params?.limit });
-    return api.get<PurchasedVideoResponse[]>(`/api/media/videos/library/purchased${qs}`, {
+    return api.get<PurchasedVideoResponse[]>(`/api/media/me/videos/purchased${qs}`, {
       requireAuth: true,
     });
   },
   getVideoMetadata: async (id: string) => {
-    return api.get<VideoMetadataResponse>(`/api/media/videos/${id}/metadata`);
+    return api.get<VideoMetadataResponse>(`/api/media/videos/${encodeURIComponent(id)}/metadata`);
   },
   updateVideoMetadata: async (id: string, data: UpdateVideoMetadataBody) => {
-    return api.patch<VideoMetadataResponse>(`/api/media/videos/${id}/metadata`, data, {
+    return api.patch<VideoMetadataResponse>(`/api/media/studio/videos/${encodeURIComponent(id)}/metadata`, data, {
       requireAuth: true,
     });
   },
@@ -894,23 +891,19 @@ export const mediaService = {
   },
   getLatestVideos: async (params?: Pick<PaginationParams, "limit">) => {
     const qs = buildQueryString({ limit: params?.limit });
-    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/latest${qs}`);
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/latest${qs}`);
   },
   getVideosByCategory: async (categorySlug: string, params?: PaginationParams) => {
-    const qs = buildQueryString({ page: params?.page, limit: params?.limit });
-    return api.get<DiscoveryVideoResponse[]>(
-      `/api/media/categories/${encodeCategoryPathSlug(categorySlug)}/videos${qs}`
-    );
+    const qs = buildQueryString({ category: categorySlug.trim(), page: params?.page, limit: params?.limit });
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/by-category${qs}`);
   },
   getVideosByCategorySlug: async (slug: string, params?: PaginationParams) => {
-    const qs = buildQueryString({ page: params?.page, limit: params?.limit });
-    return api.get<DiscoveryVideoResponse[]>(
-      `/api/media/categories/${encodeCategoryPathSlug(slug)}/videos${qs}`
-    );
+    const qs = buildQueryString({ category: slug.trim(), page: params?.page, limit: params?.limit });
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/by-category${qs}`);
   },
   getSubscribedVideos: async (params?: Pick<PaginationParams, "limit">) => {
     const qs = buildQueryString({ limit: params?.limit });
-    return api.get<DiscoveryVideoResponse[]>(`/api/media/videos/discovery/subscribed${qs}`, {
+    return api.get<DiscoveryVideoResponse[]>(`/api/media/me/videos/subscribed${qs}`, {
       requireAuth: true,
     });
   },
@@ -920,10 +913,10 @@ export const mediaService = {
       status: toCommaSeparated(params?.status),
       visibility: toCommaSeparated(params?.visibility),
     });
-    return api.get<OwnerVideoResponse[]>(`/api/media/videos/me${qs}`, { requireAuth: true });
+    return api.get<OwnerVideoResponse[]>(`/api/media/studio/videos${qs}`, { requireAuth: true });
   },
   getOwnerVideoDetail: async (id: string) => {
-    return api.get<OwnerVideoDetailResponse>(`/api/media/videos/me/${id}/detail`, { requireAuth: true });
+    return api.get<OwnerVideoDetailResponse>(`/api/media/studio/videos/${encodeURIComponent(id)}`, { requireAuth: true });
   },
   searchMedia: async (params: SearchMediaParams) => {
     const qs = buildQueryString({ q: params.q, category: params.category, limit: params.limit });

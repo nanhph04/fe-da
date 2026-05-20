@@ -6,7 +6,7 @@ import { api, getLocalAccessToken } from "@/shared/api/client";
 const FALLBACK_THUMBNAIL = "/images/thumbnail.png";
 
 function isOwnerThumbnailUrl(url: string) {
-  return url.startsWith("/api/media/videos/me/");
+  return url.startsWith("/api/media/studio/videos/");
 }
 
 interface StudioThumbnailProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
