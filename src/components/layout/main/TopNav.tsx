@@ -3,12 +3,13 @@
 import Form from "next/form";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { useState } from "react";
 import { ChevronDown, Search } from "lucide-react";
 import { usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { PublicBrand } from "@/components/layout/public/PublicBrand";
+import { AccountDropdown } from "@/components/layout/shared/AccountDropdown";
 import {
   isNavItemVisible,
   studioEntryByRole,
@@ -29,19 +30,6 @@ type TopNavProps = {
 };
 
 const NAV_CATEGORY_LIMIT = 12;
-
-const getInitials = (value?: string | null) => {
-  if (!value?.trim()) {
-    return "U";
-  }
-
-  const parts = value.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-};
 
 const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean): MainNavRole => {
   if (!isAuthenticated || !role) {
@@ -103,8 +91,10 @@ function CategoryMenu({
 }) {
   const t = useTranslations("Navigation");
   const visibleCategories = categories.slice(0, NAV_CATEGORY_LIMIT);
-  const triggerClassName = `inline-flex items-center gap-1.5 font-headline font-bold tracking-tight transition-colors duration-300 ${
-    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+  const triggerClassName = `inline-flex items-center gap-1.5 rounded-[4px] px-4 py-2 font-headline text-sm font-bold tracking-tight transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+    isActive
+      ? "bg-white/10 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
   }`;
 
   return (
@@ -170,8 +160,6 @@ function CategoryMenu({
 
 export function TopNav({ categories = [], searchAction = "/search" }: TopNavProps) {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
   const pathname = usePathname();
   const t = useTranslations("Navigation");
 
@@ -179,8 +167,6 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
   const visibleNavItems = topNavItems.filter(item => isNavItemVisible(item, role));
   const roleEntry = role === "guest" ? null : studioEntryByRole[role];
   const avatarLabel = user?.displayName || user?.email || "User";
-  const avatarInitials = getInitials(avatarLabel);
-  const canRenderAvatar = Boolean(user?.avatarUrl && user.avatarUrl !== failedAvatarUrl);
   const roleLabel: Record<MainNavRole, string> = {
     guest: t("roles.guest"),
     user: t("roles.user"),
@@ -190,119 +176,102 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
   };
 
   return (
-    <nav className="fixed top-0 z-50 flex h-20 w-full items-center gap-6 bg-background/40 bg-gradient-to-b from-muted to-transparent px-6 backdrop-blur-xl md:px-8">
-      <Link href="/" className="shrink-0 text-2xl font-black tracking-tighter text-primary font-headline">
-        Aura
-      </Link>
+    <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-background/82 shadow-[0_18px_60px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
+      <div className="mx-auto flex h-20 w-full max-w-[1600px] items-center justify-between gap-6 px-6 md:px-8">
+        <PublicBrand href="/" />
 
-      <div className="hidden flex-1 justify-center lg:flex">
-        <GlobalSearchForm action={searchAction} />
-      </div>
+        <div className="hidden min-w-0 flex-1 justify-center px-4 lg:flex">
+          <GlobalSearchForm action={searchAction} />
+        </div>
 
-      {!isLoading && (
-        <div className="flex shrink-0 items-center gap-8">
-          <div className="hidden md:flex gap-6 items-center">
-            {visibleNavItems.map(item => {
-              if (item.label === "library") {
+        {!isLoading && (
+          <div className="flex shrink-0 items-center gap-4 md:gap-6">
+            <div className="hidden items-center gap-1 rounded-sm border border-white/10 bg-card/55 p-1 shadow-inner shadow-black/30 md:flex">
+              {visibleNavItems.map(item => {
+                if (!item.path) {
+                  return null;
+                }
+
+                const isActive = item.path === "/"
+                  ? pathname === "/"
+                  : pathname === item.path || pathname?.startsWith(`${item.path}/`);
+
                 return (
-                  <CategoryMenu
+                  <Link
                     key={item.label}
-                    categories={categories}
-                    isActive={pathname?.startsWith("/category")}
-                  />
+                    href={item.path}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`rounded-[4px] px-4 py-2 font-headline text-sm font-bold tracking-tight transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      isActive
+                        ? "bg-white/10 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                        : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                    }`}
+                  >
+                    {t(item.label)}
+                  </Link>
                 );
-              }
+              })}
 
-              const isActive = item.path === pathname;
-              return (
+              <CategoryMenu
+                categories={categories}
+                isActive={pathname?.startsWith("/category")}
+              />
+
+              {roleEntry ? (
                 <Link
-                  key={item.label}
-                  href={item.path!}
-                  className={`font-headline tracking-tight font-bold transition-colors duration-300 ${
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  href={roleEntry.path!}
+                  aria-current={pathname?.startsWith(roleEntry.path!) ? "page" : undefined}
+                  className={`rounded-[4px] px-4 py-2 font-headline text-sm font-bold tracking-tight transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    pathname?.startsWith(roleEntry.path!)
+                      ? "bg-white/10 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                   }`}
                 >
-                  {t(item.label)}
+                  {t(roleEntry.label)}
                 </Link>
-              );
-            })}
+              ) : null}
+            </div>
 
-            {roleEntry ? (
-              <Link
-                href={roleEntry.path!}
-                className={`font-headline tracking-tight font-bold transition-colors duration-300 ml-2 ${
-                  pathname?.startsWith(roleEntry.path!) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t(roleEntry.label)}
-              </Link>
-            ) : null}
+            <div className="relative flex items-center gap-3 md:gap-4">
+              <LanguageSwitcher />
+              <ThemeToggle />
+
+              {role === "guest" ? (
+                <div className="hidden items-center gap-3 sm:flex">
+                  <Link
+                    href="/login"
+                    className="px-4 py-2 text-sm font-bold text-foreground transition-colors duration-300 hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {t("signIn")}
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="group relative inline-flex h-11 items-center gap-2 overflow-hidden rounded-sm border border-primary/45 bg-primary px-4 text-sm font-black text-primary-foreground shadow-[0_16px_34px_rgba(229,9,20,0.26)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_20px_42px_rgba(229,9,20,0.32)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-0"
+                  >
+                    <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_68%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <span className="material-symbols-outlined relative text-[18px]" aria-hidden="true">
+                      person_add
+                    </span>
+                    <span className="relative">{t("signUp")}</span>
+                  </Link>
+                </div>
+              ) : (
+                <AccountDropdown
+                  avatarLabel={avatarLabel}
+                  avatarUrl={user?.avatarUrl}
+                  roleLabel={roleLabel[role]}
+                  menuAriaLabel={t("accountMenuLabel")}
+                  avatarAlt={t("userAvatarAlt")}
+                  profileLabel={t("myProfile")}
+                  signOutLabel={t("signOut")}
+                  onLogout={logout}
+                />
+              )}
+            </div>
           </div>
-
-          <div className="flex items-center gap-4 relative">
-            <LanguageSwitcher />
-            <ThemeToggle />
-
-            {role === "guest" ? (
-              <div className="flex gap-4">
-                <Link href="/login" className="text-foreground font-bold hover:text-primary transition-colors">
-                  {t("signIn")}
-                </Link>
-                <Link href="/register" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-sm font-bold transition-colors">
-                  {t("signUp")}
-                </Link>
-              </div>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  aria-label={t("accountMenuLabel")}
-                  className="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-sm font-bold uppercase text-foreground transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/60"
-                  onClick={() => setShowDropdown(value => !value)}
-                >
-                  {user?.avatarUrl && canRenderAvatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt={t("userAvatarAlt")}
-                      src={user.avatarUrl}
-                      className="h-full w-full object-cover"
-                      onError={() => setFailedAvatarUrl(user.avatarUrl || null)}
-                    />
-                  ) : (
-                    <span aria-hidden="true">{avatarInitials}</span>
-                  )}
-                </button>
-
-                {showDropdown && (
-                  <div className="absolute top-12 right-0 w-48 bg-popover border border-border rounded-sm shadow-2xl py-2 flex flex-col">
-                    <div className="px-4 py-2 border-b border-border mb-2">
-                      <p className="text-foreground font-bold truncate">{user?.displayName || user?.email}</p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-widest">{roleLabel[role]}</p>
-                    </div>
-                    <Link
-                      href="/profile"
-                      className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      {t("myProfile")}
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setShowDropdown(false);
-                      }}
-                      className="px-4 py-2 text-sm text-destructive hover:bg-accent transition-colors text-left font-bold"
-                    >
-                      {t("signOut")}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </nav>
   );
 }

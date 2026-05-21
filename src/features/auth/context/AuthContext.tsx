@@ -1,9 +1,10 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
-import { api, fetchSSE, getHttpStatus, refreshAccessToken } from "@/shared/api/client";
+import { api, fetchSSE, getHttpStatus } from "@/shared/api/client";
 import { authService } from "../services/authService";
 import { useRouter } from "@/i18n/routing";
+import { normalizeInternalPath } from "@/shared/utils/locale-path";
 
 import { UserProfileResponse } from "../services/authService";
 
@@ -39,7 +40,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const forceLogout = useCallback((reason = "account-disabled") => {
     api.clearToken();
     setUser(null);
-    router.push(`/login?reason=${encodeURIComponent(reason)}`);
+
+    const params = new URLSearchParams({ reason });
+
+    if (reason === "session-expired" && typeof window !== "undefined") {
+      const currentPath = normalizeInternalPath(`${window.location.pathname}${window.location.search}`);
+      const currentPathname = normalizeInternalPath(window.location.pathname);
+
+      if (currentPath && currentPathname !== "/login") {
+        params.set("redirect", currentPath);
+      }
+    }
+
+    router.push(`/login?${params.toString()}`);
   }, [router]);
 
   const fetchProfile = useCallback(async () => {
@@ -88,7 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       api.clearToken();
       setUser(null);
-      router.push("/login");
+      router.push("/");
     }
   };
 

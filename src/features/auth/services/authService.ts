@@ -119,7 +119,10 @@ export const authService = {
 
   // 1.10) Logout
   logout: async () => {
-    return api.post<MessageResponse>("/api/auth/logout", undefined, { requireAuth: true });
+    return api.post<MessageResponse>("/api/auth/logout", undefined, {
+      requireAuth: true,
+      suppressAuthRedirect: true,
+    });
   },
 
   // Lấy session profile bằng refresh_token cookie, không rotate token và không trả accessToken.

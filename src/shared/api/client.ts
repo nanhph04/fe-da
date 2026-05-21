@@ -45,18 +45,26 @@ const redirectToLogin = (reason?: string) => {
 
   const loginPath = buildLocalizedHref("/login", window.location.pathname);
 
-  if (reason) {
-    window.location.href = `${loginPath}?reason=${encodeURIComponent(reason)}`;
-    return;
-  }
-
   if (normalizeInternalPath(window.location.pathname) === "/login") {
-    window.location.href = loginPath;
+    window.location.href = reason
+      ? `${loginPath}?reason=${encodeURIComponent(reason)}`
+      : loginPath;
     return;
   }
 
-  const redirectPath = normalizeInternalPath(`${window.location.pathname}${window.location.search}`) ?? "/";
-  window.location.href = `${loginPath}?redirect=${encodeURIComponent(redirectPath)}`;
+  const params = new URLSearchParams();
+  const shouldReturnAfterLogin = !reason || reason === "session-expired";
+
+  if (shouldReturnAfterLogin) {
+    const redirectPath = normalizeInternalPath(`${window.location.pathname}${window.location.search}`) ?? "/";
+    params.set("redirect", redirectPath);
+  }
+
+  if (reason) {
+    params.set("reason", reason);
+  }
+
+  window.location.href = `${loginPath}?${params.toString()}`;
 };
 
 export const buildApiUrl = (endpoint: string) => {
@@ -215,14 +223,19 @@ const isAccountSuspendedPayload = (payload: unknown) => {
   );
 };
 
-const handleRevokedAuthResponse = (status: number, payload: unknown, requireAuth?: boolean) => {
-  if (!requireAuth) {
+const handleRevokedAuthResponse = (
+  status: number,
+  payload: unknown,
+  requireAuth?: boolean,
+  suppressAuthRedirect?: boolean
+) => {
+  if (!requireAuth || suppressAuthRedirect) {
     return;
   }
 
   if (status === 401 || (status === 403 && isAccountSuspendedPayload(payload))) {
     clearLocalAccessToken();
-    redirectToLogin(status === 403 ? "account-disabled" : undefined);
+    redirectToLogin(status === 403 ? "account-disabled" : "session-expired");
   }
 };
 
@@ -288,7 +301,12 @@ export const fetchWrapper = async <T = unknown>(
           )) as ApiResponse<T>;
 
           if (!retryResponse.ok) {
-            handleRevokedAuthResponse(retryResponse.status, retryPayload, options.requireAuth);
+            handleRevokedAuthResponse(
+              retryResponse.status,
+              retryPayload,
+              options.requireAuth,
+              options.suppressAuthRedirect
+            );
             return Promise.reject(retryPayload);
           }
 
@@ -297,11 +315,13 @@ export const fetchWrapper = async <T = unknown>(
           isRefreshing = false;
           clearLocalAccessToken();
 
-          redirectToLogin(
-            getHttpStatus(error) === 403 || isAccountSuspendedPayload(error)
-              ? "account-disabled"
-              : undefined
-          );
+          if (!options.suppressAuthRedirect) {
+            redirectToLogin(
+              getHttpStatus(error) === 403 || isAccountSuspendedPayload(error)
+                ? "account-disabled"
+                : "session-expired"
+            );
+          }
 
           return Promise.reject(error);
         }
@@ -318,7 +338,12 @@ export const fetchWrapper = async <T = unknown>(
               )) as ApiResponse<T>;
 
               if (!retryResponse.ok) {
-                handleRevokedAuthResponse(retryResponse.status, retryPayload, options.requireAuth);
+                handleRevokedAuthResponse(
+                  retryResponse.status,
+                  retryPayload,
+                  options.requireAuth,
+                  options.suppressAuthRedirect
+                );
                 reject(retryPayload);
                 return;
               }
@@ -336,7 +361,12 @@ export const fetchWrapper = async <T = unknown>(
     )) as ApiResponse<T>;
 
     if (!response.ok) {
-      handleRevokedAuthResponse(response.status, payload, options.requireAuth);
+      handleRevokedAuthResponse(
+        response.status,
+        payload,
+        options.requireAuth,
+        options.suppressAuthRedirect
+      );
       return Promise.reject(payload);
     }
 
@@ -465,11 +495,13 @@ export const fetchSSE = async (
           isRefreshing = false;
           clearLocalAccessToken();
 
-          redirectToLogin(
-            getHttpStatus(error) === 403 || isAccountSuspendedPayload(error)
-              ? "account-disabled"
-              : undefined
-          );
+          if (!options.suppressAuthRedirect) {
+            redirectToLogin(
+              getHttpStatus(error) === 403 || isAccountSuspendedPayload(error)
+                ? "account-disabled"
+                : "session-expired"
+            );
+          }
 
           throw error;
         }
@@ -490,7 +522,12 @@ export const fetchSSE = async (
 
     if (!response.ok) {
       const payload = await parseResponseBody(response);
-      handleRevokedAuthResponse(response.status, payload, options.requireAuth);
+      handleRevokedAuthResponse(
+        response.status,
+        payload,
+        options.requireAuth,
+        options.suppressAuthRedirect
+      );
       throw new ApiHttpError(response.status, `SSE HTTP error: ${response.status}`, payload);
     }
 

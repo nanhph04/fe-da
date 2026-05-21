@@ -28,4 +28,5 @@ export type ApiResponseType = "json" | "text" | "blob";
 export interface ApiRequestInit extends RequestInit {
   requireAuth?: boolean;
   responseType?: ApiResponseType;
+  suppressAuthRedirect?: boolean;
 }

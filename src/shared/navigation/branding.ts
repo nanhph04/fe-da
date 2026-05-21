@@ -12,7 +12,6 @@ export interface PublicNavLink {
 export const publicMarketingLinks: PublicNavLink[] = [
   { label: "Khám phá", path: "/" },
   { label: "Thư viện", path: "/library" },
-  { label: "Xưởng sáng tạo", path: "/onboarding" },
 ];
 
 export const publicAuthLinks: PublicNavLink[] = [

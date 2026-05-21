@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { Moon, Sun, Monitor } from 'lucide-react';
+import { Moon, Sun, Monitor } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTheme } from "@/shared/providers/theme-provider";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -10,10 +10,12 @@ export function ThemeToggle() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const frame = window.requestAnimationFrame(() => setMounted(true));
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  // Prevent hydration mismatch — render placeholder until mounted
+  // Prevent hydration mismatch - render placeholder until mounted
   if (!mounted) {
     return (
       <button
