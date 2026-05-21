@@ -7,6 +7,12 @@ import { getErrorMessage } from "@/shared/api/client";
 import { useLocale } from "next-intl";
 import { DepositService } from "../services/depositService";
 import type { Deposit, DepositPackage } from "../types/wallet.types";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import {
+  getPersistedSession,
+  setPersistedSession,
+  clearPersistedSession,
+} from "@/shared/utils/idempotency";
 
 interface EmbeddedPayOsCheckoutProps {
   selectedPackage: DepositPackage;
@@ -47,6 +53,8 @@ export function EmbeddedPayOsCheckout({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
+  const { user } = useAuth();
+  const userId = user?.userId || "guest";
 
   useEffect(() => {
     paymentAttemptKeyRef.current = null;
@@ -62,8 +70,16 @@ export function EmbeddedPayOsCheckout({
     setCheckoutUrl("");
     setDeposit(null);
 
+    const storageKey = `deposit-attempt:${userId}:${selectedPackage.id}`;
+
     if (!paymentAttemptKeyRef.current) {
-      paymentAttemptKeyRef.current = createPaymentAttemptKey();
+      const persisted = getPersistedSession(storageKey);
+      if (persisted) {
+        paymentAttemptKeyRef.current = persisted.idempotencyKey;
+      } else {
+        paymentAttemptKeyRef.current = createPaymentAttemptKey();
+        setPersistedSession(storageKey, { idempotencyKey: paymentAttemptKeyRef.current, requestId: "" });
+      }
     }
 
     try {
@@ -84,15 +100,18 @@ export function EmbeddedPayOsCheckout({
       const paymentUrl = getValidCheckoutUrl(createdDeposit.checkoutUrl);
       setDeposit(createdDeposit);
       setCheckoutUrl(paymentUrl);
+      clearPersistedSession(storageKey);
       window.location.assign(paymentUrl);
     } catch (err) {
-      paymentAttemptKeyRef.current = null;
+      // Giữ nguyên key trong ref và sessionStorage để cho phép người dùng retry
       setIsProcessing(false);
       setError(getErrorMessage(err, "Khong the tao thanh toan PayOS. Vui long thu lai."));
     }
   };
 
   const resetPayment = () => {
+    const storageKey = `deposit-attempt:${userId}:${selectedPackage.id}`;
+    clearPersistedSession(storageKey);
     paymentAttemptKeyRef.current = null;
     setCheckoutUrl("");
     setDeposit(null);

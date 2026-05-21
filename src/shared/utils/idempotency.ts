@@ -29,3 +29,43 @@ export function createIdempotencyKey(...parts: string[]) {
   const hashSuffix = `:${createStableHash(key)}`;
   return `${key.slice(0, IDEMPOTENCY_KEY_MAX_LENGTH - hashSuffix.length)}${hashSuffix}`;
 }
+
+export interface PersistedPaymentSession {
+  idempotencyKey: string;
+  requestId: string;
+}
+
+export function getPersistedSession(key: string): PersistedPaymentSession | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const data = sessionStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setPersistedSession(key: string, data: PersistedPaymentSession): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    sessionStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function clearPersistedSession(key: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    // Ignore storage errors
+  }
+}
+

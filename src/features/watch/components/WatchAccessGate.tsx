@@ -7,7 +7,13 @@ import { PaymentService } from "@/features/wallet/services/paymentService";
 import { WalletService } from "@/features/wallet/services/walletService";
 import type { PaymentResponse, Wallet } from "@/features/wallet/types/wallet.types";
 import { getErrorMessage } from "@/shared/api/client";
-import { createIdempotencyKey, createRandomId } from "@/shared/utils/idempotency";
+import {
+  createIdempotencyKey,
+  createRandomId,
+  getPersistedSession,
+  setPersistedSession,
+  clearPersistedSession,
+} from "@/shared/utils/idempotency";
 import type { PublicMembershipTier } from "../services/publicMediaService";
 
 export interface WatchAccessData {
@@ -168,8 +174,16 @@ export function WatchAccessGate({
       return;
     }
 
-    const activeSession = purchaseSession ?? createVideoPurchaseSession(user.userId, videoId);
-    if (!purchaseSession) {
+    const storageKey = `video-purchase:${user.userId}:${videoId}`;
+    let activeSession = purchaseSession;
+    if (!activeSession) {
+      const persisted = getPersistedSession(storageKey);
+      if (persisted) {
+        activeSession = persisted;
+      } else {
+        activeSession = createVideoPurchaseSession(user.userId, videoId);
+        setPersistedSession(storageKey, activeSession);
+      }
       setPurchaseSession(activeSession);
     }
 
@@ -203,6 +217,8 @@ export function WatchAccessGate({
           }
           : current,
       );
+      
+      clearPersistedSession(storageKey);
       setPurchaseStatus("success");
       onUnlocked();
     } catch (err) {

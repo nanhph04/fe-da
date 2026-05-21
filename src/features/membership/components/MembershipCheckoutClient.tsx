@@ -14,6 +14,11 @@ import { MembershipTiers } from "./MembershipTiers";
 import { createMembershipPayment } from "../services/membershipPaymentService";
 import { createMembershipPaymentSession } from "../utils/membershipPayment";
 import type { MembershipPaymentSession } from "../types/membership.types";
+import {
+  getPersistedSession,
+  setPersistedSession,
+  clearPersistedSession,
+} from "@/shared/utils/idempotency";
 
 interface MembershipCheckoutClientProps {
   channel: PublicChannelDetail;
@@ -145,7 +150,16 @@ export function MembershipCheckoutClient({
       setSelectedTier(tier);
       setCheckoutTier(tier);
       setPaymentState({ status: "idle", error: null, response: null });
-      setPaymentSession(createMembershipPaymentSession(userId, channel.id, tier.id));
+      
+      const storageKey = `membership-purchase:${userId}:${channel.id}:${tier.id}`;
+      const persisted = getPersistedSession(storageKey);
+      let activeSession = persisted;
+      if (!activeSession) {
+        activeSession = createMembershipPaymentSession(userId, channel.id, tier.id);
+        setPersistedSession(storageKey, activeSession);
+      }
+      
+      setPaymentSession(activeSession);
       void loadWallet();
     },
     [channel.id, loadWallet, userId],
@@ -161,10 +175,13 @@ export function MembershipCheckoutClient({
       return;
     }
 
-    const activeSession = paymentSession ?? createMembershipPaymentSession(userId, channel.id, checkoutTier.id);
+    const storageKey = `membership-purchase:${userId}:${channel.id}:${checkoutTier.id}`;
+    const activeSession = paymentSession ?? getPersistedSession(storageKey) ?? createMembershipPaymentSession(userId, channel.id, checkoutTier.id);
     if (!paymentSession) {
       setPaymentSession(activeSession);
     }
+    // Đảm bảo lưu lại trong storage nếu chưa có
+    setPersistedSession(storageKey, activeSession);
 
     setPaymentState({ status: "processing", error: null, response: null });
 
@@ -182,6 +199,7 @@ export function MembershipCheckoutClient({
         requestId: activeSession.requestId,
       });
 
+      clearPersistedSession(storageKey);
       setPaymentState({ status: "success", error: null, response });
       setWallet((current) =>
         current
