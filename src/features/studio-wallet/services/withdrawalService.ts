@@ -1,4 +1,6 @@
 import { api } from "@/shared/api/client";
+import { assertWalletCanOperate } from "@/features/wallet/types/wallet-utils";
+import { StudioWalletService } from "./studioWalletService";
 import type {
   CreateWithdrawalRequest,
   Withdrawal,
@@ -42,6 +44,9 @@ const buildQueryString = (filters: WithdrawalHistoryFilters = {}) => {
 
 export class WithdrawalService {
   static async requestWithdrawal(data: CreateWithdrawalRequest): Promise<Withdrawal> {
+    const wallet = await StudioWalletService.getStudioWallet();
+    assertWalletCanOperate(wallet.status, "withdraw");
+
     const response = await api.post<Withdrawal>("/api/withdrawals", data, {
       requireAuth: true,
     });

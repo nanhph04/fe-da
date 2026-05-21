@@ -1,5 +1,7 @@
 import { api } from "@/shared/api/client";
 import { PaymentRequest, PaymentResponse } from "../types/wallet.types";
+import { assertWalletCanOperate } from "../types/wallet-utils";
+import { WalletService } from "./walletService";
 
 export class PaymentService {
   /**
@@ -13,6 +15,9 @@ export class PaymentService {
     userId: string,
     requestId?: string
   ): Promise<PaymentResponse> {
+    const wallet = await WalletService.getMyWallet();
+    assertWalletCanOperate(wallet.status, "spend");
+
     const headers: Record<string, string> = {
       "idempotency-key": idempotencyKey,
       "x-user-id": userId,

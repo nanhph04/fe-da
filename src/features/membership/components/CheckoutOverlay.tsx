@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/routing";
 import type { PaymentResponse } from "@/features/wallet/types/wallet.types";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
+import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";
 
 export type MembershipPaymentStatus = "idle" | "processing" | "success" | "error";
@@ -52,9 +53,10 @@ export function CheckoutOverlay({
 }: CheckoutOverlayProps) {
   const balanceAfter = getBalanceAfter(wallet, tier);
   const hasInsufficientBalance = wallet ? wallet.balance < tier.priceCoin : false;
+  const walletStatusMessage = wallet ? getWalletStatusMessage(wallet.status, "spend") : null;
   const isProcessing = paymentState.status === "processing";
   const isSuccess = paymentState.status === "success";
-  const canConfirm = Boolean(wallet) && !walletLoading && !walletError && !hasInsufficientBalance && !isProcessing && !isSuccess;
+  const canConfirm = Boolean(wallet) && !walletLoading && !walletError && !walletStatusMessage && !hasInsufficientBalance && !isProcessing && !isSuccess;
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end bg-background/80 backdrop-blur-sm">
@@ -137,6 +139,9 @@ export function CheckoutOverlay({
                 Số dư hiện tại chưa đủ để thanh toán gói này. Vui lòng nạp thêm Aura Coins trước khi xác nhận.
               </p>
             ) : null}
+            {walletStatusMessage ? (
+              <p className="mt-4 text-xs leading-relaxed text-destructive">{walletStatusMessage}</p>
+            ) : null}
             {walletError ? (
               <p className="mt-4 text-xs leading-relaxed text-destructive">{walletError}</p>
             ) : null}
@@ -197,7 +202,9 @@ export function CheckoutOverlay({
                 ? "Đang xử lý..."
                 : walletLoading || !wallet
                   ? "Đang tải ví..."
-                  : "Xác nhận đăng ký"}
+                  : walletStatusMessage
+                    ? "Ví không khả dụng"
+                    : "Xác nhận đăng ký"}
             </button>
           )}
           <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">

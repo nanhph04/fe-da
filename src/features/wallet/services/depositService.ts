@@ -1,5 +1,7 @@
 import { api } from "@/shared/api/client";
 import { Deposit, DepositPackage } from "../types/wallet.types";
+import { assertWalletCanOperate } from "../types/wallet-utils";
+import { WalletService } from "./walletService";
 
 export class DepositService {
   /**
@@ -17,13 +19,14 @@ export class DepositService {
    */
   static async createDeposit(
     packageId: string, 
-    idempotencyKey?: string,
-    returnUrl?: string,
-    cancelUrl?: string
+    idempotencyKey?: string
   ): Promise<Deposit> {
+    const wallet = await WalletService.getMyWallet();
+    assertWalletCanOperate(wallet.status, "deposit");
+
     const response = await api.post<Deposit>(
       "/api/deposits",
-      { packageId, returnUrl, cancelUrl },
+      { packageId },
       {
         requireAuth: true,
         headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,

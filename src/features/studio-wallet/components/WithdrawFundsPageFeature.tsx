@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/routing";
+import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import type { StudioWallet } from "../types/studio-wallet.types";
 import { WithdrawalService } from "../services/withdrawalService";
 
@@ -21,7 +22,9 @@ export function WithdrawFundsPageFeature({ initialWallet }: WithdrawFundsPageFea
   const [success, setSuccess] = useState<string | null>(null);
 
   const withdrawalAmount = Number(amount);
+  const walletStatusMessage = getWalletStatusMessage(initialWallet.status, "withdraw");
   const canSubmit =
+    !walletStatusMessage &&
     Number.isFinite(withdrawalAmount) &&
     withdrawalAmount > 0 &&
     withdrawalAmount <= initialWallet.balance &&
@@ -33,6 +36,11 @@ export function WithdrawFundsPageFeature({ initialWallet }: WithdrawFundsPageFea
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (walletStatusMessage) {
+      setError(walletStatusMessage);
+      return;
+    }
 
     if (!canSubmit) {
       setError("Enter a valid amount and bank account information.");
@@ -171,6 +179,7 @@ export function WithdrawFundsPageFeature({ initialWallet }: WithdrawFundsPageFea
               </div>
             </div>
 
+            {walletStatusMessage ? <p className="rounded-sm border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{walletStatusMessage}</p> : null}
             {error ? <p className="rounded-sm border border-primary/30 bg-primary/10 p-3 text-sm text-primary">{error}</p> : null}
             {success ? <p className="rounded-sm border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400">{success}</p> : null}
 

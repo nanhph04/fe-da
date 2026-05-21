@@ -1,6 +1,8 @@
 import { api } from "@/shared/api/client";
 import type { ApiPagination } from "@/shared/api/types";
 import { Withdrawal, BankInfo, WithdrawalStatus } from "../types/wallet.types";
+import { assertWalletCanOperate } from "../types/wallet-utils";
+import { WalletService } from "./walletService";
 
 export interface CreateWithdrawalPayload {
   coinAmount: number;
@@ -59,6 +61,9 @@ const buildQueryString = (params: WithdrawalListParams = {}) => {
 
 export class WithdrawalService {
   static async createWithdrawal(payload: CreateWithdrawalPayload): Promise<Withdrawal> {
+    const wallet = await WalletService.getMyWallet();
+    assertWalletCanOperate(wallet.status, "withdraw");
+
     const response = await api.post<Withdrawal>("/api/withdrawals", payload, { requireAuth: true });
     return response.data;
   }

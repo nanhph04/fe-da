@@ -6,6 +6,7 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { PaymentService } from "@/features/wallet/services/paymentService";
 import { WalletService } from "@/features/wallet/services/walletService";
 import type { PaymentResponse, Wallet } from "@/features/wallet/types/wallet.types";
+import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import { getErrorMessage } from "@/shared/api/client";
 import {
   createIdempotencyKey,
@@ -165,6 +166,13 @@ export function WatchAccessGate({
     if (!currentWallet) {
       setPurchaseStatus("error");
       setPurchaseError("Không thể kiểm tra số dư Aura Coins. Vui lòng thử lại.");
+      return;
+    }
+
+    const walletStatusMessage = getWalletStatusMessage(currentWallet.status, "spend");
+    if (walletStatusMessage) {
+      setPurchaseStatus("error");
+      setPurchaseError(walletStatusMessage);
       return;
     }
 

@@ -10,6 +10,7 @@ import type { DepositPackage } from "../types/wallet.types";
 interface TopUpPackagesProps {
   initialPackages?: DepositPackage[];
   onSelectPackage?: (depositPackage: DepositPackage) => void;
+  disabledReason?: string | null;
 }
 
 const sortPackages = (packages: DepositPackage[]) =>
@@ -19,7 +20,7 @@ function getNumberLocale(locale: string) {
   return locale === "en" ? "en-US" : "vi-VN";
 }
 
-export function TopUpPackages({ initialPackages, onSelectPackage }: TopUpPackagesProps) {
+export function TopUpPackages({ initialPackages, onSelectPackage, disabledReason }: TopUpPackagesProps) {
   const t = useTranslations("Wallet.TopUpPackages");
   const locale = useLocale();
   const numberFormatter = useMemo(
@@ -78,6 +79,12 @@ export function TopUpPackages({ initialPackages, onSelectPackage }: TopUpPackage
       <div className="mt-8 flex items-center justify-between">
         <h2 className="font-headline text-xl font-bold text-foreground">{t("title")}</h2>
       </div>
+
+      {disabledReason ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          {disabledReason}
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" role="status" aria-label={t("loadingLabel")}>
@@ -157,6 +164,7 @@ export function TopUpPackages({ initialPackages, onSelectPackage }: TopUpPackage
                     </span>
                     <Button
                       type="button"
+                      disabled={Boolean(disabledReason)}
                       onClick={() => onSelectPackage?.(pkg)}
                       className={`w-full font-bold transition-colors active:scale-95 ${
                         isPopular

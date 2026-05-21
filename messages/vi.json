@@ -128,6 +128,25 @@
       "bonusAmount": "+ {amount} coin thưởng",
       "currencyUnit": "VND",
       "buyNow": "Nạp ngay"
+    },
+    "TopUpSuccess": {
+      "metadataTitle": "Nạp tiền thành công - Velvet Gallery",
+      "metadataDescription": "Aura Coin đã được cộng thành công vào ví của bạn.",
+      "title": "Thanh toán thành công!",
+      "description": "Aura Coin đã được cộng vào ví của bạn.",
+      "coinsAdded": "Coin đã cộng",
+      "coinAmount": "{amount} AC",
+      "completed": "Hoàn tất",
+      "transactionDetails": "Chi tiết giao dịch",
+      "package": "Gói",
+      "packageFallback": "Gói Aura Coin",
+      "packageWithBonus": "{amount} + {bonus} coin thưởng",
+      "amountPaid": "Số tiền đã thanh toán",
+      "currencyAmount": "{amount} VND",
+      "orderId": "Mã đơn hàng",
+      "exploreContent": "Khám phá nội dung",
+      "viewWalletHistory": "Xem lịch sử ví",
+      "secureReceipt": "Giao dịch được xử lý an toàn qua Aura Pay. Biên lai đã được gửi đến email của bạn."
     }
   }
 }

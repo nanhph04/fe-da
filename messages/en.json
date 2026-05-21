@@ -128,6 +128,25 @@
       "bonusAmount": "+ {amount} bonus coins",
       "currencyUnit": "VND",
       "buyNow": "Top up now"
+    },
+    "TopUpSuccess": {
+      "metadataTitle": "Top-up Successful - Velvet Gallery",
+      "metadataDescription": "Your Aura Coins have been successfully added to your wallet.",
+      "title": "Payment Successful!",
+      "description": "Your Aura Coins have been added to your wallet.",
+      "coinsAdded": "Coins Added",
+      "coinAmount": "{amount} AC",
+      "completed": "Completed",
+      "transactionDetails": "Transaction Details",
+      "package": "Package",
+      "packageFallback": "Aura Coin package",
+      "packageWithBonus": "{amount} + {bonus} Bonus",
+      "amountPaid": "Amount Paid",
+      "currencyAmount": "{amount} VND",
+      "orderId": "Order ID",
+      "exploreContent": "Explore Content",
+      "viewWalletHistory": "View Wallet History",
+      "secureReceipt": "Transaction processed securely via Aura Pay. Receipt sent to your email."
     }
   },
   "StudioUpload": {

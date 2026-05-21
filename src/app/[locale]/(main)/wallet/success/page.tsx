@@ -1,13 +1,20 @@
 import { TopUpSuccessFeature } from "@/features/wallet/components/TopUpSuccessFeature";
-
-export const metadata = {
-  title: "Top-up Successful - Velvet Gallery",
-  description: "Your Aura Coins have been successfully added to your wallet.",
-};
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type TopUpSuccessPageProps = {
+  params: Promise<{ locale: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export async function generateMetadata({ params }: TopUpSuccessPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Wallet.TopUpSuccess" });
+
+  return {
+    title: t("metadataTitle"),
+    description: t("metadataDescription"),
+  };
+}
 
 function getSingleQueryParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -25,8 +32,12 @@ function parseNumberParam(value: string | string[] | undefined) {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-export default async function TopUpSuccessPage({ searchParams }: TopUpSuccessPageProps) {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+export default async function TopUpSuccessPage({ params, searchParams }: TopUpSuccessPageProps) {
+  const [{ locale }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams ?? Promise.resolve(undefined),
+  ]);
+  setRequestLocale(locale);
 
   return (
     <TopUpSuccessFeature

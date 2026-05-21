@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import type { StudioWallet } from "../types/studio-wallet.types";
 import { WithdrawalService } from "../services/withdrawalService";
 
@@ -29,7 +30,9 @@ export function WithdrawFundsOverlay({
   const [error, setError] = useState<string | null>(null);
 
   const withdrawalAmount = Number(amount);
+  const walletStatusMessage = getWalletStatusMessage(wallet.status, "withdraw");
   const canSubmit =
+    !walletStatusMessage &&
     Number.isFinite(withdrawalAmount) &&
     withdrawalAmount > 0 &&
     withdrawalAmount <= wallet.balance &&
@@ -41,6 +44,11 @@ export function WithdrawFundsOverlay({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (walletStatusMessage) {
+      setError(walletStatusMessage);
+      return;
+    }
 
     if (!canSubmit) {
       setError("Enter a valid amount and bank account information.");
@@ -135,6 +143,7 @@ export function WithdrawFundsOverlay({
             </p>
           </div>
 
+          {walletStatusMessage ? <p className="text-sm text-red-300">{walletStatusMessage}</p> : null}
           {error ? <p className="text-sm text-red-300">{error}</p> : null}
 
           <div className="flex justify-end gap-3">

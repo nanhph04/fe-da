@@ -9,6 +9,7 @@ import { EmbeddedPayOsCheckout } from "./EmbeddedPayOsCheckout";
 import { WalletService } from "../services/walletService";
 import { TransactionService } from "../services/transactionService";
 import type { DepositPackage, Transaction, Wallet } from "../types/wallet.types";
+import { getWalletStatusMessage } from "../types/wallet-utils";
 
 const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
 
@@ -75,8 +76,22 @@ export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (selectedPackage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedPackage]);
+
   const balanceLabel = walletState.data ? formatWalletNumber(walletState.data.balance) : "--";
   const hasWalletError = walletState.status === "error";
+  const topUpDisabledReason = walletState.data
+    ? getWalletStatusMessage(walletState.data.status, "deposit")
+    : null;
 
   return (
     <main className="min-h-screen flex-1 bg-background p-8 pt-24 md:pl-64">
@@ -119,17 +134,16 @@ export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
           <TopUpPackages
             initialPackages={initialPackages}
             onSelectPackage={setSelectedPackage}
+            disabledReason={topUpDisabledReason}
           />
         </div>
       </div>
 
       {selectedPackage ? (
-        <div className="mx-auto mt-12 max-w-7xl">
-          <EmbeddedPayOsCheckout
-            selectedPackage={selectedPackage}
-            onClose={() => setSelectedPackage(null)}
-          />
-        </div>
+        <EmbeddedPayOsCheckout
+          selectedPackage={selectedPackage}
+          onClose={() => setSelectedPackage(null)}
+        />
       ) : null}
 
       <div className="mx-auto max-w-7xl">

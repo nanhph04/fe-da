@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import { getErrorMessage } from "@/shared/api/client";
 import { WithdrawalService } from "../services/withdrawalService";
 import { colorSchemes } from "@/shared/utils/theme-utils";
 
@@ -36,7 +37,7 @@ export function WithdrawFundsOverlay({ balance, onClose, onSuccess }: { balance:
       onSuccess(amount);
     } catch (error) {
       console.error("Failed to create withdrawal:", error);
-      alert("Failed to process withdrawal. Please try again.");
+      alert(getErrorMessage(error, "Failed to process withdrawal. Please try again."));
     } finally {
       setIsProcessing(false);
     }

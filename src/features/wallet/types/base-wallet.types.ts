@@ -2,7 +2,7 @@
  * Shared base wallet types across all wallet types
  */
 
-export type WalletStatus = "ACTIVE" | "INACTIVE" | "FROZEN" | "SUSPENDED";
+export type WalletStatus = "active" | "frozen" | "closed" | "ACTIVE" | "FROZEN" | "CLOSED" | "INACTIVE" | "SUSPENDED";
 export type WalletType = "USER" | "STUDIO" | "SYSTEM" | "CHANNEL";
 type WalletAugmentation = Record<string, unknown>;
 
