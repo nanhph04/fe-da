@@ -7,6 +7,7 @@ import { PaymentService } from "@/features/wallet/services/paymentService";
 import { WalletService } from "@/features/wallet/services/walletService";
 import type { PaymentResponse, Wallet } from "@/features/wallet/types/wallet.types";
 import { getErrorMessage } from "@/shared/api/client";
+import { createIdempotencyKey, createRandomId } from "@/shared/utils/idempotency";
 import type { PublicMembershipTier } from "../services/publicMediaService";
 
 export interface WatchAccessData {
@@ -34,19 +35,11 @@ interface VideoPurchaseSession {
   requestId: string;
 }
 
-function createRandomId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function createVideoPurchaseSession(userId: string, videoId: string): VideoPurchaseSession {
   const paymentIntentId = createRandomId();
 
   return {
-    idempotencyKey: `video:${userId}:${videoId}:${paymentIntentId}`,
+    idempotencyKey: createIdempotencyKey("video", userId, videoId, paymentIntentId),
     requestId: `video-unlock:${paymentIntentId}`,
   };
 }
