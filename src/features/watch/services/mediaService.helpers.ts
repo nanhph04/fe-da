@@ -1,17 +1,5 @@
 export const READY_THUMBNAIL_STATUS = "ready";
 
-function encodeVideoPathId(videoId: string) {
-  return encodeURIComponent(videoId);
-}
-
-export function buildPublicVideoThumbnailUrl(videoId: string) {
-  return `/api/media/videos/${encodeVideoPathId(videoId)}/thumbnail`;
-}
-
-export function buildOwnerVideoThumbnailUrl(videoId: string) {
-  return `/api/media/studio/videos/${encodeVideoPathId(videoId)}/thumbnail`;
-}
-
 export function getReadyThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
   return thumbnailUrl && thumbnailStatus === READY_THUMBNAIL_STATUS ? thumbnailUrl : null;
 }
@@ -21,11 +9,8 @@ export function getReadyPublicVideoThumbnailUrl(
   thumbnailUrl?: string | null,
   thumbnailStatus?: string | null
 ) {
-  if (thumbnailStatus !== READY_THUMBNAIL_STATUS) {
-    return null;
-  }
-
-  return videoId ? buildPublicVideoThumbnailUrl(videoId) : thumbnailUrl || null;
+  void videoId;
+  return getReadyThumbnailUrl(thumbnailUrl, thumbnailStatus);
 }
 
 export function getReadyOwnerVideoThumbnailUrl(
@@ -33,11 +18,8 @@ export function getReadyOwnerVideoThumbnailUrl(
   thumbnailUrl?: string | null,
   thumbnailStatus?: string | null
 ) {
-  if (thumbnailStatus !== READY_THUMBNAIL_STATUS) {
-    return null;
-  }
-
-  return videoId ? buildOwnerVideoThumbnailUrl(videoId) : thumbnailUrl || null;
+  void videoId;
+  return getReadyThumbnailUrl(thumbnailUrl, thumbnailStatus);
 }
 
 export const buildQueryString = (params?: Record<string, string | number | undefined>) => {

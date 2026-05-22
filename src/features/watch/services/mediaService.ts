@@ -40,8 +40,6 @@ import type {
 
 export type * from "./mediaService.types";
 export {
-  buildOwnerVideoThumbnailUrl,
-  buildPublicVideoThumbnailUrl,
   getReadyOwnerVideoThumbnailUrl,
   getReadyPublicVideoThumbnailUrl,
   getReadyThumbnailUrl,
@@ -101,6 +99,16 @@ export const mediaService = {
   ) => {
     void id;
     return api.patch<ChannelResponse>("/api/media/me/channel", data, { requireAuth: true });
+  },
+  uploadAvatarChannel: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post<ChannelResponse>("/api/media/me/channel/avatar", formData, { requireAuth: true });
+  },
+  uploadBannerChannel: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post<ChannelResponse>("/api/media/me/channel/banner", formData, { requireAuth: true });
   },
   getChannel: async (id: string) => {
     return api.get<ChannelDetailResponse>(`/api/media/channels/${id}`);

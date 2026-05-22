@@ -1,4 +1,4 @@
-import { buildOwnerVideoThumbnailUrl, getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
+import { getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import type { EarningsSummary, MonthlyEarnings, VideoEarnings } from "@/features/studio-wallet/types/earnings.types";
 import type { StudioWallet, WalletStats } from "@/features/studio-wallet/types/studio-wallet.types";
 import type {
@@ -127,7 +127,7 @@ export function buildTopVideos(
       return {
         id: earningVideo.videoId,
         title: mediaVideo?.title || (financeTitleIsPlaceholder ? `Video ${earningVideo.videoId.slice(0, 8)}` : earningVideo.videoTitle),
-        thumbnailUrl: getReadyOwnerVideoThumbnailUrl(mediaVideo?.id, mediaVideo?.thumbnailUrl, mediaVideo?.thumbnailStatus) || buildOwnerVideoThumbnailUrl(earningVideo.videoId),
+        thumbnailUrl: getReadyOwnerVideoThumbnailUrl(mediaVideo?.id, mediaVideo?.thumbnailUrl, mediaVideo?.thumbnailStatus) || DEFAULT_THUMBNAIL,
         views: compactNumber(mediaViews ?? earningVideo.views),
         likes: "No API",
         earnings: formatCoins(earningVideo.revenue || earningVideo.estimatedRevenue),

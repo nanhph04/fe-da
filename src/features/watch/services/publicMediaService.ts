@@ -8,8 +8,6 @@ import type {
   ApiResponse as PublicApiResponse,
 } from "@/shared/api/types";
 
-export { buildPublicVideoThumbnailUrl } from "./mediaService.helpers";
-
 export type PublicThumbnailSource = "auto" | "custom" | string;
 export type PublicThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
 export type PublicMembershipReviewStatus = "not_requested" | "pending" | "approved" | "rejected";

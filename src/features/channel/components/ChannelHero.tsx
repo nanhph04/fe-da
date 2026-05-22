@@ -1,7 +1,15 @@
+"use client";
+
+import { useState } from "react";
+import { Edit2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { EditChannelDialog } from "./EditChannelDialog";
 import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
 
 interface ChannelHeroProps {
   channel: PublicChannelDetail;
+  isOwner?: boolean;
 }
 
 function getInitials(value: string) {
@@ -17,7 +25,9 @@ function getInitials(value: string) {
   return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
 }
 
-export function ChannelHero({ channel }: ChannelHeroProps) {
+export function ChannelHero({ channel, isOwner }: ChannelHeroProps) {
+  const router = useRouter();
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const totalVideos = channel.videoCount ?? channel.publicVideos.length;
   const totalViews = channel.membershipEligibility?.totalVideoViews ?? 0;
 
@@ -44,18 +54,32 @@ export function ChannelHero({ channel }: ChannelHeroProps) {
         </div>
 
         <div className="min-w-0 flex-1 pb-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-headline text-4xl font-black uppercase italic tracking-tighter text-foreground md:text-6xl">
-              {channel.name}
-            </h1>
-            <span
-              aria-label="Kênh đã xác minh"
-              className="material-symbols-outlined text-secondary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              verified
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-headline text-4xl font-black uppercase italic tracking-tighter text-foreground md:text-6xl">
+                {channel.name}
+              </h1>
+              <span
+                aria-label="Kênh đã xác minh"
+                className="material-symbols-outlined text-secondary"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                verified
+              </span>
+            </div>
+
+            {isOwner && (
+              <Button
+                onClick={() => setIsEditOpen(true)}
+                variant="outline"
+                className="gap-2 border-border/60 hover:bg-muted text-sm font-semibold transition-all shadow-md shrink-0"
+              >
+                <Edit2 className="h-4 w-4" />
+                Tùy chỉnh kênh
+              </Button>
+            )}
           </div>
+          
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium text-muted-foreground">
             <span>{totalVideos.toLocaleString()} video</span>
             <span className="h-1.5 w-1.5 rounded-full bg-border" aria-hidden="true" />
@@ -71,6 +95,13 @@ export function ChannelHero({ channel }: ChannelHeroProps) {
           </p>
         </div>
       </div>
+
+      <EditChannelDialog
+        channel={channel}
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        onSaved={() => router.refresh()}
+      />
     </section>
   );
 }

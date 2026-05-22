@@ -5,6 +5,7 @@ import {
   type PublicApiError,
   type PublicChannelDetail,
 } from "@/features/watch/services/publicMediaService";
+import { getServerUserProfile } from "@/shared/auth/server";
 import { ChannelHero } from "./ChannelHero";
 import { ChannelMembershipTiers } from "./ChannelMembershipTiers";
 import { ChannelVideoGrid } from "./ChannelVideoGrid";
@@ -63,6 +64,16 @@ export async function ChannelPage({ channelId }: ChannelPageProps) {
     errorMessage = getErrorMessage(err, "Không thể tải thông tin kênh.");
   }
 
+  let isOwner = false;
+  try {
+    const profile = await getServerUserProfile();
+    if (profile && profile.userId && channel.userId) {
+      isOwner = profile.userId === channel.userId;
+    }
+  } catch {
+    // Người dùng chưa đăng nhập, bỏ qua lỗi (guest user)
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-[1700px] bg-background px-4 pt-24 pb-16 md:px-8 lg:pl-72">
       {errorMessage ? (
@@ -71,7 +82,7 @@ export async function ChannelPage({ channelId }: ChannelPageProps) {
         </div>
       ) : null}
 
-      <ChannelHero channel={channel} />
+      <ChannelHero channel={channel} isOwner={isOwner} />
 
       <div className="mt-10 grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
         <ChannelVideoGrid videos={channel.publicVideos} channelName={channel.name} />
