@@ -30,16 +30,13 @@ export const formatProfileDateTime = (value?: string | null) => {
 
 export const getInitials = (value?: string | null) => {
   const cleaned = value?.trim();
-  if (!cleaned) return "VG";
+  if (!cleaned) return "V";
 
-  const parts = cleaned.split(/\s+/).filter(Boolean);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  return cleaned.charAt(0).toUpperCase();
 };
 
 export const getAvatarFallbackUrl = (name?: string | null) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "Velvet Gallery")}&background=131313&color=ffffff`;
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "Velvet Gallery")}&background=131313&color=ffffff&length=1`;
 
 export const getTransactionTitle = (transaction: Transaction) => {
   if (transaction.description) return transaction.description;

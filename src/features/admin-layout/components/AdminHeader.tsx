@@ -8,13 +8,8 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { adminFooterItems, adminSidebarItems } from "./navigation";
 
 function getInitials(displayName?: string, email?: string) {
-  const source = displayName || email || "System Admin";
-  const parts = source.split(/[\s@._-]+/).filter(Boolean);
-
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "SA";
+  const source = (displayName || email || "System Admin").trim();
+  return source.charAt(0).toUpperCase() || "S";
 }
 
 export function AdminHeader() {

@@ -17,16 +17,11 @@ interface AccountDropdownProps {
 }
 
 const getInitials = (value?: string | null) => {
-  if (!value?.trim()) {
+  const cleaned = value?.trim();
+  if (!cleaned) {
     return "U";
   }
-
-  const parts = value.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  return cleaned.charAt(0).toUpperCase();
 };
 
 export function AccountDropdown({

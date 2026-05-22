@@ -40,14 +40,8 @@ function formatPercent(value: number | null) {
 }
 
 function getInitials(name: string, email: string) {
-  const source = name.trim() || email;
-  return source
-    .split(/[\s@._-]+/)
-    .filter(Boolean)
-    .map(part => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const source = (name.trim() || email || "U").trim();
+  return source.charAt(0).toUpperCase();
 }
 
 function getRoleLabel(user: Pick<AdminUserListItem, "isCreator">) {

@@ -51,15 +51,8 @@ function formatLabel(value: string) {
 }
 
 function getInitials(name: string) {
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(part => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  return initials || "CH";
+  const cleaned = name.trim();
+  return cleaned.charAt(0).toUpperCase() || "C";
 }
 
 function getStatusTone(status: string) {

@@ -374,13 +374,11 @@ function EmptyState({ status }: { status: MembershipReviewStatus }) {
 }
 
 function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map(part => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const cleaned = name.trim();
+  if (cleaned.length === 0) {
+    return "C";
+  }
+  return cleaned.charAt(0).toUpperCase();
 }
 
 function formatDate(value: string | null) {

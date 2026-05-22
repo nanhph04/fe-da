@@ -687,6 +687,8 @@ Response:
 Muc dich:
 
 - Tao presigned URL de client upload avatar truc tiep len MinIO.
+- Tra ve `publicUrl` cua object. Sau khi complete thanh cong, service luu
+  chinh URL nay vao `profile.avatarUrl`.
 
 Auth:
 
@@ -739,14 +741,17 @@ FE flow:
 - Goi API nay truoc de lay presigned upload URL.
 - Upload file truc tiep len `data.uploadUrl` bang HTTP PUT.
 - Gui lai `Content-Type` dung voi `data.requiredHeaders`.
-- Sau khi upload thanh cong, goi API complete ben duoi.
+- Sau khi upload thanh cong, goi API complete ben duoi voi `data.objectKey`.
+- Sau khi complete thanh cong, FE lay `data.avatarUrl` tu response/profile va
+  render truc tiep. Khong can goi API download hay presigned GET rieng.
 
 
 2.3) POST /api/user/users/profile/avatar/complete
 
 Muc dich:
 
-- Xac nhan object avatar da upload hop le va cap nhat profile.
+- Xac nhan object avatar da upload hop le, dam bao object doc duoc public, va
+  cap nhat profile bang public URL.
 
 Auth:
 
@@ -768,6 +773,12 @@ Body:
 Field:
 
 - objectKey: string, required.
+
+Luu y:
+
+- `avatarUrl` tra ve trong response la public URL da duoc luu vao DB.
+- FE co the dung truc tiep `avatarUrl` cho `<img src="...">`.
+- `objectKey` chi dung cho buoc complete, khong can luu/use o FE sau do.
 
 Response:
 
