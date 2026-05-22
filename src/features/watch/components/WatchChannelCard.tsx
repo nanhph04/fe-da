@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService, type UserMembershipResponse } from "../services/mediaService";
 import type { PublicMembershipTier } from "../services/publicMediaService";
@@ -73,6 +73,8 @@ export function WatchChannelCard({
   );
   const hasJoinableTier = visibleTiers.some((tier) => tier.isAcceptingNew);
   const canShowAvatar = Boolean(avatarUrl && !avatarFailed);
+  const openMembershipPanel = useCallback(() => setIsMembershipOpen(true), []);
+  const closeMembershipPanel = useCallback(() => setIsMembershipOpen(false), []);
 
   useEffect(() => {
     let isMounted = true;
@@ -162,22 +164,21 @@ export function WatchChannelCard({
 
         <button
           type="button"
-          onClick={() => setIsMembershipOpen((current) => !current)}
+          onClick={openMembershipPanel}
           disabled={visibleTiers.length === 0}
-          className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground md:px-8"
+          aria-haspopup="dialog"
+          className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-3 text-sm font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/60 active:scale-95 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground md:px-8"
         >
           {visibleTiers.length === 0
             ? "Chưa mở gói"
-            : isMembershipOpen
-              ? "Ẩn gói"
-              : hasJoinableTier
-                ? "Đăng ký membership"
-                : "Xem gói membership"}
+            : hasJoinableTier
+              ? "Đăng ký membership"
+              : "Xem gói membership"}
         </button>
       </div>
 
       {isMembershipOpen ? (
-        <WatchMembershipPanel channelId={channelId} tiers={visibleTiers} />
+        <WatchMembershipPanel channelId={channelId} tiers={visibleTiers} onClose={closeMembershipPanel} />
       ) : null}
 
       <div className="rounded-lg border border-border/20 bg-background/30 p-6 md:p-8">
