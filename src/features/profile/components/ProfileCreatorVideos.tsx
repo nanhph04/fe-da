@@ -2,7 +2,7 @@ import { Link } from "@/i18n/routing";
 import { Film, Upload } from "lucide-react";
 import { getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import { formatDuration, formatProfileDate } from "../utils/profile-formatters";
-import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 
 interface ProfileCreatorVideosProps {
   videos: OwnerVideoResponse[];
@@ -44,13 +44,11 @@ export function ProfileCreatorVideos({ videos, error }: ProfileCreatorVideosProp
           className="group overflow-hidden rounded-lg border border-border/20 bg-card shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40"
         >
           <div className="relative aspect-video bg-muted">
-            {getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) ? (
-              <StudioThumbnail src={getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) || ""} alt={video.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                <Film className="h-10 w-10" />
-              </div>
-            )}
+            <VideoThumbnail
+              src={getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus)}
+              alt={video.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
             <div className="absolute bottom-2 right-2 rounded-sm bg-black/70 px-2 py-1 text-xs font-mono font-bold text-foreground">
               {formatDuration(video.durationSeconds)}
             </div>

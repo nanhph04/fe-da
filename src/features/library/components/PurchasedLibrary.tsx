@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { useEffect, useState } from "react";
 import {
   mediaService,
@@ -149,18 +150,11 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
                 }
               >
                 <div className={isFeatured ? "absolute inset-0" : "relative h-48 overflow-hidden"}>
-                  {item.thumbnailUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      alt={item.title}
-                      src={item.thumbnailUrl}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                      <span className="material-symbols-outlined text-5xl">movie</span>
-                    </div>
-                  )}
+                  <VideoThumbnail
+                    src={item.thumbnailUrl}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                   <div className="absolute left-3 top-3 rounded-sm bg-secondary px-2 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-foreground">
                     Đã mua

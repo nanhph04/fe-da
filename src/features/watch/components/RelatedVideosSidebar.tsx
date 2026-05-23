@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/routing";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import {
   getLatestVideosCached,
   getReadyPublicThumbnailUrl,
@@ -75,18 +76,11 @@ export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSide
         {videos.map((video) => (
           <Link key={video.id} href={`/watch/${video.id}`} className="group flex gap-4">
             <div className="relative h-24 w-44 flex-shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted">
-              {getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) || ""}
-                  alt={video.title}
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                  <span className="material-symbols-outlined text-4xl">movie</span>
-                </div>
-              )}
+              <VideoThumbnail
+                src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id)}
+                alt={video.title}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
               <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-black uppercase text-foreground">
                 {formatDuration(video.durationSeconds)}
               </span>

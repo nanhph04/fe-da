@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/routing";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { getReadyPublicThumbnailUrl, type PublicChannelVideo } from "@/features/watch/services/publicMediaService";
 
 interface ChannelVideoGridProps {
@@ -55,18 +56,11 @@ export function ChannelVideoGrid({ videos, channelName }: ChannelVideoGridProps)
               className="group overflow-hidden rounded-lg border border-border/20 bg-card transition-all duration-300 hover:border-primary/40 hover:-translate-y-0.5"
             >
               <div className="relative aspect-video overflow-hidden bg-muted">
-                {getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) || ""}
-                    alt={video.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    <span className="material-symbols-outlined text-5xl">movie</span>
-                  </div>
-                )}
+                <VideoThumbnail
+                  src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id)}
+                  alt={video.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                   <span className="rounded-sm bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-foreground">
                     {video.category}

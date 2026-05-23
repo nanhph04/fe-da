@@ -15,7 +15,7 @@ import {
 } from "@/shared/hooks/use-video-status-events";
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
 import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
-import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 
 const PROCESSING_STATUSES = new Set(["waiting", "processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
@@ -482,7 +482,7 @@ export function StudioContentFeature() {
                     className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
                     aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
                   >
-                    <StudioThumbnail
+                    <VideoThumbnail
                       src={thumbUrl}
                       alt=""
                       aria-hidden="true"

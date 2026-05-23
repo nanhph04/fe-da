@@ -1,5 +1,5 @@
 import Form from "next/form";
-import Image from "next/image";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { Link } from "@/i18n/routing";
 import {
   AlertTriangle,
@@ -449,12 +449,10 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
     <Link href={`/watch/${video.id}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <article className="h-full overflow-hidden rounded-lg border border-border bg-card transition-transform duration-300 hover:-translate-y-0.5">
         <div className="relative aspect-video overflow-hidden bg-muted">
-          <Image
+          <VideoThumbnail
             src={thumbnailUrl}
             alt={displayTitle}
-            fill
-            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/15 to-transparent" />
           <div className="absolute bottom-3 right-3 rounded-sm bg-background/90 px-2 py-1 text-[11px] font-bold text-foreground">

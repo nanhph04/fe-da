@@ -4,12 +4,12 @@ import { useState } from "react";
 
 const FALLBACK_THUMBNAIL = "/images/thumbnail.png";
 
-interface StudioThumbnailProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
+interface VideoThumbnailProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
   alt: string;
   src: string | null | undefined;
 }
 
-export function StudioThumbnail({ alt, src, className, ...props }: StudioThumbnailProps) {
+export function VideoThumbnail({ alt, src, className, ...props }: VideoThumbnailProps) {
   const [prevSrc, setPrevSrc] = useState(src);
   const [resolvedSrc, setResolvedSrc] = useState(src || FALLBACK_THUMBNAIL);
 
@@ -31,5 +31,3 @@ export function StudioThumbnail({ alt, src, className, ...props }: StudioThumbna
     />
   );
 }
-
-

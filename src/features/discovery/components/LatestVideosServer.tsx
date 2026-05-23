@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/routing";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import {
   getLatestVideosCached,
   getReadyPublicThumbnailUrl,
@@ -38,9 +39,8 @@ export async function LatestVideosServer() {
           className="group flex cursor-pointer flex-col gap-3"
         >
           <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-card transition-colors duration-300 ease-in-out group-hover:border-primary/50">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) || "/images/thumbnail.png"}
+            <VideoThumbnail
+              src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id)}
               alt={video.title}
               className="h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
             />

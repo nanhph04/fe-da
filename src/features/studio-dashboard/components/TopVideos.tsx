@@ -1,6 +1,6 @@
 "use client";
 
-import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import type { DashboardTopVideo } from "../types/studio-dashboard.types";
 
 interface TopVideosProps {
@@ -39,11 +39,11 @@ export function TopVideos({ videos, isLoading = false }: TopVideosProps) {
               </div>
             </div>
           ))
-        ) : videos.length > 0 ? (
+         ) : videos.length > 0 ? (
           videos.map(video => (
             <div key={video.id} className="group flex items-center gap-6 rounded-sm border border-border/30 bg-card p-4 transition-colors hover:bg-muted/40">
               <div className="aspect-video w-32 shrink-0 overflow-hidden rounded-sm bg-background">
-                <StudioThumbnail
+                <VideoThumbnail
                   src={video.thumbnailUrl}
                   alt={video.title}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

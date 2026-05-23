@@ -8,7 +8,7 @@ import { getErrorMessage } from "@/shared/api/client";
 import { getVideoJobStatusLabel, getVideoStatusFailureReason, isVideoJobStatus, useVideoStatusEventSubscription, type VideoStatusChangedPayload } from "@/shared/hooks/use-video-status-events";
 import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 import { StudioVideoDraftActions } from "./StudioVideoDraftActions";
-import { StudioThumbnail } from "@/shared/components/StudioThumbnail";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 
 interface StudioVideoPreviewFeatureProps {
   videoId: string;
@@ -352,7 +352,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
               <PlayerContainerClient videoId={video.id} poster={poster} title={video.title} />
             ) : (
               <div className="relative flex aspect-video overflow-hidden rounded-lg border border-border/30 bg-card">
-                <StudioThumbnail
+                <VideoThumbnail
                   src={poster}
                   alt=""
                   aria-hidden="true"

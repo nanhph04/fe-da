@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   mediaService,
@@ -124,18 +125,11 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
               className="group min-w-[320px] cursor-pointer snap-start"
             >
               <div className="relative mb-3 aspect-video overflow-hidden rounded-lg bg-background">
-                {item.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt={item.title}
-                    src={item.thumbnailUrl}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                    <span className="material-symbols-outlined text-5xl">movie</span>
-                  </div>
-                )}
+                <VideoThumbnail
+                  src={item.thumbnailUrl}
+                  alt={item.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
 
                 <div className="absolute bottom-0 left-0 h-1.5 w-full bg-muted">

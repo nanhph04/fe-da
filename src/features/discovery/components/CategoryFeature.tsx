@@ -1,5 +1,5 @@
 import Form from "next/form";
-import Image from "next/image";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { Link } from "@/i18n/routing";
 import {
   AlertTriangle,
@@ -218,12 +218,10 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
     <Link href={`/watch/${video.id}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       <article className="h-full overflow-hidden rounded-lg bg-card transition-transform duration-300 hover:-translate-y-0.5">
         <div className="relative aspect-video overflow-hidden bg-muted">
-          <Image
+          <VideoThumbnail
             src={thumbnailUrl}
             alt={displayTitle}
-            fill
-            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent opacity-80" />
           <div className="absolute bottom-3 right-3 rounded-sm bg-background/90 px-2 py-1 text-[11px] font-bold text-foreground">
@@ -448,13 +446,10 @@ export function CategoryFeature({
     <main className="min-h-screen bg-background pb-16 pt-20 md:pl-64">
       <section className="relative overflow-hidden border-b border-border bg-card">
         <div className="absolute inset-0">
-          <Image
+          <VideoThumbnail
             src={heroImageUrl}
             alt="Ảnh nền thể loại"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-40"
+            className="absolute inset-0 h-full w-full object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/30" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />

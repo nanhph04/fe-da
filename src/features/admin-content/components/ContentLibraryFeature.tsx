@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { Link } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 
@@ -186,9 +186,11 @@ export function ContentLibraryFeature() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="relative h-14 w-24 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]">
-                          {getReadyThumbnailUrl(video) ? (
-                            <Image src={getReadyThumbnailUrl(video) || ""} alt="" fill sizes="96px" className="object-cover opacity-85 transition-transform duration-300 group-hover:scale-105" />
-                          ) : null}
+                          <VideoThumbnail
+                            src={getReadyThumbnailUrl(video)}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover opacity-85 transition-transform duration-300 group-hover:scale-105"
+                          />
                         </div>
                         <div>
                           <p className="max-w-[260px] truncate font-headline text-sm font-bold text-foreground">{video.title}</p>
