@@ -7,6 +7,11 @@ interface TransactionHistoryProps {
   error?: string | null;
   initialTransactions?: Transaction[];
   loading?: boolean;
+  title?: string;
+  description?: string;
+  excludeInternalRevenue?: boolean;
+  emptyMessage?: string;
+  className?: string;
 }
 
 type NormalizedTransactionStatus = "pending" | "completed" | "failed" | "cancelled";
@@ -51,7 +56,7 @@ function isInternalRevenueTransaction(transaction: Transaction) {
 }
 
 function isIncomingTransaction(transaction: Transaction) {
-  return normalizeText(transaction.type) === "deposit";
+  return ["deposit", "channel_revenue", "system_revenue"].includes(normalizeText(transaction.type));
 }
 
 function getTransactionIcon(transaction: Transaction) {
@@ -95,8 +100,16 @@ function getPaymentDescription(transaction: Transaction) {
 }
 
 function getTransactionDescription(transaction: Transaction) {
+  if (transaction.description) {
+    return transaction.description;
+  }
+
   if (isDepositTransaction(transaction)) {
     return getDepositDescription(transaction);
+  }
+
+  if (isInternalRevenueTransaction(transaction)) {
+    return "Doanh thu studio";
   }
 
   return getPaymentDescription(transaction);
@@ -122,9 +135,16 @@ export function TransactionHistory({
   error = null,
   initialTransactions = [],
   loading = false,
+  title = "Transaction History",
+  description,
+  excludeInternalRevenue = true,
+  emptyMessage = "No transactions found.",
+  className = "mt-20",
 }: TransactionHistoryProps) {
   const transactions = sortTransactions(
-    initialTransactions.filter((transaction) => !isInternalRevenueTransaction(transaction))
+    excludeInternalRevenue
+      ? initialTransactions.filter((transaction) => !isInternalRevenueTransaction(transaction))
+      : initialTransactions
   );
 
   const formatDate = (dateStr: string) => {
@@ -136,12 +156,12 @@ export function TransactionHistory({
   };
 
   return (
-    <section className="mt-20">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="font-headline text-2xl font-bold text-foreground">Transaction History</h2>
-        <button className="text-sm font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-          View All <span className="material-symbols-outlined text-base">chevron_right</span>
-        </button>
+    <section className={`rounded-lg border border-border/30 bg-card p-6 ${className}`}>
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="font-headline text-2xl font-bold text-foreground">{title}</h2>
+          {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border/20 bg-card">
@@ -166,7 +186,7 @@ export function TransactionHistory({
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">No transactions found.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">{emptyMessage}</td>
                 </tr>
               ) : (
                 transactions.map((tx) => {

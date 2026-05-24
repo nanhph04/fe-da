@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Form from "next/form";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { WalletService } from "@/features/wallet/services/walletService";
+import { getErrorMessage } from "@/shared/api/client";
 import { ChevronDown, Search } from "lucide-react";
 import { usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
@@ -10,6 +13,7 @@ import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { AccountDropdown } from "@/components/layout/shared/AccountDropdown";
+import type { Wallet } from "@/features/wallet/types/wallet.types";
 import {
   isNavItemVisible,
   studioEntryByRole,
@@ -30,6 +34,8 @@ type TopNavProps = {
 };
 
 const NAV_CATEGORY_LIMIT = 12;
+
+const formatCoins = (value: number) => value.toLocaleString("vi-VN");
 
 const getRole = (role?: string, isAuthenticated?: boolean, isCreator?: boolean): MainNavRole => {
   if (!isAuthenticated || !role) {
@@ -79,6 +85,75 @@ function GlobalSearchForm({ action }: { action: string }) {
         <Search className="h-4 w-4" aria-hidden="true" />
       </button>
     </Form>
+  );
+}
+
+type WalletBalanceState = {
+  status: "idle" | "loading" | "success" | "error";
+  data: Wallet | null;
+  error: string | null;
+};
+
+function WalletBalanceLink({ isAuthenticated, userId }: { isAuthenticated: boolean; userId?: string }) {
+  const t = useTranslations("Navigation");
+  const walletUnavailableLabel = t("walletBalanceUnavailable");
+  const [walletState, setWalletState] = useState<WalletBalanceState>({
+    status: "idle",
+    data: null,
+    error: null,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!isAuthenticated || !userId) {
+      return;
+    }
+
+    async function loadWallet() {
+      setWalletState(current => ({ ...current, status: "loading", error: null }));
+
+      try {
+        const wallet = await WalletService.getMyWallet();
+        if (isMounted) {
+          setWalletState({ status: "success", data: wallet, error: null });
+        }
+      } catch (error) {
+        if (isMounted) {
+          setWalletState({
+            status: "error",
+            data: null,
+            error: getErrorMessage(error, walletUnavailableLabel),
+          });
+        }
+      }
+    }
+
+    void loadWallet();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, userId, walletUnavailableLabel]);
+
+  const balanceLabel = walletState.status === "loading"
+    ? t("walletBalanceLoading")
+    : walletState.data
+      ? `${formatCoins(walletState.data.balance)} AC`
+      : "-- AC";
+
+  return (
+    <Link
+      href="/wallet"
+      aria-label={t("walletBalance")}
+      title={walletState.error ?? t("wallet")}
+      className="hidden h-10 items-center gap-2 rounded-sm border border-secondary/30 bg-secondary/10 px-3 font-headline text-sm font-black text-secondary shadow-[inset_0_0_0_1px_rgba(245,158,11,0.08)] transition-all duration-300 hover:border-secondary/50 hover:bg-secondary/15 hover:text-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-flex"
+    >
+      <span className="material-symbols-outlined text-[18px]" aria-hidden="true" style={{ fontVariationSettings: "'FILL' 1" }}>
+        toll
+      </span>
+      <span className="tabular-nums">{balanceLabel}</span>
+    </Link>
   );
 }
 
@@ -234,6 +309,9 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
             </div>
 
             <div className="relative flex items-center gap-3 md:gap-4">
+              {role !== "guest" ? (
+                <WalletBalanceLink isAuthenticated={isAuthenticated} userId={user?.userId} />
+              ) : null}
               <LanguageSwitcher />
               <ThemeToggle />
 

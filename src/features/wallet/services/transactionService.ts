@@ -1,12 +1,13 @@
 import { api } from "@/shared/api/client";
+import type { ApiRequestInit } from "@/shared/api/types";
 import { Transaction } from "../types/wallet.types";
 
 export class TransactionService {
   /**
    * Get transactions initiated by the current user
    */
-  static async getMyTransactions(): Promise<Transaction[]> {
-    const response = await api.get<Transaction[]>("/api/transactions/me", { requireAuth: true });
+  static async getMyTransactions(options: ApiRequestInit = {}): Promise<Transaction[]> {
+    const response = await api.get<Transaction[]>("/api/transactions/me", { ...options, requireAuth: true });
     return response.data;
   }
 

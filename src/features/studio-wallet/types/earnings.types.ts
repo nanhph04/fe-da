@@ -1,3 +1,4 @@
+import type { ApiPagination } from "@/shared/api/types";
 import { RevenuePeriod } from "./revenue.types";
 
 export interface EarningsFilters {
@@ -62,18 +63,25 @@ export interface CategoryEarnings {
 
 export interface EarningsHistory {
   id: string;
-  videoId: string;
-  videoTitle: string;
+  videoId?: string;
+  videoTitle?: string;
+  referenceId?: string;
   amount: number;
-  currency: string;
+  currency?: string;
   status: "pending" | "confirmed" | "paid";
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   payoutDate?: string;
-  category: {
+  description?: string;
+  category?: {
     id: string;
     name: string;
   };
+}
+
+export interface EarningsHistoryResponse {
+  items: EarningsHistory[];
+  pagination: ApiPagination;
 }
 
 export interface EarningsSummary {

@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getErrorMessage } from "@/shared/api/client";
+import { TransactionHistory } from "@/features/wallet/components/TransactionHistory";
+import { TransactionService } from "@/features/wallet/services/transactionService";
+import type { Transaction } from "@/features/wallet/types/wallet.types";
 import { StudioWalletService } from "../services/studioWalletService";
 import type { StudioWallet, WalletStats } from "../types/studio-wallet.types";
 import { WalletOverview } from "./WalletOverview";
@@ -19,28 +23,78 @@ export function StudioWalletDashboard({
 }: StudioWalletDashboardProps) {
   const [wallet, setWallet] = useState(initialWallet);
   const [stats, setStats] = useState(initialStats);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isTransactionsLoading, setIsTransactionsLoading] = useState(true);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
 
   const refreshWallet = async () => {
     setIsRefreshing(true);
     setError(null);
+    setTransactionsError(null);
 
     try {
-      const [nextWallet, nextStats] = await Promise.all([
+      const [nextWallet, nextStats, nextTransactions] = await Promise.allSettled([
         StudioWalletService.getStudioWallet(),
         StudioWalletService.getWalletStats(),
+        TransactionService.getMyTransactions(),
       ]);
 
-      setWallet(nextWallet);
-      setStats(nextStats);
-    } catch {
-      setError("Failed to refresh wallet data.");
+      if (nextWallet.status === "fulfilled") {
+        setWallet(nextWallet.value);
+      } else {
+        setError(getErrorMessage(nextWallet.reason, "Failed to refresh wallet data."));
+      }
+
+      if (nextStats.status === "fulfilled") {
+        setStats(nextStats.value);
+      } else {
+        setError(getErrorMessage(nextStats.reason, "Failed to refresh wallet data."));
+      }
+
+      if (nextTransactions.status === "fulfilled") {
+        setTransactions(nextTransactions.value);
+      } else {
+        setTransactions([]);
+        setTransactionsError(getErrorMessage(nextTransactions.reason, "Failed to load studio transactions."));
+      }
     } finally {
       setIsRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadTransactions = async () => {
+      setIsTransactionsLoading(true);
+      setTransactionsError(null);
+
+      try {
+        const nextTransactions = await TransactionService.getMyTransactions({ signal: controller.signal });
+        setTransactions(nextTransactions);
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setTransactions([]);
+        setTransactionsError(getErrorMessage(error, "Failed to load studio transactions."));
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsTransactionsLoading(false);
+        }
+      }
+    };
+
+    void loadTransactions();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   return (
     <div className="space-y-10">
@@ -93,34 +147,16 @@ export function StudioWalletDashboard({
         isLoading={isRefreshing}
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <section className="rounded-lg border border-border/30 bg-card p-6 lg:col-span-1">
-          <h2 className="mb-6 font-headline text-lg font-bold text-foreground">Payout Snapshot</h2>
-          <div className="space-y-4 font-body text-sm text-muted-foreground">
-            <div className="flex items-center justify-between">
-              <span>Available balance</span>
-              <span className="font-headline font-semibold text-foreground">{stats.availableBalance.toLocaleString()} AC</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Pending payouts</span>
-              <span className="font-headline font-semibold text-secondary">{stats.pendingPayouts.toLocaleString()} AC</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Total withdrawn</span>
-              <span className="font-headline font-semibold text-foreground">{stats.totalWithdrawn.toLocaleString()} AC</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-lg border border-border/30 bg-card p-6 lg:col-span-2">
-          <h2 className="mb-6 font-headline text-lg font-bold text-foreground">Performance Summary</h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            <MetricCard label="Videos" value={wallet.videoCount.toLocaleString()} />
-            <MetricCard label="Total views" value={stats.totalViews.toLocaleString()} />
-            <MetricCard label="Avg revenue/video" value={stats.avgRevenuePerVideo.toFixed(2)} tone="secondary" />
-          </div>
-        </section>
-      </div>
+      <TransactionHistory
+        title="Studio Transaction History"
+        description="Latest deposits, withdrawals, and studio wallet movements."
+        className="mt-0"
+        error={transactionsError}
+        initialTransactions={transactions}
+        loading={isTransactionsLoading}
+        excludeInternalRevenue={false}
+        emptyMessage="No studio transactions found."
+      />
 
       <WithdrawFundsOverlay
         wallet={wallet}
@@ -128,15 +164,6 @@ export function StudioWalletDashboard({
         onClose={() => setIsWithdrawOpen(false)}
         onSuccess={refreshWallet}
       />
-    </div>
-  );
-}
-
-function MetricCard({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "secondary" }) {
-  return (
-    <div className="rounded-lg border border-border/30 bg-background p-4">
-      <p className="font-label text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-      <p className={`mt-2 font-headline text-3xl font-bold ${tone === "secondary" ? "text-secondary" : "text-foreground"}`}>{value}</p>
     </div>
   );
 }

@@ -141,11 +141,10 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
                   key={price}
                   type="button"
                   onClick={() => updateFormData({ price })}
-                  className={`rounded border px-4 py-2 font-headline text-xs font-bold transition-colors ${
-                    formData.price === price
+                  className={`rounded border px-4 py-2 font-headline text-xs font-bold transition-colors ${formData.price === price
                       ? "border-secondary/50 bg-secondary/20 text-secondary"
                       : "border-border/40 bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {price === 0 ? "Free" : formatCoins(price)}
                 </button>
@@ -217,16 +216,16 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-body text-sm text-muted-foreground">Platform Fee</span>
-                    <span className="rounded bg-muted px-1.5 py-0.5 font-label text-[10px] font-bold text-muted-foreground">10%</span>
+                    <span className="rounded bg-muted px-1.5 py-0.5 font-label text-[10px] font-bold text-muted-foreground">20%</span>
                   </div>
-                  <span className="font-headline text-primary">- {formatCoins(formData.price * 0.1)}</span>
+                  <span className="font-headline text-primary">- {formatCoins(formData.price * 0.2)}</span>
                 </div>
 
                 <div className="h-px bg-border/30" />
 
                 <div className="pt-2">
                   <p className="mb-1 font-label text-xs font-bold uppercase tracking-widest text-secondary">Estimated Net</p>
-                  <p className="font-headline text-4xl font-extrabold text-foreground">{formatCoins(formData.price * 0.9)}</p>
+                  <p className="font-headline text-4xl font-extrabold text-foreground">{formatCoins(formData.price * 0.8)}</p>
                   <p className="mt-1 font-body text-xs text-muted-foreground">Per purchase</p>
                 </div>
 
