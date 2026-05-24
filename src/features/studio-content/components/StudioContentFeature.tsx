@@ -166,6 +166,11 @@ export function StudioContentFeature() {
     videosRef.current = videos;
   }, [videos]);
 
+  const showActionMessage = useCallback((message: string) => {
+    setActionMessage(message);
+    window.setTimeout(() => setActionMessage(null), 3500);
+  }, []);
+
   const fetchVideos = useCallback(async (showLoading = true, filter: ContentFilter) => {
     if (showLoading) {
       setIsLoading(true);
@@ -182,32 +187,35 @@ export function StudioContentFeature() {
       const res = await mediaService.getOwnerVideos(params);
       if (res.success && res.data) {
         setVideos(filter === "all" ? res.data : res.data.filter(video => matchesActiveFilter(video, filter)));
-        return;
+        return true;
       }
 
+      const message = res.mess || "Không thể tải danh sách video.";
       if (showLoading) {
         setVideos([]);
-        setError(res.mess || "Không thể tải danh sách video.");
+        setError(message);
+      } else {
+        showActionMessage(message);
       }
+      return false;
     } catch (err) {
+      const message = getErrorMessage(err, "Không thể tải danh sách video. Vui lòng thử lại.");
       if (showLoading) {
         setVideos([]);
-        setError(getErrorMessage(err, "Không thể tải danh sách video. Vui lòng thử lại."));
+        setError(message);
+      } else {
+        showActionMessage(message);
       }
+      return false;
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [showActionMessage]);
 
   useEffect(() => {
     void fetchVideos(true, activeFilter);
   }, [activeFilter, fetchVideos]);
-
-  const showActionMessage = useCallback((message: string) => {
-    setActionMessage(message);
-    window.setTimeout(() => setActionMessage(null), 3500);
-  }, []);
 
   const refreshAfterProcessing = useCallback(() => {
     void fetchVideos(false, activeFilter);
@@ -565,6 +573,7 @@ export function StudioContentFeature() {
                         jobStatusMessage={video.jobStatusMessage}
                         failureReason={video.failureReason || video.errorMessage}
                         moderationDetails={video.moderationDetails}
+                        isRefreshing={isRefreshing}
                         onRefreshStatus={refreshAfterProcessing}
                       />
                     ) : null}

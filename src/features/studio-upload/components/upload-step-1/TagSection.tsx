@@ -6,10 +6,12 @@ import type { TagResponse } from "@/features/watch/services/mediaService";
 interface TagSectionProps {
   tags: TagResponse[];
   selectedTagIds: string[];
+  isLoading?: boolean;
+  error?: string | null;
   onChange: (tagIds: string[]) => void;
 }
 
-export function TagSection({ tags, selectedTagIds, onChange }: TagSectionProps) {
+export function TagSection({ tags, selectedTagIds, isLoading = false, error, onChange }: TagSectionProps) {
   const [query, setQuery] = useState("");
 
   const filteredTags = useMemo(() => {
@@ -59,9 +61,17 @@ export function TagSection({ tags, selectedTagIds, onChange }: TagSectionProps) 
 
       <div className="max-h-56 overflow-y-auto pr-1 [scrollbar-color:#484847_#19191c] [scrollbar-width:thin]">
         <div className="flex flex-wrap gap-2">
-          {tags.length === 0 ? (
+          {isLoading ? (
             <div className="w-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
               Loading tags...
+            </div>
+          ) : error ? (
+            <div className="w-full rounded-sm border border-dashed border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-xs text-destructive">
+              {error}
+            </div>
+          ) : tags.length === 0 ? (
+            <div className="w-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
+              No active tags available.
             </div>
           ) : filteredTags.length > 0 ? (
             filteredTags.map(tag => {

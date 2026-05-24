@@ -11,6 +11,7 @@ interface ProcessingProgressTrackerProps {
   jobStatusMessage?: string | null;
   failureReason?: string | null;
   moderationDetails?: Record<string, unknown> | null;
+  isRefreshing?: boolean;
   onRefreshStatus?: () => void;
 }
 
@@ -40,6 +41,7 @@ export function ProcessingProgressTracker({
   jobStatusMessage,
   failureReason,
   moderationDetails,
+  isRefreshing = false,
   onRefreshStatus,
 }: ProcessingProgressTrackerProps) {
   const normalizedStatus = normalizeStatus(jobStatus ?? initialStatus);
@@ -61,9 +63,10 @@ export function ProcessingProgressTracker({
           <button
             type="button"
             onClick={onRefreshStatus}
-            className="rounded-sm border border-current/30 px-2 py-1 font-bold uppercase tracking-widest transition-colors hover:bg-current/10"
+            disabled={isRefreshing}
+            className="rounded-sm border border-current/30 px-2 py-1 font-bold uppercase tracking-widest transition-colors hover:bg-current/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Refresh
+            {isRefreshing ? "Refreshing" : "Refresh"}
           </button>
         ) : null}
       </div>

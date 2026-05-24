@@ -75,7 +75,7 @@ export class WithdrawalService {
 
   static async cancelWithdrawal(withdrawalId: string): Promise<Withdrawal> {
     const response = await api.post<Withdrawal>(
-      `/api/withdrawals/${withdrawalId}/cancel`,
+      `/api/payment/${withdrawalId}/cancel`,
       {},
       { requireAuth: true }
     );

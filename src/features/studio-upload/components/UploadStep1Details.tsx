@@ -43,7 +43,7 @@ export function UploadStep1Details({
   updateFormData,
   onNext,
 }: UploadStep1DetailsProps) {
-  const { categories, tags } = useUploadStep1State();
+  const { categories, tags, isLoadingTaxonomy, taxonomyError } = useUploadStep1State();
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [isReplacingFile, setIsReplacingFile] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
@@ -350,12 +350,16 @@ export function UploadStep1Details({
           <CategorySection
             categories={categories}
             selectedCategoryId={formData.categoryId}
+            isLoading={isLoadingTaxonomy}
+            error={taxonomyError}
             onChange={categoryId => updateFormData({ categoryId })}
           />
 
           <TagSection
             tags={tags}
             selectedTagIds={formData.tagIds}
+            isLoading={isLoadingTaxonomy}
+            error={taxonomyError}
             onChange={tagIds => updateFormData({ tagIds })}
           />
         </div>

@@ -6,12 +6,16 @@ import type { CategoryResponse } from "@/features/watch/services/mediaService";
 interface CategorySectionProps {
   categories: CategoryResponse[];
   selectedCategoryId: string;
+  isLoading?: boolean;
+  error?: string | null;
   onChange: (categoryId: string) => void;
 }
 
 export function CategorySection({
   categories,
   selectedCategoryId,
+  isLoading = false,
+  error,
   onChange,
 }: CategorySectionProps) {
   const [query, setQuery] = useState("");
@@ -66,9 +70,17 @@ export function CategorySection({
 
         <div className="max-h-72 overflow-y-auto pr-1 [scrollbar-color:#484847_#19191c] [scrollbar-width:thin]">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {categories.length === 0 ? (
+            {isLoading ? (
               <div className="col-span-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
                 Loading categories...
+              </div>
+            ) : error ? (
+              <div className="col-span-full rounded-sm border border-dashed border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-xs text-destructive">
+                {error}
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="col-span-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
+                No active categories available.
               </div>
             ) : filteredCategories.length > 0 ? (
               filteredCategories.map(category => {

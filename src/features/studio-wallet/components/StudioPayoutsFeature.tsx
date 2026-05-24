@@ -97,6 +97,7 @@ export function StudioPayoutsFeature() {
       <PayoutHistory
         initialItems={history.withdrawals}
         initialPagination={history.pagination}
+        onHistoryChanged={loadPayouts}
       />
     </div>
   );

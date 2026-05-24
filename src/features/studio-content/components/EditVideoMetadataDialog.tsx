@@ -81,8 +81,8 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
           return;
         }
 
-        const loadedCategories = categoriesRes.success && categoriesRes.data ? categoriesRes.data : [];
-        const loadedTags = tagsRes.success && tagsRes.data ? tagsRes.data : [];
+        const loadedCategories = categoriesRes.success && categoriesRes.data ? categoriesRes.data.items : [];
+        const loadedTags = tagsRes.success && tagsRes.data ? tagsRes.data.items : [];
 
         setCategories(loadedCategories);
         setTags(loadedTags);

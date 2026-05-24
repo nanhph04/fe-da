@@ -106,8 +106,8 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     getWithdrawalSummary(),
     getWithdrawals(),
     AdminDepositService.getAdminPackages(),
-    mediaService.getAllCategoriesAdmin().then(response => response.data),
-    mediaService.getAllTagsAdmin().then(response => response.data),
+    mediaService.getAllCategoriesAdmin({ page: 1, limit: 50 }).then(response => response.data.items),
+    mediaService.getAllTagsAdmin({ page: 1, limit: 50 }).then(response => response.data.items),
   ]);
 
   const users = buildSource(

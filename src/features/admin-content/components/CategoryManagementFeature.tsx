@@ -1,11 +1,12 @@
 "use client";
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { mediaService, type CategoryResponse, type TagResponse } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
+import type { ApiPagination } from "@/shared/api/types";
 
 type TaxonomyTab = "categories" | "tags";
 type TaxonomyStatus = "active" | "inactive" | "pending" | "deleted";
@@ -38,6 +39,9 @@ const initialTagFormState: TagFormState = {
   name: "",
   status: "active",
 };
+
+const taxonomyPageLimit = 20;
+const initialPagination: ApiPagination = { page: 1, limit: taxonomyPageLimit, total: 0, totalPages: 0 };
 
 const tabOptions: Array<{ value: TaxonomyTab; label: string; icon: string }> = [
   { value: "categories", label: "Categories", icon: "category" },
@@ -111,10 +115,54 @@ function SkeletonRows({ columns }: { columns: number }) {
   ));
 }
 
+function PaginationControls({
+  pagination,
+  isLoading,
+  onPageChange,
+}: {
+  pagination: ApiPagination;
+  isLoading: boolean;
+  onPageChange: (page: number) => void;
+}) {
+  const hasPrevious = pagination.page > 1;
+  const hasNext = pagination.page < pagination.totalPages;
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-border/30 bg-background px-5 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <span>
+        Page <strong className="text-foreground">{pagination.page}</strong> / {pagination.totalPages || 1} - {pagination.total} records
+      </span>
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={!hasPrevious || isLoading}
+          onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
+          className="h-10 border-border/40 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          Previous
+        </Button>
+        <Button
+          type="button"
+          disabled={!hasNext || isLoading}
+          onClick={() => onPageChange(pagination.page + 1)}
+          className="h-10 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function CategoryManagementFeature() {
   const [activeTab, setActiveTab] = useState<TaxonomyTab>("categories");
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [tags, setTags] = useState<TagResponse[]>([]);
+  const [categoryPagination, setCategoryPagination] = useState<ApiPagination>(initialPagination);
+  const [tagPagination, setTagPagination] = useState<ApiPagination>(initialPagination);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [tagPage, setTagPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFormState, setCategoryFormState] = useState<CategoryFormState>(initialCategoryFormState);
   const [tagFormState, setTagFormState] = useState<TagFormState>(initialTagFormState);
@@ -123,27 +171,41 @@ export function CategoryManagementFeature() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const latestRequestId = useRef(0);
 
   const loadTaxonomy = useCallback(async () => {
+    const requestId = latestRequestId.current + 1;
+    latestRequestId.current = requestId;
+
     setIsLoading(true);
     setError(null);
 
+    const normalizedQuery = searchQuery.trim() || undefined;
+
     try {
       const [categoryRes, tagRes] = await Promise.all([
-        mediaService.getAllCategoriesAdmin(),
-        mediaService.getAllTagsAdmin(),
+        mediaService.getAllCategoriesAdmin({ page: categoryPage, limit: taxonomyPageLimit, q: normalizedQuery }),
+        mediaService.getAllTagsAdmin({ page: tagPage, limit: taxonomyPageLimit, q: normalizedQuery }),
       ]);
 
+      if (latestRequestId.current !== requestId) {
+        return;
+      }
+
       if (categoryRes.success && categoryRes.data) {
-        setCategories(categoryRes.data);
+        setCategories(categoryRes.data.items);
+        setCategoryPagination(categoryRes.data.pagination);
       } else {
         setCategories([]);
+        setCategoryPagination(initialPagination);
       }
 
       if (tagRes.success && tagRes.data) {
-        setTags(tagRes.data);
+        setTags(tagRes.data.items);
+        setTagPagination(tagRes.data.pagination);
       } else {
         setTags([]);
+        setTagPagination(initialPagination);
       }
 
       const errors = [
@@ -155,13 +217,21 @@ export function CategoryManagementFeature() {
         setError(errors.join(" "));
       }
     } catch (err) {
+      if (latestRequestId.current !== requestId) {
+        return;
+      }
+
       setError(getErrorMessage(err, "Unable to load taxonomy."));
       setCategories([]);
       setTags([]);
+      setCategoryPagination(initialPagination);
+      setTagPagination(initialPagination);
     } finally {
-      setIsLoading(false);
+      if (latestRequestId.current === requestId) {
+        setIsLoading(false);
+      }
     }
-  }, []);
+  }, [categoryPage, searchQuery, tagPage]);
 
   useEffect(() => {
     void loadTaxonomy();
@@ -169,12 +239,12 @@ export function CategoryManagementFeature() {
 
   const stats = useMemo(() => {
     return {
-      categoryTotal: categories.length,
+      categoryTotal: categoryPagination.total,
       categoryActive: categories.filter(category => category.status === "active").length,
-      tagTotal: tags.length,
+      tagTotal: tagPagination.total,
       tagPending: tags.filter(tag => tag.status === "pending").length,
     };
-  }, [categories, tags]);
+  }, [categories, categoryPagination.total, tagPagination.total, tags]);
 
   const filteredCategories = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -211,6 +281,8 @@ export function CategoryManagementFeature() {
   const handleTabChange = (tab: TaxonomyTab) => {
     setActiveTab(tab);
     setSearchQuery("");
+    setCategoryPage(1);
+    setTagPage(1);
     resetForms();
     setError(null);
     setNotice(null);
@@ -373,7 +445,8 @@ export function CategoryManagementFeature() {
     }
   };
 
-  const activeTotal = activeTab === "categories" ? filteredCategories.length : filteredTags.length;
+  const activePagination = activeTab === "categories" ? categoryPagination : tagPagination;
+  const activeTotal = activePagination.total;
   const editorTitle = activeTab === "categories"
     ? editingState?.type === "category" ? "Edit Category" : "Create Category"
     : editingState?.type === "tag" ? "Edit Tag" : "Create Tag";
@@ -396,9 +469,9 @@ export function CategoryManagementFeature() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <TaxonomyStatCard label="Categories" value={stats.categoryTotal} icon="category" tone="primary" />
-        <TaxonomyStatCard label="Active Categories" value={stats.categoryActive} icon="verified" />
+        <TaxonomyStatCard label="Active on Page" value={stats.categoryActive} icon="verified" />
         <TaxonomyStatCard label="Tags" value={stats.tagTotal} icon="sell" tone="secondary" />
-        <TaxonomyStatCard label="Pending Tags" value={stats.tagPending} icon="pending_actions" tone="secondary" />
+        <TaxonomyStatCard label="Pending on Page" value={stats.tagPending} icon="pending_actions" tone="secondary" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -429,7 +502,11 @@ export function CategoryManagementFeature() {
                   className="h-11 w-full rounded-md border-border/30 bg-background pl-11 pr-4 text-foreground focus-visible:ring-primary"
                   placeholder={activeTab === "categories" ? "Search categories..." : "Search tags..."}
                   value={searchQuery}
-                  onChange={event => setSearchQuery(event.target.value)}
+                  onChange={event => {
+                    setSearchQuery(event.target.value);
+                    setCategoryPage(1);
+                    setTagPage(1);
+                  }}
                 />
               </div>
             </div>
@@ -599,6 +676,18 @@ export function CategoryManagementFeature() {
                 </table>
               )}
             </div>
+            <PaginationControls
+              pagination={activePagination}
+              isLoading={isLoading}
+              onPageChange={page => {
+                if (activeTab === "categories") {
+                  setCategoryPage(page);
+                  return;
+                }
+
+                setTagPage(page);
+              }}
+            />
           </div>
         </div>
 

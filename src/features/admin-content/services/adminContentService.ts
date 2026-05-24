@@ -1,7 +1,11 @@
 import { api } from "@/shared/api/client";
 import type { ApiPagination } from "@/shared/api/types";
 
-import type { AdminVideoItem, AdminVideoListParams } from "../types/admin-content.types";
+import type {
+  AdminVideoItem,
+  AdminVideoListParams,
+  AdminVideoPreview,
+} from "../types/admin-content.types";
 
 export interface AdminVideoListResponse {
   items: AdminVideoItem[];
@@ -45,9 +49,49 @@ const buildQueryString = (params: AdminVideoListParams = {}) => {
 
 export const adminContentService = {
   async getVideos(params: AdminVideoListParams = {}) {
-    const response = await api.get<AdminVideoListResponse>(`/api/media/admin/videos${buildQueryString(params)}`, {
-      requireAuth: true,
-    });
+    const response = await api.get<AdminVideoListResponse>(
+      `/api/media/admin/videos${buildQueryString(params)}`,
+      {
+        requireAuth: true,
+      },
+    );
+
+    return response.data;
+  },
+
+  async getVideo(id: string) {
+    const response = await api.get<AdminVideoItem>(
+      `/api/media/admin/videos/${id}`,
+      {
+        requireAuth: true,
+      },
+    );
+
+    return response.data;
+  },
+
+  async getVideoPreview(id: string) {
+    const response = await api.get<AdminVideoPreview>(
+      `/api/media/admin/videos/${id}/preview`,
+      {
+        requireAuth: true,
+      },
+    );
+
+    return response.data;
+  },
+
+  async moderateVideo(
+    id: string,
+    payload: { action: "approve" } | { action: "reject"; reason: string },
+  ) {
+    const response = await api.patch<AdminVideoItem>(
+      `/api/media/admin/videos/${id}/moderation`,
+      payload,
+      {
+        requireAuth: true,
+      },
+    );
 
     return response.data;
   },

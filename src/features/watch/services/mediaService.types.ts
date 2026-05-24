@@ -1,3 +1,5 @@
+import type { ApiPagination } from "@/shared/api/types";
+
 export interface PaginationParams {
   limit?: number;
   page?: number;
@@ -420,6 +422,15 @@ export interface TagResponse {
   status: "active" | "inactive" | "pending" | "deleted" | string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TaxonomyListParams extends PaginationParams {
+  q?: string;
+}
+
+export interface TaxonomyListResponse<T> {
+  items: T[];
+  pagination: ApiPagination;
 }
 
 export interface SearchChannelResponse {

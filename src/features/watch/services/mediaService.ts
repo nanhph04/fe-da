@@ -1,4 +1,5 @@
 import { api } from "@/shared/api/client";
+import type { ApiResponse } from "@/shared/api/types";
 import { buildQueryString, toCommaSeparated } from "./mediaService.helpers";
 import { createUploadResumableVideoFile, uploadPresignedFile } from "./mediaService.upload";
 import type {
@@ -34,6 +35,8 @@ import type {
   SubmitUploadBody,
   SubmitUploadResponse,
   TagResponse,
+  TaxonomyListParams,
+  TaxonomyListResponse,
   UpdateVideoMetadataBody,
   UploadStatusResponse,
   UserMembershipResponse,
@@ -96,6 +99,26 @@ function buildPurchaseHeaders(options: PurchaseRequestOptions) {
   }
 
   return headers;
+}
+
+function normalizeTaxonomyResponse<T>(
+  response: ApiResponse<T[]>,
+  params?: TaxonomyListParams
+): ApiResponse<TaxonomyListResponse<T>> {
+  const fallbackTotalPages = response.data.length > 0 ? 1 : 0;
+
+  return {
+    ...response,
+    data: {
+      items: response.data,
+      pagination: response.pagination ?? {
+        page: params?.page ?? 1,
+        limit: params?.limit ?? response.data.length,
+        total: response.data.length,
+        totalPages: fallbackTotalPages,
+      },
+    },
+  };
 }
 
 export const mediaService = {
@@ -324,11 +347,15 @@ export const mediaService = {
       status: toCommaSeparated(params?.status),
       visibility: toCommaSeparated(params?.visibility),
     });
-    return api.get<OwnerVideoResponse[]>(`/api/media/studio/videos${qs}`, { requireAuth: true });
+    return api.get<OwnerVideoResponse[]>(`/api/media/studio/videos${qs}`, {
+      requireAuth: true,
+      cache: "no-store",
+    });
   },
   getOwnerVideoDetail: async (id: string) => {
     return api.get<OwnerVideoDetailResponse>(`/api/media/studio/videos/${encodeURIComponent(id)}`, {
       requireAuth: true,
+      cache: "no-store",
     });
   },
   searchMedia: async (params: SearchMediaParams) => {
@@ -337,13 +364,17 @@ export const mediaService = {
   },
 
   // 6. CATEGORIES & TAGS
-  getCategories: async (params?: { q?: string }) => {
-    const qs = buildQueryString({ q: params?.q });
-    return api.get<CategoryResponse[]>(`/api/media/categories${qs}`);
+  getCategories: async (params?: TaxonomyListParams) => {
+    const qs = buildQueryString({ q: params?.q, page: params?.page, limit: params?.limit });
+    const response = await api.get<CategoryResponse[]>(`/api/media/categories${qs}`);
+
+    return normalizeTaxonomyResponse(response, params);
   },
-  getAllCategoriesAdmin: async (params?: { q?: string }) => {
-    const qs = buildQueryString({ q: params?.q });
-    return api.get<CategoryResponse[]>(`/api/media/admin/categories${qs}`, { requireAuth: true });
+  getAllCategoriesAdmin: async (params?: TaxonomyListParams) => {
+    const qs = buildQueryString({ q: params?.q, page: params?.page, limit: params?.limit });
+    const response = await api.get<CategoryResponse[]>(`/api/media/admin/categories${qs}`, { requireAuth: true });
+
+    return normalizeTaxonomyResponse(response, params);
   },
   createCategoryAdmin: async (data: {
     name: string;
@@ -368,13 +399,17 @@ export const mediaService = {
   deleteCategoryAdmin: async (id: string) => {
     return api.delete<CategoryResponse>(`/api/media/admin/categories/${id}`, { requireAuth: true });
   },
-  getTags: async (params?: { q?: string }) => {
-    const qs = buildQueryString({ q: params?.q });
-    return api.get<TagResponse[]>(`/api/media/tags${qs}`);
+  getTags: async (params?: TaxonomyListParams) => {
+    const qs = buildQueryString({ q: params?.q, page: params?.page, limit: params?.limit });
+    const response = await api.get<TagResponse[]>(`/api/media/tags${qs}`);
+
+    return normalizeTaxonomyResponse(response, params);
   },
-  getAllTagsAdmin: async (params?: { q?: string }) => {
-    const qs = buildQueryString({ q: params?.q });
-    return api.get<TagResponse[]>(`/api/media/admin/tags${qs}`, { requireAuth: true });
+  getAllTagsAdmin: async (params?: TaxonomyListParams) => {
+    const qs = buildQueryString({ q: params?.q, page: params?.page, limit: params?.limit });
+    const response = await api.get<TagResponse[]>(`/api/media/admin/tags${qs}`, { requireAuth: true });
+
+    return normalizeTaxonomyResponse(response, params);
   },
   createTagAdmin: async (data: { name: string }) => {
     return api.post<TagResponse>("/api/media/admin/tags", data, { requireAuth: true });

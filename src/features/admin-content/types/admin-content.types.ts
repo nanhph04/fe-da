@@ -9,9 +9,22 @@ export type AdminVideoStatus =
 
 export type AdminVideoVisibility = "public" | "private";
 export type AdminThumbnailSource = "auto" | "custom" | string;
-export type AdminThumbnailStatus = "pending" | "processing" | "ready" | "failed" | string;
+export type AdminThumbnailStatus =
+  | "pending"
+  | "processing"
+  | "ready"
+  | "failed"
+  | string;
 
 export type AdminVideoModerationDetails = Record<string, unknown> | null;
+
+export interface AdminVideoPreview {
+  videoId: string;
+  previewUrl: string;
+  expiresAt: string;
+  evidenceTimestampSeconds: number | null;
+  moderationDetails: AdminVideoModerationDetails;
+}
 
 export interface AdminVideoItem {
   id: string;
