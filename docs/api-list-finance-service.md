@@ -53,8 +53,8 @@ Phan lon API dang nam sau internal gateway, nen request thuong can:
 - `x-internal-secret`: bat buoc cho moi route khong duoc skip guard
 - `x-user-id`: bat buoc cho route user-specific va admin route
 - `x-user-role`: bat buoc cho route admin, gia tri backend dang check la `admin`
-- `idempotency-key`: bat buoc cho `POST /api/payments`
-- `x-request-id`: optional cho `POST /api/payments`, dung lam trace id cho integration event
+- `idempotency-key`: bat buoc cho `POST /api/internal/payments/charge`
+- `x-request-id`: optional cho `POST /api/internal/payments/charge`, dung lam trace id cho integration event
 
 Webhook internal deposit success dung header rieng:
 
@@ -595,15 +595,15 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 }
 ```
 
-  - chi xu ly complete khi:
-    - `success === true`
-    - `code === "00"`
-    - neu co `dataCode` thi `dataCode === "00"`
-  - tim deposit qua `paymentCode`/`orderCode`
-  - check gateway va amount
-  - complete deposit se cong `totalCoinAmount` vao vi va tao transaction `deposit` voi `assetType=coin`
-  - transaction metadata luu `moneyAmount`, `baseCoinAmount`, `bonusCoinAmount`, `totalCoinAmount`
-  - neu webhook duplicate cho deposit da `completed` thi tra thanh cong va khong cong coin lan 2
+- chi xu ly complete khi:
+  - `success === true`
+  - `code === "00"`
+  - neu co `dataCode` thi `dataCode === "00"`
+- tim deposit qua `paymentCode`/`orderCode`
+- check gateway va amount
+- complete deposit se cong `totalCoinAmount` vao vi va tao transaction `deposit` voi `assetType=coin`
+- transaction metadata luu `moneyAmount`, `baseCoinAmount`, `bonusCoinAmount`, `totalCoinAmount`
+- neu webhook duplicate cho deposit da `completed` thi tra thanh cong va khong cong coin lan 2
 
 ### 6.5 GET `/api/deposits/admin/packages`
 
@@ -1064,11 +1064,23 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 ## 8. Payment APIs
 
-### 8.1 POST `/api/payments`
+### 8.1 Public payment API removed
 
-- Muc dich: user dung coin de thanh toan video hoac membership
+- `POST /api/payments` khong con la public finance-service contract.
+- Client mua video/membership phai goi media-service:
+  - `POST /api/media/videos/:id/purchase`
+  - `POST /api/media/channels/:channelId/memberships/:tierId/purchase`
+- Finance-service chi nhan charge video/membership qua internal API ben duoi
+  hoac qua luong Kafka auto-renew.
+
+### 8.2 POST `/api/internal/payments/charge`
+
+- Muc dich: API noi bo de media-service charge coin sau khi da validate video
+  hoac membership authoritative.
+- Khong phai public gateway contract. Khong cho client goi truc tiep.
 - Headers:
-  - `x-user-id` bat buoc
+  - `x-internal-service: media-service`
+  - `x-internal-service-secret: <MEDIA_FINANCE_INTERNAL_SECRET>`
   - `idempotency-key` bat buoc
   - `x-request-id` optional
 
@@ -1076,6 +1088,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 ```json
 {
+  "payerUserId": "user-1",
   "serviceType": "video",
   "serviceId": "video-123",
   "channelId": "channel-123",
@@ -1089,79 +1102,27 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 }
 ```
 
-- `serviceType` hien co:
-  - `video`
-  - `membership`
-
-- `metadata` la optional. Code hien tai support:
-  - `videoTitle`
-  - `channelName`
-  - `thumbnailUrl`
-  - `packageName`
-
-- Output `data`:
-
-```json
-{
-  "payerWalletId": "wallet-user",
-  "channelWalletId": "wallet-channel",
-  "systemWalletId": "wallet-system",
-  "serviceType": "video",
-  "serviceId": "video-123",
-  "channelId": "channel-123",
-  "channelOwnerId": "channel-owner-1",
-  "coinAmount": 100,
-  "splitPercent": 80,
-  "creatorCoins": 80,
-  "systemCoins": 20,
-  "transactions": [
-    {
-      "id": "txn-debit",
-      "type": "video_purchase",
-      "status": "completed",
-      "amount": 100,
-      "fromWalletId": "wallet-user",
-      "toWalletId": null,
-      "referenceId": "video-123"
-    },
-    {
-      "id": "txn-creator",
-      "type": "channel_revenue",
-      "status": "pending",
-      "amount": 80,
-      "fromWalletId": null,
-      "toWalletId": "wallet-channel",
-      "referenceId": "video-123"
-    },
-    {
-      "id": "txn-system",
-      "type": "system_revenue",
-      "status": "pending",
-      "amount": 20,
-      "fromWalletId": null,
-      "toWalletId": "wallet-system",
-      "referenceId": "video-123"
-    }
-  ]
-}
-```
-
 - Backend xu ly:
-  - validate `idempotency-key`
-  - neu cung key va cung request chinh da goi roi thi tra lai response cu
-  - request hash hien tinh theo `userId`, `serviceType`, `serviceId`, `channelId`, `channelOwnerId`, `coinAmount`; `metadata` va `x-request-id` khong nam trong hash
-  - neu cung key nhung cac field chinh khac thi tra `409`
-  - tim vi payer, vi channel owner, vi system
-  - neu chua co vi cua channel owner thi backend tu tao
-  - tru coin user
-  - chia doanh thu giua creator va system theo config
-  - revenue cua creator/system duoc ghi vao `frozenBalance`, ledger revenue ban dau la `pending` cho den khi settlement release
-  - tao cac transaction ledger
-  - day integration event:
-    - `video.payment.success`
-    - `membership.payment.success`
+  - verify caller nam trong `FINANCE_INTERNAL_SERVICE_ALLOWLIST`
+  - verify secret theo caller. Preferred env format la
+    `<CALLER_SERVICE>_FINANCE_INTERNAL_SECRET`, vi du
+    `MEDIA_SERVICE_FINANCE_INTERNAL_SECRET`
+  - `MEDIA_FINANCE_INTERNAL_SECRET` van duoc support nhu legacy alias cho
+    `media-service`
+  - map `payerUserId` thanh payer `userId`
+  - reuse payment logic hien co: tru coin, chia revenue, tao transaction,
+    tao settlement va day outbox event
+  - idempotency theo `payerUserId + idempotency-key`
 
-### 8.2 Membership auto-renew charge
+- Media-service contract:
+  - client chi goi media-service purchase endpoint
+  - media-service tu lay gia, owner, channel, trang thai video/tier tu DB cua
+    media-service
+  - media-service tao entitlement sync sau khi charge thanh cong
+  - media-service van consume `video.payment.success` /
+    `membership.payment.success` de reconcile idempotent
+
+### 8.3 Membership auto-renew charge
 
 - Muc dich: finance-service tu dong tru coin khi media-service phat event den han gia han membership.
 - Khong co public HTTP API rieng. Luong nay chay qua Kafka de tranh client gia mao yeu cau charge.
@@ -1299,9 +1260,10 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - cho phep user huy bang `POST /api/withdrawals/:withdrawalId/cancel` khi con pending
 
 - Man thanh toan video/membership:
-  - goi `POST /api/payments`
-  - bat buoc gui `idempotency-key`
-  - nen gui lai cung key neu user bam lai cung mot action do lag
+  - khong goi finance-service truc tiep
+  - mua video: goi `POST /api/media/videos/:id/purchase`
+  - mua membership: goi `POST /api/media/channels/:channelId/memberships/:tierId/purchase`
+  - FE nen gui/reuse `idempotency-key` theo tung action mua de retry khong tru coin hai lan
 
 ## 12. Ghi chu quan trong
 
@@ -1309,4 +1271,3 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Cac API admin cua `withdrawals` cung dang check role `admin` trong use case.
 - `GET /api/transactions/reference/:referenceId` hien khong check ownership, nen khong nen expose truc tiep cho FE public neu chua co tang kiem soat phia gateway/BFF.
 - Webhook PayOS co the tra `status: "ignored"` thay vi loi khi payload khong phai success event.
-

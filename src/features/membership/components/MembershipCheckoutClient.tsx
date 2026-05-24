@@ -195,7 +195,6 @@ export function MembershipCheckoutClient({
         },
         tier: checkoutTier,
         idempotencyKey: activeSession.idempotencyKey,
-        userId,
         requestId: activeSession.requestId,
       });
 
@@ -205,7 +204,7 @@ export function MembershipCheckoutClient({
         current
           ? {
               ...current,
-              balance: Math.max(current.balance - response.coinAmount, 0),
+              balance: Math.max(current.balance - response.chargedCoinAmount, 0),
             }
           : current,
       );

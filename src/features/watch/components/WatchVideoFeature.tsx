@@ -8,6 +8,7 @@ import {
   getChannelDetailCached,
   getReadyPublicThumbnailUrl,
   getVideoMetadataCached,
+  getVideoMetadataFresh,
   type PublicApiError,
   type PublicMembershipTier,
   type PublicVideoMetadata,
@@ -31,6 +32,26 @@ function resolveRequiredTierLevel(video: PublicVideoMetadata) {
   );
 }
 
+async function getVideoMetadataForWatch(videoId: string) {
+  try {
+    const cachedResponse = await getVideoMetadataCached(videoId);
+    if (cachedResponse.success && cachedResponse.data) {
+      return cachedResponse;
+    }
+  } catch (error) {
+    const apiError = error as PublicApiError;
+    if (apiError.code !== 404) {
+      console.warn("Failed to load video metadata from cache, retrying fresh:", {
+        videoId,
+        code: apiError.code ?? null,
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  return getVideoMetadataFresh(videoId);
+}
+
 export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let title = "Unknown Video";
   let poster: string | undefined;
@@ -49,7 +70,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let membershipTiers: PublicMembershipTier[] = [];
 
   try {
-    const infoRes = await getVideoMetadataCached(videoId);
+    const infoRes = await getVideoMetadataForWatch(videoId);
     if (!infoRes.success || !infoRes.data) {
       notFound();
     }

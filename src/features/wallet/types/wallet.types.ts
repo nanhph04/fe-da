@@ -2,14 +2,6 @@ export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED"
 export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "VIDEO_PURCHASE" | "CHANNEL_REVENUE" | "SYSTEM_REVENUE" | "deposit" | "withdrawal" | "payment" | "video_purchase" | "membership_purchase" | "member_subscription" | "channel_revenue" | "system_revenue" | "refund" | "system_adjustment";
 export type DepositStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "pending" | "processing" | "completed" | "failed" | "cancelled";
 export type WithdrawalStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED" | "CANCELLED" | "pending" | "approved" | "processing" | "completed" | "rejected" | "cancelled";
-export type PaymentServiceType = "video" | "membership";
-
-export interface PaymentMetadata {
-  videoTitle?: string;
-  channelName?: string;
-  thumbnailUrl?: string;
-  packageName?: string;
-}
 
 import { WalletStatus, WalletType } from "./base-wallet.types";
 
@@ -112,35 +104,3 @@ export interface Withdrawal {
   cancelledAt: string | null;
 }
 
-export interface PaymentRequest {
-  serviceType: PaymentServiceType;
-  serviceId: string;
-  channelId: string;
-  channelOwnerId: string;
-  coinAmount: number;
-  metadata?: PaymentMetadata;
-}
-
-export interface PaymentTransaction {
-  id: string;
-  type: TransactionType;
-  amount: number;
-  fromWalletId: string | null;
-  toWalletId: string | null;
-  referenceId: string | null;
-}
-
-export interface PaymentResponse {
-  payerWalletId: string;
-  channelWalletId: string;
-  systemWalletId: string;
-  serviceType: PaymentServiceType;
-  serviceId: string;
-  channelId: string;
-  channelOwnerId: string;
-  coinAmount: number;
-  splitPercent: number;
-  creatorCoins: number;
-  systemCoins: number;
-  transactions: PaymentTransaction[];
-}

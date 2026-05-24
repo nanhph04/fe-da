@@ -321,49 +321,53 @@ export function CategoryManagementFeature() {
     await handleTagSubmit();
   };
 
-  const handleCategoryDelete = async (category: CategoryResponse) => {
+  const handleCategoryStatusToggle = async (category: CategoryResponse) => {
+    const nextStatus = normalizeStatus(category.status) === "active" ? "inactive" : "active";
+
     setIsSaving(true);
     setError(null);
     setNotice(null);
 
     try {
-      const res = await mediaService.deleteCategoryAdmin(category.id);
+      const res = await mediaService.updateCategoryAdmin(category.id, { status: nextStatus });
       if (res.success) {
-        setNotice(`Category ${category.name} moved to inactive.`);
+        setNotice(`Category ${category.name} ${nextStatus === "active" ? "activated" : "set to inactive"}.`);
         if (editingState?.type === "category" && editingState.id === category.id) {
-          resetForms();
+          setCategoryFormState(current => ({ ...current, status: nextStatus }));
         }
         await loadTaxonomy();
         return;
       }
 
-      setError(res.mess || "Unable to delete category.");
+      setError(res.mess || "Unable to update category status.");
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to delete category."));
+      setError(getErrorMessage(err, "Unable to update category status."));
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleTagDelete = async (tag: TagResponse) => {
+  const handleTagStatusToggle = async (tag: TagResponse) => {
+    const nextStatus = normalizeStatus(tag.status) === "active" ? "inactive" : "active";
+
     setIsSaving(true);
     setError(null);
     setNotice(null);
 
     try {
-      const res = await mediaService.deleteTagAdmin(tag.id);
+      const res = await mediaService.updateTagAdmin(tag.id, { status: nextStatus });
       if (res.success) {
-        setNotice(`Tag ${tag.name} moved to inactive.`);
+        setNotice(`Tag ${tag.name} ${nextStatus === "active" ? "activated" : "set to inactive"}.`);
         if (editingState?.type === "tag" && editingState.id === tag.id) {
-          resetForms();
+          setTagFormState(current => ({ ...current, status: nextStatus }));
         }
         await loadTaxonomy();
         return;
       }
 
-      setError(res.mess || "Unable to delete tag.");
+      setError(res.mess || "Unable to update tag status.");
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to delete tag."));
+      setError(getErrorMessage(err, "Unable to update tag status."));
     } finally {
       setIsSaving(false);
     }
@@ -455,7 +459,7 @@ export function CategoryManagementFeature() {
                       <th className="px-5 py-4">Order</th>
                       <th className="px-5 py-4">Parent</th>
                       <th className="px-5 py-4">Status</th>
-                      <th className="px-5 py-4 text-right">Actions</th>
+                      <th className="px-5 py-4 text-right">Active</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -468,38 +472,56 @@ export function CategoryManagementFeature() {
                         </td>
                       </tr>
                     ) : (
-                      filteredCategories.map(category => (
-                        <tr key={category.id} className="group transition-colors hover:bg-muted/35">
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-border/30 bg-muted text-primary">
-                                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">category</span>
+                      filteredCategories.map(category => {
+                        const isCategoryActive = normalizeStatus(category.status) === "active";
+
+                        return (
+                          <tr key={category.id} className="group transition-colors hover:bg-muted/35">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-border/30 bg-muted text-primary">
+                                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">category</span>
+                                </div>
+                                <div>
+                                  <p className="font-headline text-sm font-bold text-foreground">{category.name}</p>
+                                  <p className="font-mono text-[10px] text-muted-foreground">{category.id}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-headline text-sm font-bold text-foreground">{category.name}</p>
-                                <p className="font-mono text-[10px] text-muted-foreground">{category.id}</p>
+                            </td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">/{category.slug}</td>
+                            <td className="max-w-[260px] px-5 py-4 font-body text-sm text-muted-foreground">
+                              <span className="line-clamp-2">{category.description || "No description."}</span>
+                            </td>
+                            <td className="px-5 py-4 font-headline text-sm font-bold text-foreground">{category.displayOrder}</td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{category.parentId || "None"}</td>
+                            <td className="px-5 py-4"><StatusBadge status={category.status} /></td>
+                            <td className="px-5 py-4 text-right">
+                              <div className="flex items-center justify-end gap-3">
+                                <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleCategoryEdit(category)} aria-label={`Edit ${category.name}`}>
+                                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  role="switch"
+                                  aria-checked={isCategoryActive}
+                                  onClick={() => handleCategoryStatusToggle(category)}
+                                  disabled={isSaving}
+                                  className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
+                                    isCategoryActive ? "border-emerald-500/40 bg-emerald-500/90" : "border-border/50 bg-input"
+                                  }`}
+                                  aria-label={`${isCategoryActive ? "Deactivate" : "Activate"} ${category.name}`}
+                                >
+                                  <span
+                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform duration-200 ${
+                                      isCategoryActive ? "translate-x-6" : "translate-x-1"
+                                    }`}
+                                  />
+                                </button>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 font-mono text-xs text-muted-foreground">/{category.slug}</td>
-                          <td className="max-w-[260px] px-5 py-4 font-body text-sm text-muted-foreground">
-                            <span className="line-clamp-2">{category.description || "No description."}</span>
-                          </td>
-                          <td className="px-5 py-4 font-headline text-sm font-bold text-foreground">{category.displayOrder}</td>
-                          <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{category.parentId || "None"}</td>
-                          <td className="px-5 py-4"><StatusBadge status={category.status} /></td>
-                          <td className="px-5 py-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleCategoryEdit(category)} aria-label={`Edit ${category.name}`}>
-                                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
-                              </button>
-                              <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-primary disabled:cursor-not-allowed disabled:opacity-50" onClick={() => handleCategoryDelete(category)} disabled={isSaving} aria-label={`Delete ${category.name}`}>
-                                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -512,7 +534,7 @@ export function CategoryManagementFeature() {
                       <th className="px-5 py-4">Status</th>
                       <th className="px-5 py-4">Created</th>
                       <th className="px-5 py-4">Updated</th>
-                      <th className="px-5 py-4 text-right">Actions</th>
+                      <th className="px-5 py-4 text-right">Active</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -525,35 +547,53 @@ export function CategoryManagementFeature() {
                         </td>
                       </tr>
                     ) : (
-                      filteredTags.map(tag => (
-                        <tr key={tag.id} className="group transition-colors hover:bg-muted/35">
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-border/30 bg-muted text-secondary">
-                                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">sell</span>
+                      filteredTags.map(tag => {
+                        const isTagActive = normalizeStatus(tag.status) === "active";
+
+                        return (
+                          <tr key={tag.id} className="group transition-colors hover:bg-muted/35">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-border/30 bg-muted text-secondary">
+                                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">sell</span>
+                                </div>
+                                <div>
+                                  <p className="font-headline text-sm font-bold text-foreground">{tag.name}</p>
+                                  <p className="font-mono text-[10px] text-muted-foreground">{tag.id}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-headline text-sm font-bold text-foreground">{tag.name}</p>
-                                <p className="font-mono text-[10px] text-muted-foreground">{tag.id}</p>
+                            </td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">#{tag.slug}</td>
+                            <td className="px-5 py-4"><StatusBadge status={tag.status} /></td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.createdAt)}</td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.updatedAt)}</td>
+                            <td className="px-5 py-4 text-right">
+                              <div className="flex items-center justify-end gap-3">
+                                <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleTagEdit(tag)} aria-label={`Edit ${tag.name}`}>
+                                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  role="switch"
+                                  aria-checked={isTagActive}
+                                  onClick={() => handleTagStatusToggle(tag)}
+                                  disabled={isSaving}
+                                  className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
+                                    isTagActive ? "border-emerald-500/40 bg-emerald-500/90" : "border-border/50 bg-input"
+                                  }`}
+                                  aria-label={`${isTagActive ? "Deactivate" : "Activate"} ${tag.name}`}
+                                >
+                                  <span
+                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform duration-200 ${
+                                      isTagActive ? "translate-x-6" : "translate-x-1"
+                                    }`}
+                                  />
+                                </button>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 font-mono text-xs text-muted-foreground">#{tag.slug}</td>
-                          <td className="px-5 py-4"><StatusBadge status={tag.status} /></td>
-                          <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.createdAt)}</td>
-                          <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.updatedAt)}</td>
-                          <td className="px-5 py-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleTagEdit(tag)} aria-label={`Edit ${tag.name}`}>
-                                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
-                              </button>
-                              <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-primary disabled:cursor-not-allowed disabled:opacity-50" onClick={() => handleTagDelete(tag)} disabled={isSaving} aria-label={`Delete ${tag.name}`}>
-                                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

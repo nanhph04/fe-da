@@ -1,17 +1,17 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import type { PaymentResponse } from "@/features/wallet/types/wallet.types";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
 import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";
+import type { MembershipPurchaseResponse } from "@/features/watch/services/mediaService";
 
 export type MembershipPaymentStatus = "idle" | "processing" | "success" | "error";
 
 export interface MembershipPaymentState {
   status: MembershipPaymentStatus;
   error: string | null;
-  response: PaymentResponse | null;
+  response: MembershipPurchaseResponse | null;
 }
 
 interface CheckoutOverlayProps {

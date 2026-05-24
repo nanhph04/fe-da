@@ -450,13 +450,20 @@ export async function getVideoMetadataCached(videoId: string) {
   cacheTag("media:video", `media:video:${videoId}`);
 
   return fetchPublicApi<PublicVideoMetadata>(
-    `/api/media/videos/${videoId}/metadata`
+    `/api/media/videos/${encodeURIComponent(videoId)}/metadata`
+  );
+}
+
+export async function getVideoMetadataFresh(videoId: string) {
+  return fetchPublicApi<PublicVideoMetadata>(
+    `/api/media/videos/${encodeURIComponent(videoId)}/metadata`,
+    { cache: "no-store" }
   );
 }
 
 export async function getViewerVideoMetadata(videoId: string) {
   return fetchServerApi<PublicVideoMetadata>(
-    `/api/media/videos/${videoId}/metadata`,
+    `/api/media/videos/${encodeURIComponent(videoId)}/metadata`,
     { requireAuth: true }
   );
 }

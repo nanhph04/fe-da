@@ -28,9 +28,6 @@ export type {
   DepositStatus,
   DepositPackage,
   BankInfo,
-  PaymentRequest,
-  PaymentResponse,
-  PaymentTransaction,
 } from './types/wallet.types';
 
 // Utilities

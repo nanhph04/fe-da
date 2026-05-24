@@ -1,12 +1,11 @@
-import { PaymentService } from "@/features/wallet/services/paymentService";
-import type { PaymentResponse } from "@/features/wallet/types/wallet.types";
+import { mediaService } from "@/features/watch/services/mediaService";
+import type { MembershipPurchaseResponse } from "@/features/watch/services/mediaService";
 import type { MembershipPaymentChannel, MembershipPaymentTier } from "../types/membership.types";
 
 interface CreateMembershipPaymentInput {
   channel: MembershipPaymentChannel;
   tier: MembershipPaymentTier;
   idempotencyKey: string;
-  userId: string;
   requestId?: string;
 }
 
@@ -14,24 +13,12 @@ export async function createMembershipPayment({
   channel,
   tier,
   idempotencyKey,
-  userId,
   requestId,
-}: CreateMembershipPaymentInput): Promise<PaymentResponse> {
-  return PaymentService.createPayment(
-    {
-      serviceType: "membership",
-      serviceId: tier.id,
-      channelId: channel.id,
-      channelOwnerId: channel.userId,
-      coinAmount: tier.priceCoin,
-      metadata: {
-        channelName: channel.name,
-        packageName: tier.name,
-        thumbnailUrl: channel.avatarUrl ?? undefined,
-      },
-    },
+}: CreateMembershipPaymentInput): Promise<MembershipPurchaseResponse> {
+  const response = await mediaService.purchaseMembership(channel.id, tier.id, {
     idempotencyKey,
-    userId,
     requestId,
-  );
+  });
+
+  return response.data;
 }

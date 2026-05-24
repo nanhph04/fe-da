@@ -14,6 +14,7 @@ import type {
   GetPartUrlsResponse,
   InitUploadBody,
   InitUploadResponse,
+  MembershipPurchaseResponse,
   MembershipStatusResponse,
   MembershipTierResponse,
   MyChannelResponse,
@@ -23,6 +24,7 @@ import type {
   PaginationParams,
   PlaybackInfoResponse,
   PublicVideosParams,
+  PurchaseRequestOptions,
   PurchasedVideoResponse,
   RefreshPlaybackTokenResponse,
   SaveVideoProgressBody,
@@ -36,6 +38,7 @@ import type {
   UploadStatusResponse,
   UserMembershipResponse,
   VideoMetadataResponse,
+  VideoPurchaseResponse,
 } from "./mediaService.types";
 
 export type * from "./mediaService.types";
@@ -82,6 +85,18 @@ const uploadResumableVideoFile = createUploadResumableVideoFile({
   completePart,
   completeUpload,
 });
+
+function buildPurchaseHeaders(options: PurchaseRequestOptions) {
+  const headers: Record<string, string> = {
+    "idempotency-key": options.idempotencyKey,
+  };
+
+  if (options.requestId) {
+    headers["x-request-id"] = options.requestId;
+  }
+
+  return headers;
+}
 
 export const mediaService = {
   // 1. HEALTH CHECK
@@ -183,6 +198,13 @@ export const mediaService = {
       { requireAuth: true }
     );
   },
+  purchaseMembership: async (channelId: string, tierId: string, options: PurchaseRequestOptions) => {
+    return api.post<MembershipPurchaseResponse>(
+      `/api/media/channels/${encodeURIComponent(channelId)}/memberships/${encodeURIComponent(tierId)}/purchase`,
+      undefined,
+      { requireAuth: true, headers: buildPurchaseHeaders(options) }
+    );
+  },
 
   // 4. VIDEO
   initUpload: async (data: InitUploadBody) => {
@@ -236,6 +258,13 @@ export const mediaService = {
       `/api/media/me/videos/${encodeURIComponent(id)}/playback-token/refresh`,
       {},
       { requireAuth: true }
+    );
+  },
+  purchaseVideo: async (id: string, options: PurchaseRequestOptions) => {
+    return api.post<VideoPurchaseResponse>(
+      `/api/media/videos/${encodeURIComponent(id)}/purchase`,
+      undefined,
+      { requireAuth: true, headers: buildPurchaseHeaders(options) }
     );
   },
   getContinueWatching: async (params?: Pick<PaginationParams, "limit">) => {

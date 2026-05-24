@@ -291,7 +291,6 @@ export function PlayerContainerClient({
       <WatchAccessGate
         videoId={videoId}
         poster={poster}
-        title={title}
         access={access}
         purchaseCompleted={hasCompletedPurchase}
         onUnlocked={handleUnlocked}

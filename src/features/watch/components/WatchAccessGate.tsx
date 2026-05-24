@@ -3,9 +3,8 @@
 import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { PaymentService } from "@/features/wallet/services/paymentService";
 import { WalletService } from "@/features/wallet/services/walletService";
-import type { PaymentResponse, Wallet } from "@/features/wallet/types/wallet.types";
+import type { Wallet } from "@/features/wallet/types/wallet.types";
 import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import { getErrorMessage } from "@/shared/api/client";
 import {
@@ -16,6 +15,7 @@ import {
   clearPersistedSession,
 } from "@/shared/utils/idempotency";
 import type { PublicMembershipTier } from "../services/publicMediaService";
+import { mediaService } from "../services/mediaService";
 
 export interface WatchAccessData {
   channelId: string;
@@ -29,7 +29,6 @@ export interface WatchAccessData {
 interface WatchAccessGateProps {
   videoId: string;
   poster?: string;
-  title?: string;
   access: WatchAccessData;
   purchaseCompleted?: boolean;
   onUnlocked: () => void;
@@ -53,13 +52,6 @@ function createVideoPurchaseSession(userId: string, videoId: string): VideoPurch
 
 function formatCoins(value: number) {
   return `${value.toLocaleString("vi-VN")} AC`;
-}
-
-function getTierLabel(level: number) {
-  if (level === 1) return "Standard";
-  if (level === 2) return "Premium";
-  if (level === 3) return "Exclusive";
-  return `Level ${level}`;
 }
 
 function findRecommendedMembershipTier(
@@ -96,7 +88,6 @@ function getAccessDescription(access: WatchAccessData) {
 export function WatchAccessGate({
   videoId,
   poster,
-  title,
   access,
   purchaseCompleted = false,
   onUnlocked,
@@ -152,12 +143,6 @@ export function WatchAccessGate({
       return;
     }
 
-    if (!access.channelId || !access.channelOwnerId) {
-      setPurchaseStatus("error");
-      setPurchaseError("Thiếu thông tin kênh để thanh toán video.");
-      return;
-    }
-
     let currentWallet = wallet;
     if (!currentWallet) {
       currentWallet = await loadWallet();
@@ -199,33 +184,21 @@ export function WatchAccessGate({
     setPurchaseError(null);
 
     try {
-      const response: PaymentResponse = await PaymentService.createPayment(
-        {
-          serviceType: "video",
-          serviceId: videoId,
-          channelId: access.channelId,
-          channelOwnerId: access.channelOwnerId,
-          coinAmount: access.priceCoin,
-          metadata: {
-            videoTitle: title,
-            channelName: access.channelName,
-            thumbnailUrl: poster,
-          },
-        },
-        activeSession.idempotencyKey,
-        user.userId,
-        activeSession.requestId,
-      );
+      const response = await mediaService.purchaseVideo(videoId, {
+        idempotencyKey: activeSession.idempotencyKey,
+        requestId: activeSession.requestId,
+      });
+      const chargedCoinAmount = response.data?.priceCoin ?? access.priceCoin;
 
       setWallet((current) =>
         current
           ? {
             ...current,
-            balance: Math.max(current.balance - response.coinAmount, 0),
+            balance: Math.max(current.balance - chargedCoinAmount, 0),
           }
           : current,
       );
-      
+
       clearPersistedSession(storageKey);
       setPurchaseStatus("success");
       onUnlocked();
@@ -233,7 +206,7 @@ export function WatchAccessGate({
       setPurchaseStatus("error");
       setPurchaseError(getErrorMessage(err, "Thanh toán video thất bại. Vui lòng thử lại."));
     }
-  }, [access, isAuthenticated, loadWallet, onUnlocked, poster, purchaseSession, title, user, videoId, wallet]);
+  }, [access, isAuthenticated, loadWallet, onUnlocked, purchaseSession, user, videoId, wallet]);
 
   useEffect(() => {
     setPurchaseSession(null);
@@ -251,7 +224,7 @@ export function WatchAccessGate({
     void loadWallet();
   }, [access.priceCoin, isAuthenticated, loadWallet, wallet, walletLoading]);
 
-  const canBuyVideo = access.priceCoin > 0 && Boolean(access.channelId && access.channelOwnerId);
+  const canBuyVideo = access.priceCoin > 0 && Boolean(access.channelId);
   const hasPurchaseOption = access.priceCoin > 0;
   const hasMembershipOption = Boolean(membershipHref);
   const hasInsufficientBalance = Boolean(wallet && wallet.balance < access.priceCoin);
@@ -373,6 +346,12 @@ export function WatchAccessGate({
         {purchaseAlreadyCompleted ? (
           <p className="mx-auto mt-4 rounded-md border border-secondary/30 bg-secondary/10 px-4 py-2 text-sm font-bold text-secondary">
             Đã mở khóa video. Đang tải lại trình phát...
+          </p>
+        ) : null}
+
+        {walletError ? (
+          <p className="mx-auto mt-4 max-w-xl rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+            {walletError}
           </p>
         ) : null}
 

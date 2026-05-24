@@ -217,6 +217,25 @@ export interface SaveVideoProgressResponse {
   completed: boolean;
 }
 
+export interface PurchaseRequestOptions {
+  idempotencyKey: string;
+  requestId?: string;
+}
+
+export interface VideoPurchaseResponse {
+  videoId: string;
+  channelId: string;
+  priceCoin: number;
+  unlocked: boolean;
+  paymentTransactionId: string;
+}
+
+export interface MembershipPurchaseResponse {
+  membership: AutoRenewMembershipResponse;
+  chargedCoinAmount: number;
+  paymentTransactionId: string;
+}
+
 export type ModerationDetails = Record<string, unknown>;
 
 export interface VideoMetadataResponse {
