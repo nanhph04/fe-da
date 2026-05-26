@@ -4,6 +4,7 @@ import { PublicBrand } from "./PublicBrand";
 import type { PublicNavLink } from "@/shared/navigation/branding";
 import { publicMarketingLinks } from "@/shared/navigation/branding";
 import { PublicHeaderAuthActions } from "./PublicHeaderAuthActions";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 interface PublicHeaderProps {
   currentPath?: string;
@@ -50,6 +51,8 @@ export function PublicHeader({
           </nav>
 
           {children}
+
+          <LanguageSwitcher />
 
           {showAuthActions ? <PublicHeaderAuthActions /> : null}
         </div>
