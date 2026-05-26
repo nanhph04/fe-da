@@ -3,18 +3,11 @@ import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { Link } from "@/i18n/routing";
 import {
   AlertTriangle,
-  CalendarDays,
-  Clock3,
   Coins,
-  Compass,
-  Eye,
-  Filter,
-  Hash,
   Lock,
   Search,
   SlidersHorizontal,
   Sparkles,
-  Tag,
   UserRound,
   Video,
   X,
@@ -146,6 +139,10 @@ function getChannelLabel(video: PublicDiscoveryVideo) {
   return `Kenh ${video.channelId.slice(0, 8)}`;
 }
 
+function getChannelInitial(video: PublicDiscoveryVideo) {
+  return getChannelLabel(video).trim().charAt(0).toUpperCase() || "V";
+}
+
 function getCategoryLabel(filters: SearchFilters, categories: CategoryPublic[]) {
   if (!filters.category) {
     return "Tat ca the loai";
@@ -225,42 +222,41 @@ function SearchHero({
 
   return (
     <section className="relative overflow-hidden border-b border-border bg-card">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary),transparent_34%)] opacity-10" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" />
-      <div className="relative mx-auto max-w-7xl px-6 py-16 md:px-10 lg:px-12">
-        <div className="max-w-4xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-sm border border-border bg-background/80 px-3 py-2 text-xs font-bold uppercase tracking-[0.22em] text-secondary">
-            <Compass className="h-4 w-4" aria-hidden="true" />
-            Search & Discovery
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--primary),transparent_32%)] opacity-10" />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-5 px-6 py-10 md:px-10 lg:px-12 xl:flex-row xl:items-end xl:justify-between">
+        <div className="max-w-3xl">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-background">
+            <Search className="h-3.5 w-3.5" aria-hidden="true" />
+            Search
           </div>
-          <h1 className="font-headline text-4xl font-black tracking-tight text-foreground md:text-6xl">
+          <h1 className="font-headline text-3xl font-black tracking-tight text-foreground md:text-5xl">
             Tim noi dung tren Velvet Gallery
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-muted-foreground md:text-lg">
-            Tim video theo tieu de, mo ta, the loai, tag; khi co tu khoa, he thong dong thoi tra ve kenh public phu hop.
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
+            Tim video, kenh public, the loai va tag trong mot trang ket qua gon nhu feed video.
           </p>
-        </div>
-
-        <div className="mt-10 grid gap-3 sm:grid-cols-3 lg:max-w-3xl">
-          <div className="rounded-lg border border-border bg-background/70 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Video</p>
-            <p className="mt-2 font-headline text-3xl font-black text-foreground">{videosCount}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-background/70 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Kenh</p>
-            <p className="mt-2 font-headline text-3xl font-black text-foreground">{channelsCount}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-background/70 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Bo loc</p>
-            <p className="mt-2 font-headline text-3xl font-black text-foreground">{activeFilterCount}</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
+            <span className="rounded-full bg-background/80 px-3 py-2">{mode === "latest" ? "Moi nhat" : "Tim kiem public"}</span>
+            <span className="rounded-full bg-background/80 px-3 py-2">{getCategoryLabel(filters, categories)}</span>
+            <span className="rounded-full bg-background/80 px-3 py-2">Limit {filters.limit}</span>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
-          <span className="rounded-sm bg-background/80 px-3 py-2">Che do: {mode === "latest" ? "Moi nhat" : "Tim kiem public"}</span>
-          <span className="rounded-sm bg-background/80 px-3 py-2">{getCategoryLabel(filters, categories)}</span>
-          <span className="rounded-sm bg-background/80 px-3 py-2">Limit {filters.limit}</span>
-        </div>
+        <dl className="grid w-full max-w-sm grid-cols-3 overflow-hidden rounded-lg border border-border bg-background/80 text-center text-sm xl:flex-shrink-0">
+          <div className="p-3">
+            <dt className="text-xs font-bold text-muted-foreground">Video</dt>
+            <dd className="mt-1 font-headline text-xl font-black text-foreground">{videosCount}</dd>
+          </div>
+          <div className="border-x border-border p-3">
+            <dt className="text-xs font-bold text-muted-foreground">Kenh</dt>
+            <dd className="mt-1 font-headline text-xl font-black text-foreground">{channelsCount}</dd>
+          </div>
+          <div className="p-3">
+            <dt className="text-xs font-bold text-muted-foreground">Bo loc</dt>
+            <dd className="mt-1 font-headline text-xl font-black text-secondary">{activeFilterCount}</dd>
+          </div>
+        </dl>
       </div>
     </section>
   );
@@ -278,109 +274,143 @@ function FilterPanel({
   formAction: string;
 }) {
   const selectedTagSet = new Set(filters.tags);
-  const visibleTags = tags.slice(0, 24);
-  const visibleCategories = categories.slice(0, 10);
+  const visibleTags = tags.slice(0, 18);
+  const visibleCategories = categories.slice(0, 12);
   const activeFilters = hasActiveFilters(filters);
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5">
-      <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-            Bo loc media public
+    <section className="space-y-3">
+      <details className="group rounded-lg border border-border/80 bg-card" open={activeFilters || undefined}>
+        <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-3 outline-none transition-colors hover:bg-foreground/[0.03] focus-visible:ring-2 focus-visible:ring-ring/70 sm:flex-row sm:items-center sm:justify-between [&::-webkit-details-marker]:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground">
+              <Search className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="font-headline text-lg font-extrabold tracking-tight text-foreground">
+                Tim kiem va bo loc
+              </h2>
+              <p className="truncate text-sm text-muted-foreground">
+                {activeFilters ? "Dang ap dung bo loc" : "Bam de mo bo loc tim kiem"}
+              </p>
+            </div>
           </div>
-          <h2 className="mt-2 font-headline text-2xl font-extrabold tracking-tight text-foreground">
-            Tim kiem thong minh
-          </h2>
-        </div>
-        {activeFilters ? (
-          <Link
-            href="/search"
-            className="inline-flex min-h-11 w-fit items-center gap-2 rounded-sm border border-border px-4 text-sm font-bold text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-            Xoa bo loc
-          </Link>
-        ) : null}
-      </div>
 
-      <Form action={formAction} className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,0.65fr)_140px_auto]">
-        <div>
-          <label className="sr-only" htmlFor="global-search-query">
-            Tu khoa tim kiem
-          </label>
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-            <input
-              id="global-search-query"
-              name="q"
-              type="search"
-              defaultValue={filters.q}
-              maxLength={200}
-              placeholder="Tim theo tieu de, mo ta video hoac ten kenh"
-              className="h-12 w-full rounded-sm border border-border bg-input pl-11 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
-            />
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            {activeFilters ? (
+              <span className="rounded-full bg-foreground/10 px-3 py-2 font-bold text-foreground">
+                {getActiveFilterCount(filters)} bo loc
+              </span>
+            ) : null}
+            <span className="inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-4 font-bold text-background transition-transform group-open:scale-[0.98]">
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+              <span className="group-open:hidden">Mo</span>
+              <span className="hidden group-open:inline">An</span>
+            </span>
           </div>
-        </div>
+        </summary>
 
-        <div>
-          <label className="sr-only" htmlFor="global-search-category">
-            The loai
-          </label>
-          <select
-            id="global-search-category"
-            name="category"
-            defaultValue={filters.category}
-            className="h-12 w-full rounded-sm border border-border bg-input px-4 text-sm font-medium text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
-          >
-            <option value="">Tat ca the loai</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.slug}>
-                {category.name}
-              </option>
+        <div className="border-t border-border px-4 py-4">
+          <Form action={formAction} className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(180px,0.65fr)_140px_auto]">
+            <div>
+              <label className="sr-only" htmlFor="global-search-query">
+                Tu khoa tim kiem
+              </label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  id="global-search-query"
+                  name="q"
+                  type="search"
+                  defaultValue={filters.q}
+                  maxLength={200}
+                  placeholder="Tim theo tieu de, mo ta video hoac ten kenh"
+                  className="h-11 w-full rounded-full border border-border bg-input pl-11 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="sr-only" htmlFor="global-search-category">
+                The loai
+              </label>
+              <select
+                id="global-search-category"
+                name="category"
+                defaultValue={filters.category}
+                className="h-11 w-full rounded-full border border-border bg-input px-4 text-sm font-medium text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
+              >
+                <option value="">Tat ca the loai</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.slug}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="sr-only" htmlFor="global-search-limit">
+                So luong ket qua
+              </label>
+              <select
+                id="global-search-limit"
+                name="limit"
+                defaultValue={String(filters.limit)}
+                className="h-11 w-full rounded-full border border-border bg-input px-4 text-sm font-medium text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
+              >
+                {LIMIT_OPTIONS.map((limit) => (
+                  <option key={limit} value={limit}>
+                    {limit} ket qua
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {filters.tags.map((tag) => (
+              <input key={tag} type="hidden" name="tags" value={tag} />
             ))}
-          </select>
+
+            <button
+              type="submit"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-black text-primary-foreground transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+            >
+              <Search className="h-4 w-4" aria-hidden="true" />
+              Tim kiem
+            </button>
+          </Form>
+
+          {activeFilters ? (
+            <div className="mt-3 flex flex-col gap-3 rounded-lg bg-foreground/[0.04] p-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <span>{getResultDescription("media-search", filters, categories)}</span>
+              <Link
+                href="/search"
+                className="inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary/80"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                Xoa bo loc
+              </Link>
+            </div>
+          ) : null}
         </div>
-
-        <div>
-          <label className="sr-only" htmlFor="global-search-limit">
-            So luong ket qua
-          </label>
-          <select
-            id="global-search-limit"
-            name="limit"
-            defaultValue={String(filters.limit)}
-            className="h-12 w-full rounded-sm border border-border bg-input px-4 text-sm font-medium text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/30"
-          >
-            {LIMIT_OPTIONS.map((limit) => (
-              <option key={limit} value={limit}>
-                {limit} ket qua
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {filters.tags.map((tag) => (
-          <input key={tag} type="hidden" name="tags" value={tag} />
-        ))}
-
-        <button
-          type="submit"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-sm bg-primary px-6 text-sm font-black text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
-        >
-          <Search className="h-4 w-4" aria-hidden="true" />
-          Tim kiem
-        </button>
-      </Form>
+      </details>
 
       {visibleCategories.length > 0 ? (
-        <div className="mt-6 border-t border-border pt-5">
-          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-foreground">
-            <Filter className="h-4 w-4 text-secondary" aria-hidden="true" />
-            The loai noi bat
-          </div>
-          <div className="flex flex-wrap gap-2">
+        <nav
+          aria-label="Loc video theo the loai"
+          className="-mx-6 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="flex min-w-max items-center gap-2">
+            <Link
+              href={buildSearchHref(filters, { category: "", limit: DEFAULT_LIMIT })}
+              className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
+                filters.category === ""
+                  ? "bg-foreground text-background"
+                  : "bg-foreground/10 text-foreground hover:bg-foreground/15"
+              }`}
+            >
+              Tat ca
+            </Link>
             {visibleCategories.map((category) => {
               const isSelected = filters.category === category.slug;
 
@@ -391,10 +421,10 @@ function FilterPanel({
                     category: isSelected ? "" : category.slug,
                     limit: DEFAULT_LIMIT,
                   })}
-                  className={`rounded-sm border px-3 py-2 text-xs font-bold transition-colors ${
+                  className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
                     isSelected
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-foreground/5 text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                      ? "bg-foreground text-background"
+                      : "bg-foreground/10 text-foreground hover:bg-foreground/15"
                   }`}
                 >
                   {category.name}
@@ -402,16 +432,15 @@ function FilterPanel({
               );
             })}
           </div>
-        </div>
+        </nav>
       ) : null}
 
       {visibleTags.length > 0 ? (
-        <div className="mt-6 border-t border-border pt-5">
-          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-foreground">
-            <Tag className="h-4 w-4 text-secondary" aria-hidden="true" />
-            Tag public
-          </div>
-          <div className="flex flex-wrap gap-2">
+        <nav
+          aria-label="Loc video theo tag"
+          className="-mx-6 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="flex min-w-max items-center gap-2">
             {visibleTags.map((tag) => {
               const isSelected = selectedTagSet.has(tag.slug);
 
@@ -419,19 +448,18 @@ function FilterPanel({
                 <Link
                   key={tag.id}
                   href={buildTagHref(filters, tag.slug)}
-                  className={`inline-flex items-center gap-1 rounded-sm border px-3 py-2 text-xs font-bold transition-colors ${
+                  className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
                     isSelected
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-foreground/5 text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                      ? "bg-foreground text-background"
+                      : "bg-foreground/10 text-foreground hover:bg-foreground/15"
                   }`}
                 >
-                  <Hash className="h-3 w-3" aria-hidden="true" />
-                  {tag.name}
+                  #{tag.name}
                 </Link>
               );
             })}
           </div>
-        </div>
+        </nav>
       ) : null}
     </section>
   );
@@ -447,18 +475,18 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
 
   return (
     <Link href={`/watch/${video.id}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <article className="h-full overflow-hidden rounded-lg border border-border bg-card transition-transform duration-300 hover:-translate-y-0.5">
-        <div className="relative aspect-video overflow-hidden bg-muted">
+      <article className="h-full rounded-lg transition-colors hover:bg-foreground/[0.04]">
+        <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
           <VideoThumbnail
             src={thumbnailUrl}
             alt={displayTitle}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/15 to-transparent" />
-          <div className="absolute bottom-3 right-3 rounded-sm bg-background/90 px-2 py-1 text-[11px] font-bold text-foreground">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/65 via-transparent to-transparent opacity-70" />
+          <div className="absolute bottom-2 right-2 rounded-sm bg-background/95 px-1.5 py-0.5 text-[11px] font-bold text-foreground">
             {formatDuration(video.durationSeconds)}
           </div>
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
             <span className="rounded-sm bg-background/90 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
               {getPrimaryResolution(video.resolutions)}
             </span>
@@ -471,49 +499,42 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
           </div>
         </div>
 
-        <div className="space-y-5 p-5">
-          <div>
-            <h3 className="line-clamp-2 font-headline text-xl font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
+        <div className="flex gap-3 px-1 pt-3">
+          <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted text-sm font-black text-foreground">
+            {getChannelInitial(video)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
               {displayTitle}
             </h3>
-            <p className="mt-3 line-clamp-2 text-sm leading-7 text-muted-foreground">
-              {video.description || "Video public trong Velvet Gallery."}
+            <p className="mt-1 truncate text-sm font-medium text-muted-foreground">
+              {getChannelLabel(video)}
             </p>
-          </div>
-
-          <div className="space-y-2 text-xs leading-6 text-muted-foreground">
-            <p className="font-medium text-foreground/80">{getChannelLabel(video)}</p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                {formatViewCount(video.viewCount)} luot xem
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-                {formatPublishedAt(video.publishedAt || video.createdAt)}
-              </span>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <span>{formatViewCount(video.viewCount)} luot xem</span>
+              <span aria-hidden="true">-</span>
+              <span>{formatPublishedAt(video.publishedAt || video.createdAt)}</span>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {hasCoinPrice ? (
-              <span className="inline-flex items-center gap-1.5 rounded-sm bg-secondary px-2.5 py-1.5 text-xs font-bold text-secondary-foreground">
-                <Coins className="h-3.5 w-3.5" aria-hidden="true" />
-                {video.price} Coin
-              </span>
-            ) : (
-              <span className="rounded-sm bg-foreground/10 px-2.5 py-1.5 text-xs font-bold text-foreground">
-                Free
-              </span>
-            )}
-            {video.tags.slice(0, 2).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-sm bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground"
-              >
-                #{tag}
-              </span>
-            ))}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {hasCoinPrice ? (
+                <span className="inline-flex items-center gap-1 rounded-sm bg-secondary/15 px-2 py-1 text-[11px] font-bold text-secondary">
+                  <Coins className="h-3 w-3" aria-hidden="true" />
+                  {video.price} Coin
+                </span>
+              ) : (
+                <span className="rounded-sm bg-foreground/10 px-2 py-1 text-[11px] font-bold text-foreground">
+                  Free
+                </span>
+              )}
+              {video.tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-sm bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </article>
@@ -638,7 +659,7 @@ export function SearchFeature({
         mode={mode}
       />
 
-      <div className="mx-auto max-w-7xl space-y-8 px-6 py-10 md:px-10 lg:px-12">
+      <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 md:px-10 lg:px-12">
         <FilterPanel
           filters={filters}
           categories={categories}
@@ -649,14 +670,11 @@ export function SearchFeature({
         {errorMessage ? <ErrorNotice message={errorMessage} /> : null}
 
         {shouldShowChannels ? (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                  <UserRound className="h-4 w-4" aria-hidden="true" />
-                  Kenh public
-                </div>
-                <h2 className="mt-2 font-headline text-2xl font-extrabold tracking-tight text-foreground">
+          <section className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <UserRound className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
                   Kenh khop tu khoa
                 </h2>
               </div>
@@ -676,28 +694,26 @@ export function SearchFeature({
         ) : null}
 
         <section>
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                <Video className="h-4 w-4" aria-hidden="true" />
-                {mode === "latest" ? "Discovery latest" : "Public videos"}
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
+                  {getResultHeading(mode, filters)}
+                </h2>
               </div>
-              <h2 className="mt-2 font-headline text-3xl font-extrabold tracking-tight text-foreground">
-                {getResultHeading(mode, filters)}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              <p className="mt-1 max-w-2xl truncate text-sm text-muted-foreground">
                 {getResultDescription(mode, filters, categories)}
               </p>
             </div>
-            <p className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Clock3 className="h-4 w-4" aria-hidden="true" />
-              {videos.length} video dang hien thi
+            <p className="text-sm font-medium text-muted-foreground">
+              {videos.length} video
             </p>
           </div>
 
           {videos.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {videos.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}

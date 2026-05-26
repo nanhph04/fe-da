@@ -5,15 +5,14 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Coins,
-  Eye,
   Film,
   ListVideo,
   Lock,
   Search,
+  SlidersHorizontal,
   Sparkles,
-  Tag,
+  X,
 } from "lucide-react";
 import { formatDuration, formatViewCount } from "@/features/home/utils/format";
 import {
@@ -110,6 +109,10 @@ function getChannelLabel(video: PublicDiscoveryVideo) {
   }
 
   return `Kênh ${video.channelId.slice(0, 8)}`;
+}
+
+function getChannelInitial(video: PublicDiscoveryVideo) {
+  return getChannelLabel(video).trim().charAt(0).toUpperCase() || "V";
 }
 
 function formatPublishedAt(value: string | null) {
@@ -216,18 +219,18 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
 
   return (
     <Link href={`/watch/${video.id}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <article className="h-full overflow-hidden rounded-lg bg-card transition-transform duration-300 hover:-translate-y-0.5">
-        <div className="relative aspect-video overflow-hidden bg-muted">
+      <article className="h-full rounded-lg transition-colors hover:bg-foreground/[0.04]">
+        <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
           <VideoThumbnail
             src={thumbnailUrl}
             alt={displayTitle}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent opacity-80" />
-          <div className="absolute bottom-3 right-3 rounded-sm bg-background/90 px-2 py-1 text-[11px] font-bold text-foreground">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/65 via-transparent to-transparent opacity-70" />
+          <div className="absolute bottom-2 right-2 rounded-sm bg-background/95 px-1.5 py-0.5 text-[11px] font-bold text-foreground">
             {formatDuration(video.durationSeconds)}
           </div>
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
             <span className="rounded-sm bg-background/90 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
               {getPrimaryResolution(video.resolutions)}
             </span>
@@ -240,49 +243,42 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
           </div>
         </div>
 
-        <div className="space-y-5 p-5 pt-6">
-          <div>
-            <h3 className="line-clamp-2 font-headline text-xl font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
+        <div className="flex gap-3 px-1 pt-3">
+          <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted text-sm font-black text-foreground">
+            {getChannelInitial(video)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
               {displayTitle}
             </h3>
-            <p className="mt-3 line-clamp-2 text-sm leading-7 text-muted-foreground">
-              {video.description || "Video công khai trong Velvet Gallery."}
+            <p className="mt-1 truncate text-sm font-medium text-muted-foreground">
+              {getChannelLabel(video)}
             </p>
-          </div>
-
-          <div className="space-y-2 text-xs leading-6 text-muted-foreground">
-            <p className="font-medium">{getChannelLabel(video)}</p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                {formatViewCount(video.viewCount)} lượt xem
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                {formatPublishedAt(video.publishedAt || video.createdAt)}
-              </span>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <span>{formatViewCount(video.viewCount)} lượt xem</span>
+              <span aria-hidden="true">-</span>
+              <span>{formatPublishedAt(video.publishedAt || video.createdAt)}</span>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5">
-            {hasCoinPrice ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/25 px-3 py-1.5 text-xs font-bold text-secondary">
-                <Coins className="h-3.5 w-3.5" aria-hidden="true" />
-                {video.price} Coin
-              </span>
-            ) : (
-              <span className="rounded-full bg-emerald-600/80 px-3 py-1.5 text-xs font-bold text-white">
-                Free
-              </span>
-            )}
-            {video.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-foreground/5 px-3 py-1.5 text-xs font-medium text-muted-foreground"
-              >
-                #{tag}
-              </span>
-            ))}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {hasCoinPrice ? (
+                <span className="inline-flex items-center gap-1 rounded-sm bg-secondary/15 px-2 py-1 text-[11px] font-bold text-secondary">
+                  <Coins className="h-3 w-3" aria-hidden="true" />
+                  {video.price} Coin
+                </span>
+              ) : (
+                <span className="rounded-sm bg-foreground/10 px-2 py-1 text-[11px] font-bold text-foreground">
+                  Free
+                </span>
+              )}
+              {video.tags.slice(0, 2).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-sm bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </article>
@@ -302,81 +298,120 @@ function FilterPanel({
   formAction: string;
 }) {
   const selectedTagSet = new Set(filters.tags);
+  const hasActiveFilters = Boolean(filters.q || filters.tags.length > 0);
+  const visibleTags = tags.slice(0, 18);
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Bộ lọc public videos
+    <section className="space-y-3">
+      <details className="group rounded-lg border border-border/80 bg-card" open={Boolean(filters.q) || undefined}>
+        <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-3 outline-none transition-colors hover:bg-foreground/[0.03] focus-visible:ring-2 focus-visible:ring-ring/70 sm:flex-row sm:items-center sm:justify-between [&::-webkit-details-marker]:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-foreground/10 text-foreground">
+              <Search className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="font-headline text-lg font-extrabold tracking-tight text-foreground">
+                Tìm trong danh mục
+              </h2>
+              <p className="truncate text-sm text-muted-foreground">
+                {hasActiveFilters ? "Đang áp dụng bộ lọc" : "Bấm để mở ô tìm kiếm"}
+              </p>
+            </div>
           </div>
-          <h2 className="mt-2 font-headline text-2xl font-extrabold tracking-tight text-foreground">
-            Tìm trong thể loại này
-          </h2>
-        </div>
 
-        <Form action={formAction} className="flex w-full flex-col gap-3 sm:flex-row lg:max-w-xl">
-          <label className="sr-only" htmlFor="category-query">
-            Từ khóa tìm kiếm video
-          </label>
-          <input
-            id="category-query"
-            name="q"
-            defaultValue={filters.q}
-            placeholder="Tìm theo tiêu đề hoặc mô tả"
-            className="h-12 flex-1 rounded-sm border border-border bg-input px-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
-          />
-          {filters.tags.length > 0 ? (
-            <input type="hidden" name="tags" value={filters.tags.join(",")} />
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            {hasActiveFilters ? (
+              <span className="rounded-full bg-foreground/10 px-3 py-2 font-bold text-foreground">
+                {filters.tags.length + (filters.q ? 1 : 0)} bộ lọc
+              </span>
+            ) : null}
+            <span className="inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-4 font-bold text-background transition-transform group-open:scale-[0.98]">
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+              <span className="group-open:hidden">Mở</span>
+              <span className="hidden group-open:inline">Ẩn</span>
+            </span>
+          </div>
+        </summary>
+
+        <div className="border-t border-border px-4 py-4">
+          <Form action={formAction} className="grid gap-3 lg:grid-cols-[1fr_auto]">
+            <label className="sr-only" htmlFor="category-query">
+              Từ khóa tìm kiếm video
+            </label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <input
+                id="category-query"
+                name="q"
+                defaultValue={filters.q}
+                placeholder="Tìm theo tiêu đề hoặc tên video"
+                className="h-11 w-full rounded-full border border-border bg-input pl-11 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
+              />
+            </div>
+            {filters.tags.length > 0 ? (
+              <input type="hidden" name="tags" value={filters.tags.join(",")} />
+            ) : null}
+            <button
+              type="submit"
+              className="h-11 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground transition hover:brightness-110 active:scale-[0.98]"
+            >
+              Tìm kiếm
+            </button>
+          </Form>
+
+          {hasActiveFilters ? (
+            <div className="mt-3 flex flex-col gap-3 rounded-lg bg-foreground/[0.04] p-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Đang lọc{filters.q ? ` theo "${filters.q}"` : ""}
+                {filters.tags.length > 0 ? ` với ${filters.tags.length} tag` : ""}.
+              </span>
+              <Link
+                href={`/category/${slug}`}
+                className="inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary/80"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+                Xóa lọc
+              </Link>
+            </div>
           ) : null}
-          <button
-            type="submit"
-            className="h-12 rounded-sm bg-primary/80 px-6 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/70 active:bg-primary/60"
-          >
-            Tìm kiếm
-          </button>
-        </Form>
-      </div>
+        </div>
+      </details>
 
-      {tags.length > 0 ? (
-        <div className="mt-5 border-t border-border pt-5">
-          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-foreground">
-            <Tag className="h-4 w-4 text-secondary" aria-hidden="true" />
-            Lọc theo tag
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {tags.slice(0, 18).map((tag) => {
+      {visibleTags.length > 0 ? (
+        <nav
+          aria-label="Lọc video theo tag"
+          className="-mx-6 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="flex min-w-max items-center gap-2">
+            <Link
+              href={buildCategoryHref(slug, { q: filters.q || undefined })}
+              className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
+                filters.tags.length === 0
+                  ? "bg-foreground text-background"
+                  : "bg-foreground/10 text-foreground hover:bg-foreground/15"
+              }`}
+            >
+              Tất cả
+            </Link>
+            {visibleTags.map((tag) => {
               const isSelected = selectedTagSet.has(tag.slug);
 
               return (
                 <Link
                   key={tag.id}
                   href={buildTagHref(slug, filters, tag.slug)}
-                  className={`rounded-full px-4 py-2 text-xs font-bold transition-colors ${
+                  className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
                     isSelected
-                      ? "bg-primary/85 text-primary-foreground hover:bg-primary/75"
-                      : "bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                      ? "bg-foreground text-background"
+                      : "bg-foreground/10 text-foreground hover:bg-foreground/15"
                   }`}
                 >
-                  #{tag.name}
+                  {tag.name}
                 </Link>
               );
             })}
           </div>
-        </div>
-      ) : null}
-
-      {filters.q || filters.tags.length > 0 ? (
-        <div className="mt-5 flex items-center justify-between rounded-sm border border-border bg-muted p-3 text-sm text-muted-foreground">
-          <span>
-            Đang lọc{filters.q ? ` theo "${filters.q}"` : ""}
-            {filters.tags.length > 0 ? ` với ${filters.tags.length} tag` : ""}.
-          </span>
-          <Link href={`/category/${slug}`} className="font-bold text-primary hover:text-primary/80">
-            Xóa lọc
-          </Link>
-        </div>
+        </nav>
       ) : null}
     </section>
   );
@@ -455,66 +490,65 @@ export function CategoryFeature({
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
         </div>
 
-        <div className="relative mx-auto flex min-h-[520px] max-w-7xl items-end px-6 py-14 md:px-10 lg:px-12">
-          <div className="max-w-4xl">
-            <div className="mb-5 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-sm bg-secondary px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-secondary-foreground">
-                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                Public Collection
-              </span>
-              <span className="rounded-sm border border-border bg-card px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                /category/{slug || "unknown"}
-              </span>
+        <div className="relative mx-auto flex min-h-[340px] max-w-7xl items-end px-6 py-10 md:px-10 lg:px-12">
+          <div className="flex w-full flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-background">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                  Public Collection
+                </span>
+                <span className="rounded-full bg-background/70 px-3 py-1.5 text-xs font-bold text-muted-foreground">
+                  /category/{slug || "unknown"}
+                </span>
+              </div>
+
+              <h1 className="font-headline text-3xl font-black uppercase leading-none tracking-tight text-foreground md:text-5xl">
+                {title}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
+                {description}
+              </p>
             </div>
 
-            <h1 className="bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text font-headline text-4xl font-black uppercase leading-[0.96] tracking-tight text-transparent md:text-5xl lg:text-6xl">
-              {title}
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-              {description}
-            </p>
-
-            <div className="mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-lg bg-foreground/5 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Tổng video</p>
-                <p className="mt-2 font-headline text-3xl font-black text-foreground">{totalVideos}</p>
+            <dl className="grid w-full max-w-sm grid-cols-3 overflow-hidden rounded-lg border border-border bg-background/80 text-center text-sm sm:flex-shrink-0">
+              <div className="p-3">
+                <dt className="text-xs font-bold text-muted-foreground">Tổng</dt>
+                <dd className="mt-1 font-headline text-xl font-black text-foreground">{totalVideos}</dd>
               </div>
-              <div className="rounded-lg bg-foreground/5 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Đang hiển thị</p>
-                <p className="mt-2 font-headline text-3xl font-black text-foreground">{videos.length}</p>
+              <div className="border-x border-border p-3">
+                <dt className="text-xs font-bold text-muted-foreground">Hiển thị</dt>
+                <dd className="mt-1 font-headline text-xl font-black text-foreground">{videos.length}</dd>
               </div>
-              <div className="rounded-lg bg-foreground/5 p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Trạng thái</p>
-                <p className="mt-2 font-headline text-lg font-black text-secondary">Ready + Public</p>
+              <div className="p-3">
+                <dt className="text-xs font-bold text-muted-foreground">Public</dt>
+                <dd className="mt-1 font-headline text-xl font-black text-secondary">Ready</dd>
               </div>
-            </div>
+            </dl>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl space-y-8 px-6 py-10 md:px-10 lg:px-12">
+      <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 md:px-10 lg:px-12">
         <FilterPanel slug={slug} filters={filters} tags={tags} formAction={formAction} />
 
         {errorMessage ? <ErrorNotice message={errorMessage} /> : null}
 
         <section>
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                <ListVideo className="h-4 w-4" aria-hidden="true" />
-                {hasFilters ? "Kết quả lọc" : "Category videos"}
-              </div>
-              <h2 className="mt-2 font-headline text-3xl font-extrabold tracking-tight text-foreground">
-                {hasFilters ? "Video phù hợp" : "Video trong bộ sưu tập"}
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <ListVideo className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+              <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
+                {hasFilters ? "Kết quả phù hợp" : "Tất cả video"}
               </h2>
             </div>
             <p className="text-sm font-medium text-muted-foreground">
-              {videos.length} video đang hiển thị
+              {videos.length} video
             </p>
           </div>
 
           {videos.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {videos.map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))}
