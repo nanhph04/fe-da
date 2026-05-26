@@ -2,12 +2,36 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
 import { HomeDiscoverySection, type HomeCategorySection } from "./HomeDiscoverySection";
+import { HomeHeroSlider, type HomeHeroSlide } from "./HomeHeroSlider";
 import { HomePageAccountCta } from "./HomePageAccountCta";
-import { HomePageStudioCta } from "./HomePageStudioCta";
-import type {
-  CategoryPublic,
-  PublicDiscoveryVideo,
+import { formatDuration, formatViewCount } from "../utils/format";
+import {
+  getReadyPublicThumbnailUrl,
+  type CategoryPublic,
+  type PublicDiscoveryVideo,
 } from "@/features/watch/services/publicMediaService";
+
+const HERO_FALLBACK_IMAGE = "/images/hero-bg.jpg";
+
+function toHomeHeroSlide(video: PublicDiscoveryVideo): HomeHeroSlide {
+  return {
+    id: video.id,
+    title: video.title,
+    description:
+      video.description?.trim() ||
+      "Một lựa chọn mới từ phòng chiếu Velvet Gallery, tuyển chọn cho trải nghiệm xem đậm chất điện ảnh.",
+    category: video.category || "Cinematic",
+    creator: video.channel?.name ?? "Velvet Gallery",
+    views: formatViewCount(video.metrics?.viewsCount ?? video.viewCount),
+    duration: formatDuration(video.durationSeconds),
+    imageUrl:
+      getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ??
+      HERO_FALLBACK_IMAGE,
+    href: `/watch/${video.id}`,
+    price: video.price,
+    requiredTierLevel: video.requiredTierLevel,
+  };
+}
 
 interface HomePageProps {
   latestVideos: PublicDiscoveryVideo[];
@@ -24,61 +48,7 @@ export function HomePage({
     <div className="min-h-screen bg-background text-foreground">
       <PublicHeader currentPath="/" />
 
-      {/* Hero Section */}
-      <section className="relative min-h-[921px] flex items-center pt-24 pb-16 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            alt="Cinematic Background"
-            src="/images/hero-bg.jpg"
-            fill
-            className="w-full h-full object-cover opacity-40"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/80 to-background" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(229,9,20,0.12)_0%,transparent_60%)]" />
-        </div>
-
-        {/* Badge */}
-        <div className="absolute top-32 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border/15 bg-card/40 px-4 py-1.5 backdrop-blur-md">
-          <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-            star
-          </span>
-          <span className="text-xs font-medium tracking-wider text-secondary uppercase">
-            Thẻ Truy Cập Cao Cấp Đã Mở
-          </span>
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-12 flex flex-col items-center md:items-start text-center md:text-left">
-          <h1 className="font-display text-5xl md:text-7xl lg:text-[5rem] font-extrabold leading-[1.05] tracking-[-0.02em] max-w-4xl mb-6">
-            The Velvet Gallery:
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/70">
-              Tái Định Nghĩa Trải Nghiệm Điện Ảnh
-            </span>
-          </h1>
-
-          <p className="font-body mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Bước vào phòng chiếu số với nội dung chất lượng cao, phân phối phi tập trung và vận hành bằng nền kinh tế Aura Coin.
-            Nơi tuyển chọn điện ảnh gặp gỡ sức mạnh sáng tạo của cộng đồng.
-          </p>
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
-            <Link
-              href="#discover"
-              className="group relative flex w-full items-center justify-center space-x-2 overflow-hidden rounded-sm bg-gradient-to-br from-primary to-primary/75 px-8 py-4 font-semibold tracking-wide text-primary-foreground shadow-[0_20px_40px_rgba(229,9,20,0.25)] transition-all duration-300 hover:brightness-110 sm:w-auto"
-            >
-              <span className="relative z-10">Khám phá kho phim</span>
-              <span className="material-symbols-outlined text-xl relative z-10 group-hover:translate-x-1 transition-transform">
-                arrow_forward
-              </span>
-            </Link>
-            <HomePageStudioCta />
-          </div>
-        </div>
-      </section>
+      <HomeHeroSlider slides={latestVideos.map(toHomeHeroSlide)} />
 
       <HomeDiscoverySection
         latestVideos={latestVideos}
