@@ -150,6 +150,26 @@
       "exploreContent": "Explore Content",
       "viewWalletHistory": "View Wallet History",
       "secureReceipt": "Transaction processed securely via Aura Pay. Receipt sent to your email."
+    },
+    "EmbeddedCheckout": {
+      "hostedCheckout": "PayOS Hosted Checkout",
+      "closePanel": "Close payment panel",
+      "creatingCheckout": "Creating PayOS checkout...",
+      "dontClosePanel": "Please do not close this panel.",
+      "selectedPackage": "Selected Package",
+      "bonusCoins": "+ {amount} bonus coins",
+      "totalPayable": "Total payable",
+      "hostedByPayOS": "Hosted by PayOS",
+      "hostedDescription": "You will continue on the official PayOS payment page.",
+      "webhookVerified": "Webhook verified",
+      "webhookDescription": "Aura Coins are added after backend confirmation.",
+      "codeLabel": "Code: ",
+      "cancel": "Cancel",
+      "continueToPayOS": "Continue to PayOS",
+      "continueDescription": "We will create a deposit request and load the secure PayOS payment form.",
+      "errors": {
+        "createPaymentFailed": "Unable to create PayOS payment. Please try again."
+      }
     }
   },
   "StudioUpload": {

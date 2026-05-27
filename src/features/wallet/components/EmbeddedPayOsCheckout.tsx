@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Loader2, ShieldCheck, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { DepositService } from "../services/depositService";
 import type { Deposit, DepositPackage } from "../types/wallet.types";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -78,6 +78,7 @@ export function EmbeddedPayOsCheckout({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
+  const t = useTranslations("Wallet.EmbeddedCheckout");
   const { user } = useAuth();
   const userId = user?.userId || "guest";
 
@@ -182,7 +183,7 @@ export function EmbeddedPayOsCheckout({
     } catch (err) {
       // Giữ nguyên key trong ref và sessionStorage để cho phép người dùng retry
       setIsProcessing(false);
-      setError(getErrorMessage(err, "Khong the tao thanh toan PayOS. Vui long thu lai."));
+      setError(getErrorMessage(err, t("errors.createPaymentFailed")));
     }
   };
 
@@ -213,7 +214,7 @@ export function EmbeddedPayOsCheckout({
       <div className="flex flex-row items-start justify-between gap-3 border-b border-border/20 bg-muted px-4 py-4 sm:px-6 sm:py-5 md:items-center">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-secondary">
-            PayOS Hosted Checkout
+            {t("hostedCheckout")}
           </p>
           <h3 className="font-headline text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
             {selectedPackage.name} - {formatWalletNumber(selectedPackage.totalCoinAmount)} AC
@@ -228,7 +229,7 @@ export function EmbeddedPayOsCheckout({
               type="button"
               onClick={handleClose}
               className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-border/40 text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="Close payment panel"
+              aria-label={t("closePanel")}
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -241,9 +242,9 @@ export function EmbeddedPayOsCheckout({
           <div className="space-y-4 text-center">
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-secondary" aria-hidden="true" />
             <h4 className="font-headline text-xl font-bold text-foreground">
-              Creating PayOS checkout...
+              {t("creatingCheckout")}
             </h4>
-            <p className="text-sm text-muted-foreground">Please do not close this panel.</p>
+            <p className="text-sm text-muted-foreground">{t("dontClosePanel")}</p>
           </div>
         </div>
       ) : null}
@@ -252,18 +253,18 @@ export function EmbeddedPayOsCheckout({
         <aside className="space-y-4 sm:space-y-5">
           <div className="rounded-lg border-l-4 border-secondary bg-background/40 p-4 sm:p-5">
             <p className="text-xs font-bold uppercase tracking-widest text-secondary">
-              Selected Package
+              {t("selectedPackage")}
             </p>
             <p className="mt-2 font-headline text-2xl font-black text-foreground sm:text-3xl">
               {formatWalletNumber(selectedPackage.totalCoinAmount)} AC
             </p>
             {selectedPackage.bonusCoinAmount > 0 ? (
               <p className="mt-2 text-sm font-bold text-secondary">
-                + {formatWalletNumber(selectedPackage.bonusCoinAmount)} bonus coins
+                {t("bonusCoins", { amount: formatWalletNumber(selectedPackage.bonusCoinAmount) })}
               </p>
             ) : null}
             <div className="mt-5 border-t border-border/30 pt-5">
-              <p className="text-sm text-muted-foreground">Total payable</p>
+              <p className="text-sm text-muted-foreground">{t("totalPayable")}</p>
               <p className="font-headline text-xl font-bold text-foreground">
                 {formatWalletNumber(selectedPackage.moneyAmount)} VND
               </p>
@@ -274,18 +275,18 @@ export function EmbeddedPayOsCheckout({
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-1 h-5 w-5 text-primary" aria-hidden="true" />
               <div>
-                <p className="text-sm font-bold text-foreground">Hosted by PayOS</p>
+                <p className="text-sm font-bold text-foreground">{t("hostedByPayOS")}</p>
                 <p className="text-xs text-muted-foreground">
-                  You will continue on the official PayOS payment page.
+                  {t("hostedDescription")}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <ExternalLink className="mt-1 h-5 w-5 text-primary" aria-hidden="true" />
               <div>
-                <p className="text-sm font-bold text-foreground">Webhook verified</p>
+                <p className="text-sm font-bold text-foreground">{t("webhookVerified")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Aura Coins are added after backend confirmation.
+                  {t("webhookDescription")}
                 </p>
               </div>
             </div>
@@ -319,7 +320,7 @@ export function EmbeddedPayOsCheckout({
               <div className="mt-4 flex flex-col gap-3 border-t border-border/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                 {deposit ? (
                   <span className="text-sm font-semibold text-muted-foreground">
-                    Code: <strong className="font-mono text-lg font-black text-foreground md:text-xl">{deposit.paymentCode || deposit.id}</strong>
+                    {t("codeLabel")}<strong className="font-mono text-lg font-black text-foreground md:text-xl">{deposit.paymentCode || deposit.id}</strong>
                   </span>
                 ) : <span />}
                 <Button
@@ -327,7 +328,7 @@ export function EmbeddedPayOsCheckout({
                   onClick={resetPayment}
                   className="w-full rounded-sm border-border bg-transparent text-sm font-bold text-foreground transition-all hover:bg-muted sm:w-auto"
                 >
-                  Cancel / Hủy
+                  {t("cancel")}
                 </Button>
               </div>
             </div>
@@ -337,10 +338,10 @@ export function EmbeddedPayOsCheckout({
                 qr_code_scanner
               </span>
               <h4 className="mt-4 font-headline text-2xl font-bold text-foreground">
-                Continue to PayOS
+                {t("continueToPayOS")}
               </h4>
               <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                We will create a deposit request and load the secure PayOS payment form.
+                {t("continueDescription")}
               </p>
 
               {error ? (
@@ -360,7 +361,7 @@ export function EmbeddedPayOsCheckout({
                 ) : (
                   <ExternalLink className="mr-3 h-5 w-5" aria-hidden="true" />
                 )}
-                Continue to PayOS
+                {t("continueToPayOS")}
               </Button>
             </div>
           )}

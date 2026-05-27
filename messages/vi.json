@@ -150,6 +150,26 @@
       "exploreContent": "Khám phá nội dung",
       "viewWalletHistory": "Xem lịch sử ví",
       "secureReceipt": "Giao dịch được xử lý an toàn qua Aura Pay. Biên lai đã được gửi đến email của bạn."
+    },
+    "EmbeddedCheckout": {
+      "hostedCheckout": "Cổng thanh toán PayOS",
+      "closePanel": "Đóng bảng thanh toán",
+      "creatingCheckout": "Đang khởi tạo thanh toán PayOS...",
+      "dontClosePanel": "Vui lòng không đóng cửa sổ này.",
+      "selectedPackage": "Gói đã chọn",
+      "bonusCoins": "+ {amount} coin thưởng",
+      "totalPayable": "Tổng tiền thanh toán",
+      "hostedByPayOS": "Bảo mật bởi PayOS",
+      "hostedDescription": "Bạn sẽ giao dịch trên trang thanh toán chính thức của PayOS.",
+      "webhookVerified": "Xác thực tự động",
+      "webhookDescription": "Aura Coins sẽ được cộng ngay sau khi hệ thống xác thực.",
+      "codeLabel": "Mã đơn: ",
+      "cancel": "Hủy",
+      "continueToPayOS": "Tiếp tục với PayOS",
+      "continueDescription": "Hệ thống sẽ tạo yêu cầu nạp và tải trang thanh toán an toàn của PayOS.",
+      "errors": {
+        "createPaymentFailed": "Không thể tạo thanh toán PayOS. Vui lòng thử lại."
+      }
     }
   },
   "Home": {
