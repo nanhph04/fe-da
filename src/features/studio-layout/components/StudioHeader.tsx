@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { StudioWalletService } from "@/features/studio-wallet";
 import { studioQuickLinks } from "./navigation";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 const getInitials = (value?: string | null) => {
   const cleaned = value?.trim();
@@ -103,6 +104,8 @@ export function StudioHeader() {
         ) : null}
 
         <div className="relative flex items-center gap-4">
+          <LanguageSwitcher />
+
           <Link
             href="/studio/wallet"
             className="flex h-9 items-center gap-2 rounded-sm border border-secondary/30 bg-secondary/10 px-3 font-headline text-xs font-bold uppercase tracking-widest text-secondary transition-colors hover:border-secondary/60 hover:bg-secondary/15 focus:outline-none focus:ring-2 focus:ring-ring/60"

@@ -6,6 +6,7 @@ import { usePathname } from "@/i18n/routing";
 import { Bell, Menu, Search, X } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { adminFooterItems, adminSidebarItems } from "./navigation";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 function getInitials(displayName?: string, email?: string) {
   const source = (displayName || email || "System Admin").trim();
@@ -57,6 +58,8 @@ export function AdminHeader() {
           <Link href="/admin/content/review" className="hidden font-headline text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary lg:block">
             Review Queue
           </Link>
+
+          <LanguageSwitcher />
 
           <div className="flex items-center gap-3 border-l border-border/30 pl-3 md:pl-6">
             <div className="hidden max-w-44 text-right sm:block">
