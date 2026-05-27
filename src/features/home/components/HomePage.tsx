@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
+import { useTranslations } from "next-intl";
 import { HomeDiscoverySection, type HomeCategorySection } from "./HomeDiscoverySection";
 import { HomeHeroSlider, type HomeHeroSlide } from "./HomeHeroSlider";
 import { HomePageAccountCta } from "./HomePageAccountCta";
@@ -44,6 +45,8 @@ export function HomePage({
   categories,
   categorySections,
 }: HomePageProps) {
+  const t = useTranslations("Home");
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PublicHeader currentPath="/" />
@@ -63,13 +66,13 @@ export function HomePage({
         <div className="relative z-10 mx-auto max-w-7xl px-8 md:px-12">
           <div className="mb-10 flex max-w-3xl flex-col gap-4">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
-              Vì sao chọn Velvet Gallery
+              {t("whyChooseVelvet")}
             </p>
             <h2 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-5xl">
-              Một không gian xem phim gắn liền với quyền truy cập và kinh tế sáng tạo.
+              {t("featuresTitle")}
             </h2>
             <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              Từ nội dung khóa theo cấp độ, giao dịch Aura Coin đến công cụ Studio, mọi phần được thiết kế để người xem và nhà sáng tạo gặp nhau trong cùng một hệ sinh thái.
+              {t("featuresDesc")}
             </p>
           </div>
 
@@ -86,13 +89,13 @@ export function HomePage({
                 </div>
                 <div>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
-                    Membership levels
+                    {t("membershipLevelsEyebrow")}
                   </p>
                   <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
-                    Cấp truy cập độc quyền Lv1-Lv3
+                    {t("membershipLevelsTitle")}
                   </h3>
                   <p className="text-base leading-relaxed text-muted-foreground">
-                    Mở khóa nội dung cao cấp theo từng cấp độ, từ trải nghiệm xem tiêu chuẩn đến bản director&apos;s cut và các buổi chiếu riêng tư.
+                    {t("membershipLevelsDesc")}
                   </p>
                 </div>
               </div>
@@ -113,13 +116,13 @@ export function HomePage({
                 </div>
                 <div>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
-                    Creator economy
+                    {t("creatorEconomyEyebrow")}
                   </p>
                   <h3 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-secondary">
-                    Kinh tế Aura
+                    {t("creatorEconomyTitle")}
                   </h3>
                   <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
-                    Giao dịch an toàn bằng Aura Coins. Người xem có thể ủng hộ nhà sáng tạo trực tiếp, mua quyền xem nội dung và giữ lịch sử giao dịch minh bạch.
+                    {t("creatorEconomyDesc")}
                   </p>
                 </div>
               </div>
@@ -137,13 +140,13 @@ export function HomePage({
                 </div>
                 <div>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    Creator tools
+                    {t("creatorToolsEyebrow")}
                   </p>
                   <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground">
-                    Xưởng sáng tạo
+                    {t("creatorToolsTitle")}
                   </h3>
                   <p className="text-base leading-relaxed text-muted-foreground">
-                    Hạ tầng lưu trữ chất lượng cao, phân tích minh bạch và công cụ kết nối trực tiếp với khán giả.
+                    {t("creatorToolsDesc")}
                   </p>
                 </div>
               </div>
@@ -168,11 +171,10 @@ export function HomePage({
 
         <div className="relative z-10 max-w-4xl mx-auto px-8 text-center flex flex-col items-center">
           <h2 className="font-display text-4xl md:text-6xl font-extrabold tracking-[-0.02em] mb-6">
-            Tham gia cuộc cách mạng điện ảnh hôm nay
+            {t("ctaTitle")}
           </h2>
           <p className="mb-12 max-w-2xl font-body text-lg text-muted-foreground">
-            Giữ chỗ của bạn trong The Velvet Gallery. Kích hoạt ví Aura và bắt đầu khám phá kỷ nguyên mới
-            của giải trí phi tập trung.
+            {t("ctaDesc")}
           </p>
           <HomePageAccountCta />
         </div>
@@ -192,33 +194,32 @@ export function HomePage({
               </span>
             </div>
             <p className="max-w-md text-sm leading-relaxed text-neutral-500">
-              &copy; 2024 Velvet Gallery. Triết lý và nhận diện thương hiệu Velvet Gallery là tài sản của
-              Cinematic Immersion.
+              {t("footerDesc")}
             </p>
           </div>
 
           {/* Platform Links */}
           <div className="flex flex-col space-y-3">
-            <span className="mb-2 font-semibold text-foreground">Nền tảng</span>
+            <span className="mb-2 font-semibold text-foreground">{t("footerNavPlatform")}</span>
             <Link href="/" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              Giới thiệu
+              {t("footerNavAbout")}
             </Link>
             <Link href="/onboarding" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              Nhà sáng tạo
+              {t("footerNavCreators")}
             </Link>
             <Link href="/login" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              Trung tâm trợ giúp
+              {t("footerNavHelp")}
             </Link>
           </div>
 
           {/* Account Links */}
           <div className="flex flex-col space-y-3">
-            <span className="mb-2 font-semibold text-foreground">Tài khoản</span>
+            <span className="mb-2 font-semibold text-foreground">{t("footerNavAccount")}</span>
             <Link href="/login" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              Chính sách quyền riêng tư
+              {t("footerNavPrivacy")}
             </Link>
             <Link href="/register" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              Điều khoản dịch vụ
+              {t("footerNavTerms")}
             </Link>
           </div>
         </div>

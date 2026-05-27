@@ -2,9 +2,11 @@
 
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useTranslations } from "next-intl";
 
 export function HomePageAccountCta() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const t = useTranslations("Home");
 
   if (isLoading) {
     return (
@@ -17,7 +19,7 @@ export function HomePageAccountCta() {
 
   const isAdmin = user?.role === "admin";
   const href = isAdmin ? "/admin" : isAuthenticated ? "/library" : "/register";
-  const label = isAdmin ? "Vào trang quản lý" : isAuthenticated ? "Vào thư viện" : "Đăng ký ngay";
+  const label = isAdmin ? t("ctaAdmin") : isAuthenticated ? t("ctaLibrary") : t("ctaRegister");
 
   return (
     <Link

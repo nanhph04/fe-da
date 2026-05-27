@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/routing";
 import { MediaRow } from "./MediaRow";
 import type { MediaCardProps } from "./MediaCard";
+import { useTranslations } from "next-intl";
 import { formatDuration, formatViewCount } from "../utils/format";
 import {
   getReadyPublicThumbnailUrl,
@@ -63,6 +64,7 @@ export function HomeDiscoverySection({
   categories,
   categorySections,
 }: HomeDiscoverySectionProps) {
+  const t = useTranslations("Home");
   const releaseItems = latestVideos.slice(0, 6).map(toMediaCard);
   const visibleCategorySections = categorySections
     .map((section) => ({
@@ -78,28 +80,28 @@ export function HomeDiscoverySection({
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
-              Kho nội dung đa dạng
+              {t("diverseContentLibrary")}
             </p>
             <h2 className="font-headline text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-              Khám phá nội dung mới nhất
+              {t("exploreLatestContent")}
             </h2>
           </div>
           <Link
             href="/search"
             className="w-fit rounded-sm border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            Tìm kiếm toàn thư viện
+            {t("searchLibrary")}
           </Link>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl">
         {releaseItems.length > 0 ? (
-          <MediaRow title="Mới phát hành" items={releaseItems} viewAllHref="/category/latest" />
+          <MediaRow title={t("newReleases")} items={releaseItems} viewAllHref="/category/latest" />
         ) : (
           <section className="px-8 py-8 md:px-12">
             <div className="rounded-sm border border-border bg-card p-8 text-muted-foreground">
-              Chưa có nội dung mới từ Media Service. Vui lòng quay lại sau.
+              {t("noContent")}
             </div>
           </section>
         )}
@@ -120,14 +122,14 @@ export function HomeDiscoverySection({
               <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
-                    Lối vào nhanh
+                    {t("quickAccess")}
                   </p>
                   <h3 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
-                    Khám phá theo thể loại
+                    {t("exploreByCategory")}
                   </h3>
                 </div>
                 <p className="max-w-md text-sm leading-6 text-muted-foreground">
-                  Chọn một chủ đề để mở các hàng phim, khóa học và video đang được tuyển chọn.
+                  {t("exploreByCategoryDesc")}
                 </p>
               </div>
 

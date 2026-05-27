@@ -1,5 +1,6 @@
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export interface MediaCardProps {
   title: string;
@@ -11,6 +12,8 @@ export interface MediaCardProps {
 }
 
 export function MediaCard({ title, creator, views, imageUrl, duration, href }: MediaCardProps) {
+  const t = useTranslations("Home");
+
   const card = (
     <div className="group relative w-64 flex-shrink-0 cursor-pointer">
       {/* Image Container */}
@@ -29,6 +32,7 @@ export function MediaCard({ title, creator, views, imageUrl, duration, href }: M
         )}
         
         {/* Play Overlay */}
+        {/* Play Overlay */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
             <span className="material-symbols-outlined text-foreground text-2xl">play_arrow</span>
@@ -42,7 +46,7 @@ export function MediaCard({ title, creator, views, imageUrl, duration, href }: M
           {title}
         </h3>
         <p className="text-xs text-white/50">{creator}</p>
-        <p className="text-xs text-white/30">{views} views</p>
+        <p className="text-xs text-white/30">{t("viewsCount", { count: views })}</p>
       </div>
     </div>
   );

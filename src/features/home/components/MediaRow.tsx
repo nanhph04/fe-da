@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { MediaCard, MediaCardProps } from "./MediaCard";
 
 interface MediaRowProps {
@@ -11,6 +12,7 @@ interface MediaRowProps {
 }
 
 export function MediaRow({ title, items, viewAllHref }: MediaRowProps) {
+  const t = useTranslations("Home");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -34,7 +36,7 @@ export function MediaRow({ title, items, viewAllHref }: MediaRowProps) {
               href={viewAllHref}
               className="mr-2 text-xs font-medium text-white/50 hover:text-foreground transition-colors"
             >
-              View All
+              {t("viewAll")}
             </Link>
           )}
           <button

@@ -1,12 +1,15 @@
 import { Link } from "@/i18n/routing";
 import type { ReactNode } from "react";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
+import { useTranslations } from "next-intl";
 
 interface TopNavHomeProps {
   children: ReactNode;
 }
 
 export function TopNavHome({ children }: TopNavHomeProps) {
+  const t = useTranslations("Home");
+
   return (
     <>
       <PublicHeader currentPath="/" subtitle="Public Marketing">
@@ -18,7 +21,7 @@ export function TopNavHome({ children }: TopNavHomeProps) {
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 transition-colors group-hover:text-white/60">
               search
             </span>
-            Search the library
+            {t("searchLibraryPlaceholder")}
           </Link>
         </div>
       </PublicHeader>

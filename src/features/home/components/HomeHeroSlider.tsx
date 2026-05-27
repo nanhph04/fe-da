@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/routing";
 import type { MouseEvent, PointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export interface HomeHeroSlide {
   id: string;
@@ -39,30 +40,42 @@ const FALLBACK_SLIDE: HomeHeroSlide = {
 
 const AUTOPLAY_DELAY_MS = 8000;
 
-function getAccessLabel(slide: HomeHeroSlide) {
+type TFunction = ReturnType<typeof useTranslations>;
+
+function getAccessLabel(slide: HomeHeroSlide, t: TFunction) {
   if (slide.requiredTierLevel) {
-    return `Lv${slide.requiredTierLevel} member`;
+    return t("heroAccessLabelMember", { level: slide.requiredTierLevel });
   }
 
   if (slide.price > 0) {
     return `${slide.price} AC`;
   }
 
-  return "Free access";
+  return t("heroAccessLabelFree");
 }
 
-function getSlideEyebrow(slide: HomeHeroSlide, index: number) {
+function getSlideEyebrow(slide: HomeHeroSlide, index: number, t: TFunction) {
   if (index === 0) {
-    return "Featured premiere";
+    return t("heroFeaturedPremiere");
   }
 
-  return slide.category || "Velvet selection";
+  return slide.category || t("heroVelvetSelection");
 }
 
 export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
+  const t = useTranslations("Home");
+
+  const fallbackSlide = useMemo(() => ({
+    ...FALLBACK_SLIDE,
+    title: t("heroFallbackTitle"),
+    description: t("heroFallbackDescription"),
+    category: t("heroFallbackCategory"),
+    creator: t("heroFallbackCreator"),
+  }), [t]);
+
   const heroSlides = useMemo(
-    () => (slides.length > 0 ? slides.slice(0, 6) : [FALLBACK_SLIDE]),
-    [slides],
+    () => (slides.length > 0 ? slides.slice(0, 6) : [fallbackSlide]),
+    [slides, fallbackSlide],
   );
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -145,7 +158,7 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
     <section
       className="relative isolate h-[760px] overflow-hidden bg-background bg-cover bg-center bg-no-repeat pt-24 text-foreground md:h-[820px]"
       style={{ backgroundImage: `url(${activeSlide.imageUrl})` }}
-      aria-label="Phim nổi bật"
+      aria-label={t("ariaFeaturedMovies")}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -159,10 +172,10 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
         <div className="max-w-3xl overflow-hidden">
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <span className="rounded-sm border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-secondary">
-              {getSlideEyebrow(activeSlide, activeIndex)}
+              {getSlideEyebrow(activeSlide, activeIndex, t)}
             </span>
             <span className="rounded-sm border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground">
-              {getAccessLabel(activeSlide)}
+              {getAccessLabel(activeSlide, t)}
             </span>
           </div>
 
@@ -171,7 +184,7 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
               {activeSlide.title}
             </h1>
             <p className="mt-6 line-clamp-2 h-16 max-w-2xl text-pretty text-base leading-8 text-muted-foreground md:text-lg">
-              {activeSlide.description || "Một lựa chọn mới từ phòng chiếu Velvet Gallery, tuyển chọn cho trải nghiệm xem đậm chất điện ảnh."}
+              {activeSlide.description || t("heroFallbackDescription")}
             </p>
           </div>
 
@@ -183,7 +196,7 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
               {activeSlide.category || "Cinematic"}
             </span>
             <span>{activeSlide.creator}</span>
-            <span>{activeSlide.views} views</span>
+            <span>{t("viewsCount", { count: activeSlide.views })}</span>
             <span>{activeSlide.duration}</span>
           </div>
 
@@ -199,7 +212,7 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
                     play_arrow
                   </span>
                 </span>
-                <span>Xem ngay</span>
+                <span>{t("watchNow")}</span>
               </span>
             </Link>
           </div>
@@ -217,7 +230,7 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
               onPointerUp={handlePreviewPointerUp}
               onPointerCancel={handlePreviewPointerUp}
               className="flex cursor-grab touch-pan-x select-none gap-3 overflow-x-auto scroll-smooth pb-1 active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              aria-label="Danh sách slide nổi bật có thể kéo ngang"
+              aria-label={t("ariaScrollableFeaturedList")}
             >
               {previewSlides.map((slide, slideIndex) => {
                 const isActivePreview = slideIndex === activeIndex;
@@ -243,7 +256,7 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
                     <span className={`absolute left-3 top-3 rounded-sm border px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.18em] ${
                       isActivePreview ? "border-primary/45 bg-primary/80 text-white" : "border-white/15 bg-black/40 text-white/75"
                     }`}>
-                      {isActivePreview ? "Đang xem" : "Next"}
+                      {isActivePreview ? t("nowWatching") : t("nextSlide")}
                     </span>
                     <span className="absolute bottom-3 left-3 right-3 line-clamp-2 font-display text-sm font-extrabold leading-tight text-white drop-shadow">
                       {slide.title}
