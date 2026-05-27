@@ -10,10 +10,13 @@ import {
 import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
 import { getErrorMessage } from "@/shared/api/client";
 import type { ApiPagination } from "@/shared/api/types";
+import { useTranslations, useLocale } from "next-intl";
 
-function formatDuration(seconds: number | null) {
+type TFunction = ReturnType<typeof useTranslations>;
+
+function formatDuration(seconds: number | null, t: TFunction) {
   if (!seconds || seconds <= 0) {
-    return "Chưa rõ thời lượng";
+    return t("unknownDuration");
   }
 
   const hours = Math.floor(seconds / 3600);
@@ -26,13 +29,13 @@ function formatDuration(seconds: number | null) {
   return `${minutes}m`;
 }
 
-function formatDate(value: string) {
+function formatDate(value: string, locale: string, t: TFunction) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Không rõ ngày mua";
+    return t("unknownPurchaseDate");
   }
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -44,6 +47,8 @@ interface PurchasedLibraryProps {
 }
 
 export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
+  const t = useTranslations("LibraryPage");
+  const locale = useLocale();
   const [state, setState] = useState(() =>
     createAsyncState<PurchasedVideoResponse[]>([])
   );
@@ -65,7 +70,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
           setState({
             status: "error",
             data: [],
-            error: response.mess || "Không thể tải thư viện đã mua.",
+            error: response.mess || t("loadPurchasedFailed"),
           });
           return;
         }
@@ -79,7 +84,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
           setState({
             status: "error",
             data: [],
-            error: getErrorMessage(err, "Không thể tải thư viện đã mua."),
+            error: getErrorMessage(err, t("loadPurchasedFailed")),
           });
         }
       }
@@ -90,17 +95,17 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
     return () => {
       isMounted = false;
     };
-  }, [refreshKey]);
+  }, [refreshKey, t]);
 
   const items = state.data;
 
   return (
     <section>
       <div className="mb-8 flex items-end justify-between gap-4">
-        <h2 className="font-headline text-3xl font-bold text-foreground">Thư viện đã mua</h2>
+        <h2 className="font-headline text-3xl font-bold text-foreground">{t("purchasedLibraryTitle")}</h2>
         {pagination && pagination.total > items.length ? (
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Hiển thị {items.length}/{pagination.total} video
+            {t("showingVideos", { count: items.length, total: pagination.total })}
           </p>
         ) : null}
       </div>
@@ -127,7 +132,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
 
       {isAsyncSuccess(state) && items.length === 0 ? (
         <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
-          Bạn chưa mua video nào.
+          {t("noPurchasedVideos")}
         </div>
       ) : null}
 
@@ -135,7 +140,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map((item, index) => {
             const videoId = item.videoId;
-            const primaryCategory = item.categories[0] || "Chưa phân loại";
+            const primaryCategory = item.categories[0] || t("uncategorized");
             const isFeatured = index === 0;
             const itemKey = `${videoId}-${item.purchasedAt}-${index}`;
 
@@ -157,7 +162,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                   <div className="absolute left-3 top-3 rounded-sm bg-secondary px-2 py-1 text-[10px] font-black uppercase tracking-widest text-secondary-foreground">
-                    Đã mua
+                    {t("purchasedBadge")}
                   </div>
                 </div>
 
@@ -166,10 +171,10 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
                     {item.title}
                   </h3>
                   <p className="line-clamp-2 text-sm text-foreground/80">
-                    {item.description || item.channelName || "Video đã mua"}
+                    {item.description || item.channelName || t("purchasedVideos")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {primaryCategory} • {formatDuration(item.durationSeconds)} • Đã mua {formatDate(item.purchasedAt)}
+                    {primaryCategory} • {formatDuration(item.durationSeconds, t)} • {t("purchasedOn", { date: formatDate(item.purchasedAt, locale, t) })}
                   </p>
                 </div>
               </Link>

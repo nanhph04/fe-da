@@ -7,30 +7,33 @@ import { WalletService } from "@/features/wallet/services/walletService";
 import type { Wallet } from "@/features/wallet/types/wallet.types";
 import { createAsyncState, isAsyncLoading } from "@/shared/api/async-state";
 import { getErrorMessage } from "@/shared/api/client";
+import { useTranslations } from "next-intl";
 
-function formatMemberSince(value?: string) {
+type TFunction = ReturnType<typeof useTranslations>;
+
+function formatMemberSince(value: string | undefined, t: TFunction) {
   if (!value) {
-    return "Chưa rõ ngày tham gia";
+    return t("memberSinceUnknown");
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Chưa rõ ngày tham gia";
+    return t("memberSinceUnknown");
   }
 
-  return `Thành viên từ ${date.getFullYear()}`;
+  return t("memberSince", { year: date.getFullYear() });
 }
 
-function getStatusLabel(role?: string, isCreator?: boolean) {
+function getStatusLabel(role: string | undefined, isCreator: boolean | undefined, t: TFunction) {
   if (role === "admin") {
-    return "Quản trị viên";
+    return t("roleAdmin");
   }
 
   if (isCreator || role === "creator") {
-    return "Nhà sáng tạo";
+    return t("roleCreator");
   }
 
-  return "Người xem";
+  return t("roleViewer");
 }
 
 interface ProfileHeaderProps {
@@ -39,6 +42,7 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
   const { user } = useAuth();
+  const t = useTranslations("LibraryPage");
   const [walletState, setWalletState] = useState(() =>
     createAsyncState<Wallet | null>(null)
   );
@@ -64,7 +68,7 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
           setWalletState({
             status: "error",
             data: null,
-            error: getErrorMessage(error, "Không thể tải số dư ví."),
+            error: getErrorMessage(error, t("loadWalletFailed")),
           });
         }
       }
@@ -75,12 +79,12 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
     return () => {
       isMounted = false;
     };
-  }, [user, refreshKey]);
+  }, [user, refreshKey, t]);
 
-  const displayName = user?.displayName || user?.email || "Tài khoản của bạn";
+  const displayName = user?.displayName || user?.email || t("myAccount");
   const walletLabel = walletState.data
     ? `${walletState.data.balance.toLocaleString()} AC`
-    : walletState.error || "Chưa có dữ liệu";
+    : walletState.error || t("noData");
 
   return (
     <section className="flex flex-col items-start justify-between gap-8 border-b border-border/20 pb-12 md:flex-row md:items-end">
@@ -90,11 +94,11 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
         </h1>
         <div className="flex flex-wrap items-center gap-4">
           <span className="rounded border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
-            {getStatusLabel(user?.role, user?.isCreator)}
+            {getStatusLabel(user?.role, user?.isCreator, t)}
           </span>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="material-symbols-outlined text-muted-foreground">calendar_today</span>
-            <span className="text-sm font-medium">{formatMemberSince(user?.createdAt)}</span>
+            <span className="text-sm font-medium">{formatMemberSince(user?.createdAt, t)}</span>
           </div>
         </div>
       </div>
@@ -102,7 +106,7 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
       <div className="flex items-center gap-6 rounded-lg border border-border/20 bg-card p-6">
         <div className="space-y-1">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Số dư Aura
+            {t("auraBalance")}
           </span>
           <div className="flex items-center gap-2 font-headline text-3xl font-black text-secondary">
             {isAsyncLoading(walletState) ? "..." : walletLabel}
@@ -113,7 +117,7 @@ export function ProfileHeader({ refreshKey = 0 }: ProfileHeaderProps) {
           href="/wallet"
           className="rounded-sm bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-95"
         >
-          Nạp coin
+          {t("topUp")}
         </Link>
       </div>
     </section>

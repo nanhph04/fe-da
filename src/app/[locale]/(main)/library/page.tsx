@@ -9,10 +9,12 @@ import { AccountActivity } from "@/features/library/components/AccountActivity";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function LibraryPage() {
   const { user, isLoading } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
+  const t = useTranslations("LibraryPage");
 
   useEffect(() => {
     const refreshLibrary = () => setRefreshKey(value => value + 1);
@@ -46,12 +48,12 @@ export default function LibraryPage() {
         <div className="w-full max-w-md space-y-6 rounded-lg border border-border/20 bg-card p-8 text-center">
           <span className="material-symbols-outlined text-muted-foreground/50 text-6xl">video_library</span>
           <div className="space-y-2">
-            <h2 className="font-headline text-2xl font-bold text-foreground">Thư viện cá nhân</h2>
-            <p className="text-sm text-muted-foreground">Đăng nhập để truy cập video đã mua, gói hội viên và lịch sử xem của bạn.</p>
+            <h2 className="font-headline text-2xl font-bold text-foreground">{t("personalLibrary")}</h2>
+            <p className="text-sm text-muted-foreground">{t("signInToAccess")}</p>
           </div>
           <Link href="/login" className="block w-full">
             <Button className="w-full bg-primary font-bold uppercase tracking-widest text-primary-foreground hover:bg-primary/90">
-              Đăng nhập ngay
+              {t("signInNow")}
             </Button>
           </Link>
         </div>
@@ -66,7 +68,7 @@ export default function LibraryPage() {
 
         <div className="flex items-center gap-6 border-b border-border/20 pb-4">
           <span className="-mb-[18px] border-b-2 border-primary pb-4 font-headline text-sm font-bold uppercase tracking-widest text-primary">
-            Tổng quan
+            {t("overview")}
           </span>
         </div>
 

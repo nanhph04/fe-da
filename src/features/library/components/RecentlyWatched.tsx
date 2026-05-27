@@ -10,20 +10,23 @@ import {
 } from "@/features/watch/services/mediaService";
 import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
 import { getErrorMessage } from "@/shared/api/client";
+import { useTranslations } from "next-intl";
 
-function formatRemainingTime(value: number | null) {
+type TFunction = ReturnType<typeof useTranslations>;
+
+function formatRemainingTime(value: number | null, t: TFunction) {
   if (value === null || value <= 0) {
-    return "Sắp xem xong";
+    return t("finishingSoon");
   }
 
   const hours = Math.floor(value / 3600);
   const minutes = Math.ceil((value % 3600) / 60);
 
   if (hours > 0) {
-    return `${hours}h ${minutes}m còn lại`;
+    return t("remainingHoursMinutes", { hours, minutes });
   }
 
-  return `${minutes}m còn lại`;
+  return t("remainingMinutes", { minutes });
 }
 
 interface RecentlyWatchedProps {
@@ -32,6 +35,7 @@ interface RecentlyWatchedProps {
 
 export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
   const { user } = useAuth();
+  const t = useTranslations("LibraryPage");
   const [state, setState] = useState(() =>
     createAsyncState<ContinueWatchingVideoResponse[]>([])
   );
@@ -58,7 +62,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
           setState({
             status: "error",
             data: [],
-            error: getErrorMessage(error, "Không thể tải danh sách xem tiếp."),
+            error: getErrorMessage(error, t("loadContinueWatchingFailed")),
           });
         }
       }
@@ -69,7 +73,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
     return () => {
       isMounted = false;
     };
-  }, [user, refreshKey]);
+  }, [user, refreshKey, t]);
 
   const items = state.data;
 
@@ -77,7 +81,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
     <section>
       <div className="mb-8 flex items-end justify-between">
         <h2 className="text-3xl font-headline font-bold text-foreground">
-          Xem tiếp
+          {t("continueWatching")}
         </h2>
       </div>
 
@@ -101,7 +105,7 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
 
       {isAsyncSuccess(state) && items.length === 0 ? (
         <div className="rounded-lg border border-border/20 bg-card p-6 text-sm text-muted-foreground">
-          Chưa có dữ liệu.
+          {t("noData")}
         </div>
       ) : null}
 
@@ -155,8 +159,8 @@ export function RecentlyWatched({ refreshKey = 0 }: RecentlyWatchedProps) {
                 {item.title}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {formatRemainingTime(item.remainingSeconds)} •{" "}
-                {item.viewCount.toLocaleString()} lượt xem
+                {formatRemainingTime(item.remainingSeconds, t)} •{" "}
+                {t("viewsCount", { count: item.viewCount.toLocaleString() })}
               </p>
             </Link>
           );

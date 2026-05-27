@@ -5,14 +5,17 @@ import { TransactionService } from "@/features/wallet/services/transactionServic
 import type { Transaction } from "@/features/wallet/types/wallet.types";
 import { createAsyncState, isAsyncError, isAsyncLoading, isAsyncSuccess } from "@/shared/api/async-state";
 import { getErrorMessage } from "@/shared/api/client";
+import { useTranslations, useLocale } from "next-intl";
 
-function formatDate(value: string) {
+type TFunction = ReturnType<typeof useTranslations>;
+
+function formatDate(value: string, locale: string, t: TFunction) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Không rõ thời gian";
+    return t("unknownTime");
   }
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -25,8 +28,8 @@ function normalizeText(value: string | null | undefined) {
   return value?.trim().toLowerCase() ?? "";
 }
 
-function formatNumber(value: number) {
-  return value.toLocaleString("vi-VN");
+function formatNumber(value: number, locale: string) {
+  return value.toLocaleString(locale);
 }
 
 function readNumberMetadata(metadata: Record<string, unknown>, key: string) {
@@ -65,14 +68,14 @@ function getServiceType(transaction: Transaction) {
   return "service";
 }
 
-function getActivityMeta(transaction: Transaction) {
+function getActivityMeta(transaction: Transaction, locale: string, t: TFunction) {
   if (isDepositTransaction(transaction)) {
     const moneyAmount = readNumberMetadata(transaction.metadata, "moneyAmount");
     const coinAmount = readNumberMetadata(transaction.metadata, "totalCoinAmount") ?? transaction.amount;
 
     return {
-      title: moneyAmount !== null ? `Nạp thành công ${formatNumber(moneyAmount)} VND` : "Nạp coin thành công",
-      amount: `+${formatNumber(coinAmount)} AC`,
+      title: moneyAmount !== null ? t("depositSuccessVnd", { amount: formatNumber(moneyAmount, locale) }) : t("depositSuccess"),
+      amount: `+${formatNumber(coinAmount, locale)} AC`,
       icon: "add_card",
       iconColor: "text-secondary",
       iconBg: "bg-secondary/10",
@@ -84,8 +87,8 @@ function getActivityMeta(transaction: Transaction) {
 
   if (serviceType === "video") {
     return {
-      title: "Thanh toán video",
-      amount: `-${formatNumber(transaction.amount)} AC`,
+      title: t("videoPayment"),
+      amount: `-${formatNumber(transaction.amount, locale)} AC`,
       icon: "lock_open",
       iconColor: "text-primary",
       iconBg: "bg-primary/10",
@@ -95,8 +98,8 @@ function getActivityMeta(transaction: Transaction) {
 
   if (serviceType === "membership") {
     return {
-      title: "Thanh toán gói hội viên",
-      amount: `-${formatNumber(transaction.amount)} AC`,
+      title: t("membershipPayment"),
+      amount: `-${formatNumber(transaction.amount, locale)} AC`,
       icon: "autorenew",
       iconColor: "text-primary",
       iconBg: "bg-primary/10",
@@ -105,8 +108,8 @@ function getActivityMeta(transaction: Transaction) {
   }
 
   return {
-    title: "Thanh toán dịch vụ",
-    amount: `-${formatNumber(transaction.amount)} AC`,
+    title: t("servicePayment"),
+    amount: `-${formatNumber(transaction.amount, locale)} AC`,
     icon: "receipt_long",
     iconColor: "text-primary",
     iconBg: "bg-primary/10",
@@ -119,6 +122,8 @@ interface AccountActivityProps {
 }
 
 export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
+  const t = useTranslations("LibraryPage");
+  const locale = useLocale();
   const [state, setState] = useState(() => createAsyncState<Transaction[]>([]));
 
   useEffect(() => {
@@ -141,7 +146,7 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
           setState({
             status: "error",
             data: [],
-            error: getErrorMessage(err, "Không thể tải hoạt động tài khoản."),
+            error: getErrorMessage(err, t("loadAccountActivityFailed")),
           });
         }
       }
@@ -152,13 +157,13 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
     return () => {
       isMounted = false;
     };
-  }, [refreshKey]);
+  }, [refreshKey, t]);
 
   const transactions = state.data;
 
   return (
     <div className="space-y-6 lg:col-span-2">
-      <h2 className="font-headline text-2xl font-bold text-foreground">Hoạt động tài khoản</h2>
+      <h2 className="font-headline text-2xl font-bold text-foreground">{t("accountActivityTitle")}</h2>
 
       <div className="overflow-hidden rounded-lg border border-border/20 bg-card divide-y divide-border/20">
         {isAsyncLoading(state) ? (
@@ -181,12 +186,12 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
         ) : null}
 
         {isAsyncSuccess(state) && transactions.length === 0 ? (
-          <div className="p-6 text-sm text-muted-foreground">Chưa có dữ liệu.</div>
+          <div className="p-6 text-sm text-muted-foreground">{t("noData")}</div>
         ) : null}
 
         {isAsyncSuccess(state)
           ? transactions.map((transaction) => {
-              const meta = getActivityMeta(transaction);
+              const meta = getActivityMeta(transaction, locale, t);
               return (
                 <div key={transaction.id} className="flex items-center justify-between p-5 transition-colors hover:bg-muted/60">
                   <div className="flex items-center gap-4">
@@ -195,7 +200,7 @@ export function AccountActivity({ refreshKey = 0 }: AccountActivityProps) {
                     </div>
                     <div>
                       <p className="font-headline font-bold text-foreground">{meta.title}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(transaction.createdAt)}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(transaction.createdAt, locale, t)}</p>
                     </div>
                   </div>
                   <span className={`font-black ${meta.amountColor}`}>{meta.amount}</span>
