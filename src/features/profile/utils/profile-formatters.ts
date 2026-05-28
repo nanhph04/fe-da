@@ -1,25 +1,27 @@
 import type { Transaction } from "@/features/wallet/types/wallet.types";
 
-export const formatProfileDate = (value?: string | null) => {
-  if (!value) return "Unknown";
+export const formatProfileDate = (value?: string | null, locale = "vi") => {
+  const fallback = locale === "vi" ? "Chưa rõ" : "Unknown";
+  if (!value) return fallback;
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
+  if (Number.isNaN(date.getTime())) return fallback;
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(date);
 };
 
-export const formatProfileDateTime = (value?: string | null) => {
-  if (!value) return "Unknown";
+export const formatProfileDateTime = (value?: string | null, locale = "vi") => {
+  const fallback = locale === "vi" ? "Chưa rõ" : "Unknown";
+  if (!value) return fallback;
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
+  if (Number.isNaN(date.getTime())) return fallback;
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -38,29 +40,30 @@ export const getInitials = (value?: string | null) => {
 export const getAvatarFallbackUrl = (name?: string | null) =>
   `https://ui-avatars.com/api/?name=${encodeURIComponent(name || "Velvet Gallery")}&background=131313&color=ffffff&length=1`;
 
-export const getTransactionTitle = (transaction: Transaction) => {
+export const getTransactionTitle = (transaction: Transaction, t?: (key: string) => string) => {
   if (transaction.description) return transaction.description;
 
   switch (transaction.type) {
     case "DEPOSIT":
-      return "Nạp Aura Coins";
+      return t ? t("walletHistory.transactions.deposit") : "Nạp Aura Coins";
     case "WITHDRAWAL":
-      return "Rút số dư";
+      return t ? t("walletHistory.transactions.withdrawal") : "Rút số dư";
     case "VIDEO_PURCHASE":
-      return "Mở khóa video";
+      return t ? t("walletHistory.transactions.videoPurchase") : "Mở khóa video";
     case "CHANNEL_REVENUE":
-      return "Doanh thu kênh";
+      return t ? t("walletHistory.transactions.channelRevenue") : "Doanh thu kênh";
     case "SYSTEM_REVENUE":
-      return "Phí nền tảng";
+      return t ? t("walletHistory.transactions.systemRevenue") : "Phí nền tảng";
     default:
-      return "Giao dịch ví";
+      return t ? t("walletHistory.transactions.default") : "Giao dịch ví";
   }
 };
 
-export const getTransactionAmountLabel = (transaction: Transaction, walletId?: string | null) => {
+export const getTransactionAmountLabel = (transaction: Transaction, walletId?: string | null, locale = "vi") => {
   const isIncoming = !!walletId && transaction.toWalletId === walletId;
   const sign = isIncoming || transaction.type === "DEPOSIT" ? "+" : "-";
-  return `${sign}${Math.abs(transaction.amount).toLocaleString("vi-VN")} AC`;
+  const formattedAmount = Math.abs(transaction.amount).toLocaleString(locale === "vi" ? "vi-VN" : "en-US");
+  return `${sign}${formattedAmount} AC`;
 };
 
 export const getTransactionTone = (transaction: Transaction, walletId?: string | null) => {
@@ -77,3 +80,4 @@ export const formatDuration = (seconds?: number | null) => {
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
+

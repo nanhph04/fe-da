@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { ProfileClientDataState, ProfileUser } from "../types/profile.types";
 import { AccountInfo } from "./AccountInfo";
 import { ActiveMemberships } from "./ActiveMemberships";
@@ -15,6 +16,7 @@ interface ProfileTabsProps {
 type ProfileTab = "overview" | "videos";
 
 export function ProfileTabs({ user, data }: ProfileTabsProps) {
+  const t = useTranslations("ProfilePage.tabs");
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
 
   const tabButtonClass = (tab: ProfileTab) =>
@@ -26,10 +28,10 @@ export function ProfileTabs({ user, data }: ProfileTabsProps) {
     <>
       <div className="flex gap-8 border-b border-border/20">
         <button type="button" onClick={() => setActiveTab("overview")} className={tabButtonClass("overview")}>
-          Overview
+          {t("overview")}
         </button>
         <button type="button" onClick={() => setActiveTab("videos")} className={tabButtonClass("videos")}>
-          Videos
+          {t("videos")}
         </button>
       </div>
 

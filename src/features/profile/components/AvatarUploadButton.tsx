@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ChangeEvent } from "react";
 import { Camera, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { getErrorMessage } from "@/shared/api/client";
@@ -13,6 +14,7 @@ const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export function AvatarUploadButton() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { fetchProfile } = useAuth();
+  const t = useTranslations("ProfilePage.avatar");
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -23,12 +25,12 @@ export function AvatarUploadButton() {
     if (!file) return;
 
     if (!ALLOWED_AVATAR_TYPES.includes(file.type as (typeof ALLOWED_AVATAR_TYPES)[number])) {
-      setMessage("Chỉ hỗ trợ JPEG, PNG hoặc WebP.");
+      setMessage(t("validation.unsupportedType"));
       return;
     }
 
     if (file.size > MAX_AVATAR_BYTES) {
-      setMessage("Avatar tối đa 5MB.");
+      setMessage(t("validation.sizeLimit"));
       return;
     }
 
@@ -50,9 +52,9 @@ export function AvatarUploadButton() {
 
       await profileService.completeAvatarUpload({ objectKey: uploadResponse.data.objectKey });
       await fetchProfile();
-      setMessage("Đã cập nhật avatar.");
+      setMessage(t("success"));
     } catch (error) {
-      setMessage(getErrorMessage(error, "Không thể cập nhật avatar."));
+      setMessage(getErrorMessage(error, t("errors.uploadFailed")));
     } finally {
       setIsUploading(false);
     }
@@ -66,7 +68,7 @@ export function AvatarUploadButton() {
         accept="image/jpeg,image/png,image/webp"
         className="sr-only"
         onChange={handleFileChange}
-        aria-label="Tải avatar mới"
+        aria-label={t("ariaLabel")}
       />
       <Button
         type="button"
@@ -74,8 +76,8 @@ export function AvatarUploadButton() {
         disabled={isUploading}
         onClick={() => inputRef.current?.click()}
         className="h-11 w-11 rounded-lg bg-primary text-primary-foreground shadow-lg transition-transform duration-300 hover:-translate-y-0.5 hover:opacity-90"
-        aria-label="Tải avatar mới"
-        title={message || "Tải avatar mới"}
+        aria-label={t("ariaLabel")}
+        title={message || t("ariaLabel")}
       >
         {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
       </Button>

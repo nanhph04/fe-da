@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Loader2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ interface ChangePasswordDialogProps {
 }
 
 export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
+  const t = useTranslations("ProfilePage.changePassword");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,12 +31,12 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     setSuccess(null);
 
     if (newPassword.length < 8) {
-      setError("Mật khẩu mới cần tối thiểu 8 ký tự.");
+      setError(t("validation.minLength"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp.");
+      setError(t("validation.mismatch"));
       return;
     }
 
@@ -44,9 +46,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setSuccess("Đã đổi mật khẩu thành công.");
+      setSuccess(t("success"));
     } catch (submitError) {
-      setError(getErrorMessage(submitError, "Không thể đổi mật khẩu."));
+      setError(getErrorMessage(submitError, t("errors.changeFailed")));
     } finally {
       setIsSubmitting(false);
     }
@@ -57,14 +59,14 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-lg border border-border/30 bg-card p-6 shadow-2xl">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">Security</p>
-            <h2 className="mt-2 font-headline text-2xl font-black tracking-tight text-foreground">Đổi mật khẩu</h2>
+            <p className="text-xs font-black uppercase tracking-[0.24em] text-primary">{t("security")}</p>
+            <h2 className="mt-2 font-headline text-2xl font-black tracking-tight text-foreground">{t("title")}</h2>
           </div>
           <button
             type="button"
             onClick={() => onOpenChange(false)}
             className="flex h-11 w-11 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Đóng form đổi mật khẩu"
+            aria-label={t("closeLabel")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -72,15 +74,15 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
 
         <div className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="old-password">Mật khẩu hiện tại</Label>
+            <Label htmlFor="old-password">{t("currentPassword")}</Label>
             <Input id="old-password" type="password" value={oldPassword} onChange={event => setOldPassword(event.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="new-password">Mật khẩu mới</Label>
+            <Label htmlFor="new-password">{t("newPassword")}</Label>
             <Input id="new-password" type="password" value={newPassword} onChange={event => setNewPassword(event.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Xác nhận mật khẩu mới</Label>
+            <Label htmlFor="confirm-password">{t("confirmPassword")}</Label>
             <Input id="confirm-password" type="password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} required />
           </div>
         </div>
@@ -90,11 +92,11 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
 
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            Đóng
+            {t("close")}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Cập nhật mật khẩu
+            {t("update")}
           </Button>
         </div>
       </form>

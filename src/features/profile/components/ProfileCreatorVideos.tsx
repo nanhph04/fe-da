@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/routing";
 import { Film, Upload } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import { formatDuration, formatProfileDate } from "../utils/profile-formatters";
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
@@ -10,6 +11,9 @@ interface ProfileCreatorVideosProps {
 }
 
 export function ProfileCreatorVideos({ videos, error }: ProfileCreatorVideosProps) {
+  const t = useTranslations("ProfilePage.studioVideos");
+  const locale = useLocale();
+
   if (error) {
     return <div className="rounded-lg border border-destructive/30 bg-card p-6 text-sm text-destructive">{error}</div>;
   }
@@ -20,16 +24,16 @@ export function ProfileCreatorVideos({ videos, error }: ProfileCreatorVideosProp
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-muted text-muted-foreground">
           <Film className="h-6 w-6" />
         </div>
-        <h3 className="font-headline text-xl font-bold text-foreground">Chưa có video trong Studio</h3>
+        <h3 className="font-headline text-xl font-bold text-foreground">{t("empty.title")}</h3>
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-          Khi bạn đăng tải video, các nội dung mới nhất sẽ xuất hiện trong tab này.
+          {t("empty.description")}
         </p>
         <Link
           href="/studio/upload"
           className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-primary px-5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
         >
           <Upload className="h-4 w-4" />
-          Tải video lên
+          {t("empty.cta")}
         </Link>
       </div>
     );
@@ -59,7 +63,7 @@ export function ProfileCreatorVideos({ videos, error }: ProfileCreatorVideosProp
           <div className="p-4">
             <h3 className="line-clamp-1 font-headline font-bold text-foreground transition-colors group-hover:text-primary">{video.title}</h3>
             <p className="mt-2 text-xs text-muted-foreground">
-              {formatProfileDate(video.publishedAt || video.createdAt)} - {(video.viewCount || 0).toLocaleString("vi-VN")} views
+              {formatProfileDate(video.publishedAt || video.createdAt, locale)} - {t("views", { count: (video.viewCount || 0).toLocaleString(locale === "vi" ? "vi-VN" : "en-US") })}
             </p>
           </div>
         </Link>

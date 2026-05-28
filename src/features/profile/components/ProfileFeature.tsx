@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { profileService } from "../services/profile.service";
 import type { ProfileClientDataState, ProfileUser } from "../types/profile.types";
@@ -23,6 +24,7 @@ const initialDataState: ProfileClientDataState = {
 
 export function ProfileFeature({ initialUser }: ProfileFeatureProps) {
   const { user } = useAuth();
+  const t = useTranslations("ProfilePage");
   const effectiveUser = (user || initialUser) as ProfileUser;
   const [data, setData] = useState<ProfileClientDataState>(initialDataState);
 
@@ -53,7 +55,7 @@ export function ProfileFeature({ initialUser }: ProfileFeatureProps) {
           <div className="flex min-h-64 items-center justify-center rounded-lg border border-border/20 bg-card">
             <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              Đang tải dữ liệu hồ sơ...
+              {t("loading")}
             </div>
           </div>
         ) : (

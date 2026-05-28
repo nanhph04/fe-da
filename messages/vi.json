@@ -266,5 +266,136 @@
     "servicePayment": "Thanh toán dịch vụ",
     "loadWalletFailed": "Không thể tải số dư ví.",
     "unknownTime": "Không rõ thời gian"
+  },
+  "ProfilePage": {
+    "metadata": {
+      "title": "Hồ sơ | Velvet Gallery",
+      "description": "Quản lý thông tin hồ sơ của bạn."
+    },
+    "loading": "Đang tải dữ liệu hồ sơ...",
+    "tabs": {
+      "overview": "Tổng quan",
+      "videos": "Videos"
+    },
+    "hero": {
+      "avatarAlt": "Avatar của {name}",
+      "memberSince": "Thành viên từ {date}",
+      "creatorBadge": "Creator",
+      "accountRole": "Vai trò tài khoản",
+      "editProfile": "Chỉnh sửa hồ sơ"
+    },
+    "editProfile": {
+      "settings": "Cài đặt hồ sơ",
+      "title": "Cập nhật hồ sơ",
+      "closeLabel": "Đóng form cập nhật hồ sơ",
+      "displayName": "Tên hiển thị",
+      "bio": "Giới thiệu",
+      "phone": "Số điện thoại",
+      "birthday": "Ngày sinh",
+      "gender": "Giới tính",
+      "genderPlaceholder": "Không chọn",
+      "genderMale": "Nam",
+      "genderFemale": "Nữ",
+      "genderFemaleLegacy": "Nữ (legacy)",
+      "cancel": "Hủy",
+      "save": "Lưu thay đổi",
+      "validation": {
+        "phoneLength": "Số điện thoại chỉ gồm 8-15 chữ số."
+      },
+      "errors": {
+        "updateFailed": "Không thể cập nhật hồ sơ."
+      }
+    },
+    "accountInfo": {
+      "title": "Thông tin tài khoản",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "gender": "Giới tính",
+      "birthday": "Ngày sinh",
+      "genderLabels": {
+        "male": "Nam",
+        "female": "Nữ",
+        "unspecified": "Chưa cập nhật"
+      },
+      "passwordSecurity": "Mật khẩu bảo mật",
+      "changePassword": "Đổi mật khẩu"
+    },
+    "changePassword": {
+      "security": "Bảo mật",
+      "title": "Đổi mật khẩu",
+      "closeLabel": "Đóng form đổi mật khẩu",
+      "currentPassword": "Mật khẩu hiện tại",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu mới",
+      "close": "Đóng",
+      "update": "Cập nhật mật khẩu",
+      "success": "Đã đổi mật khẩu thành công.",
+      "validation": {
+        "minLength": "Mật khẩu mới cần tối thiểu 8 ký tự.",
+        "mismatch": "Mật khẩu xác nhận không khớp."
+      },
+      "errors": {
+        "changeFailed": "Không thể đổi mật khẩu."
+      }
+    },
+    "avatar": {
+      "validation": {
+        "unsupportedType": "Chỉ hỗ trợ JPEG, PNG hoặc WebP.",
+        "sizeLimit": "Avatar tối đa 5MB."
+      },
+      "success": "Đã cập nhật avatar.",
+      "ariaLabel": "Tải avatar mới",
+      "errors": {
+        "uploadFailed": "Không thể cập nhật avatar."
+      }
+    },
+    "memberships": {
+      "title": "Membership đang hoạt động",
+      "error": "Không thể tải gói hội viên.",
+      "empty": {
+        "title": "Chưa tham gia membership",
+        "description": "Khám phá các kênh để mở khóa tuyển chọn director cuts và nội dung premium.",
+        "cta": "Khám phá thư viện"
+      },
+      "avatarAlt": "Avatar kênh {name}",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "level": "Cấp {level}",
+      "expires": "Hết hạn: {date}",
+      "pricePerMonth": "{amount} AC / tháng",
+      "actions": {
+        "manage": "Quản lý",
+        "upgrade": "Nâng cấp"
+      }
+    },
+    "studioVideos": {
+      "empty": {
+        "title": "Chưa có video trong Studio",
+        "description": "Khi bạn tải lên video, các nội dung mới nhất sẽ xuất hiện ở tab này.",
+        "cta": "Tải video lên"
+      },
+      "views": "{count} lượt xem",
+      "durationFallback": "--:--"
+    },
+    "walletHistory": {
+      "title": "Lịch sử ví",
+      "viewAll": "Xem tất cả",
+      "balanceLabel": "Số dư Aura",
+      "frozenLabel": "Đang đóng băng: {amount} AC",
+      "empty": {
+        "title": "Chưa có giao dịch",
+        "description": "Các giao dịch Aura Coins sẽ xuất hiện tại đây."
+      },
+      "transactions": {
+        "deposit": "Nạp Aura Coins",
+        "withdrawal": "Rút số dư",
+        "videoPurchase": "Mở khóa video",
+        "channelRevenue": "Doanh thu kênh",
+        "systemRevenue": "Phí nền tảng",
+        "default": "Giao dịch ví"
+      }
+    }
   }
 }

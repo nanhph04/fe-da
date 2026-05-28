@@ -314,5 +314,136 @@
     "servicePayment": "Service payment",
     "loadWalletFailed": "Unable to load wallet balance.",
     "unknownTime": "Unknown time"
+  },
+  "ProfilePage": {
+    "metadata": {
+      "title": "Profile | Velvet Gallery",
+      "description": "Manage your profile information."
+    },
+    "loading": "Loading profile data...",
+    "tabs": {
+      "overview": "Overview",
+      "videos": "Videos"
+    },
+    "hero": {
+      "avatarAlt": "Avatar of {name}",
+      "memberSince": "Member since {date}",
+      "creatorBadge": "Creator",
+      "accountRole": "Account Role",
+      "editProfile": "Edit Profile"
+    },
+    "editProfile": {
+      "settings": "Profile settings",
+      "title": "Update Profile",
+      "closeLabel": "Close update profile form",
+      "displayName": "Display Name",
+      "bio": "Bio",
+      "phone": "Phone Number",
+      "birthday": "Birthday",
+      "gender": "Gender",
+      "genderPlaceholder": "Not selected",
+      "genderMale": "Male",
+      "genderFemale": "Female",
+      "genderFemaleLegacy": "Female (legacy)",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "validation": {
+        "phoneLength": "Phone number must be between 8 and 15 digits."
+      },
+      "errors": {
+        "updateFailed": "Unable to update profile."
+      }
+    },
+    "accountInfo": {
+      "title": "Account Information",
+      "email": "Email",
+      "phone": "Phone Number",
+      "gender": "Gender",
+      "birthday": "Birthday",
+      "genderLabels": {
+        "male": "Male",
+        "female": "Female",
+        "unspecified": "Not updated"
+      },
+      "passwordSecurity": "Password Security",
+      "changePassword": "Change Password"
+    },
+    "changePassword": {
+      "security": "Security",
+      "title": "Change Password",
+      "closeLabel": "Close change password form",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "close": "Close",
+      "update": "Update Password",
+      "success": "Password changed successfully.",
+      "validation": {
+        "minLength": "New password must be at least 8 characters.",
+        "mismatch": "Confirm password does not match."
+      },
+      "errors": {
+        "changeFailed": "Unable to change password."
+      }
+    },
+    "avatar": {
+      "validation": {
+        "unsupportedType": "Only JPEG, PNG or WebP are supported.",
+        "sizeLimit": "Avatar must be under 5MB."
+      },
+      "success": "Avatar updated successfully.",
+      "ariaLabel": "Upload new avatar",
+      "errors": {
+        "uploadFailed": "Unable to update avatar."
+      }
+    },
+    "memberships": {
+      "title": "Active Memberships",
+      "error": "Failed to load active memberships.",
+      "empty": {
+        "title": "No memberships joined",
+        "description": "Explore channels to unlock director cuts and premium content.",
+        "cta": "Explore Library"
+      },
+      "avatarAlt": "Avatar of {name} channel",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "level": "Level {level}",
+      "expires": "Expires: {date}",
+      "pricePerMonth": "{amount} AC / month",
+      "actions": {
+        "manage": "Manage",
+        "upgrade": "Upgrade"
+      }
+    },
+    "studioVideos": {
+      "empty": {
+        "title": "No videos in Studio yet",
+        "description": "Upload a video and your latest content will appear in this tab.",
+        "cta": "Upload Video"
+      },
+      "views": "{count} views",
+      "durationFallback": "--:--"
+    },
+    "walletHistory": {
+      "title": "Wallet History",
+      "viewAll": "View All",
+      "balanceLabel": "Aura Balance",
+      "frozenLabel": "Frozen: {amount} AC",
+      "empty": {
+        "title": "No transactions yet",
+        "description": "Your Aura Coins transactions will appear here."
+      },
+      "transactions": {
+        "deposit": "Top up Aura Coins",
+        "withdrawal": "Withdraw balance",
+        "videoPurchase": "Unlock video",
+        "channelRevenue": "Channel revenue",
+        "systemRevenue": "Platform fee",
+        "default": "Wallet transaction"
+      }
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/routing";
 import { Compass, Crown, LockKeyhole } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import type { UserMembershipResponse } from "@/features/watch/services/mediaService";
 import { formatProfileDate, getAvatarFallbackUrl } from "../utils/profile-formatters";
 
@@ -9,11 +10,14 @@ interface ActiveMembershipsProps {
 }
 
 export function ActiveMemberships({ memberships, error }: ActiveMembershipsProps) {
+  const t = useTranslations("ProfilePage.memberships");
+  const locale = useLocale();
+
   return (
     <section className="space-y-6 lg:sticky lg:top-28">
       <h2 className="flex items-center gap-3 font-headline text-xl font-bold text-foreground">
         <span className="h-6 w-1 rounded-full bg-secondary" aria-hidden="true" />
-        Membership đang hoạt động
+        {t("title")}
       </h2>
 
       {error ? (
@@ -23,13 +27,13 @@ export function ActiveMemberships({ memberships, error }: ActiveMembershipsProps
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-sm bg-muted text-muted-foreground">
             <Compass className="h-5 w-5" />
           </div>
-          <p className="font-headline text-lg font-bold text-foreground">Chưa tham gia membership</p>
-          <p className="mt-2 text-sm text-muted-foreground">Khám phá các kênh để mở khóa director cuts và nội dung premium.</p>
+          <p className="font-headline text-lg font-bold text-foreground">{t("empty.title")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("empty.description")}</p>
           <Link
             href="/library"
             className="mt-5 inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
           >
-            Khám phá thư viện
+            {t("empty.cta")}
           </Link>
         </div>
       ) : (
@@ -49,7 +53,7 @@ export function ActiveMemberships({ memberships, error }: ActiveMembershipsProps
                     <img
                       className="h-full w-full object-cover"
                       src={membership.channelAvatarUrl || getAvatarFallbackUrl(membership.channelName)}
-                      alt={`Avatar kênh ${membership.channelName}`}
+                      alt={t("avatarAlt", { name: membership.channelName })}
                     />
                   </div>
                   <div className="min-w-0">
@@ -57,7 +61,7 @@ export function ActiveMemberships({ memberships, error }: ActiveMembershipsProps
                     <div className="mt-1 flex items-center gap-2">
                       {blocked ? <LockKeyhole className="h-3.5 w-3.5 text-destructive" /> : <Crown className="h-3.5 w-3.5 text-secondary" />}
                       <span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">
-                        Level {membership.tierLevel} {membership.isActive ? "Active" : "Inactive"}
+                        {t("level", { level: membership.tierLevel })} {membership.isActive ? t("status.active") : t("status.inactive")}
                       </span>
                     </div>
                   </div>
@@ -66,8 +70,8 @@ export function ActiveMemberships({ memberships, error }: ActiveMembershipsProps
 
               <div className="space-y-4">
                 <div className="flex justify-between gap-4 text-xs">
-                  <span className="text-muted-foreground">Hết hạn: {formatProfileDate(membership.expiryDate)}</span>
-                  <span className="font-bold text-secondary">{membership.priceCoin.toLocaleString("vi-VN")} AC / tháng</span>
+                  <span className="text-muted-foreground">{t("expires", { date: formatProfileDate(membership.expiryDate, locale) })}</span>
+                  <span className="font-bold text-secondary">{t("pricePerMonth", { amount: membership.priceCoin.toLocaleString(locale === "vi" ? "vi-VN" : "en-US") })}</span>
                 </div>
                 {membership.membershipBlockedReason && (
                   <p className="rounded-sm border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
@@ -79,14 +83,14 @@ export function ActiveMemberships({ memberships, error }: ActiveMembershipsProps
                     href={`/creator/${membership.channelId}/join`}
                     className="inline-flex h-9 items-center justify-center rounded-sm border border-border bg-background px-3 text-[11px] font-black uppercase tracking-wider text-foreground transition-colors hover:bg-muted"
                   >
-                    Quản lý
+                    {t("actions.manage")}
                   </Link>
                   <Link
                     href={membership.canUpgrade && !blocked ? `/creator/${membership.channelId}/join` : "#"}
                     aria-disabled={!membership.canUpgrade || blocked}
                     className="inline-flex h-9 items-center justify-center rounded-sm border border-primary/20 bg-primary/10 px-3 text-[11px] font-black uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-primary-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50"
                   >
-                    Nâng cấp
+                    {t("actions.upgrade")}
                   </Link>
                 </div>
               </div>

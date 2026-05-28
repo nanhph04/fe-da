@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { ProfileUser } from "../types/profile.types";
 import { formatProfileDate, getAvatarFallbackUrl } from "../utils/profile-formatters";
@@ -14,6 +15,9 @@ interface HeroProfileProps {
 
 export function HeroProfile({ user }: HeroProfileProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const t = useTranslations("ProfilePage.hero");
+  const tRoles = useTranslations("Navigation.roles");
+  const locale = useLocale();
   const displayName = user.displayName || user.email || "Velvet Viewer";
 
   return (
@@ -26,7 +30,7 @@ export function HeroProfile({ user }: HeroProfileProps) {
             <img
               className="h-full w-full object-cover"
               src={user.avatarUrl || getAvatarFallbackUrl(displayName)}
-              alt={`Avatar của ${displayName}`}
+              alt={t("avatarAlt", { name: displayName })}
             />
           </div>
           <AvatarUploadButton />
@@ -38,24 +42,24 @@ export function HeroProfile({ user }: HeroProfileProps) {
               {displayName}
             </h1>
             {user.isCreator && (
-              <span className="inline-flex items-center justify-center rounded-sm border border-secondary/20 bg-secondary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-secondary">
-                Creator
+              <span className="inline-flex items-center justify-center rounded-sm border border-secondary/20 bg-secondary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-secondary">
+                {t("creatorBadge")}
               </span>
             )}
           </div>
 
           <p className="mb-6 text-sm font-medium text-muted-foreground">
-            Thành viên từ {formatProfileDate(user.createdAt)}
+            {t("memberSince", { date: formatProfileDate(user.createdAt, locale) })}
           </p>
 
           {user.bio && <p className="mb-6 max-w-2xl text-sm leading-relaxed text-foreground/80">{user.bio}</p>}
 
           <div className="flex flex-wrap items-center justify-center gap-4 md:justify-start">
             <div className="rounded-lg border-l-4 border-primary bg-background px-6 py-3 shadow-lg">
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Account Role</p>
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("accountRole")}</p>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-6 w-6 text-primary" />
-                <span className="font-headline text-2xl font-black capitalize text-foreground">{user.role || "viewer"}</span>
+                <span className="font-headline text-2xl font-black capitalize text-foreground">{tRoles(user.role || "viewer")}</span>
               </div>
             </div>
 
@@ -64,7 +68,7 @@ export function HeroProfile({ user }: HeroProfileProps) {
               onClick={() => setIsEditOpen(true)}
               className="min-h-11 rounded-sm px-8 text-sm font-black uppercase tracking-wider shadow-[0px_10px_30px_rgba(229,9,20,0.25)]"
             >
-              Chỉnh sửa hồ sơ
+              {t("editProfile")}
             </Button>
           </div>
         </div>
