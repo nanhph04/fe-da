@@ -11,8 +11,9 @@ Tai lieu nay viet theo goc nhin FE/BFF: goi API nao, gui gi, nhan gi, va backend
   - `whitelist: true`
   - `forbidNonWhitelisted: true`
 - Hau het route di qua internal gateway guard.
-- 3 route duoc skip internal gateway guard:
+- 4 route duoc skip internal gateway guard:
   - `GET /api`
+  - `GET /api/health`
   - `POST /api/deposits/webhooks/payos`
   - `POST /api/deposits/:depositId/webhook/success`
 
@@ -77,6 +78,27 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 ```json
 "Hello World!"
 ```
+
+### GET `/api/health`
+
+- Muc dich: health check nhe cho gateway/load balancer hoac man hinh admin hien thi service con song.
+- Route dac biet:
+  - skip internal gateway guard
+- Input:
+  - khong co body/query/path param
+- Output `data`:
+
+```json
+{
+  "status": "ok",
+  "service": "finance-service",
+  "timestamp": "2026-05-28T00:19:26.000Z"
+}
+```
+
+- Ghi chu:
+  - endpoint nay chi bao Nest app con response HTTP duoc.
+  - hien chua kiem tra DB/Kafka/Redis deep health.
 
 ## 4. Wallet APIs
 
@@ -190,7 +212,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Backend xu ly:
   - `totalBalance = balance + frozenBalance`
   - `availableBalance = balance`
-  - `pendingPayouts`: tong withdrawal dang `pending`, `approved`, `processing`
+  - `pendingPayouts`: tong withdrawal dang `pending`
   - `totalWithdrawn`: tong withdrawal `completed`
   - `monthlyEarnings`: tong transaction `channel_revenue` trong thang hien tai
   - `monthlyGrowth`: so sanh `monthlyEarnings` voi thang truoc
@@ -743,7 +765,6 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   "description": "Rut tien thang 4",
   "rejectionReason": null,
   "requestedAt": "2026-05-06T10:00:00.000Z",
-  "approvedAt": null,
   "completedAt": null,
   "rejectedAt": null,
   "cancelledAt": null
@@ -772,7 +793,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 - Headers:
   - `x-user-id` bat buoc
 - Query:
-  - `status` optional, mot trong: `pending`, `approved`, `processing`, `completed`, `rejected`, `cancelled`
+  - `status` optional, mot trong: `pending`, `completed`, `rejected`, `cancelled`
   - `page` optional, mac dinh `1`
   - `limit` optional, mac dinh `20`, toi da `100`
   - `startDate` optional, ISO date/date-time, loc theo `requestedAt >= startDate`
@@ -827,8 +848,6 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   "pendingCount": 1,
   "pendingCoinAmount": 100,
   "pendingMoneyAmount": 10000,
-  "approvedCount": 0,
-  "processingCount": 0,
   "completedCount": 2,
   "completedCoinAmount": 300,
   "completedMoneyAmount": 30000,
@@ -895,27 +914,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - hoan coin ve vi
   - update transaction sang cancelled
 
-### 7.5 POST `/api/withdrawals/:withdrawalId/approve`
-
-- Muc dich: admin duyet lenh rut
-- Headers:
-  - `x-user-id` bat buoc
-  - `x-user-role=admin` bat buoc
-- Input body:
-
-```json
-{
-  "adminNote": "Da kiem tra thong tin ngan hang"
-}
-```
-
-- Output: withdrawal sau khi approve
-- Backend xu ly:
-  - check role `admin`
-  - set trang thai `approved`
-  - luu `processedByAdminId` va `adminNote`
-
-### 7.6 POST `/api/withdrawals/:withdrawalId/reject`
+### 7.5 POST `/api/withdrawals/:withdrawalId/reject`
 
 - Muc dich: admin tu choi lenh rut
 - Headers:
@@ -937,7 +936,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - tra coin ve vi
   - update transaction sang failed
 
-### 7.7 POST `/api/withdrawals/:withdrawalId/complete`
+### 7.6 POST `/api/withdrawals/:withdrawalId/complete`
 
 - Muc dich: admin xac nhan da chuyen khoan xong
 - Headers:
@@ -974,8 +973,6 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   "pendingCount": 3,
   "pendingCoinAmount": 1200,
   "pendingMoneyAmount": 120000,
-  "approvedCount": 1,
-  "processingCount": 2,
   "completed30dMoneyAmount": 500000
 }
 ```
@@ -992,7 +989,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `x-user-id` bat buoc
   - `x-user-role=admin` bat buoc
 - Query:
-  - `status` optional, mot trong: `pending`, `approved`, `processing`, `completed`, `rejected`, `cancelled`
+  - `status` optional, mot trong: `pending`, `completed`, `rejected`, `cancelled`
   - `userId` optional, loc withdrawal theo user
   - `page` optional, mac dinh `1`, neu khong phai so nguyen duong thi backend fallback ve `1`
   - `limit` optional, mac dinh `20`, toi da `100`, neu khong phai so nguyen duong thi backend fallback ve `20`
@@ -1027,7 +1024,6 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
       "description": "Rut tien thang 4",
       "rejectionReason": null,
       "requestedAt": "2026-05-06T10:00:00.000Z",
-      "approvedAt": null,
       "completedAt": null,
       "rejectedAt": null,
       "cancelledAt": null
@@ -1062,25 +1058,120 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - tim withdrawal theo id
   - khong check ownership user vi day la route admin
 
-## 8. Payment APIs
+## 8. Admin Dashboard APIs
 
-### 8.1 Public payment API removed
+### 8.1 GET `/api/admin/dashboard/overview`
 
-- `POST /api/payments` khong con la public finance-service contract.
+- Muc dich: admin lay so lieu tong the de render dashboard finance trong 1 request.
+- Headers:
+  - `x-user-id` bat buoc
+  - `x-user-role=admin` bat buoc
+- Query optional:
+  - `startDate`: ISO date-time, loc tu thoi diem nay
+  - `endDate`: ISO date-time, loc den thoi diem nay
+- Neu khong truyen `startDate/endDate`, backend tinh tong toan bo du lieu.
+- Output `data`:
+
+```json
+{
+  "generatedAt": "2026-05-28T00:19:26.000Z",
+  "range": {
+    "startDate": "2026-05-01T00:00:00.000Z",
+    "endDate": "2026-05-28T23:59:59.999Z"
+  },
+  "deposits": {
+    "totalCount": 120,
+    "pendingCount": 5,
+    "processingCount": 1,
+    "completedCount": 110,
+    "failedCount": 2,
+    "cancelledCount": 2,
+    "completedMoneyAmount": 25000000,
+    "completedCoinAmount": 250000
+  },
+  "withdrawals": {
+    "totalCount": 35,
+    "pendingCount": 4,
+    "completedCount": 28,
+    "rejectedCount": 2,
+    "cancelledCount": 1,
+    "pendingMoneyAmount": 1200000,
+    "completedMoneyAmount": 8400000,
+    "totalFeeAmount": 500000,
+    "pendingFeeAmount": 60000,
+    "completedFeeAmount": 420000
+  },
+  "revenue": {
+    "totalPaymentCoins": 30000,
+    "creatorRevenueCoins": 24000,
+    "systemRevenueCoins": 6000,
+    "videoSystemRevenueCoins": 4000,
+    "membershipSystemRevenueCoins": 2000,
+    "pendingSystemRevenueCoins": 1500,
+    "releasedSystemRevenueCoins": 4500
+  },
+  "wallets": {
+    "userWalletCount": 1000,
+    "activeUserWalletCount": 980,
+    "totalUserAvailableBalance": 900000,
+    "totalUserFrozenBalance": 50000,
+    "systemRevenueAvailableBalance": 4500,
+    "systemRevenueFrozenBalance": 1500
+  },
+  "transactions": {
+    "totalCount": 500,
+    "pendingCount": 20,
+    "completedCount": 470,
+    "failedCount": 5,
+    "cancelledCount": 5,
+    "depositCoinAmount": 250000,
+    "withdrawalCoinAmount": 90000,
+    "videoPurchaseCoins": 20000,
+    "membershipCoins": 10000
+  }
+}
+```
+
+- Y nghia cac nhom data:
+  - `deposits`: tong hop lenh nap theo `requestedAt`; so tien/coin chi cong vao cac deposit `completed`.
+  - `withdrawals`: tong hop lenh rut theo `requestedAt`; `totalFeeAmount` la tong phi rut tien backend da tinh tren cac lenh rut trong range.
+  - `revenue.systemRevenueCoins`: tong coin hoa hong web thu duoc tu transaction `system_revenue`.
+  - `revenue.creatorRevenueCoins`: tong coin chia cho creator tu transaction `channel_revenue`.
+  - `revenue.pendingSystemRevenueCoins`: hoa hong web dang nam trong settlement `pending`, chua release ve available balance.
+  - `revenue.releasedSystemRevenueCoins`: hoa hong web da release trong settlement.
+  - `wallets.systemRevenueAvailableBalance`: balance hien tai cua vi `system_revenue`, khong loc theo date range.
+  - `wallets.systemRevenueFrozenBalance`: frozen balance hien tai cua vi `system_revenue`, khong loc theo date range.
+  - `transactions`: tong hop ledger theo `createdAt`.
+
+- Backend xu ly:
+  - check `x-user-role` phai la `admin`
+  - validate `startDate/endDate` neu co
+  - neu `startDate > endDate` tra `400 startDate must be before endDate`
+  - query truc tiep bang TypeORM read model, khong thay doi du lieu
+
+- Luu y:
+  - Cac metric money dang la VND integer.
+  - Cac metric coin dang la coin integer.
+  - Metric wallet la snapshot hien tai, khong phai snapshot lich su theo range.
+
+## 9. Payment APIs
+
+### 9.1 Payment entrypoint
+
+- Finance-service khong expose public payment creation endpoint.
 - Client mua video/membership phai goi media-service:
   - `POST /api/media/videos/:id/purchase`
   - `POST /api/media/channels/:channelId/memberships/:tierId/purchase`
 - Finance-service chi nhan charge video/membership qua internal API ben duoi
   hoac qua luong Kafka auto-renew.
 
-### 8.2 POST `/api/internal/payments/charge`
+### 9.2 POST `/api/internal/payments/charge`
 
 - Muc dich: API noi bo de media-service charge coin sau khi da validate video
   hoac membership authoritative.
 - Khong phai public gateway contract. Khong cho client goi truc tiep.
 - Headers:
-  - `x-internal-service: media-service`
-  - `x-internal-service-secret: <MEDIA_FINANCE_INTERNAL_SECRET>`
+  - `x-internal-secret: <FINANCE_INTERNAL_GATEWAY_SECRET>`
   - `idempotency-key` bat buoc
   - `x-request-id` optional
 
@@ -1103,12 +1194,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 ```
 
 - Backend xu ly:
-  - verify caller nam trong `FINANCE_INTERNAL_SERVICE_ALLOWLIST`
-  - verify secret theo caller. Preferred env format la
-    `<CALLER_SERVICE>_FINANCE_INTERNAL_SECRET`, vi du
-    `MEDIA_SERVICE_FINANCE_INTERNAL_SECRET`
-  - `MEDIA_FINANCE_INTERNAL_SECRET` van duoc support nhu legacy alias cho
-    `media-service`
+  - verify `x-internal-secret` bang internal gateway secret cua finance-service
   - map `payerUserId` thanh payer `userId`
   - reuse payment logic hien co: tru coin, chia revenue, tao transaction,
     tao settlement va day outbox event
@@ -1122,7 +1208,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - media-service van consume `video.payment.success` /
     `membership.payment.success` de reconcile idempotent
 
-### 8.3 Membership auto-renew charge
+### 9.3 Membership auto-renew charge
 
 - Muc dich: finance-service tu dong tru coin khi media-service phat event den han gia han membership.
 - Khong co public HTTP API rieng. Luong nay chay qua Kafka de tranh client gia mao yeu cau charge.
@@ -1164,7 +1250,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 }
 ```
 
-## 9. Mapping trang thai nghiep vu cho FE
+## 10. Mapping trang thai nghiep vu cho FE
 
 ### Deposit status
 
@@ -1177,8 +1263,6 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 ### Withdrawal status
 
 - `pending`: user vua tao lenh rut, cho admin xu ly
-- `approved`: admin da duyet, cho chuyen khoan
-- `processing`: admin dang xu ly chuyen khoan
 - `rejected`: admin tu choi, coin da hoan vi
 - `completed`: admin da chuyen tien xong
 - `cancelled`: user tu huy, coin da hoan vi
@@ -1204,7 +1288,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `amount=totalCoinAmount`
   - `metadata.moneyAmount` la so tien user da thanh toan
 
-## 10. Loi FE se hay gap
+## 11. Loi FE se hay gap
 
 - `400 Bad Request`
   - thieu field body
@@ -1230,7 +1314,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - `idempotency-key` bi reuse voi payload khac
   - `deposit package code` bi trung
 
-## 11. Goi y tich hop FE
+## 12. Goi y tich hop FE
 
 - Man vi:
   - goi `GET /api/wallets/me`
@@ -1259,15 +1343,26 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
   - goi `GET /api/withdrawals/me` de load lich su
   - cho phep user huy bang `POST /api/withdrawals/:withdrawalId/cancel` khi con pending
 
+- Man admin dashboard:
+  - goi `GET /api/admin/dashboard/overview`
+  - truyen `startDate/endDate` khi can loc theo ky bao cao
+  - dung `revenue.systemRevenueCoins` de hien thi hoa hong web thu duoc bang coin
+  - dung `withdrawals.totalFeeAmount` hoac `withdrawals.completedFeeAmount` de hien thi phi rut tien
+
+- Health check:
+  - goi `GET /api/health`
+  - dung cho gateway/load balancer hoac UI trang thai service
+
 - Man thanh toan video/membership:
   - khong goi finance-service truc tiep
   - mua video: goi `POST /api/media/videos/:id/purchase`
   - mua membership: goi `POST /api/media/channels/:channelId/memberships/:tierId/purchase`
   - FE nen gui/reuse `idempotency-key` theo tung action mua de retry khong tru coin hai lan
 
-## 12. Ghi chu quan trong
+## 13. Ghi chu quan trong
 
 - Cac API admin cua `deposits` dang check role `admin`.
 - Cac API admin cua `withdrawals` cung dang check role `admin` trong use case.
+- API admin dashboard dang check role `admin` trong use case.
 - `GET /api/transactions/reference/:referenceId` hien khong check ownership, nen khong nen expose truc tiep cho FE public neu chua co tang kiem soat phia gateway/BFF.
 - Webhook PayOS co the tra `status: "ignored"` thay vi loi khi payload khong phai success event.

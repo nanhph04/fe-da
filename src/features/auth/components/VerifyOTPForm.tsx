@@ -19,24 +19,87 @@ const otpSchema = z.object({
 
 type OTPValues = z.infer<typeof otpSchema>;
 
+type PendingVerifyData = {
+  email: string;
+  password: string;
+  otpRequestedAt?: number;
+};
+
+const OTP_TTL_MS = 5 * 60 * 1000;
+
+function getOtpExpiresAt(requestedAt?: number) {
+  const safeRequestedAt =
+    typeof requestedAt === "number" && Number.isFinite(requestedAt)
+      ? requestedAt
+      : Date.now();
+
+  return safeRequestedAt + OTP_TTL_MS;
+}
+
+function getRemainingSeconds(expiresAt: number) {
+  return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+}
+
+function formatCountdown(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+
+  return `${minutes}:${seconds}`;
+}
+
 export function VerifyOTPForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [pendingData, setPendingData] = useState<{email: string, password: string} | null>(null);
+  const [pendingData, setPendingData] = useState<PendingVerifyData | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
-  
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+   
   const router = useRouter();
   const { setAuthData } = useAuth();
 
   useEffect(() => {
     const data = sessionStorage.getItem("pendingVerify");
     if (data) {
-      setPendingData(JSON.parse(data));
+      const parsedData = JSON.parse(data) as PendingVerifyData;
+      const requestedAt = parsedData.otpRequestedAt ?? Date.now();
+      const normalizedData = {
+        ...parsedData,
+        otpRequestedAt: requestedAt,
+      };
+
+      setPendingData(normalizedData);
+      setOtpExpiresAt(getOtpExpiresAt(requestedAt));
+
+      if (!parsedData.otpRequestedAt) {
+        sessionStorage.setItem("pendingVerify", JSON.stringify(normalizedData));
+      }
     } else {
       // Nếu không có dữ liệu, bắt về đăng ký
       router.push("/register");
     }
   }, [router]);
+
+  useEffect(() => {
+    if (!otpExpiresAt) {
+      setRemainingSeconds(0);
+      return;
+    }
+
+    const updateRemainingTime = () => {
+      const nextRemainingSeconds = Math.max(
+        0,
+        Math.ceil((otpExpiresAt - Date.now()) / 1000),
+      );
+
+      setRemainingSeconds(nextRemainingSeconds);
+    };
+
+    updateRemainingTime();
+    const timerId = window.setInterval(updateRemainingTime, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [otpExpiresAt]);
 
   const { handleSubmit, setValue, watch, formState: { errors } } = useForm<OTPValues>({
     resolver: zodResolver(otpSchema),
@@ -44,9 +107,16 @@ export function VerifyOTPForm() {
   });
 
   const pin = watch("pin");
+  const isOtpExpired = otpExpiresAt !== null && remainingSeconds === 0;
 
   const onSubmit = async (data: OTPValues) => {
     if (!pendingData) return;
+
+    if (isOtpExpired) {
+      setServerError("OTP has expired. Please request a new code.");
+      setResendStatus(null);
+      return;
+    }
     
     setIsLoading(true);
     setServerError(null);
@@ -98,6 +168,15 @@ export function VerifyOTPForm() {
         type: "register"
       });
       if (res.success) {
+        const requestedAt = Date.now();
+        const nextPendingData = {
+          ...pendingData,
+          otpRequestedAt: requestedAt,
+        };
+
+        sessionStorage.setItem("pendingVerify", JSON.stringify(nextPendingData));
+        setPendingData(nextPendingData);
+        setOtpExpiresAt(getOtpExpiresAt(requestedAt));
         setResendStatus("OTP has been resent to your email.");
       } else {
         setServerError(res.mess || "Failed to resend OTP");
@@ -130,6 +209,9 @@ export function VerifyOTPForm() {
               </div>
               <h1 className="mb-3 font-headline text-3xl font-black tracking-[-0.02em] text-foreground">Two-Step Verification</h1>
               <p className="max-w-[280px] text-sm leading-relaxed text-muted-foreground">A verification code has been sent to your email.</p>
+              <p className="mt-3 rounded-full border border-border/30 bg-muted/40 px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-secondary">
+                OTP expires in {formatCountdown(remainingSeconds)}
+              </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -154,6 +236,12 @@ export function VerifyOTPForm() {
                   </div>
                 ) : null}
 
+                {isOtpExpired ? (
+                  <div className="mt-4 rounded-sm border border-secondary/30 bg-secondary/10 p-3">
+                    <p className="text-center text-xs font-medium text-secondary">OTP has expired. Please resend a new code.</p>
+                  </div>
+                ) : null}
+
                 {resendStatus ? (
                   <div className="mt-4 rounded-sm border border-green-500/30 bg-green-500/10 p-3">
                     <p className="text-center text-xs font-medium text-green-400">{resendStatus}</p>
@@ -163,7 +251,7 @@ export function VerifyOTPForm() {
 
               <button
                 type="submit"
-                disabled={isLoading || !pendingData}
+                disabled={isLoading || !pendingData || isOtpExpired}
                 className="flex w-full items-center justify-center rounded-sm bg-gradient-to-br from-primary to-primary/75 py-4 font-headline text-sm font-bold uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-200 hover:scale-[1.02] active:scale-95 disabled:opacity-50"
               >
                 {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
@@ -175,7 +263,9 @@ export function VerifyOTPForm() {
               <button type="button" onClick={handleResend} className="group flex items-center gap-2 transition-opacity hover:opacity-80">
                 <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Resend Code</span>
                 <span className="h-px w-8 bg-border" />
-                <span className="font-headline text-xs font-bold text-secondary">01:59</span>
+                <span className={`font-headline text-xs font-bold ${isOtpExpired ? "text-destructive" : "text-secondary"}`}>
+                  {isOtpExpired ? "Expired" : formatCountdown(remainingSeconds)}
+                </span>
               </button>
 
               <Link href="/login" className="inline-flex items-center gap-1 text-[10px] uppercase tracking-tight text-muted-foreground transition-colors hover:text-foreground">

@@ -104,3 +104,77 @@ export interface AdminPriorityAction {
   countLabel: string;
   unavailable?: boolean;
 }
+
+export interface FinanceOverviewData {
+  generatedAt: string;
+  range: {
+    startDate: string;
+    endDate: string;
+  };
+  deposits: {
+    totalCount: number;
+    pendingCount: number;
+    processingCount: number;
+    completedCount: number;
+    failedCount: number;
+    cancelledCount: number;
+    completedMoneyAmount: number;
+    completedCoinAmount: number;
+  };
+  withdrawals: {
+    totalCount: number;
+    pendingCount: number;
+    completedCount: number;
+    rejectedCount: number;
+    cancelledCount: number;
+    pendingMoneyAmount: number;
+    completedMoneyAmount: number;
+    totalFeeAmount: number;
+    pendingFeeAmount: number;
+    completedFeeAmount: number;
+  };
+  revenue: {
+    totalPaymentCoins: number;
+    creatorRevenueCoins: number;
+    systemRevenueCoins: number;
+    videoSystemRevenueCoins: number;
+    membershipSystemRevenueCoins: number;
+    pendingSystemRevenueCoins: number;
+    releasedSystemRevenueCoins: number;
+  };
+  wallets: {
+    userWalletCount: number;
+    activeUserWalletCount: number;
+    totalUserAvailableBalance: number;
+    totalUserFrozenBalance: number;
+    systemRevenueAvailableBalance: number;
+    systemRevenueFrozenBalance: number;
+  };
+  transactions: {
+    totalCount: number;
+    pendingCount: number;
+    completedCount: number;
+    failedCount: number;
+    cancelledCount: number;
+    depositCoinAmount: number;
+    withdrawalCoinAmount: number;
+    videoPurchaseCoins: number;
+    membershipCoins: number;
+  };
+}
+
+export interface ServiceHealthStatus {
+  service: string;
+  endpoint: string;
+  status: "healthy" | "unhealthy" | "checking";
+  latency?: number;
+  timestamp?: string;
+  error?: string;
+}
+
+export interface DashboardWidgetConfig {
+  id: "health" | "stats" | "financeOverview" | "priorityActions" | "dataSources";
+  title: string;
+  visible: boolean;
+}
+

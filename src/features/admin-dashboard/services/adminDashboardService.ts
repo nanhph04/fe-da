@@ -11,6 +11,8 @@ import type {
   AdminUsersSummary,
   AdminWithdrawalListResponse,
   AdminWithdrawalSummary,
+  FinanceOverviewData,
+  ServiceHealthStatus,
 } from "../types/admin-dashboard.types";
 
 type SettledSource<T> = {
@@ -207,3 +209,44 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     loadedAt: new Date().toISOString(),
   };
 }
+
+export async function getFinanceOverview(startDate?: string, endDate?: string): Promise<FinanceOverviewData> {
+  const params = new URLSearchParams();
+  if (startDate) params.set("startDate", startDate);
+  if (endDate) params.set("endDate", endDate);
+
+  const queryString = params.toString();
+  const url = `/api/admin/dashboard/overview${queryString ? `?${queryString}` : ""}`;
+
+  const response = await api.get<FinanceOverviewData>(url, { requireAuth: true });
+  return response.data;
+}
+
+export async function checkServiceHealth(serviceName: string, endpoint: string): Promise<ServiceHealthStatus> {
+  const startTime = Date.now();
+  try {
+    await api.get(endpoint, {
+      requireAuth: false,
+      suppressAuthRedirect: true,
+    });
+    const latency = Date.now() - startTime;
+    return {
+      service: serviceName,
+      endpoint,
+      status: "healthy",
+      latency,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (err: unknown) {
+    const latency = Date.now() - startTime;
+    return {
+      service: serviceName,
+      endpoint,
+      status: "unhealthy",
+      latency,
+      timestamp: new Date().toISOString(),
+      error: getErrorMessage(err, "Offline or Unreachable"),
+    };
+  }
+}
+

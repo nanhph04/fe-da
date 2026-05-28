@@ -13,7 +13,7 @@ Mục tiêu của ứng dụng là cung cấp trải nghiệm xem video mượt 
 
 ## 2. Các nhóm người dùng (User Roles)
 Hệ thống sử dụng mô hình "Hỗn hợp" (Mixed Model) - bất kỳ ai cũng có thể trở thành Nhà sáng tạo.
-1. **Guest (Khách vãng lai):** Có thể xem các video public miễn phí, xem thông tin kênh và tìm kiếm nội dung.
+1. **Guest (Khách vãng lai):** Chỉ có thể xem thông tin video public, xem thông tin kênh và tìm kiếm nội dung. Muốn phát/xem nội dung video thì phải đăng nhập.
 2. **Viewer (Người xem / User):** Có thể nạp Tiền thật để lấy Coin, dùng Coin để mua Membership (Gói hội viên) của kênh, xem video độc quyền, tương tác (Like, Comment, Tăng View).
 3. **Creator (Nhà sáng tạo):** Chính là các User có tính năng đăng tải video. Có quyền tạo các Tier (Gói hội viên) để kiếm Coin, xem thống kê, quản lý video của mình.
 4. **Admin (Quản trị viên hệ thống):** Quản lý nội dung toàn hệ thống. Có quyền khóa/mở kênh (Lock Channel), tước quyền hội viên của kênh (Suspend Membership) và xử lý các nội dung vi phạm.

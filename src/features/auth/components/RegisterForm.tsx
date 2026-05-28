@@ -34,6 +34,8 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterValues) => {
     setIsLoading(true);
     setServerError(null);
+    const otpRequestedAt = Date.now();
+
     try {
       const res = await authService.register({
         email: data.email,
@@ -44,7 +46,8 @@ export function RegisterForm() {
         // Lưu tạm email/password vào sessionStorage để gửi tiếp lúc Verify OTP
         sessionStorage.setItem("pendingVerify", JSON.stringify({
           email: data.email,
-          password: data.password
+          password: data.password,
+          otpRequestedAt,
         }));
         router.push("/verify-otp");
       } else {
