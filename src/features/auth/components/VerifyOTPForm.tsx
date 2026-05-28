@@ -68,8 +68,11 @@ export function VerifyOTPForm() {
         otpRequestedAt: requestedAt,
       };
 
+      const expiresAt = getOtpExpiresAt(requestedAt);
+
       setPendingData(normalizedData);
-      setOtpExpiresAt(getOtpExpiresAt(requestedAt));
+      setOtpExpiresAt(expiresAt);
+      setRemainingSeconds(getRemainingSeconds(expiresAt));
 
       if (!parsedData.otpRequestedAt) {
         sessionStorage.setItem("pendingVerify", JSON.stringify(normalizedData));
