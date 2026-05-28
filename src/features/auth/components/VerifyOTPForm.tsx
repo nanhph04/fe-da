@@ -53,7 +53,7 @@ export function VerifyOTPForm() {
   const [pendingData, setPendingData] = useState<PendingVerifyData | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
   const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(OTP_TTL_MS / 1000);
    
   const router = useRouter();
   const { setAuthData } = useAuth();
@@ -90,12 +90,7 @@ export function VerifyOTPForm() {
     }
 
     const updateRemainingTime = () => {
-      const nextRemainingSeconds = Math.max(
-        0,
-        Math.ceil((otpExpiresAt - Date.now()) / 1000),
-      );
-
-      setRemainingSeconds(nextRemainingSeconds);
+      setRemainingSeconds(getRemainingSeconds(otpExpiresAt));
     };
 
     updateRemainingTime();
@@ -177,9 +172,12 @@ export function VerifyOTPForm() {
           otpRequestedAt: requestedAt,
         };
 
+        const expiresAt = getOtpExpiresAt(requestedAt);
+
         sessionStorage.setItem("pendingVerify", JSON.stringify(nextPendingData));
         setPendingData(nextPendingData);
-        setOtpExpiresAt(getOtpExpiresAt(requestedAt));
+        setOtpExpiresAt(expiresAt);
+        setRemainingSeconds(getRemainingSeconds(expiresAt));
         setResendStatus("OTP has been resent to your email.");
       } else {
         setServerError(res.mess || "Failed to resend OTP");
