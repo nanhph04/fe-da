@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { Suspense, useEffect } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
+import { themeConfig } from "@/shared/config/theme";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
 
 type AppProvidersProps = {
@@ -83,8 +84,10 @@ export function AppProviders({ children, locale, messages }: AppProvidersProps) 
       <ExtensionInjectedAttributeCleanup />
       <ThemeProvider
         attribute="class"
-        defaultTheme="dark"
-        enableSystem
+        defaultTheme={themeConfig.defaultTheme}
+        forcedTheme={themeConfig.forcedTheme}
+        enableSystem={themeConfig.enableSystem}
+        themes={[...themeConfig.supportedThemes]}
         disableTransitionOnChange
       >
         <NextIntlClientProvider

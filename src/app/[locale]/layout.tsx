@@ -4,6 +4,7 @@ import { Inter, Manrope } from "next/font/google";
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from "next/navigation";
+import { themeConfig } from "@/shared/config/theme";
 import { AppProviders } from "@/shared/providers/app-providers";
 import "../globals.css";
 
@@ -50,7 +51,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${manrope.variable} h-full antialiased`}
+      className={`${inter.variable} ${manrope.variable} ${themeConfig.forcedTheme} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground" suppressHydrationWarning>

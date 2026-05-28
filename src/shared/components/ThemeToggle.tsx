@@ -2,9 +2,18 @@
 
 import { Moon, Sun, Monitor } from "lucide-react";
 import { useEffect, useState } from "react";
+import { themeConfig } from "@/shared/config/theme";
 import { useTheme } from "@/shared/providers/theme-provider";
 
 export function ThemeToggle() {
+  if (!themeConfig.enableThemeSwitching) {
+    return null;
+  }
+
+  return <ThemeToggleControl />;
+}
+
+function ThemeToggleControl() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
