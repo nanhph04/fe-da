@@ -80,8 +80,8 @@ function parseTags(values: string[]) {
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (error && typeof error === "object") {
-    const apiError = error as { mess?: string; message?: string; errors?: string[] };
-    return apiError.mess || apiError.message || apiError.errors?.join(", ") || fallback;
+    const apiError = error as { message?: string; mess?: string; errors?: string[] };
+    return apiError.message || apiError.mess || apiError.errors?.join(", ") || fallback;
   }
 
   if (error instanceof Error && error.message) {
@@ -116,7 +116,7 @@ async function loadSearchResults(filters: SearchFilters): Promise<SearchResultSt
       let channels: PublicSearchChannel[] = [];
       let errorMessage = videoResponse.success
         ? null
-        : videoResponse.mess || "Khong the tai danh sach video theo tag.";
+        : videoResponse.message || "Khong the tai danh sach video theo tag.";
 
       if (filters.q) {
         try {
@@ -130,7 +130,7 @@ async function loadSearchResults(filters: SearchFilters): Promise<SearchResultSt
             channels = channelResponse.data.channels ?? [];
           } else {
             errorMessage =
-              errorMessage || channelResponse.mess || "Khong the tai ket qua kenh phu hop.";
+              errorMessage || channelResponse.message || "Khong the tai ket qua kenh phu hop.";
           }
         } catch (error) {
           errorMessage =
@@ -158,7 +158,7 @@ async function loadSearchResults(filters: SearchFilters): Promise<SearchResultSt
         channels: response.success ? response.data?.channels ?? [] : [],
         errorMessage: response.success
           ? null
-          : response.mess || "Khong the tai ket qua tim kiem tu Media Service.",
+          : response.message || "Khong the tai ket qua tim kiem tu Media Service.",
         mode: "media-search",
       };
     }
@@ -170,7 +170,7 @@ async function loadSearchResults(filters: SearchFilters): Promise<SearchResultSt
       channels: [],
       errorMessage: latestResponse.success
         ? null
-        : latestResponse.mess || "Khong the tai danh sach video moi nhat.",
+        : latestResponse.message || "Khong the tai danh sach video moi nhat.",
       mode: "latest",
     };
   } catch (error) {
@@ -207,10 +207,10 @@ export default async function SearchPage({
   const tags: TagPublic[] = tagsResponse?.success ? tagsResponse.data ?? [] : [];
   const metaErrors = [
     categoriesResponse && !categoriesResponse.success
-      ? categoriesResponse.mess || "Khong the tai danh sach the loai."
+      ? categoriesResponse.message || "Khong the tai danh sach the loai."
       : null,
     tagsResponse && !tagsResponse.success
-      ? tagsResponse.mess || "Khong the tai danh sach tag."
+      ? tagsResponse.message || "Khong the tai danh sach tag."
       : null,
   ].filter(Boolean);
   const errorMessage = [resultState.errorMessage, ...metaErrors].filter(Boolean).join(" ") || null;

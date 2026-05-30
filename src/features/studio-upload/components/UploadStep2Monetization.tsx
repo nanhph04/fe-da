@@ -50,13 +50,13 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
       const channelId = channelResponse.data?.channelId;
 
       if (!channelResponse.success || !channelId) {
-        throw new Error(channelResponse.mess || "Creator channel is not available.");
+        throw new Error(channelResponse.message || "Creator channel is not available.");
       }
 
       const tiersResponse = await mediaService.getMembershipTiers(channelId);
 
       if (!tiersResponse.success) {
-        throw new Error(tiersResponse.mess || "Channel membership tiers are not available.");
+        throw new Error(tiersResponse.message || "Channel membership tiers are not available.");
       }
 
       if (isCancelled?.()) {

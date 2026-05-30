@@ -9,18 +9,32 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { authService } from "@/features/auth/services/authService";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
-});
+const getForgotPasswordSchema = (t: (key: string) => string) =>
+  z.object({
+    email: z.string().email(t("validation.invalidEmail")),
+  });
 
-type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+type ForgotPasswordValues = z.infer<ReturnType<typeof getForgotPasswordSchema>>;
+
+const isRateLimitError = (err: unknown) => {
+  if (err && typeof err === "object") {
+    const errObj = err as { statusCode?: number; code?: number; status?: number };
+    return errObj.statusCode === 429 || errObj.code === 429 || errObj.status === 429;
+  }
+  return false;
+};
 
 export function ForgotPasswordForm() {
+  const t = useTranslations("Auth");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  
+
+  const forgotPasswordSchema = getForgotPasswordSchema(t);
+
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
   });
@@ -33,10 +47,14 @@ export function ForgotPasswordForm() {
       if (res.success) {
         setIsSent(true);
       } else {
-        setServerError(res.mess || "Failed to send recovery email");
+        setServerError(res.message || t("forgotPassword.errors.failed"));
       }
     } catch (err: unknown) {
-      setServerError(getErrorMessage(err, "An error occurred"));
+      if (isRateLimitError(err)) {
+        setServerError(t("rateLimit"));
+      } else {
+        setServerError(getErrorMessage(err, t("forgotPassword.errors.generic")));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -46,9 +64,12 @@ export function ForgotPasswordForm() {
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-background/35 px-6 py-6 backdrop-blur-xl md:px-8">
         <PublicBrand href="/" />
-        <button type="button" className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground">
-          Help
-        </button>
+        <div className="flex items-center gap-4">
+          {/* <span className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground cursor-pointer">
+            {tNav("help")}
+          </span> */}
+          <LanguageSwitcher />
+        </div>
       </div>
 
       <div className="pointer-events-none fixed inset-0 -z-10 opacity-20">
@@ -64,9 +85,9 @@ export function ForgotPasswordForm() {
               <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                 <span className="material-symbols-outlined text-3xl text-primary">lock_reset</span>
               </div>
-              <h1 className="mb-3 font-headline text-3xl font-extrabold tracking-[-0.02em] text-foreground">Forgot Password?</h1>
+              <h1 className="mb-3 font-headline text-3xl font-extrabold tracking-[-0.02em] text-foreground">{t("forgotPassword.title")}</h1>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Enter the email address associated with your Velvet Gallery account and we&apos;ll send you a link to reset your password.
+                {t("forgotPassword.subtitle")}
               </p>
             </header>
 
@@ -75,23 +96,23 @@ export function ForgotPasswordForm() {
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full ring-1 ring-primary/30 shadow-[0_0_30px_rgba(229,9,20,0.18)]">
                   <span className="material-symbols-outlined text-4xl text-primary">mail</span>
                 </div>
-                <h3 className="font-headline text-2xl font-bold text-foreground">Email Sent</h3>
+                <h3 className="font-headline text-2xl font-bold text-foreground">{t("forgotPassword.successTitle")}</h3>
                 <p className="text-muted-foreground">
-                  We&apos;ve sent an email with password recovery instructions. Please check your inbox.
+                  {t("forgotPassword.successDesc")}
                 </p>
                 <button
                   type="button"
                   className="w-full rounded-sm py-4 font-headline text-sm font-bold uppercase tracking-widest text-muted-foreground ring-1 ring-border transition-all hover:text-foreground hover:ring-primary/50"
                   onClick={() => setIsSent(false)}
                 >
-                  Try another email
+                  {t("forgotPassword.tryAnotherEmail")}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-2">
                   <label className="ml-1 block text-xs font-bold uppercase tracking-widest text-muted-foreground" htmlFor="email">
-                    Email Address
+                    {t("forgotPassword.emailLabel")}
                   </label>
                   <div className="group relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
@@ -100,7 +121,7 @@ export function ForgotPasswordForm() {
                     <input
                       id="email"
                       type="email"
-                      placeholder="name@example.com"
+                      placeholder={t("forgotPassword.emailPlaceholder")}
                       className={`w-full rounded-sm bg-input py-4 pr-4 pl-12 text-foreground placeholder:text-muted-foreground/50 ring-1 transition-all outline-none focus:ring-2 focus:ring-primary ${errors.email ? "ring-destructive" : "ring-border/30"}`}
                       {...register("email")}
                     />
@@ -120,7 +141,7 @@ export function ForgotPasswordForm() {
                   className="flex w-full items-center justify-center rounded-sm bg-gradient-to-br from-primary to-primary/75 py-4 font-headline text-sm font-bold uppercase tracking-wider text-primary-foreground shadow-lg transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                  {isLoading ? "Sending..." : "Send Reset Link"}
+                  {isLoading ? t("forgotPassword.sending") : t("forgotPassword.sendLink")}
                 </button>
               </form>
             )}
@@ -128,21 +149,21 @@ export function ForgotPasswordForm() {
             <div className="mt-8 border-t border-border/10 pt-8 text-center">
               <Link href="/login" className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground">
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                Back to Sign In
+                {t("forgotPassword.backToSignIn")}
               </Link>
             </div>
           </div>
 
           <div className="mt-12 text-center">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Secure Authentication • Velvet Gallery Encryption</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">{t("forgotPassword.secureAuth")}</p>
           </div>
         </div>
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Privacy Policy</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Terms of Service</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Cookie Preferences</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.privacyPolicy")}</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.termsOfService")}</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.cookiePreferences")}</span>
       </footer>
     </div>
   );

@@ -445,5 +445,116 @@
         "default": "Wallet transaction"
       }
     }
+  },
+  "Auth": {
+    "rateLimit": "Too many attempts. Please try again later.",
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Return to the Velvet Gallery experience.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@domain.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot Password?",
+      "signIn": "Sign In",
+      "signingIn": "Signing In...",
+      "newToVelvet": "New to Velvet Gallery?",
+      "createAccount": "Create an account",
+      "reasons": {
+        "accountDisabled": "Account is disabled. Please check your email for details.",
+        "sessionExpired": "Session expired. Please sign in again."
+      },
+      "errors": {
+        "suspended": "Your account has been suspended.",
+        "failed": "Login failed.",
+        "loadProfileFailed": "Failed to load your profile after login.",
+        "generic": "An error occurred during login. Please try again."
+      },
+      "aria": {
+        "showPassword": "Show password",
+        "hidePassword": "Hide password"
+      }
+    },
+    "register": {
+      "title": "Join the Gallery.",
+      "subtitle": "Unlock a premium cinematic experience designed for the discerning viewer.",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "createAccount": "Create Account",
+      "creating": "Creating...",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "termsAgreement": "By continuing, you agree to Velvet Gallery's",
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "errors": {
+        "failed": "Registration failed.",
+        "generic": "An error occurred during registration."
+      },
+      "aria": {
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "showConfirmPassword": "Show confirm password",
+        "hideConfirmPassword": "Hide confirm password"
+      }
+    },
+    "verifyOtp": {
+      "title": "Two-Step Verification",
+      "subtitle": "A verification code has been sent to your email.",
+      "expiresIn": "OTP expires in {time}",
+      "expired": "Expired",
+      "resendCode": "Resend Code",
+      "backToLogin": "Back to Login",
+      "verifyIdentity": "Verify Identity",
+      "verifying": "Verifying...",
+      "secureAccess": "Secure Access",
+      "encryptedSession": "End-to-end encrypted session",
+      "noCode": "No Code?",
+      "checkSpam": "Check your spam folder",
+      "messages": {
+        "expiredError": "OTP has expired. Please request a new code.",
+        "expiredErrorResend": "OTP has expired. Please resend a new code.",
+        "resent": "OTP has been resent to your email."
+      },
+      "errors": {
+        "failed": "Verification failed.",
+        "generic": "An error occurred during verification.",
+        "resendFailed": "Failed to resend OTP."
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "subtitle": "Enter the email address associated with your Velvet Gallery account and we'll send you a link to reset your password.",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "sendLink": "Send Reset Link",
+      "sending": "Sending...",
+      "successTitle": "Email Sent",
+      "successDesc": "We've sent an email with password recovery instructions. Please check your inbox.",
+      "tryAnotherEmail": "Try another email",
+      "backToSignIn": "Back to Sign In",
+      "secureAuth": "Secure Authentication • Velvet Gallery Encryption",
+      "errors": {
+        "failed": "Failed to send recovery email.",
+        "generic": "An error occurred."
+      }
+    },
+    "footer": {
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "cookiePreferences": "Cookie Preferences"
+    },
+    "validation": {
+      "invalidEmail": "Invalid email address.",
+      "passwordRequired": "Password is required.",
+      "passwordMinLength": "Password must be at least 6 characters.",
+      "confirmPasswordMinLength": "Confirm password must be at least 6 characters.",
+      "passwordsMismatch": "Passwords do not match.",
+      "otpMinLength": "OTP must be 6 digits."
+    }
   }
 }

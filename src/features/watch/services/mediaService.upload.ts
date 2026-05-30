@@ -213,7 +213,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
     if (partsToUpload.length === 0) {
       const completeRes = await uploadApi.completeUpload(videoId, uploadId);
       if (!completeRes.success) {
-        throw new Error(completeRes.mess || "Failed to complete upload session");
+        throw new Error(completeRes.message || "Failed to complete upload session");
       }
       return;
     }
@@ -230,7 +230,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
 
       const urlRes = await uploadApi.getPartUrls(videoId, uploadId, [partNumber]);
       if (!urlRes.success || !urlRes.data?.parts?.length) {
-        throw new Error(urlRes.mess || `Failed to get upload URL for part ${partNumber}`);
+        throw new Error(urlRes.message || `Failed to get upload URL for part ${partNumber}`);
       }
 
       const partInfo = urlRes.data.parts.find(part => part.partNumber === partNumber);
@@ -255,7 +255,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
       });
 
       if (!completedRes.success) {
-        throw new Error(completedRes.mess || `Failed to register completion of part ${partNumber}`);
+        throw new Error(completedRes.message || `Failed to register completion of part ${partNumber}`);
       }
     }
 
@@ -265,7 +265,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
 
     const completeRes = await uploadApi.completeUpload(videoId, uploadId);
     if (!completeRes.success) {
-      throw new Error(completeRes.mess || "Failed to complete upload session");
+      throw new Error(completeRes.message || "Failed to complete upload session");
     }
   };
 };

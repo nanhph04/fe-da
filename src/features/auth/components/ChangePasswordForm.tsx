@@ -49,7 +49,7 @@ export function ChangePasswordForm() {
         setIsSuccess(true);
         setTimeout(() => router.push("/library"), 3000);
       } else {
-        setServerError(res.mess || "Failed to change password");
+        setServerError(res.message || "Failed to change password");
       }
     } catch (err: unknown) {
       setServerError(getErrorMessage(err, "An error occurred"));

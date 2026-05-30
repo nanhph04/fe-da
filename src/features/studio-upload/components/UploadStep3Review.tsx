@@ -50,7 +50,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       });
 
       if (!metadataResponse.success) {
-        setError(metadataResponse.mess || "Failed to update draft metadata");
+        setError(metadataResponse.message || "Failed to update draft metadata");
         return;
       }
 
@@ -75,8 +75,8 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         thumbnailObjectKey: thumbnailObjectKey ?? undefined,
       });
 
-      if (!(confirmResponse.success || confirmResponse.code === 201 || confirmResponse.code === 200)) {
-        setError(confirmResponse.mess || "Failed to submit upload");
+      if (!(confirmResponse.success || confirmResponse.statusCode === 201 || confirmResponse.statusCode === 200)) {
+        setError(confirmResponse.message || "Failed to submit upload");
         return;
       }
 

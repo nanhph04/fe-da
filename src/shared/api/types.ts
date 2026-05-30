@@ -1,9 +1,18 @@
 export interface ApiError {
-  success?: boolean;
+  success?: false;
+  statusCode?: number;
+  /** @deprecated Use statusCode for HTTP status. Kept while older services still return code. */
   code?: number;
-  mess?: string;
   message?: string;
+  /** @deprecated Use message. Kept while older services still return mess. */
+  mess?: string;
+  data?: null;
+  errorCode?: string;
+  requestId?: string;
+  timestamp?: string;
+  path?: string;
   errors?: string[];
+  /** @deprecated Use statusCode. Kept for thrown/custom errors. */
   status?: number;
 }
 
@@ -16,9 +25,14 @@ export interface ApiPagination {
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
-  code: number;
+  statusCode: number;
+  /** @deprecated Use statusCode for HTTP status. Kept while older services still return code. */
+  code?: number;
   data: T;
-  mess: string;
+  message?: string;
+  /** @deprecated Use message. Kept while older services still return mess. */
+  mess?: string;
+  errorCode?: string;
   errors?: string[];
   pagination?: ApiPagination;
 }

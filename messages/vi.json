@@ -397,5 +397,116 @@
         "default": "Giao dịch ví"
       }
     }
+  },
+  "Auth": {
+    "rateLimit": "Yêu cầu quá thường xuyên. Vui lòng thử lại sau.",
+    "login": {
+      "title": "Chào mừng quay lại",
+      "subtitle": "Trở lại với trải nghiệm Velvet Gallery.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ten@tenmien.com",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Quên mật khẩu?",
+      "signIn": "Đăng nhập",
+      "signingIn": "Đang đăng nhập...",
+      "newToVelvet": "Mới sử dụng Velvet Gallery?",
+      "createAccount": "Tạo tài khoản",
+      "reasons": {
+        "accountDisabled": "Tài khoản đã bị vô hiệu hóa. Vui lòng kiểm tra email để biết lý do.",
+        "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+      },
+      "errors": {
+        "suspended": "Tài khoản của bạn đã bị đình chỉ.",
+        "failed": "Đăng nhập thất bại.",
+        "loadProfileFailed": "Không thể tải hồ sơ của bạn sau khi đăng nhập.",
+        "generic": "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại."
+      },
+      "aria": {
+        "showPassword": "Hiển thị mật khẩu",
+        "hidePassword": "Ẩn mật khẩu"
+      }
+    },
+    "register": {
+      "title": "Tham gia Gallery.",
+      "subtitle": "Mở khóa trải nghiệm điện ảnh cao cấp dành cho người xem sành điệu.",
+      "emailLabel": "Địa chỉ Email",
+      "emailPlaceholder": "ten@vidu.com",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "••••••••",
+      "createAccount": "Tạo tài khoản",
+      "creating": "Đang tạo...",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập",
+      "termsAgreement": "Bằng cách tiếp tục, bạn đồng ý với",
+      "termsOfService": "Điều khoản dịch vụ",
+      "privacyPolicy": "Chính sách quyền riêng tư",
+      "errors": {
+        "failed": "Đăng ký thất bại.",
+        "generic": "Đã xảy ra lỗi trong quá trình đăng ký."
+      },
+      "aria": {
+        "showPassword": "Hiển thị mật khẩu",
+        "hidePassword": "Ẩn mật khẩu",
+        "showConfirmPassword": "Hiển thị xác nhận mật khẩu",
+        "hideConfirmPassword": "Ẩn xác nhận mật khẩu"
+      }
+    },
+    "verifyOtp": {
+      "title": "Xác minh hai bước",
+      "subtitle": "Một mã xác minh đã được gửi đến email của bạn.",
+      "expiresIn": "Mã OTP hết hạn sau {time}",
+      "expired": "Đã hết hạn",
+      "resendCode": "Gửi lại mã",
+      "backToLogin": "Quay lại Đăng nhập",
+      "verifyIdentity": "Xác minh danh tính",
+      "verifying": "Đang xác minh...",
+      "secureAccess": "Truy cập an toàn",
+      "encryptedSession": "Phiên làm việc được mã hóa đầu cuối",
+      "noCode": "Không nhận được mã?",
+      "checkSpam": "Kiểm tra thư mục spam của bạn",
+      "messages": {
+        "expiredError": "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.",
+        "expiredErrorResend": "Mã OTP đã hết hạn. Vui lòng gửi lại mã mới.",
+        "resent": "Mã OTP đã được gửi lại vào email của bạn."
+      },
+      "errors": {
+        "failed": "Xác minh thất bại.",
+        "generic": "Đã xảy ra lỗi trong quá trình xác minh.",
+        "resendFailed": "Không thể gửi lại mã OTP."
+      }
+    },
+    "forgotPassword": {
+      "title": "Quên mật khẩu?",
+      "subtitle": "Nhập địa chỉ email được liên kết với tài khoản Velvet Gallery của bạn và chúng tôi sẽ gửi cho bạn liên kết để đặt lại mật khẩu.",
+      "emailLabel": "Địa chỉ Email",
+      "emailPlaceholder": "ten@vidu.com",
+      "sendLink": "Gửi liên kết đặt lại",
+      "sending": "Đang gửi...",
+      "successTitle": "Đã gửi Email",
+      "successDesc": "Chúng tôi đã gửi email hướng dẫn khôi phục mật khẩu. Vui lòng kiểm tra hộp thư đến của bạn.",
+      "tryAnotherEmail": "Thử email khác",
+      "backToSignIn": "Quay lại Đăng nhập",
+      "secureAuth": "Xác thực an toàn • Mã hóa Velvet Gallery",
+      "errors": {
+        "failed": "Không thể gửi email khôi phục.",
+        "generic": "Đã xảy ra lỗi."
+      }
+    },
+    "footer": {
+      "privacyPolicy": "Chính sách bảo mật",
+      "termsOfService": "Điều khoản dịch vụ",
+      "cookiePreferences": "Tùy chọn Cookie"
+    },
+    "validation": {
+      "invalidEmail": "Địa chỉ email không hợp lệ.",
+      "passwordRequired": "Mật khẩu là bắt buộc.",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự.",
+      "confirmPasswordMinLength": "Mật khẩu xác nhận phải có ít nhất 6 ký tự.",
+      "passwordsMismatch": "Mật khẩu không khớp.",
+      "otpMinLength": "Mã OTP phải có 6 chữ số."
+    }
   }
 }

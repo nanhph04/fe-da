@@ -180,7 +180,7 @@ export function Subscriptions({ refreshKey = 0 }: SubscriptionsProps) {
       const response = await mediaService.updateMembershipAutoRenew(membershipRecordId, false);
 
       if (!response.success || !response.data) {
-        throw new Error(response.mess || t("errors.cancelFailed"));
+        throw new Error(response.message || t("errors.cancelFailed"));
       }
 
       setRenewalRecords((current) => ({

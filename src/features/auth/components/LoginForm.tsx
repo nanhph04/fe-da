@@ -12,22 +12,28 @@ import { useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { getSafeInternalRedirectPath } from "@/shared/utils/locale-path";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+const getLoginSchema = (t: (key: string) => string) =>
+  z.object({
+    email: z.string().email(t("validation.invalidEmail")),
+    password: z.string().min(1, t("validation.passwordRequired")),
+  });
 
-type LoginValues = z.infer<typeof loginSchema>;
+type LoginValues = z.infer<ReturnType<typeof getLoginSchema>>;
+
+const isRateLimitError = (err: unknown) => {
+  if (err && typeof err === "object") {
+    const errObj = err as { statusCode?: number; code?: number; status?: number };
+    return errObj.statusCode === 429 || errObj.code === 429 || errObj.status === 429;
+  }
+  return false;
+};
 
 type LoginFormProps = {
   redirectTo?: string;
   reason?: string;
-};
-
-const loginReasonMessages: Record<string, string> = {
-  "account-disabled": "Tài khoản đã bị vô hiệu hóa. Vui lòng kiểm tra email để biết lý do.",
-  "session-expired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
 };
 
 const getRedirectAfterLogin = (profile: UserProfile | null, redirectTo?: string) => {
@@ -53,12 +59,22 @@ const getRedirectAfterLogin = (profile: UserProfile | null, redirectTo?: string)
 };
 
 export function LoginForm({ redirectTo, reason }: LoginFormProps) {
+  const t = useTranslations("Auth");
+  const tNav = useTranslations("Navigation");
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(
-    reason ? loginReasonMessages[reason] ?? null : null
+    reason
+      ? reason === "account-disabled"
+        ? t("login.reasons.accountDisabled")
+        : reason === "session-expired"
+          ? t("login.reasons.sessionExpired")
+          : null
+      : null
   );
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  const loginSchema = getLoginSchema(t);
 
   const {
     register,
@@ -79,21 +95,50 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
         const profile = await setAuthData(res.data.accessToken);
         const nextPath = getRedirectAfterLogin(profile, redirectTo);
         if (!nextPath) {
-          setServerError("Failed to load your profile after login.");
+          setServerError(t("login.errors.loadProfileFailed"));
           return;
         }
         router.push(nextPath);
         return;
       }
 
-      if (res.code === 403) {
-        setServerError(res.mess || "Your account has been suspended");
+      const resObj = res as { errorCode?: string };
+      if (resObj?.errorCode === "EMAIL_NOT_VERIFIED") {
+        sessionStorage.setItem("pendingVerify", JSON.stringify({
+          email: data.email,
+          password: data.password,
+          otpRequestedAt: Date.now(),
+          needsResend: true,
+        }));
+        router.push("/verify-otp");
         return;
       }
 
-      setServerError(res.mess || "Login failed");
+      if (res.statusCode === 403) {
+        setServerError(res.message || t("login.errors.suspended"));
+        return;
+      }
+
+      setServerError(res.message || t("login.errors.failed"));
     } catch (err: unknown) {
-      setServerError(getErrorMessage(err, "An error occurred during login. Please try again."));
+      if (err && typeof err === "object") {
+        const errObj = err as { errorCode?: string };
+        if (errObj.errorCode === "EMAIL_NOT_VERIFIED") {
+          sessionStorage.setItem("pendingVerify", JSON.stringify({
+            email: data.email,
+            password: data.password,
+            otpRequestedAt: Date.now(),
+            needsResend: true,
+          }));
+          router.push("/verify-otp");
+          return;
+        }
+      }
+      if (isRateLimitError(err)) {
+        setServerError(t("rateLimit"));
+      } else {
+        setServerError(getErrorMessage(err, t("login.errors.generic")));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -110,19 +155,22 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
 
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-6 md:px-8">
         <PublicBrand href="/" />
-        <span className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground">
-          Trợ giúp
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="font-headline text-sm font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground cursor-pointer">
+            {tNav("help")}
+          </span>
+          <LanguageSwitcher />
+        </div>
       </header>
 
       <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-28 pb-28">
         <div className="w-full max-w-md">
           <div className="mb-12 text-center md:text-left">
             <h1 className="mb-2 font-headline text-5xl font-extrabold leading-none tracking-[-0.02em] text-foreground">
-              Welcome Back
+              {t("login.title")}
             </h1>
             <p className="text-sm tracking-wide text-muted-foreground">
-              Return to the Velvet Gallery experience.
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -130,13 +178,13 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
             <div className="space-y-4">
               <div className="group">
                 <label htmlFor="email" className="mb-2 ml-1 block font-headline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Email
+                  {t("login.emailLabel")}
                 </label>
                 <div className="relative">
                   <input
                     id="email"
                     type="email"
-                    placeholder="name@domain.com"
+                    placeholder={t("login.emailPlaceholder")}
                     className={`w-full rounded-sm bg-input py-4 pr-12 pl-4 text-foreground placeholder:text-muted-foreground/50 ring-1 transition-all focus:outline-none focus:ring-primary/60 ${errors.email ? "ring-destructive" : "ring-border/30"}`}
                     {...register("email")}
                   />
@@ -150,23 +198,23 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
               <div className="group">
                 <div className="mb-2 flex items-center justify-between">
                   <label htmlFor="password" className="ml-1 block font-headline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    Password
+                    {t("login.passwordLabel")}
                   </label>
                   <Link href="/forgot-password" className="text-xs font-medium uppercase tracking-widest text-secondary transition-colors hover:text-secondary/80">
-                    Forgot Password?
+                    {t("login.forgotPassword")}
                   </Link>
                 </div>
                 <div className="relative">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder={t("login.passwordPlaceholder")}
                     className={`w-full rounded-sm bg-input py-4 pr-12 pl-4 text-foreground placeholder:text-muted-foreground/50 ring-1 transition-all focus:outline-none focus:ring-primary/60 ${errors.password ? "ring-destructive" : "ring-border/30"}`}
                     {...register("password")}
                   />
                   <button
                     type="button"
-                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
+                    aria-label={showPassword ? t("login.aria.hidePassword") : t("login.aria.showPassword")}
                     aria-pressed={showPassword}
                     onClick={() => setShowPassword((current) => !current)}
                     className="absolute top-1/2 right-3 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/60"
@@ -190,35 +238,15 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
               className="flex w-full items-center justify-center rounded-sm bg-gradient-to-br from-primary to-primary/75 py-5 font-headline text-sm font-extrabold uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/10 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-              {isLoading ? "Signing In..." : "Sign In"}
+              {isLoading ? t("login.signingIn") : t("login.signIn")}
             </button>
-
-            {/* <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/10" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-4 tracking-widest text-muted-foreground/50">Or continue with</span>
-              </div>
-            </div> */}
-
-            {/* <div className="grid grid-cols-2 gap-4">
-              <button type="button" className="group flex items-center justify-center gap-2 rounded-sm bg-card py-4 transition-colors hover:bg-muted">
-                <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground">google</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Google</span>
-              </button>
-              <button type="button" className="group flex items-center justify-center gap-2 rounded-sm bg-card py-4 transition-colors hover:bg-muted">
-                <span className="material-symbols-outlined text-muted-foreground group-hover:text-foreground" style={{ fontVariationSettings: "'FILL' 1" }}>ios</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Apple</span>
-              </button>
-            </div> */}
           </form>
 
           <footer className="mt-12 text-center">
             <p className="text-sm text-muted-foreground">
-              New to Velvet Gallery?
+              {t("login.newToVelvet")}
               <Link href="/register" className="ml-1 font-bold text-foreground transition-colors hover:text-primary">
-                Create an account
+                {t("login.createAccount")}
               </Link>
             </p>
           </footer>
@@ -226,9 +254,9 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Privacy Policy</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Terms of Service</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">Cookie Preferences</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.privacyPolicy")}</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.termsOfService")}</span>
+        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.cookiePreferences")}</span>
       </div>
     </div>
   );

@@ -101,7 +101,7 @@ export function StudioMembershipFeature() {
       const channelId = myChannelRes.data?.channelId;
 
       if (!myChannelRes.success || !channelId) {
-        throw new Error(myChannelRes.mess || "Creator channel is not available.");
+        throw new Error(myChannelRes.message || "Creator channel is not available.");
       }
 
       const [detailRes, tiersRes] = await Promise.all([
@@ -110,11 +110,11 @@ export function StudioMembershipFeature() {
       ]);
 
       if (!detailRes.success || !detailRes.data) {
-        throw new Error(detailRes.mess || "Membership data is not available.");
+        throw new Error(detailRes.message || "Membership data is not available.");
       }
 
       if (!tiersRes.success) {
-        throw new Error(tiersRes.mess || "Membership tiers are not available.");
+        throw new Error(tiersRes.message || "Membership tiers are not available.");
       }
 
       setChannelDetail(detailRes.data);
@@ -177,7 +177,7 @@ export function StudioMembershipFeature() {
       const response = await mediaService.requestChannelMembershipReview(channelDetail.id);
 
       if (!response.success || !response.data) {
-        throw new Error(response.mess || "Unable to request membership review.");
+        throw new Error(response.message || "Unable to request membership review.");
       }
 
       setChannelDetail((current) => current ? { ...current, ...response.data } : current);
@@ -218,7 +218,7 @@ export function StudioMembershipFeature() {
           });
 
       if (!response.success || !response.data) {
-        throw new Error(response.mess || "Unable to save membership tier.");
+        throw new Error(response.message || "Unable to save membership tier.");
       }
 
       if (editorState?.mode !== "edit" && !payload.isAcceptingNew) {
@@ -227,7 +227,7 @@ export function StudioMembershipFeature() {
         });
 
         if (!response.success || !response.data) {
-          throw new Error(response.mess || "Unable to update the new tier status.");
+          throw new Error(response.message || "Unable to update the new tier status.");
         }
       }
 
@@ -264,7 +264,7 @@ export function StudioMembershipFeature() {
       });
 
       if (!response.success || !response.data) {
-        throw new Error(response.mess || "Unable to update tier status.");
+        throw new Error(response.message || "Unable to update tier status.");
       }
 
       const updatedTier = mapMembershipTier(response.data);

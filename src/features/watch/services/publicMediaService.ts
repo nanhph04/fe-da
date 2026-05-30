@@ -236,14 +236,16 @@ export async function getLatestVideosCached(limit = 10) {
   } catch (error) {
     const apiError = error as PublicApiError;
 
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code ?? 503;
+    const message = apiError.message || "Unable to load latest videos from the media service.";
+
     return {
       success: false,
-      code: apiError.code ?? 503,
+      statusCode,
+      code: statusCode,
       data: [],
-      mess:
-        apiError.mess ||
-        apiError.message ||
-        "Unable to load latest videos from the media service.",
+      message,
+      mess: message,
       errors: apiError.errors,
     } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
   }
@@ -260,14 +262,16 @@ export async function getCategoriesCached() {
   } catch (error) {
     const apiError = error as PublicApiError;
 
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code ?? 503;
+    const message = apiError.message || "Unable to load categories from the media service.";
+
     return {
       success: false,
-      code: apiError.code ?? 503,
+      statusCode,
+      code: statusCode,
       data: [],
-      mess:
-        apiError.mess ||
-        apiError.message ||
-        "Unable to load categories from the media service.",
+      message,
+      mess: message,
       errors: apiError.errors,
     } satisfies PublicApiResponse<CategoryPublic[]>;
   }
@@ -284,14 +288,16 @@ export async function getTagsCached() {
   } catch (error) {
     const apiError = error as PublicApiError;
 
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code ?? 503;
+    const message = apiError.message || "Unable to load tags from the media service.";
+
     return {
       success: false,
-      code: apiError.code ?? 503,
+      statusCode,
+      code: statusCode,
       data: [],
-      mess:
-        apiError.mess ||
-        apiError.message ||
-        "Unable to load tags from the media service.",
+      message,
+      mess: message,
       errors: apiError.errors,
     } satisfies PublicApiResponse<TagPublic[]>;
   }
@@ -377,14 +383,16 @@ export async function getVideosByCategoryCached(categorySlug: string, limit = 6)
   } catch (error) {
     const apiError = error as PublicApiError;
 
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code ?? 503;
+    const message = apiError.message || "Unable to load category videos from the media service.";
+
     return {
       success: false,
-      code: apiError.code ?? 503,
+      statusCode,
+      code: statusCode,
       data: [],
-      mess:
-        apiError.mess ||
-        apiError.message ||
-        "Unable to load category videos from the media service.",
+      message,
+      mess: message,
       errors: apiError.errors,
     } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
   }

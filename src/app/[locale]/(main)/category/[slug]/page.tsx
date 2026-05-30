@@ -51,10 +51,10 @@ function parseTags(value?: string) {
   );
 }
 
-function getApiErrorCode(error: unknown) {
+function getApiErrorStatus(error: unknown) {
   if (error && typeof error === "object") {
-    const apiError = error as { code?: number; status?: number };
-    return apiError.code ?? apiError.status;
+    const apiError = error as { statusCode?: number; code?: number; status?: number };
+    return apiError.statusCode ?? apiError.status ?? apiError.code;
   }
 
   return undefined;
@@ -62,8 +62,8 @@ function getApiErrorCode(error: unknown) {
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (error && typeof error === "object") {
-    const apiError = error as { mess?: string; message?: string; errors?: string[] };
-    return apiError.mess || apiError.message || apiError.errors?.join(", ") || fallback;
+    const apiError = error as { message?: string; mess?: string; errors?: string[] };
+    return apiError.message || apiError.mess || apiError.errors?.join(", ") || fallback;
   }
 
   if (error instanceof Error && error.message) {
@@ -133,14 +133,14 @@ export default async function CategoryPage({
         });
         videos = response.success ? response.data ?? [] : [];
         if (!response.success) {
-          errorMessage = response.mess || "Không thể lọc danh sách video mới nhất.";
+          errorMessage = response.message || "Không thể lọc danh sách video mới nhất.";
         }
       } else if (isLatest) {
         const response = await getLatestVideosCached(CATEGORY_PAGE_LIMIT);
         if (response.success) {
           videos = response.data ?? [];
         } else {
-          errorMessage = response.mess || "Không thể tải danh sách video mới nhất.";
+          errorMessage = response.message || "Không thể tải danh sách video mới nhất.";
         }
       } else if (hasFilters) {
         const response = await getPublicVideosCached({
@@ -151,19 +151,19 @@ export default async function CategoryPage({
         });
         videos = response.success ? response.data ?? [] : [];
         if (!response.success) {
-          errorMessage = response.mess || "Không thể lọc video trong thể loại này.";
+          errorMessage = response.message || "Không thể lọc video trong thể loại này.";
         }
       } else {
         const response = await getCategoryVideosPageCached(slug, page, CATEGORY_PAGE_LIMIT);
         videos = response.success ? response.data ?? [] : [];
         pagination = response.pagination ?? null;
         if (!response.success) {
-          errorMessage = response.mess || "Không thể tải video trong thể loại này.";
+          errorMessage = response.message || "Không thể tải video trong thể loại này.";
         }
       }
     } catch (error) {
       errorMessage =
-        getApiErrorCode(error) === 404
+        getApiErrorStatus(error) === 404
           ? "Không tìm thấy thể loại đang hoạt động cho đường dẫn này."
           : getApiErrorMessage(error, "Không thể tải dữ liệu thể loại lúc này.");
     }

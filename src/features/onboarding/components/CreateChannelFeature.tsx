@@ -17,10 +17,11 @@ function isChannelConflict(error: unknown) {
     return false;
   }
 
-  const apiError = error as { code?: number; status?: number; mess?: string; message?: string };
-  const message = `${apiError.mess ?? ""} ${apiError.message ?? ""}`.toLowerCase();
+  const apiError = error as { statusCode?: number; code?: number; status?: number; mess?: string; message?: string };
+  const message = `${apiError.message ?? ""} ${apiError.mess ?? ""}`.toLowerCase();
+  const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code;
 
-  return apiError.code === 409 || apiError.status === 409 || message.includes("conflict");
+  return statusCode === 409 || message.includes("conflict");
 }
 
 function canAccessStudio(profile: UserProfileResponse | null) {
@@ -107,10 +108,10 @@ export function CreateChannelFeature() {
 
     try {
       const res = await mediaService.createChannel({ name: trimmedName, bio: trimmedBio });
-      if (res.success || res.code === 201) {
+      if (res.success || res.statusCode === 201) {
         await goToStudioWhenReady();
       } else {
-        setError(res.mess || "Không thể tạo kênh.");
+        setError(res.message || "Không thể tạo kênh.");
       }
     } catch (err: unknown) {
       if (isChannelConflict(err)) {

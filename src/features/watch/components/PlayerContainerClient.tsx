@@ -87,7 +87,7 @@ function buildPlaybackUrl(streamUrl: string, token?: string) {
 
 function isPermissionError(error: unknown) {
   const apiError = error as ApiError;
-  const statusCode = apiError.code ?? apiError.status;
+  const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code;
 
   if (statusCode === 402 || statusCode === 403) {
     return true;
@@ -199,12 +199,12 @@ export function PlayerContainerClient({
               : metadataResolutions,
           );
           setVideoUrl(finalUrl);
-        } else if (isPermissionError({ code: tokenRes.code, mess: tokenRes.mess })) {
+        } else if (isPermissionError(tokenRes)) {
           setVideoUrl(null);
-          setAccessDeniedMessage(tokenRes.mess || "Bạn chưa có quyền xem video này.");
+          setAccessDeniedMessage(tokenRes.message || "Bạn chưa có quyền xem video này.");
         } else {
           setVideoUrl(null);
-          setError(tokenRes.mess || "Failed to load video stream.");
+          setError(tokenRes.message || "Failed to load video stream.");
         }
       } catch (err: unknown) {
         if (!isActive) {

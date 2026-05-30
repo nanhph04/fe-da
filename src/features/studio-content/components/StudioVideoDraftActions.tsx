@@ -55,8 +55,8 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
         resolutions: getConfirmResolutions(video),
       });
 
-      if (!(response.success || response.code === 200 || response.code === 201)) {
-        setError(response.mess || "Không thể confirm-upload video draft.");
+      if (!(response.success || response.statusCode === 200 || response.statusCode === 201)) {
+        setError(response.message || "Không thể confirm-upload video draft.");
         return;
       }
 
@@ -111,7 +111,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
     try {
       const response = await mediaService.cancelUpload(video.id, video.uploadId || "");
       if (!response.success) {
-        setError(response.mess || "Không thể hủy upload draft.");
+        setError(response.message || "Không thể hủy upload draft.");
         return;
       }
 

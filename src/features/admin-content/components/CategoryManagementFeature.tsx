@@ -209,8 +209,8 @@ export function CategoryManagementFeature() {
       }
 
       const errors = [
-        categoryRes.success ? null : categoryRes.mess || "Unable to load categories.",
-        tagRes.success ? null : tagRes.mess || "Unable to load tags.",
+        categoryRes.success ? null : categoryRes.message || "Unable to load categories.",
+        tagRes.success ? null : tagRes.message || "Unable to load tags.",
       ].filter(Boolean);
 
       if (errors.length > 0) {
@@ -340,7 +340,7 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(res.mess || "Unable to save category.");
+      setError(res.message || "Unable to save category.");
     } catch (err) {
       setError(getErrorMessage(err, "Unable to save category."));
     } finally {
@@ -374,7 +374,7 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(res.mess || "Unable to save tag.");
+      setError(res.message || "Unable to save tag.");
     } catch (err) {
       setError(getErrorMessage(err, "Unable to save tag."));
     } finally {
@@ -411,7 +411,7 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(res.mess || "Unable to update category status.");
+      setError(res.message || "Unable to update category status.");
     } catch (err) {
       setError(getErrorMessage(err, "Unable to update category status."));
     } finally {
@@ -437,7 +437,7 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(res.mess || "Unable to update tag status.");
+      setError(res.message || "Unable to update tag status.");
     } catch (err) {
       setError(getErrorMessage(err, "Unable to update tag status."));
     } finally {

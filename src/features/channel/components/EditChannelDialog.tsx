@@ -57,7 +57,7 @@ export function EditChannelDialog({ channel, open, onOpenChange, onSaved }: Edit
       if (response.success && response.data) {
         setAvatarUrl(response.data.avatarUrl);
       } else {
-        setError(response.mess || "Không thể tải lên ảnh đại diện.");
+        setError(response.message || "Không thể tải lên ảnh đại diện.");
       }
     } catch (uploadError) {
       setError(getErrorMessage(uploadError, "Không thể tải lên ảnh đại diện."));
@@ -90,7 +90,7 @@ export function EditChannelDialog({ channel, open, onOpenChange, onSaved }: Edit
       if (response.success && response.data) {
         setBannerUrl(response.data.bannerUrl);
       } else {
-        setError(response.mess || "Không thể tải lên ảnh bìa.");
+        setError(response.message || "Không thể tải lên ảnh bìa.");
       }
     } catch (uploadError) {
       setError(getErrorMessage(uploadError, "Không thể tải lên ảnh bìa."));
@@ -121,7 +121,7 @@ export function EditChannelDialog({ channel, open, onOpenChange, onSaved }: Edit
         onSaved();
         onOpenChange(false);
       } else {
-        setError(response.mess || "Không thể cập nhật thông tin kênh.");
+        setError(response.message || "Không thể cập nhật thông tin kênh.");
       }
     } catch (saveError) {
       setError(getErrorMessage(saveError, "Không thể cập nhật thông tin kênh."));

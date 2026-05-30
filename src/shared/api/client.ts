@@ -87,6 +87,22 @@ const buildStreamingApiUrl = (endpoint: string) => {
   return `${API_BASE_URL}${endpoint}`;
 };
 
+export const getApiErrorCode = (error: unknown) => {
+  if (!error || typeof error !== "object") {
+    return null;
+  }
+
+  const payload = "payload" in error ? (error as { payload?: unknown }).payload : error;
+  if (payload && typeof payload === "object") {
+    const apiError = payload as ApiError;
+    return typeof apiError.errorCode === "string" && apiError.errorCode.trim()
+      ? apiError.errorCode
+      : null;
+  }
+
+  return null;
+};
+
 export const getErrorMessage = (
   error: unknown,
   fallback = "An unexpected error occurred"
@@ -95,24 +111,59 @@ export const getErrorMessage = (
     return error;
   }
 
-  if (error instanceof Error && error.message.trim()) {
-    return error.message;
-  }
+  const payload = error && typeof error === "object" && "payload" in error
+    ? (error as { payload?: unknown }).payload
+    : error;
 
-  if (error && typeof error === "object") {
-    const apiError = error as ApiError;
-    if (typeof apiError.mess === "string" && apiError.mess.trim()) {
-      return apiError.mess;
-    }
+  if (payload && typeof payload === "object") {
+    const apiError = payload as ApiError;
     if (typeof apiError.message === "string" && apiError.message.trim()) {
       return apiError.message;
+    }
+    if (typeof apiError.mess === "string" && apiError.mess.trim()) {
+      return apiError.mess;
     }
     if (Array.isArray(apiError.errors) && apiError.errors.length > 0) {
       return apiError.errors.join(", ");
     }
   }
 
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
   return fallback;
+};
+
+const normalizeApiPayload = (payload: unknown, statusCode: number) => {
+  if (!payload || typeof payload !== "object" || !("success" in payload)) {
+    return payload;
+  }
+
+  const response = payload as ApiResponse<unknown> | ApiError;
+  const nextPayload: Record<string, unknown> = { ...response };
+
+  if (typeof nextPayload.statusCode !== "number") {
+    nextPayload.statusCode = typeof response.code === "number" ? response.code : statusCode;
+  }
+
+  if (typeof nextPayload.code !== "number") {
+    nextPayload.code = nextPayload.statusCode;
+  }
+
+  if (typeof nextPayload.message !== "string" && typeof response.mess === "string") {
+    nextPayload.message = response.mess;
+  }
+
+  if (typeof nextPayload.mess !== "string" && typeof response.message === "string") {
+    nextPayload.mess = response.message;
+  }
+
+  if (!("data" in nextPayload)) {
+    nextPayload.data = null;
+  }
+
+  return nextPayload;
 };
 
 const parseResponseBody = async (
@@ -129,14 +180,16 @@ const parseResponseBody = async (
 
   const contentType = response.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
-    return response.json();
+    return normalizeApiPayload(await response.json(), response.status);
   }
 
   const text = await response.text();
   return text
     ? {
         success: response.ok,
+        statusCode: response.status,
         code: response.status,
+        data: null,
         message: text,
         mess: text,
       }
@@ -170,11 +223,19 @@ const isFetchConnectionError = (error: unknown) =>
   error instanceof TypeError &&
   (error.message === "Failed to fetch" || error.message === "fetch failed");
 
-const createConnectionError = (): ApiError => ({
-  success: false,
-  code: 503,
-  mess: "Unable to connect to the API server. Check that the backend is running and reachable.",
-});
+const createConnectionError = (): ApiError => {
+  const message = "Unable to connect to the API server. Check that the backend is running and reachable.";
+
+  return {
+    success: false,
+    statusCode: 503,
+    code: 503,
+    data: null,
+    errorCode: "COMMON_API_UNREACHABLE",
+    message,
+    mess: message,
+  };
+};
 
 export class ApiHttpError extends Error {
   status: number;
@@ -193,9 +254,13 @@ export const getHttpStatus = (error: unknown) => {
     return error.status;
   }
 
-  if (error && typeof error === "object") {
-    const apiError = error as ApiError;
-    return apiError.status ?? apiError.code ?? null;
+  const payload = error && typeof error === "object" && "payload" in error
+    ? (error as { payload?: unknown }).payload
+    : error;
+
+  if (payload && typeof payload === "object") {
+    const apiError = payload as ApiError;
+    return apiError.statusCode ?? apiError.status ?? apiError.code ?? null;
   }
 
   return null;
@@ -262,7 +327,14 @@ export const refreshAccessToken = async () => {
       return refreshPayload.data.accessToken;
     }
 
-    throw refreshPayload || ({ success: false, code: 401, mess: "Refresh failed" } satisfies ApiError);
+    throw refreshPayload || ({
+      success: false,
+      statusCode: 401,
+      code: 401,
+      data: null,
+      message: "Refresh failed",
+      mess: "Refresh failed",
+    } satisfies ApiError);
   } catch (error: unknown) {
     if (isFetchConnectionError(error)) {
       throw createConnectionError();

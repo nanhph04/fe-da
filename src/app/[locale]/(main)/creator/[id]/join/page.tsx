@@ -31,7 +31,7 @@ export default async function JoinMembershipPage({ params, searchParams }: JoinM
     channel = channelResponse.data;
   } catch (err) {
     const apiError = err as PublicApiError;
-    if (apiError.code === 404) {
+    if ((apiError.statusCode ?? apiError.status ?? apiError.code) === 404) {
       notFound();
     }
 

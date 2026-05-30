@@ -230,7 +230,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
           return;
         }
 
-        setError(response.mess || "Unable to load this Studio video.");
+        setError(response.message || "Unable to load this Studio video.");
         setVideo(null);
       } catch (err) {
         if (!cancelled) {

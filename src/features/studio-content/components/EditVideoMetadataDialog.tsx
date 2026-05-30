@@ -98,7 +98,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
           return;
         }
 
-        setError(metadataRes.mess || "Không tải được dữ liệu video.");
+        setError(metadataRes.message || "Không tải được dữ liệu video.");
       } catch (err) {
         if (isActive) {
           setError(getErrorMessage(err, "Không tải được dữ liệu video."));
@@ -148,7 +148,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
         return;
       }
 
-      setError(res.mess || "Không lưu được metadata video.");
+      setError(res.message || "Không lưu được metadata video.");
     } catch (err) {
       setError(getErrorMessage(err, "Không lưu được metadata video."));
     } finally {

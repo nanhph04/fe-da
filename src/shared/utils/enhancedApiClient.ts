@@ -2,15 +2,20 @@ import { buildApiUrl, fetchWrapper } from "@/shared/api/client";
 import type { ApiRequestInit, ApiResponse } from "@/shared/api/types";
 
 type RetryableError = {
+  statusCode?: number;
   status?: number;
+  code?: number;
   config?: {
     headers?: HeadersInit;
   };
 };
 
 const getResponseStatus = (
-  response: { status?: number } | ApiResponse<unknown>
-) => ("status" in response ? response.status : undefined);
+  response: { status?: number; statusCode?: number; code?: number } | ApiResponse<unknown>
+) => {
+  const statusResponse = response as { status?: number; statusCode?: number; code?: number };
+  return statusResponse.statusCode ?? statusResponse.status ?? statusResponse.code;
+};
 
 export interface RetryConfig {
   maxRetries?: number;
@@ -214,9 +219,10 @@ export class RetryHandler {
   }
 
   private defaultRetryCondition(error: unknown): boolean {
-    if (error && typeof error === "object" && "status" in error) {
+    if (error && typeof error === "object") {
       const retryableError = error as RetryableError;
-      return [408, 429, 500, 502, 503, 504].includes(retryableError.status ?? 0);
+      const statusCode = retryableError.statusCode ?? retryableError.status ?? retryableError.code ?? 0;
+      return [408, 429, 500, 502, 503, 504].includes(statusCode);
     }
 
     return false;

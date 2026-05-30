@@ -13,7 +13,7 @@ async function loadAllCategories() {
   const firstPage = await mediaService.getCategories({ page: 1, limit: TAXONOMY_PAGE_LIMIT });
 
   if (!firstPage.success) {
-    throw new Error(firstPage.mess || "Failed to load categories.");
+    throw new Error(firstPage.message || "Failed to load categories.");
   }
 
   const items = [...firstPage.data.items];
@@ -31,7 +31,7 @@ async function loadAllCategories() {
 
   remainingPages.forEach(response => {
     if (!response.success) {
-      throw new Error(response.mess || "Failed to load categories.");
+      throw new Error(response.message || "Failed to load categories.");
     }
 
     items.push(...response.data.items);
@@ -44,7 +44,7 @@ async function loadAllTags() {
   const firstPage = await mediaService.getTags({ page: 1, limit: TAXONOMY_PAGE_LIMIT });
 
   if (!firstPage.success) {
-    throw new Error(firstPage.mess || "Failed to load tags.");
+    throw new Error(firstPage.message || "Failed to load tags.");
   }
 
   const items = [...firstPage.data.items];
@@ -62,7 +62,7 @@ async function loadAllTags() {
 
   remainingPages.forEach(response => {
     if (!response.success) {
-      throw new Error(response.mess || "Failed to load tags.");
+      throw new Error(response.message || "Failed to load tags.");
     }
 
     items.push(...response.data.items);

@@ -40,10 +40,11 @@ async function getVideoMetadataForWatch(videoId: string) {
     }
   } catch (error) {
     const apiError = error as PublicApiError;
-    if (apiError.code !== 404) {
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code;
+    if (statusCode !== 404) {
       console.warn("Failed to load video metadata from cache, retrying fresh:", {
         videoId,
-        code: apiError.code ?? null,
+        statusCode: statusCode ?? null,
         message: getErrorMessage(error),
       });
     }
@@ -91,14 +92,15 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
     membershipTiers = infoRes.data.membershipTiers ?? [];
   } catch (err: unknown) {
     const apiError = err as PublicApiError;
-    if (apiError.code === 403 || apiError.code === 404) {
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code;
+    if (statusCode === 403 || statusCode === 404) {
       notFound();
     }
 
     console.warn("Failed to load video metadata SSR:", {
       videoId,
       message: getErrorMessage(err),
-      code: apiError.code ?? null,
+      statusCode: statusCode ?? null,
     });
   }
 

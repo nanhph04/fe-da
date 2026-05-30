@@ -70,7 +70,7 @@ export function PurchasedLibrary({ refreshKey = 0 }: PurchasedLibraryProps) {
           setState({
             status: "error",
             data: [],
-            error: response.mess || t("loadPurchasedFailed"),
+            error: response.message || t("loadPurchasedFailed"),
           });
           return;
         }

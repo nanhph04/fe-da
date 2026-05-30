@@ -53,11 +53,11 @@ export async function ChannelPage({ channelId }: ChannelPageProps) {
     if (response.success && response.data) {
       channel = response.data;
     } else {
-      errorMessage = response.mess || "Không thể tải thông tin kênh.";
+      errorMessage = response.message || "Không thể tải thông tin kênh.";
     }
   } catch (err: unknown) {
     const apiError = err as PublicApiError;
-    if (apiError.code === 404) {
+    if ((apiError.statusCode ?? apiError.status ?? apiError.code) === 404) {
       notFound();
     }
 

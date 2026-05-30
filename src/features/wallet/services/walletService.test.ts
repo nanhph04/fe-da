@@ -15,6 +15,7 @@ const mockedApi = api as jest.Mocked<typeof api>;
 describe("WalletService", () => {
   const mockWalletResponse = {
     success: true,
+    statusCode: 200,
     code: 200,
     data: {
       id: "wallet-123",
@@ -26,6 +27,7 @@ describe("WalletService", () => {
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z",
     },
+    message: "Wallet retrieved successfully",
     mess: "Wallet retrieved successfully",
   };
 
@@ -46,11 +48,14 @@ describe("WalletService", () => {
     it("should handle API errors", async () => {
       const errorResponse = {
         success: false,
+        statusCode: 404,
         code: 404,
+        data: null,
+        message: "Wallet not found",
         mess: "Wallet not found",
       };
 
-      mockedApi.get.mockRejectedValue(new Error(errorResponse.mess));
+      mockedApi.get.mockRejectedValue(new Error(errorResponse.message));
 
       await expect(WalletService.getMyWallet()).rejects.toThrow("Wallet not found");
     });

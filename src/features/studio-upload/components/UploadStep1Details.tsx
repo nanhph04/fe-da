@@ -114,7 +114,7 @@ export function UploadStep1Details({
           return;
         }
 
-        setReplaceError(res.mess || "Không thể hủy draft upload hiện tại.");
+        setReplaceError(res.message || "Không thể hủy draft upload hiện tại.");
       } catch (err) {
         setReplaceError(getErrorMessage(err, "Không thể hủy draft upload. Vui lòng thử lại."));
       } finally {
@@ -148,7 +148,7 @@ export function UploadStep1Details({
         return;
       }
 
-      setReplaceError(res.mess || "Không thể hủy upload cũ để thay thế file.");
+      setReplaceError(res.message || "Không thể hủy upload cũ để thay thế file.");
     } catch (err) {
       setReplaceError(getErrorMessage(err, "Không thể đổi file video. Vui lòng thử lại."));
     } finally {
@@ -201,8 +201,8 @@ export function UploadStep1Details({
           thumbnailExtension: thumbnailExtension ?? undefined,
         });
 
-        if (!(initResponse.success || initResponse.code === 201) || !initResponse.data) {
-          setUploadError(initResponse.mess || "Không thể tạo draft upload.");
+        if (!(initResponse.success || initResponse.statusCode === 201) || !initResponse.data) {
+          setUploadError(initResponse.message || "Không thể tạo draft upload.");
           return;
         }
 

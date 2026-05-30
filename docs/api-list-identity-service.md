@@ -246,7 +246,8 @@ Cookie:
 - sameSite: strict
 - maxAge: 3 ngay
 - path: lay tu AUTH_COOKIE_PATH.
-- .env.example dang de AUTH_COOKIE_PATH=/api/auth.
+- .env.example de AUTH_COOKIE_PATH=/api/identity/auth trong identity-service.
+- Khi di qua api_gateway, gateway rewrite Set-Cookie Path tu /api/identity/auth sang public path /api/auth.
 
 Response:
 

@@ -122,7 +122,7 @@ export function CompleteProfileFeature() {
     });
 
     if (!uploadUrlResponse.success || !uploadUrlResponse.data) {
-      throw new Error(uploadUrlResponse.mess || "Không thể tạo đường dẫn tải ảnh đại diện.");
+      throw new Error(uploadUrlResponse.message || "Không thể tạo đường dẫn tải ảnh đại diện.");
     }
 
     await authService.uploadAvatarFile({
@@ -136,7 +136,7 @@ export function CompleteProfileFeature() {
     });
 
     if (!completeResponse.success || !completeResponse.data) {
-      throw new Error(completeResponse.mess || "Không thể cập nhật ảnh đại diện.");
+      throw new Error(completeResponse.message || "Không thể cập nhật ảnh đại diện.");
     }
   };
 
@@ -158,7 +158,7 @@ export function CompleteProfileFeature() {
         await fetchProfile();
         router.push("/library");
       } else {
-        setServerError(res.mess || "Không thể cập nhật hồ sơ");
+        setServerError(res.message || "Không thể cập nhật hồ sơ");
       }
     } catch (err: unknown) {
       setServerError(getErrorMessage(err, "Không thể cập nhật hồ sơ"));
@@ -182,7 +182,7 @@ export function CompleteProfileFeature() {
         await fetchProfile(); // Refresh AuthContext so guard won't redirect back
         router.push("/library");
       } else {
-        setServerError(res.mess || "Không thể thiết lập hồ sơ mặc định");
+        setServerError(res.message || "Không thể thiết lập hồ sơ mặc định");
       }
     } catch (err: unknown) {
       setServerError(getErrorMessage(err, "Không thể bỏ qua. Vui lòng thử lại."));

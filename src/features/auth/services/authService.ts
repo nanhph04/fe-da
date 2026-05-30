@@ -88,7 +88,7 @@ export const authService = {
   },
 
   // 1.2) Verify Email
-  verifyEmail: async (data: { email: string; otp: string; password: string }) => {
+  verifyEmail: async (data: { email: string; otp: string }) => {
     return api.post<MessageResponse>("/api/auth/verify-email", data);
   },
 

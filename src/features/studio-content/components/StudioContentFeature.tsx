@@ -190,7 +190,7 @@ export function StudioContentFeature() {
         return true;
       }
 
-      const message = res.mess || "Không thể tải danh sách video.";
+      const message = res.message || "Không thể tải danh sách video.";
       if (showLoading) {
         setVideos([]);
         setError(message);
@@ -286,7 +286,7 @@ export function StudioContentFeature() {
         : await mediaService.deleteVideo(video.id);
 
       if (!response.success) {
-        showActionMessage(response.mess || "Không thể xoá video. Vui lòng thử lại.");
+        showActionMessage(response.message || "Không thể xoá video. Vui lòng thử lại.");
         return;
       }
 
@@ -317,8 +317,8 @@ export function StudioContentFeature() {
         resolutions: getConfirmResolutions(video),
       });
 
-      if (!(response.success || response.code === 200 || response.code === 201)) {
-        showActionMessage(response.mess || "Không thể confirm-upload video draft. Nếu raw file chưa upload, hãy bấm Upload lại file.");
+      if (!(response.success || response.statusCode === 200 || response.statusCode === 201)) {
+        showActionMessage(response.message || "Không thể confirm-upload video draft. Nếu raw file chưa upload, hãy bấm Upload lại file.");
         return;
       }
 
