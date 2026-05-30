@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Loader2, ShieldCheck, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { DepositService } from "../services/depositService";
 import type { Deposit, DepositPackage } from "../types/wallet.types";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -21,12 +21,12 @@ import { usePayOS } from "@payos/payos-checkout";
 // a pre-parsed JavaScript object in window message events.
 if (typeof window !== "undefined") {
   const originalJSONParse = JSON.parse;
-  JSON.parse = function (text: any, reviver?: any) {
+  JSON.parse = function (text: unknown, reviver?: unknown) {
     if (typeof text === "object" && text !== null) {
       return text;
     }
-    return originalJSONParse(text, reviver);
-  } as any;
+    return originalJSONParse(text as string, reviver as Parameters<typeof originalJSONParse>[1]);
+  } as typeof JSON.parse;
 }
 
 interface EmbeddedPayOsCheckoutProps {
@@ -77,7 +77,6 @@ export function EmbeddedPayOsCheckout({
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const locale = useLocale();
   const t = useTranslations("Wallet.EmbeddedCheckout");
   const { user } = useAuth();
   const userId = user?.userId || "guest";

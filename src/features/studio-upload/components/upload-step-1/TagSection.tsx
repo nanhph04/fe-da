@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { TagResponse } from "@/features/watch/services/mediaService";
 
 interface TagSectionProps {
@@ -12,6 +13,7 @@ interface TagSectionProps {
 }
 
 export function TagSection({ tags, selectedTagIds, isLoading = false, error, onChange }: TagSectionProps) {
+  const t = useTranslations("Studio.upload");
   const [query, setQuery] = useState("");
 
   const filteredTags = useMemo(() => {
@@ -34,13 +36,13 @@ export function TagSection({ tags, selectedTagIds, isLoading = false, error, onC
       <div className="flex items-start justify-between gap-4">
         <div>
           <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Tags
+            {t("step1.fields.tags")}
           </label>
-          <p className="text-xs text-muted-foreground">Optional active tags for discovery and search.</p>
+          <p className="text-xs text-muted-foreground">{t("step1.fields.tagsHint")}</p>
         </div>
         {selectedTagIds.length > 0 ? (
           <span className="shrink-0 rounded-sm border border-secondary/30 bg-secondary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-secondary">
-            {selectedTagIds.length} selected
+            {t("step1.fields.tagsSelected", { count: selectedTagIds.length })}
           </span>
         ) : null}
       </div>
@@ -54,7 +56,7 @@ export function TagSection({ tags, selectedTagIds, isLoading = false, error, onC
           aria-label="Search tags"
           value={query}
           onChange={event => setQuery(event.target.value)}
-          placeholder="Search tags..."
+          placeholder={t("step1.fields.tagsSearchPlaceholder")}
           className="h-10 w-full rounded-sm border border-border/40 bg-background pl-10 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:ring-1 focus:ring-primary/60"
         />
       </div>
@@ -63,7 +65,7 @@ export function TagSection({ tags, selectedTagIds, isLoading = false, error, onC
         <div className="flex flex-wrap gap-2">
           {isLoading ? (
             <div className="w-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
-              Loading tags...
+              {t("step1.fields.tagsLoading")}
             </div>
           ) : error ? (
             <div className="w-full rounded-sm border border-dashed border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-xs text-destructive">
@@ -71,7 +73,7 @@ export function TagSection({ tags, selectedTagIds, isLoading = false, error, onC
             </div>
           ) : tags.length === 0 ? (
             <div className="w-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
-              No active tags available.
+              {t("step1.fields.tagsEmpty")}
             </div>
           ) : filteredTags.length > 0 ? (
             filteredTags.map(tag => {
@@ -99,7 +101,7 @@ export function TagSection({ tags, selectedTagIds, isLoading = false, error, onC
             })
           ) : (
             <div className="w-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
-              No matching tag found.
+              {t("step1.fields.tagsNoMatch")}
             </div>
           )}
         </div>

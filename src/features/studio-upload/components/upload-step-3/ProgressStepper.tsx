@@ -1,15 +1,18 @@
+import { useTranslations } from "next-intl";
+
 interface ProgressStepperProps {
   currentStep: 1 | 2 | 3;
 }
 
-const steps = [
-  { label: "Details", step: 1 },
-  { label: "Monetization", step: 2 },
-  { label: "Visibility", step: 3 },
-] as const;
-
 export function ProgressStepper({ currentStep }: ProgressStepperProps) {
+  const t = useTranslations("Studio.upload");
   const completedWidth = currentStep === 1 ? "w-0" : currentStep === 2 ? "w-1/2" : "w-full";
+
+  const steps = [
+    { label: t("stepper.details"), step: 1 },
+    { label: t("stepper.pricing"), step: 2 },
+    { label: t("stepper.publish"), step: 3 },
+  ] as const;
 
   return (
     <div className="relative w-full py-2">

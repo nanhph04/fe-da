@@ -749,6 +749,185 @@
           "saving": "Đang lưu..."
         }
       }
+    },
+    "upload": {
+      "stepper": {
+        "details": "Chi tiết",
+        "pricing": "Giá & Kênh thu nhập",
+        "publish": "Xuất bản"
+      },
+      "step1": {
+        "label": "Tải lên mới",
+        "title": "Chi tiết video",
+        "fields": {
+          "title": "Tiêu đề video",
+          "description": "Mô tả",
+          "descriptionPlaceholder": "Mô tả cho người xem biết về video của bạn...",
+          "thumbnail": "Ảnh đại diện tùy chỉnh (Thumbnail)",
+          "thumbnailHint": "Không bắt buộc, chấp nhận JPG, PNG, hoặc WEBP tối đa 5MB.",
+          "thumbnailChoose": "Chọn ảnh đại diện",
+          "clear": "Xóa",
+          "category": "Thể loại",
+          "categoryHint": "Chọn một thể loại bắt buộc cho video.",
+          "categorySearchPlaceholder": "Tìm kiếm thể loại...",
+          "categoryLoading": "Đang tải thể loại...",
+          "categoryEmpty": "Không có thể loại hoạt động.",
+          "categoryNoMatch": "Không tìm thấy thể loại nào.",
+          "categoryNoMatchHint": "Thử tìm kiếm bằng tên thể loại hoặc slug.",
+          "tags": "Thẻ (Tags)",
+          "tagsHint": "Thẻ không bắt buộc giúp tăng khả năng tìm kiếm video.",
+          "tagsSelected": "Đã chọn {count} thẻ",
+          "tagsSearchPlaceholder": "Tìm kiếm thẻ...",
+          "tagsLoading": "Đang tải thẻ...",
+          "tagsEmpty": "Không có thẻ hoạt động.",
+          "tagsNoMatch": "Không tìm thấy thẻ nào phù hợp.",
+          "selectFileHint": "Chọn tệp video để bắt đầu",
+          "browseFiles": "Tìm tệp",
+          "uploadingRawFile": "Đang tải lên tệp gốc",
+          "replacingFile": "Đang thay thế tệp",
+          "uploadedToStorage": "Đã tải lên hệ thống lưu trữ",
+          "fileReady": "Tệp đã sẵn sàng",
+          "rawVideoUploaded": "Đã tải tệp video gốc lên",
+          "percentUploaded": "Đã tải lên {progress}%",
+          "replacing": "Đang thay thế...",
+          "replace": "Thay thế"
+        },
+        "errors": {
+          "invalidThumbnailType": "Ảnh đại diện phải ở định dạng JPG, PNG hoặc WEBP.",
+          "invalidThumbnailSize": "Ảnh đại diện phải có dung lượng tối đa 5MB.",
+          "cancelDraftFailed": "Không thể hủy draft upload hiện tại.",
+          "cancelDraftRetry": "Không thể hủy draft upload. Vui lòng thử lại.",
+          "replaceFileFailed": "Không thể hủy upload cũ để thay thế file.",
+          "replaceFileRetry": "Không thể đổi file video. Vui lòng thử lại.",
+          "createDraftFailed": "Không thể tạo bản nháp tải lên.",
+          "uploadVideoFailed": "Không thể tải video lên. Vui lòng thử lại."
+        },
+        "resolutions": {
+          "title": "Độ phân giải xử lý",
+          "hint": "Các độ phân giải này khớp với body resolutions của API xử lý video."
+        },
+        "bottomBar": {
+          "status": "Trạng thái",
+          "rawUploaded": "Đã tải lên tệp thô",
+          "fileSelected": "Đã chọn tệp",
+          "draft": "Bản nháp",
+          "uploading": "Đang tải lên {progress}%",
+          "nextBtn": "Tiếp theo: Thiết lập giá",
+          "uploadBtn": "Tải lên & Tiếp tục"
+        }
+      },
+      "step2": {
+        "label": "Doanh thu",
+        "title": "Chiến lược giá",
+        "description": "Thiết lập cách người xem truy cập nội dung của bạn. Aura Coins được sử dụng cho tất cả các giao dịch mở khóa và thanh toán của creator.",
+        "fields": {
+          "priceTitle": "Giá bán video",
+          "priceHint": "Thiết lập phí mở khóa bằng Aura Coins. Nhập 0 AC để phát hành miễn phí.",
+          "pricePremium": "Nội dung cao cấp",
+          "membershipTitle": "Yêu cầu cấp độ hội viên",
+          "membershipHint": "Không bắt buộc. Được đồng bộ từ các cấp độ hội viên trên kênh của bạn để giới hạn truy cập.",
+          "syncing": "Đang đồng bộ cấp độ",
+          "tiersCount": "{count} cấp độ",
+          "none": "Không có (Tất cả mọi người đều xem được)",
+          "loading": "Đang tải các cấp độ hội viên...",
+          "selectedTier": "Đã chọn: {name} ở Lv{level} ({price})",
+          "emptyTiers": "Không tìm thấy cấp độ hội viên nào. Vui lòng tạo cấp độ tại trang Hội viên trước.",
+          "loadTiersFailed": "Không thể tải các cấp độ hội viên của kênh này.",
+          "retrySync": "Thử lại đồng bộ",
+          "free": "Miễn phí",
+          "tierOpen": "Đang mở",
+          "tierClosed": "Đã đóng"
+        },
+        "breakdown": {
+          "title": "Phân phối doanh thu",
+          "gross": "Tổng giá bán",
+          "fee": "Phí nền tảng",
+          "estimatedNet": "Doanh thu ròng ước tính",
+          "perPurchase": "Trên mỗi lượt mua",
+          "hint": "Aura DRM bảo vệ các bản phát hành cao cấp. Khoản thanh toán sẽ được tự động cộng vào Ví của bạn sau khi được mở khóa."
+        },
+        "buttons": {
+          "back": "Quay lại",
+          "next": "Tiếp theo: Xem lại & Xuất bản"
+        }
+      },
+      "step3": {
+        "title": "Pipeline xuất bản",
+        "description": "Cấu hình các tham số phát hành và kiểm tra cuối cùng trước khi đưa video lên sóng.",
+        "success": {
+          "title": "Đã gửi yêu cầu tải lên",
+          "message": "Video đã được gửi sang pipeline xử lý và kiểm duyệt.",
+          "redirect": "Đang chuyển hướng về Thư viện nội dung..."
+        },
+        "errors": {
+          "updateMetadataFailed": "Không thể cập nhật thông tin bản nháp.",
+          "missingThumbnailUrl": "Dịch vụ media không trả về URL tải ảnh đại diện lên. Vui lòng xóa ảnh đại diện tùy chỉnh hoặc thử lại.",
+          "submitUploadFailed": "Không thể xác nhận yêu cầu tải lên.",
+          "genericUploadError": "Đã xảy ra lỗi trong quá trình tải lên.",
+          "selectFileFirst": "Vui lòng quay lại bước Chi tiết để chọn tệp video trước khi xuất bản."
+        },
+        "declarations": {
+          "title": "Điều khoản & Tuyên bố",
+          "guidelines": "Tôi xác nhận tuân thủ <link>Nguyên tắc cộng đồng Aura Cinematic</link>",
+          "drm": "Tôi hiểu rằng Aura DRM sẽ được áp dụng để ngăn chặn việc phân phối lại trái phép"
+        },
+        "actions": {
+          "confirmPublish": "Xác nhận & Xuất bản",
+          "saveDraft": "Lưu bản nháp",
+          "draftBarHint": "Bản nháp đã được tạo và video gốc đã được tải lên từ Bước 1.",
+          "back": "Quay lại trang Thiết lập giá"
+        },
+        "overlay": {
+          "title": "Đang xuất bản tác phẩm của bạn...",
+          "metadata": "Đang đồng bộ thông tin cuối cùng...",
+          "thumbnail": "Đang tải lên ảnh đại diện tùy chỉnh...",
+          "confirming": "Đang xác nhận tải lên để đưa vào hàng đợi xử lý..."
+        },
+        "preflight": {
+          "title": "Kiểm tra trước khi xuất bản",
+          "metadataLabel": "Thông tin chi tiết",
+          "metadataDetail": "Các trường bắt buộc đã sẵn sàng",
+          "categoryLabel": "Danh mục",
+          "categoryDetail": "Sẽ được xác thực bởi dịch vụ media",
+          "monetizationLabel": "Doanh thu",
+          "monetizationDetail": "Cấu hình giá đã được chuẩn bị"
+        },
+        "schedule": {
+          "title": "Lên lịch phát hành",
+          "badge": "Sắp ra mắt",
+          "description": "Tính năng lên lịch chỉ nhằm mục đích minh họa và chưa được gửi lên API media.",
+          "date": "Ngày",
+          "time": "Giờ"
+        },
+        "summary": {
+          "untitled": "Video chưa đặt tên",
+          "rawUploaded": "Đã tải tệp gốc lên • Sẵn sàng xác nhận",
+          "draft": "Thông tin bản nháp • Đang chờ tải tệp gốc lên",
+          "exclusive": "Cấp độ {level}: Độc quyền",
+          "unlockPrice": "Giá mở khóa",
+          "customThumbnail": "Ảnh đại diện tùy chỉnh",
+          "draftLabel": "Bản nháp"
+        },
+        "visibility": {
+          "title": "Chọn chế độ hiển thị",
+          "titleAccess": "Cấp độ truy cập video",
+          "public": {
+            "title": "Công khai",
+            "description": "Tất cả mọi người đều có thể xem video của bạn sau khi hoàn tất xử lý và kiểm duyệt. Video có thể hiển thị trên kênh của bạn và các trang tìm kiếm công khai.",
+            "descriptionShort": "Phát hành rộng rãi tới mọi người trên trang bảng tin."
+          },
+          "unlisted": {
+            "title": "Không công khai",
+            "description": "Bất kỳ ai có liên kết video đều có thể xem. Chế độ hiển thị này hiện chưa được hỗ trợ bởi API hiện tại.",
+            "badge": "Sắp ra mắt"
+          },
+          "private": {
+            "title": "Riêng tư",
+            "description": "Chỉ những người xem có quyền truy cập rõ ràng mới có thể xem video của bạn sau khi quy trình tải lên và kiểm duyệt hoàn tất.",
+            "descriptionShort": "Chỉ hiển thị với bạn hoặc những người có liên kết."
+          }
+        }
+      }
     }
   }
 }

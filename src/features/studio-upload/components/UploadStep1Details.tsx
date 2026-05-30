@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { UploadFormData } from "./StudioUploadFeature";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -43,6 +44,7 @@ export function UploadStep1Details({
   updateFormData,
   onNext,
 }: UploadStep1DetailsProps) {
+  const t = useTranslations("Studio.upload");
   const { categories, tags, isLoadingTaxonomy, taxonomyError } = useUploadStep1State();
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [isReplacingFile, setIsReplacingFile] = useState(false);
@@ -67,12 +69,12 @@ export function UploadStep1Details({
     const isAllowedSize = file.size <= 5 * 1024 * 1024;
 
     if (!isAllowedType) {
-      setThumbnailError("Thumbnail must be a JPG, PNG, or WEBP image.");
+      setThumbnailError(t("step1.errors.invalidThumbnailType"));
       return;
     }
 
     if (!isAllowedSize) {
-      setThumbnailError("Thumbnail must be 5MB or smaller.");
+      setThumbnailError(t("step1.errors.invalidThumbnailSize"));
       return;
     }
 
@@ -114,9 +116,9 @@ export function UploadStep1Details({
           return;
         }
 
-        setReplaceError(res.message || "Không thể hủy draft upload hiện tại.");
+        setReplaceError(res.message || t("step1.errors.cancelDraftFailed"));
       } catch (err) {
-        setReplaceError(getErrorMessage(err, "Không thể hủy draft upload. Vui lòng thử lại."));
+        setReplaceError(getErrorMessage(err, t("step1.errors.cancelDraftRetry")));
       } finally {
         setIsReplacingFile(false);
       }
@@ -148,9 +150,9 @@ export function UploadStep1Details({
         return;
       }
 
-      setReplaceError(res.message || "Không thể hủy upload cũ để thay thế file.");
+      setReplaceError(res.message || t("step1.errors.replaceFileFailed"));
     } catch (err) {
-      setReplaceError(getErrorMessage(err, "Không thể đổi file video. Vui lòng thử lại."));
+      setReplaceError(getErrorMessage(err, t("step1.errors.replaceFileRetry")));
     } finally {
       setIsReplacingFile(false);
     }
@@ -183,7 +185,7 @@ export function UploadStep1Details({
         const thumbnailExtension = formData.thumbnailFile ? getThumbnailExtension(formData.thumbnailFile) : null;
 
         if (formData.thumbnailFile && !thumbnailExtension) {
-          setThumbnailError("Thumbnail must be a JPG, PNG, or WEBP image.");
+          setThumbnailError(t("step1.errors.invalidThumbnailType"));
           return;
         }
 
@@ -202,7 +204,7 @@ export function UploadStep1Details({
         });
 
         if (!(initResponse.success || initResponse.statusCode === 201) || !initResponse.data) {
-          setUploadError(initResponse.message || "Không thể tạo draft upload.");
+          setUploadError(initResponse.message || t("step1.errors.createDraftFailed"));
           return;
         }
 
@@ -221,7 +223,7 @@ export function UploadStep1Details({
       updateFormData({ draftUpload, rawUploadCompleted: true });
       onNext();
     } catch (err) {
-      setUploadError(getErrorMessage(err, "Không thể upload video. Vui lòng thử lại."));
+      setUploadError(getErrorMessage(err, t("step1.errors.uploadVideoFailed")));
       updateFormData({ rawUploadCompleted: false });
     } finally {
       setIsUploadingRaw(false);
@@ -233,10 +235,10 @@ export function UploadStep1Details({
       <header className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <span className="mb-2 block font-headline text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            New Upload
+            {t("step1.label")}
           </span>
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">
-            Video Details
+            {t("step1.title")}
           </h1>
         </div>
 
@@ -267,7 +269,7 @@ export function UploadStep1Details({
         <div className="space-y-8 lg:col-span-8">
           <div className="group">
             <label className="mb-3 block text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors group-focus-within:text-primary">
-              Video Title
+              {t("step1.fields.title")}
             </label>
             <input
               type="text"
@@ -286,12 +288,12 @@ export function UploadStep1Details({
           <div className="rounded-lg border border-border/30 bg-card p-6">
             <div className="mb-4 flex items-center justify-between border-b border-border/30 pb-4">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Description
+                {t("step1.fields.description")}
               </label>
             </div>
             <textarea
               className="min-h-[200px] w-full resize-none border-0 bg-transparent font-body leading-relaxed text-foreground/80 outline-none focus:ring-0"
-              placeholder="Tell viewers about your video..."
+              placeholder={t("step1.fields.descriptionPlaceholder")}
               value={formData.description}
               onChange={e => updateFormData({ description: e.target.value })}
             />
@@ -307,8 +309,8 @@ export function UploadStep1Details({
           <div className="rounded-lg border border-border/30 bg-card p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <p className="font-headline text-sm font-bold text-foreground">Custom Thumbnail</p>
-                <p className="mt-1 text-xs text-muted-foreground">Optional JPG, PNG, or WEBP up to 5MB.</p>
+                <p className="font-headline text-sm font-bold text-foreground">{t("step1.fields.thumbnail")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("step1.fields.thumbnailHint")}</p>
               </div>
               {formData.thumbnailFile ? (
                 <button
@@ -316,7 +318,7 @@ export function UploadStep1Details({
                   onClick={() => handleThumbnailSelect(null)}
                   className="rounded-sm border border-border/40 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Clear
+                  {t("step1.fields.clear")}
                 </button>
               ) : null}
             </div>
@@ -335,7 +337,7 @@ export function UploadStep1Details({
               ) : (
                 <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
                   <span className="material-symbols-outlined text-4xl" aria-hidden="true">add_photo_alternate</span>
-                  <span className="font-headline text-xs font-bold uppercase tracking-widest">Choose thumbnail</span>
+                  <span className="font-headline text-xs font-bold uppercase tracking-widest">{t("step1.fields.thumbnailChoose")}</span>
                 </span>
               )}
             </button>
@@ -369,7 +371,7 @@ export function UploadStep1Details({
         <div className="flex items-center gap-4">
           <div className="hidden flex-col sm:flex">
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              Status
+              {t("step1.bottomBar.status")}
             </span>
             <span
               className={`flex items-center gap-1 text-xs font-bold ${
@@ -379,7 +381,11 @@ export function UploadStep1Details({
               {formData.file ? (
                 <span className="material-symbols-outlined text-[14px]">check</span>
               ) : null}
-              {formData.rawUploadCompleted ? "Raw uploaded" : formData.file ? "File selected" : "Draft"}
+              {formData.rawUploadCompleted
+                ? t("step1.bottomBar.rawUploaded")
+                : formData.file
+                  ? t("step1.bottomBar.fileSelected")
+                  : t("step1.bottomBar.draft")}
             </span>
           </div>
         </div>
@@ -394,7 +400,11 @@ export function UploadStep1Details({
                 : "pointer-events-none bg-muted text-muted-foreground"
             }`}
           >
-            {isUploadingRaw ? `Uploading ${uploadProgress}%` : formData.rawUploadCompleted ? "Next: Pricing & Monetization" : "Upload & Continue"}
+            {isUploadingRaw
+              ? t("step1.bottomBar.uploading", { progress: uploadProgress })
+              : formData.rawUploadCompleted
+                ? t("step1.bottomBar.nextBtn")
+                : t("step1.bottomBar.uploadBtn")}
           </button>
         </div>
       </div>

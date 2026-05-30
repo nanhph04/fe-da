@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const FALLBACK_THUMBNAIL = "/images/thumbnail.png";
 
@@ -9,35 +9,17 @@ interface VideoThumbnailProps extends Omit<React.ImgHTMLAttributes<HTMLImageElem
   src: string | null | undefined;
 }
 
-function resolveThumbnailSrc(src: string | null | undefined, currentSrc: string) {
-  if (src) {
-    return src;
+export function VideoThumbnail({ alt, src, className, ...props }: VideoThumbnailProps) {
+  const [fallbackActive, setFallbackActive] = useState(false);
+  const [prevSrc, setPrevSrc] = useState(src);
+
+  // Sync state with src changes at render time to avoid useEffect cascading renders
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    setFallbackActive(false);
   }
 
-  return currentSrc === FALLBACK_THUMBNAIL ? FALLBACK_THUMBNAIL : currentSrc;
-}
-
-export function VideoThumbnail({ alt, src, className, ...props }: VideoThumbnailProps) {
-  const [resolvedSrc, setResolvedSrc] = useState(src || FALLBACK_THUMBNAIL);
-
-  useEffect(() => {
-    console.log("[VideoThumbnail] source updated", {
-      alt,
-      src,
-      fallback: FALLBACK_THUMBNAIL,
-    });
-
-    setResolvedSrc((currentSrc) => {
-      const nextSrc = resolveThumbnailSrc(src, currentSrc);
-      console.log("[VideoThumbnail] resolved thumbnail source", {
-        alt,
-        inputSrc: src,
-        currentSrc,
-        nextSrc,
-      });
-      return nextSrc;
-    });
-  }, [alt, src]);
+  const resolvedSrc = src && !fallbackActive ? src : FALLBACK_THUMBNAIL;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -46,15 +28,15 @@ export function VideoThumbnail({ alt, src, className, ...props }: VideoThumbnail
       className={className || "h-full w-full object-cover"}
       src={resolvedSrc}
       alt={alt}
-      onError={(event) => {
+      onError={() => {
         console.error("[VideoThumbnail] thumbnail failed to load", {
           alt,
-          requestedSrc: event.currentTarget.src,
-          resolvedSrc,
+          requestedSrc: resolvedSrc,
           fallback: FALLBACK_THUMBNAIL,
         });
-        setResolvedSrc(FALLBACK_THUMBNAIL);
+        setFallbackActive(true);
       }}
     />
   );
 }
+

@@ -1,13 +1,17 @@
-const checks = [
-  { label: "Metadata", detail: "Required fields are ready" },
-  { label: "Categories", detail: "Will be validated by media service" },
-  { label: "Monetization", detail: "Pricing configuration prepared" },
-];
+import { useTranslations } from "next-intl";
 
 export function PreflightChecks() {
+  const t = useTranslations("Studio.upload");
+
+  const checks = [
+    { label: t("step3.preflight.metadataLabel"), detail: t("step3.preflight.metadataDetail") },
+    { label: t("step3.preflight.categoryLabel"), detail: t("step3.preflight.categoryDetail") },
+    { label: t("step3.preflight.monetizationLabel"), detail: t("step3.preflight.monetizationDetail") },
+  ];
+
   return (
     <div className="flex flex-col gap-4 rounded-xl bg-surface-container-low p-5 shadow-sm">
-      <h4 className="font-headline text-sm font-semibold text-on-surface">Pre-flight Checks</h4>
+      <h4 className="font-headline text-sm font-semibold text-on-surface">{t("step3.preflight.title")}</h4>
       <div className="flex flex-col gap-3">
         {checks.map((check) => (
           <div key={check.label} className="flex items-center gap-3">

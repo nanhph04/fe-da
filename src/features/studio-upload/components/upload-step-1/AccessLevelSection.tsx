@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { UploadFormData } from "../StudioUploadFeature";
 
 interface AccessLevelSectionProps {
@@ -9,11 +10,13 @@ export function AccessLevelSection({
   visibility,
   updateFormData,
 }: AccessLevelSectionProps) {
+  const t = useTranslations("Studio.upload");
+
   return (
     <section className="space-y-6">
       <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
         <span className="material-symbols-outlined text-[#fdc003]">lock_open</span>
-        Video Access Level
+        {t("step3.visibility.titleAccess")}
       </h3>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <label className="group relative cursor-pointer">
@@ -33,9 +36,9 @@ export function AccessLevelSection({
                 <div className="h-1.5 w-1.5 rounded-full bg-input" />
               </div>
             </div>
-            <h4 className="mb-1 font-headline font-bold text-foreground">Public</h4>
+            <h4 className="mb-1 font-headline font-bold text-foreground">{t("step3.visibility.public.title")}</h4>
             <p className="text-xs text-muted-foreground">
-              Available to everyone on your public feed.
+              {t("step3.visibility.public.descriptionShort")}
             </p>
           </div>
         </label>
@@ -60,9 +63,9 @@ export function AccessLevelSection({
                 <div className="hidden h-1.5 w-1.5 rounded-full bg-input peer-checked:block" />
               </div>
             </div>
-            <h4 className="mb-1 font-headline font-bold text-foreground">Private</h4>
+            <h4 className="mb-1 font-headline font-bold text-foreground">{t("step3.visibility.private.title")}</h4>
             <p className="text-xs text-muted-foreground">
-              Only visible to you or those with link.
+              {t("step3.visibility.private.descriptionShort")}
             </p>
           </div>
         </label>

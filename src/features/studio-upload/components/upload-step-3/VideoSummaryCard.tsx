@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { UploadFormData } from "../StudioUploadFeature";
 
 interface VideoSummaryCardProps {
@@ -5,7 +6,8 @@ interface VideoSummaryCardProps {
 }
 
 export function VideoSummaryCard({ formData }: VideoSummaryCardProps) {
-  const priceLabel = formData.price > 0 ? `${formData.price} AC` : "Free";
+  const t = useTranslations("Studio.upload");
+  const priceLabel = formData.price > 0 ? `${formData.price} AC` : t("step2.fields.free");
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl bg-surface-container-low shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
@@ -22,17 +24,17 @@ export function VideoSummaryCard({ formData }: VideoSummaryCardProps) {
         )}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-surface-container-low to-transparent" />
         <div className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 font-headline text-xs font-semibold text-foreground">
-          {formData.thumbnailFile ? "Custom thumbnail" : "Draft"}
+          {formData.thumbnailFile ? t("step3.summary.customThumbnail") : t("step3.summary.draftLabel")}
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 p-5">
+      <div className="group flex flex-col gap-4 p-5">
         <div className="flex flex-col gap-1">
           <h3 className="font-headline text-base font-bold leading-snug text-on-surface">
-            {formData.title || "Untitled upload"}
+            {formData.title || t("step3.summary.untitled")}
           </h3>
           <p className="font-body text-xs text-on-surface-variant">
-            {formData.rawUploadCompleted ? "Raw uploaded • Ready to confirm" : "Draft metadata • Waiting for raw upload"}
+            {formData.rawUploadCompleted ? t("step3.summary.rawUploaded") : t("step3.summary.draft")}
           </p>
         </div>
 
@@ -42,13 +44,13 @@ export function VideoSummaryCard({ formData }: VideoSummaryCardProps) {
               <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                 star
               </span>
-              Level {formData.requiredTierLevel}: Exclusive
+              {t("step3.summary.exclusive", { level: formData.requiredTierLevel })}
             </div>
           </div>
         ) : null}
 
         <div className="flex items-center justify-between border-t border-outline-variant/10 py-3">
-          <span className="font-body text-sm text-on-surface-variant">Unlock Price</span>
+          <span className="font-body text-sm text-on-surface-variant">{t("step3.summary.unlockPrice")}</span>
           <span className="flex items-center gap-1 font-headline text-lg font-bold text-on-surface">
             {formData.price > 0 ? (
               <span className="material-symbols-outlined text-base text-secondary" aria-hidden="true">

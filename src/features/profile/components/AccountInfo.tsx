@@ -12,7 +12,7 @@ interface AccountInfoProps {
   user: ProfileUser;
 }
 
-const getGenderLabel = (gender: ProfileUser["gender"], t: any) => {
+const getGenderLabel = (gender: ProfileUser["gender"], t: (key: string) => string) => {
   if (gender === "male") return t("genderLabels.male");
   if (gender === "female" || gender === "women") return t("genderLabels.female");
   return t("genderLabels.unspecified");

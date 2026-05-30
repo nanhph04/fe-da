@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { UploadStep1Details } from "./UploadStep1Details";
 import { UploadStep2Monetization } from "./UploadStep2Monetization";
 import { UploadStep3Review } from "./UploadStep3Review";
@@ -37,6 +38,7 @@ export interface UploadFormData {
 }
 
 export function StudioUploadFeature() {
+  const t = useTranslations("Studio.upload");
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<UploadFormData>({
     title: "",
@@ -74,17 +76,17 @@ export function StudioUploadFeature() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${currentStep >= 1 ? 'bg-primary text-black ring-4 ring-primary/20' : 'bg-muted text-muted-foreground'}`}>1</span>
-              <span className={`text-sm font-headline ${currentStep >= 1 ? 'text-foreground font-bold' : 'text-muted-foreground'}`}>Details</span>
+              <span className={`text-sm font-headline ${currentStep >= 1 ? 'text-foreground font-bold' : 'text-muted-foreground'}`}>{t("stepper.details")}</span>
             </div>
             <div className={`w-12 h-[1px] ${currentStep >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
             <div className="flex items-center gap-2">
               <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${currentStep >= 2 ? 'bg-primary text-black ring-4 ring-primary/20' : 'bg-muted text-muted-foreground'}`}>2</span>
-              <span className={`text-sm font-headline ${currentStep >= 2 ? 'text-foreground font-bold' : 'text-muted-foreground'}`}>Pricing & Payout</span>
+              <span className={`text-sm font-headline ${currentStep >= 2 ? 'text-foreground font-bold' : 'text-muted-foreground'}`}>{t("stepper.pricing")}</span>
             </div>
             <div className={`w-12 h-[1px] ${currentStep >= 3 ? 'bg-primary' : 'bg-muted'}`}></div>
             <div className={`flex items-center gap-2 ${currentStep < 3 ? 'opacity-40' : ''}`}>
               <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${currentStep >= 3 ? 'bg-primary text-black ring-4 ring-primary/20' : 'bg-muted text-muted-foreground'}`}>3</span>
-              <span className={`text-sm font-headline ${currentStep >= 3 ? 'text-foreground font-bold' : 'text-muted-foreground'}`}>Publish</span>
+              <span className={`text-sm font-headline ${currentStep >= 3 ? 'text-foreground font-bold' : 'text-muted-foreground'}`}>{t("stepper.publish")}</span>
             </div>
           </div>
         </div>

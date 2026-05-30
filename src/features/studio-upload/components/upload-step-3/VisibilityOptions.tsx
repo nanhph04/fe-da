@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 type VisibilityValue = "public" | "private";
 type VisibilityOption = {
   id: VisibilityValue | "unlisted";
@@ -16,41 +18,40 @@ interface VisibilityOptionsProps {
   onChange: (value: VisibilityValue) => void;
 }
 
-const options: VisibilityOption[] = [
-  {
-    id: "public",
-    icon: "public",
-    title: "Public",
-    description:
-      "Everyone can watch your video after processing and moderation. It can appear on your channel and in discovery surfaces.",
-  },
-  {
-    id: "unlisted",
-    icon: "link",
-    title: "Unlisted",
-    description:
-      "Anyone with the video link can watch it. This visibility mode is not available in the current API yet.",
-    disabled: true,
-    badge: "Coming soon",
-  },
-  {
-    id: "private",
-    icon: "lock",
-    iconFilled: true,
-    title: "Private",
-    description:
-      "Only viewers with explicit access can watch your video after the upload and review pipeline completes.",
-  },
-];
-
 function isSupportedVisibility(value: VisibilityOption["id"]): value is VisibilityValue {
   return value === "public" || value === "private";
 }
 
 export function VisibilityOptions({ value, onChange }: VisibilityOptionsProps) {
+  const t = useTranslations("Studio.upload");
+
+  const options: VisibilityOption[] = [
+    {
+      id: "public",
+      icon: "public",
+      title: t("step3.visibility.public.title"),
+      description: t("step3.visibility.public.description"),
+    },
+    {
+      id: "unlisted",
+      icon: "link",
+      title: t("step3.visibility.unlisted.title"),
+      description: t("step3.visibility.unlisted.description"),
+      disabled: true,
+      badge: t("step3.visibility.unlisted.badge"),
+    },
+    {
+      id: "private",
+      icon: "lock",
+      iconFilled: true,
+      title: t("step3.visibility.private.title"),
+      description: t("step3.visibility.private.description"),
+    },
+  ];
+
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="mb-2 font-headline text-lg font-semibold text-on-surface">Select Visibility</h2>
+      <h2 className="mb-2 font-headline text-lg font-semibold text-on-surface">{t("step3.visibility.title")}</h2>
       {options.map((option) => {
         const isActive = value === option.id;
         const isDisabled = option.disabled || !isSupportedVisibility(option.id);

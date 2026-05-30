@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import type { UploadFormData } from "./StudioUploadFeature";
 import { mediaService } from "@/features/watch/services/mediaService";
@@ -20,6 +21,7 @@ interface UploadStep3ReviewProps {
 }
 
 export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadStep3ReviewProps) {
+  const t = useTranslations("Studio.upload");
   const router = useRouter();
   const [isChecked1, setIsChecked1] = useState(false);
   const [isChecked2, setIsChecked2] = useState(false);
@@ -50,12 +52,12 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       });
 
       if (!metadataResponse.success) {
-        setError(metadataResponse.message || "Failed to update draft metadata");
+        setError(metadataResponse.message || t("step3.errors.updateMetadataFailed"));
         return;
       }
 
       if (formData.thumbnailFile && (!draftUpload.thumbnailUploadUrl || !draftUpload.thumbnailObjectKey)) {
-        setError("Media service did not return a thumbnail upload URL. Remove the custom thumbnail or try again.");
+        setError(t("step3.errors.missingThumbnailUrl"));
         return;
       }
 
@@ -76,7 +78,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       });
 
       if (!(confirmResponse.success || confirmResponse.statusCode === 201 || confirmResponse.statusCode === 200)) {
-        setError(confirmResponse.message || "Failed to submit upload");
+        setError(confirmResponse.message || t("step3.errors.submitUploadFailed"));
         return;
       }
 
@@ -85,7 +87,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         router.push("/studio/content");
       }, 2000);
     } catch (err: unknown) {
-      setError(getErrorMessage(err, "An error occurred during upload"));
+      setError(getErrorMessage(err, t("step3.errors.genericUploadError")));
     } finally {
       setPublishStage("idle");
       setIsPublishing(false);
@@ -98,9 +100,9 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
           <span className="material-symbols-outlined text-green-500 text-6xl">check_circle</span>
         </div>
-        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-foreground mb-2">Upload Submitted</h1>
-        <p className="text-muted-foreground">Video đã được gửi sang pipeline xử lý và kiểm duyệt.</p>
-        <p className="text-muted-foreground text-sm mt-4">Redirecting to Content Library...</p>
+        <h1 className="text-4xl font-extrabold font-headline tracking-tighter text-foreground mb-2">{t("step3.success.title")}</h1>
+        <p className="text-muted-foreground">{t("step3.success.message")}</p>
+        <p className="text-muted-foreground text-sm mt-4">{t("step3.success.redirect")}</p>
       </div>
     );
   }
@@ -111,10 +113,10 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       <div className="px-12 py-10">
         <div className="mb-10 max-w-5xl mx-auto">
           <h1 className="font-display text-3xl tracking-tight font-bold text-on-surface mb-2">
-            Publishing Pipeline
+            {t("step3.title")}
           </h1>
           <p className="font-body text-sm text-on-surface-variant">
-            Configure release parameters and final checks before going live.
+            {t("step3.description")}
           </p>
         </div>
 
@@ -137,13 +139,13 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
 
             {!formData.file ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-                Vui lòng quay lại bước Details để chọn video file trước khi publish.
+                {t("step3.errors.selectFileFirst")}
               </div>
             ) : null}
 
             {/* Declarations — compact inline */}
             <div className={`bg-surface-container-low rounded-xl p-5 flex flex-col gap-3 transition-opacity ${isPublishing ? 'opacity-20 pointer-events-none' : ''}`}>
-              <h4 className="font-headline text-sm font-semibold text-on-surface">Terms & Declarations</h4>
+              <h4 className="font-headline text-sm font-semibold text-on-surface">{t("step3.declarations.title")}</h4>
               
               <label className="flex items-start gap-3 cursor-pointer group">
                 <div className="relative flex items-start pt-0.5">
@@ -158,7 +160,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
                   </div>
                 </div>
                 <p className="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">
-                  I confirm compliance with <span className="text-primary">Aura Cinematic Community Guidelines</span>
+                  {t.rich("step3.declarations.guidelines", { link: (chunks) => <span className="text-primary">{chunks}</span> })}
                 </p>
               </label>
 
@@ -175,7 +177,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
                   </div>
                 </div>
                 <p className="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">
-                  I understand Aura DRM will be applied to prevent unauthorized redistribution
+                  {t("step3.declarations.drm")}
                 </p>
               </label>
             </div>
@@ -192,7 +194,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
               disabled={isPublishing}
               className="w-full rounded-sm border border-outline-variant/30 py-3 font-headline text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Back to Pricing
+              {t("step3.actions.back")}
             </button>
           </aside>
         </div>
@@ -203,16 +205,15 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="w-full max-w-sm space-y-4 rounded-lg border border-border/30 bg-card p-8 text-center shadow-2xl">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <h3 className="font-headline font-bold text-xl text-on-surface">Publishing your Masterpiece...</h3>
+            <h3 className="font-headline font-bold text-xl text-on-surface">{t("step3.overlay.title")}</h3>
             <p className="text-sm text-muted-foreground">
-              {publishStage === "metadata" && "Syncing final metadata..."}
-              {publishStage === "thumbnail" && "Uploading custom thumbnail..."}
-              {publishStage === "confirming" && "Confirming upload for processing..."}
+              {publishStage === "metadata" && t("step3.overlay.metadata")}
+              {publishStage === "thumbnail" && t("step3.overlay.thumbnail")}
+              {publishStage === "confirming" && t("step3.overlay.confirming")}
             </p>
           </div>
         </div>
       )}
-
 
       {error && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-red-600/10 border border-red-600/30 rounded-lg px-6 py-3 z-50">

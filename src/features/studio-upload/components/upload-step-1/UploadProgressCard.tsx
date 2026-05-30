@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 
 interface UploadProgressCardProps {
   file: File | null;
@@ -31,6 +32,7 @@ export function UploadProgressCard({
   uploadError,
   onFileSelect,
 }: UploadProgressCardProps) {
+  const t = useTranslations("Studio.upload");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const openFilePicker = () => {
@@ -56,7 +58,7 @@ export function UploadProgressCard({
       {!file ? (
         <div className="flex flex-col gap-3">
           <span className="text-center font-headline text-sm font-medium text-muted-foreground">
-            Select video file to begin
+            {t("step1.fields.selectFileHint")}
           </span>
           <button
             type="button"
@@ -64,19 +66,25 @@ export function UploadProgressCard({
             disabled={isReplacing || isUploading}
             className="w-full border border-dashed border-border bg-muted py-2 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Browse Files
+            {t("step1.fields.browseFiles")}
           </button>
           {replaceError ? <p className="text-xs text-destructive">{replaceError}</p> : null}
         </div>
       ) : (
         <div className="space-y-4">
-          <div>
+          <div className="min-w-0">
             <div className={`mb-2 flex items-center gap-2 ${isUploaded ? "text-secondary" : "text-green-500"}`}>
               <span className={`material-symbols-outlined text-[18px] ${isUploading ? "animate-spin" : ""}`}>
                 {isUploading ? "progress_activity" : isUploaded ? "cloud_done" : "check_circle"}
               </span>
               <span className="font-headline text-xs font-bold uppercase tracking-widest">
-                {isUploading ? "Uploading Raw File" : isReplacing ? "Replacing File" : isUploaded ? "Uploaded to Storage" : "File Ready"}
+                {isUploading
+                  ? t("step1.fields.uploadingRawFile")
+                  : isReplacing
+                    ? t("step1.fields.replacingFile")
+                    : isUploaded
+                      ? t("step1.fields.uploadedToStorage")
+                      : t("step1.fields.fileReady")}
               </span>
             </div>
             <p className="truncate font-headline text-sm font-semibold text-zinc-200" title={file.name}>
@@ -94,7 +102,9 @@ export function UploadProgressCard({
                   />
                 </div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {isUploaded ? "Raw video uploaded" : `${uploadProgress}% uploaded`}
+                  {isUploaded
+                    ? t("step1.fields.rawVideoUploaded")
+                    : t("step1.fields.percentUploaded", { progress: uploadProgress })}
                 </p>
               </div>
             ) : null}
@@ -109,7 +119,7 @@ export function UploadProgressCard({
               disabled={isReplacing || isUploading}
               className="flex-1 rounded-sm bg-muted py-2 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isReplacing ? "Replacing..." : "Replace"}
+              {isReplacing ? t("step1.fields.replacing") : t("step1.fields.replace")}
             </button>
             <button
               type="button"
@@ -117,7 +127,7 @@ export function UploadProgressCard({
               disabled={isReplacing || isUploading}
               className="rounded-sm border border-border/40 px-3 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Clear
+              {t("step1.fields.clear")}
             </button>
           </div>
         </div>

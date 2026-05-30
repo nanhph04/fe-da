@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function ScheduleRelease() {
+  const t = useTranslations("Studio.upload");
   const [enabled, setEnabled] = useState(false);
   const [date, setDate] = useState("2026-05-20");
   const [time, setTime] = useState("18:00");
@@ -12,13 +14,13 @@ export function ScheduleRelease() {
       <div className="flex items-start justify-between gap-6">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h3 className="font-headline text-base font-semibold text-on-surface">Schedule Release</h3>
+            <h3 className="font-headline text-base font-semibold text-on-surface">{t("step3.schedule.title")}</h3>
             <span className="rounded bg-surface-container-high px-2 py-0.5 font-body text-xs text-on-surface-variant">
-              Coming soon
+              {t("step3.schedule.badge")}
             </span>
           </div>
           <p className="font-body text-sm text-on-surface-variant">
-            Scheduling is shown for planning only and is not sent to the media API yet.
+            {t("step3.schedule.description")}
           </p>
         </div>
 
@@ -42,7 +44,7 @@ export function ScheduleRelease() {
         <div className="flex flex-col gap-4 sm:flex-row">
           <div className="flex flex-1 flex-col gap-2">
             <label className="ml-1 font-label text-xs text-on-surface-variant" htmlFor="release-date">
-              Date
+              {t("step3.schedule.date")}
             </label>
             <div className="relative">
               <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">
@@ -60,7 +62,7 @@ export function ScheduleRelease() {
 
           <div className="flex flex-1 flex-col gap-2">
             <label className="ml-1 font-label text-xs text-on-surface-variant" htmlFor="release-time">
-              Time
+              {t("step3.schedule.time")}
             </label>
             <div className="relative">
               <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">

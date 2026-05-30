@@ -6,7 +6,6 @@ import {
   FileClock,
   Film,
   Gauge,
-  History,
   Landmark,
   LifeBuoy,
   Settings,

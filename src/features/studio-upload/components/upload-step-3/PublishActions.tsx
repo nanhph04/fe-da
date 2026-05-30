@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface PublishActionsProps {
   canPublish: boolean;
   isPublishing: boolean;
@@ -7,6 +9,8 @@ interface PublishActionsProps {
 }
 
 export function PublishActions({ canPublish, isPublishing, onPublish }: PublishActionsProps) {
+  const t = useTranslations("Studio.upload");
+
   return (
     <div className="mt-4 flex flex-col gap-3">
       <button
@@ -24,7 +28,7 @@ export function PublishActions({ canPublish, isPublishing, onPublish }: PublishA
         ) : (
           <span className="material-symbols-outlined text-lg">upload</span>
         )}
-        Confirm & Publish
+        {t("step3.actions.confirmPublish")}
       </button>
 
       <button
@@ -34,10 +38,10 @@ export function PublishActions({ canPublish, isPublishing, onPublish }: PublishA
         aria-describedby="save-draft-note"
       >
         <span className="material-symbols-outlined text-lg">save</span>
-        Save as Draft
+        {t("step3.actions.saveDraft")}
       </button>
       <p id="save-draft-note" className="text-center font-body text-xs text-on-surface-variant">
-        Draft was created and raw video was uploaded from Step 1.
+        {t("step3.actions.draftBarHint")}
       </p>
     </div>
   );

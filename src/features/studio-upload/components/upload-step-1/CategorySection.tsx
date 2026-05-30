@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { CategoryResponse } from "@/features/watch/services/mediaService";
 
 interface CategorySectionProps {
@@ -18,6 +19,7 @@ export function CategorySection({
   error,
   onChange,
 }: CategorySectionProps) {
+  const t = useTranslations("Studio.upload");
   const [query, setQuery] = useState("");
 
   const filteredCategories = useMemo(() => {
@@ -43,9 +45,9 @@ export function CategorySection({
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Category
+              {t("step1.fields.category")}
             </label>
-            <p className="text-xs text-muted-foreground">Select one active category required by media service.</p>
+            <p className="text-xs text-muted-foreground">{t("step1.fields.categoryHint")}</p>
           </div>
           {selectedCategory ? (
             <span className="shrink-0 rounded-sm border border-secondary/30 bg-secondary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-secondary">
@@ -63,7 +65,7 @@ export function CategorySection({
             aria-label="Search categories"
             value={query}
             onChange={event => setQuery(event.target.value)}
-            placeholder="Search category..."
+            placeholder={t("step1.fields.categorySearchPlaceholder")}
             className="h-10 w-full rounded-sm border border-border/40 bg-background pl-10 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary focus:ring-1 focus:ring-primary/60"
           />
         </div>
@@ -72,7 +74,7 @@ export function CategorySection({
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {isLoading ? (
               <div className="col-span-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
-                Loading categories...
+                {t("step1.fields.categoryLoading")}
               </div>
             ) : error ? (
               <div className="col-span-full rounded-sm border border-dashed border-destructive/30 bg-destructive/10 px-4 py-6 text-center text-xs text-destructive">
@@ -80,7 +82,7 @@ export function CategorySection({
               </div>
             ) : categories.length === 0 ? (
               <div className="col-span-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center text-xs text-muted-foreground">
-                No active categories available.
+                {t("step1.fields.categoryEmpty")}
               </div>
             ) : filteredCategories.length > 0 ? (
               filteredCategories.map(category => {
@@ -113,8 +115,8 @@ export function CategorySection({
               })
             ) : (
               <div className="col-span-full rounded-sm border border-dashed border-border/30 bg-background/60 px-4 py-6 text-center">
-                <p className="text-xs font-medium text-muted-foreground">No matching category found.</p>
-                <p className="mt-1 text-[10px] text-muted-foreground/70">Try searching by category name or slug.</p>
+                <p className="text-xs font-medium text-muted-foreground">{t("step1.fields.categoryNoMatch")}</p>
+                <p className="mt-1 text-[10px] text-muted-foreground/70">{t("step1.fields.categoryNoMatchHint")}</p>
               </div>
             )}
           </div>

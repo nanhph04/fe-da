@@ -797,6 +797,185 @@
           "saving": "Saving..."
         }
       }
+    },
+    "upload": {
+      "stepper": {
+        "details": "Details",
+        "pricing": "Pricing & Payout",
+        "publish": "Publish"
+      },
+      "step1": {
+        "label": "New Upload",
+        "title": "Video Details",
+        "fields": {
+          "title": "Video Title",
+          "description": "Description",
+          "descriptionPlaceholder": "Tell viewers about your video...",
+          "thumbnail": "Custom Thumbnail",
+          "thumbnailHint": "Optional JPG, PNG, or WEBP up to 5MB.",
+          "thumbnailChoose": "Choose thumbnail",
+          "clear": "Clear",
+          "category": "Category",
+          "categoryHint": "Select one active category required by media service.",
+          "categorySearchPlaceholder": "Search category...",
+          "categoryLoading": "Loading categories...",
+          "categoryEmpty": "No active categories available.",
+          "categoryNoMatch": "No matching category found.",
+          "categoryNoMatchHint": "Try searching by category name or slug.",
+          "tags": "Tags",
+          "tagsHint": "Optional active tags for discovery and search.",
+          "tagsSelected": "{count} selected",
+          "tagsSearchPlaceholder": "Search tags...",
+          "tagsLoading": "Loading tags...",
+          "tagsEmpty": "No active tags available.",
+          "tagsNoMatch": "No matching tag found.",
+          "selectFileHint": "Select video file to begin",
+          "browseFiles": "Browse Files",
+          "uploadingRawFile": "Uploading Raw File",
+          "replacingFile": "Replacing File",
+          "uploadedToStorage": "Uploaded to Storage",
+          "fileReady": "File Ready",
+          "rawVideoUploaded": "Raw video uploaded",
+          "percentUploaded": "{progress}% uploaded",
+          "replacing": "Replacing...",
+          "replace": "Replace"
+        },
+        "errors": {
+          "invalidThumbnailType": "Thumbnail must be a JPG, PNG, or WEBP image.",
+          "invalidThumbnailSize": "Thumbnail must be 5MB or smaller.",
+          "cancelDraftFailed": "Unable to cancel current draft upload.",
+          "cancelDraftRetry": "Unable to cancel draft upload. Please try again.",
+          "replaceFileFailed": "Unable to cancel old upload to replace file.",
+          "replaceFileRetry": "Unable to change video file. Please try again.",
+          "createDraftFailed": "Unable to create draft upload.",
+          "uploadVideoFailed": "Unable to upload video. Please try again."
+        },
+        "resolutions": {
+          "title": "Processing Resolutions",
+          "hint": "These resolutions match the body resolutions of the video processing API."
+        },
+        "bottomBar": {
+          "status": "Status",
+          "rawUploaded": "Raw uploaded",
+          "fileSelected": "File selected",
+          "draft": "Draft",
+          "uploading": "Uploading {progress}%",
+          "nextBtn": "Next: Pricing & Monetization",
+          "uploadBtn": "Upload & Continue"
+        }
+      },
+      "step2": {
+        "label": "Monetization",
+        "title": "Pricing Strategy",
+        "description": "Configure how viewers access your content. Aura Coins power all unlocks and creator settlements.",
+        "fields": {
+          "priceTitle": "Video Listing Price",
+          "priceHint": "Set the access fee in Aura Coins. Use 0 AC for free releases.",
+          "pricePremium": "Premium Content",
+          "membershipTitle": "Required Membership Tier",
+          "membershipHint": "Optional. Pulled from your channel membership tiers to restrict access by level.",
+          "syncing": "Syncing tiers",
+          "tiersCount": "{count} tiers",
+          "none": "None (Available to all)",
+          "loading": "Loading channel tiers...",
+          "selectedTier": "Selected: {name} at Lv{level} ({price})",
+          "emptyTiers": "No membership tiers found. Create tiers in Studio Membership first.",
+          "loadTiersFailed": "Unable to load this channel's membership tiers.",
+          "retrySync": "Retry sync",
+          "free": "Free",
+          "tierOpen": "Open",
+          "tierClosed": "Closed"
+        },
+        "breakdown": {
+          "title": "Earnings Breakdown",
+          "gross": "Gross Price",
+          "fee": "Platform Fee",
+          "estimatedNet": "Estimated Net",
+          "perPurchase": "Per purchase",
+          "hint": "Aura DRM protects premium releases. Payments settle automatically to your Wallet after unlocks."
+        },
+        "buttons": {
+          "back": "Back",
+          "next": "Next: Review & Publish"
+        }
+      },
+      "step3": {
+        "title": "Publishing Pipeline",
+        "description": "Configure release parameters and final checks before going live.",
+        "success": {
+          "title": "Upload Submitted",
+          "message": "Video has been submitted to the processing and moderation pipeline.",
+          "redirect": "Redirecting to Content Library..."
+        },
+        "errors": {
+          "updateMetadataFailed": "Failed to update draft metadata.",
+          "missingThumbnailUrl": "Media service did not return a thumbnail upload URL. Remove the custom thumbnail or try again.",
+          "submitUploadFailed": "Failed to submit upload.",
+          "genericUploadError": "An error occurred during upload.",
+          "selectFileFirst": "Please go back to the Details step and choose a video file before publishing."
+        },
+        "declarations": {
+          "title": "Terms & Declarations",
+          "guidelines": "I confirm compliance with <link>Aura Cinematic Community Guidelines</link>",
+          "drm": "I understand Aura DRM will be applied to prevent unauthorized redistribution"
+        },
+        "actions": {
+          "confirmPublish": "Confirm & Publish",
+          "saveDraft": "Save as Draft",
+          "draftBarHint": "Draft was created and raw video was uploaded from Step 1.",
+          "back": "Back to Pricing"
+        },
+        "overlay": {
+          "title": "Publishing your Masterpiece...",
+          "metadata": "Syncing final metadata...",
+          "thumbnail": "Uploading custom thumbnail...",
+          "confirming": "Confirming upload for processing..."
+        },
+        "preflight": {
+          "title": "Pre-flight Checks",
+          "metadataLabel": "Metadata",
+          "metadataDetail": "Required fields are ready",
+          "categoryLabel": "Categories",
+          "categoryDetail": "Will be validated by media service",
+          "monetizationLabel": "Monetization",
+          "monetizationDetail": "Pricing configuration prepared"
+        },
+        "schedule": {
+          "title": "Schedule Release",
+          "badge": "Coming soon",
+          "description": "Scheduling is shown for planning only and is not sent to the media API yet.",
+          "date": "Date",
+          "time": "Time"
+        },
+        "summary": {
+          "untitled": "Untitled upload",
+          "rawUploaded": "Raw uploaded • Ready to confirm",
+          "draft": "Draft metadata • Waiting for raw upload",
+          "exclusive": "Level {level}: Exclusive",
+          "unlockPrice": "Unlock Price",
+          "customThumbnail": "Custom thumbnail",
+          "draftLabel": "Draft"
+        },
+        "visibility": {
+          "title": "Select Visibility",
+          "titleAccess": "Video Access Level",
+          "public": {
+            "title": "Public",
+            "description": "Everyone can watch your video after processing and moderation. It can appear on your channel and in discovery surfaces.",
+            "descriptionShort": "Available to everyone on your public feed."
+          },
+          "unlisted": {
+            "title": "Unlisted",
+            "description": "Anyone with the video link can watch it. This visibility mode is not available in the current API yet.",
+            "badge": "Coming soon"
+          },
+          "private": {
+            "title": "Private",
+            "description": "Only viewers with explicit access can watch your video after the upload and review pipeline completes.",
+            "descriptionShort": "Only visible to you or those with link."
+          }
+        }
+      }
     }
   }
 }

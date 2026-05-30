@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { UploadFormData } from "../StudioUploadFeature";
 import { RESOLUTION_OPTIONS } from "./constants";
 
@@ -10,14 +11,16 @@ export function ResolutionSection({
   resolutions,
   updateFormData,
 }: ResolutionSectionProps) {
+  const t = useTranslations("Studio.upload");
+
   return (
     <section className="space-y-4 rounded-xl border border-border bg-card p-6">
       <div>
         <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-          Processing Resolutions
+          {t("step1.resolutions.title")}
         </h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Các độ phân giải này khớp với body `resolutions` của API xử lý video.
+          {t("step1.resolutions.hint")}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
