@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
 import { WithdrawalService } from "../services/withdrawalService";
@@ -18,6 +19,7 @@ const initialHistory: WithdrawalHistoryResponse = {
 };
 
 export function StudioPayoutsFeature() {
+  const t = useTranslations("Studio");
   const [history, setHistory] = useState<WithdrawalHistoryResponse>(initialHistory);
   const [summary, setSummary] = useState<WithdrawalSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,13 +42,13 @@ export function StudioPayoutsFeature() {
       setHistory(response);
       setSummary(summaryResponse);
     } catch (err) {
-      setError(getErrorMessage(err, "Không thể tải lịch sử payout."));
+      setError(getErrorMessage(err, t("wallet.payouts.error")));
       setHistory(initialHistory);
       setSummary(null);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadPayouts();
@@ -64,7 +66,7 @@ export function StudioPayoutsFeature() {
           ))}
         </div>
         <div className="rounded-lg border border-border/30 bg-card p-6 text-sm text-muted-foreground">
-          Loading withdrawal history...
+          {t("wallet.payouts.loading")}
         </div>
       </div>
     );
@@ -73,14 +75,14 @@ export function StudioPayoutsFeature() {
   if (error) {
     return (
       <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6">
-        <p className="font-headline text-lg font-bold text-foreground">Không thể tải payout</p>
+        <p className="font-headline text-lg font-bold text-foreground">{t("wallet.payouts.error")}</p>
         <p className="mt-2 text-sm text-muted-foreground">{error}</p>
         <Button
           type="button"
           onClick={loadPayouts}
           className="mt-5 rounded-sm bg-primary px-5 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90"
         >
-          Thử lại
+          {t("wallet.payouts.retry")}
         </Button>
       </div>
     );
@@ -89,9 +91,9 @@ export function StudioPayoutsFeature() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 md:grid-cols-3">
-        <SummaryCard label="Pending" value={`${(summary?.pendingCoinAmount ?? 0).toLocaleString()} AC`} />
-        <SummaryCard label="Completed" value={`${(summary?.completedCoinAmount ?? 0).toLocaleString()} AC`} />
-        <SummaryCard label="Records" value={(history.pagination.total || summary?.completedCount || 0).toLocaleString()} />
+        <SummaryCard label={t("wallet.payouts.summary.pending")} value={`${(summary?.pendingCoinAmount ?? 0).toLocaleString()} AC`} />
+        <SummaryCard label={t("wallet.payouts.summary.completed")} value={`${(summary?.completedCoinAmount ?? 0).toLocaleString()} AC`} />
+        <SummaryCard label={t("wallet.payouts.summary.records")} value={(history.pagination.total || summary?.completedCount || 0).toLocaleString()} />
       </div>
 
       <PayoutHistory
@@ -111,3 +113,4 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+

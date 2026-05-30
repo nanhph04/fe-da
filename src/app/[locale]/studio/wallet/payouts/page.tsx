@@ -1,23 +1,36 @@
 import { StudioPayoutsFeature } from "@/features/studio-wallet";
 import { requireStudioAccess } from "@/shared/auth/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export const metadata = {
-  title: "Withdrawal Management | Studio Wallet | Velvet Gallery",
-  description: "Monitor studio withdrawal history.",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default async function StudioPayoutsPage() {
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Studio.wallet.payoutsMetadata" });
+  return {
+    title: `${t("title")} | Studio Wallet | Velvet Gallery`,
+    description: t("description"),
+  };
+}
+
+export default async function StudioPayoutsPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   await requireStudioAccess("/studio/wallet/payouts");
+  const t = await getTranslations({ locale, namespace: "Studio.wallet.payouts" });
 
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-8">
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">
-            Withdrawal Management
+            {t("title")}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Review withdrawal processing and monitor completed creator payouts.
+            {t("description")}
           </p>
         </div>
 

@@ -2,13 +2,25 @@ import { WithdrawFundsPageFeature } from "@/features/studio-wallet";
 import type { StudioWallet } from "@/features/studio-wallet/types/studio-wallet.types";
 import { fetchServerApi } from "@/shared/api/server";
 import { requireStudioAccess } from "@/shared/auth/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export const metadata = {
-  title: "Withdraw Funds | Studio Wallet | Velvet Gallery",
-  description: "Create a creator payout request from your Studio Wallet balance.",
+type Props = {
+  params: Promise<{ locale: string }>;
 };
 
-export default async function StudioWalletWithdrawPage() {
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Studio.wallet.withdrawMetadata" });
+  return {
+    title: `${t("title")} | Studio Wallet | Velvet Gallery`,
+    description: t("description"),
+  };
+}
+
+export default async function StudioWalletWithdrawPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   await requireStudioAccess("/studio/wallet/withdraw");
 
   const walletResponse = await fetchServerApi<StudioWallet>("/api/studio/wallet/me", {

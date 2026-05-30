@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { getErrorMessage } from "@/shared/api/client";
 import { EarningsService } from "../services/earningsService";
 import type { EarningsHistory } from "../types/earnings.types";
@@ -33,44 +34,27 @@ type ChartWindow = {
 };
 
 const summaryCards = [
-  { label: "Total Earned AC", icon: "stars", key: "total" },
-  { label: "Available for Payout", icon: "account_balance_wallet", key: "available" },
-  { label: "Frozen Coins", icon: "lock", key: "frozen" },
-  { label: "Pending Payouts", icon: "schedule", key: "pending" },
+  { icon: "stars", key: "total" },
+  { icon: "account_balance_wallet", key: "available" },
+  { icon: "lock", key: "frozen" },
+  { icon: "schedule", key: "pending" },
 ] as const;
-
-const chartRangeOptions: Array<{ value: ChartRange; label: string }> = [
-  { value: "day", label: "1 Day" },
-  { value: "week", label: "1 Week" },
-  { value: "month", label: "1 Month" },
-];
 
 const chartHeight = 40;
 const chartBaseline = 36;
 const chartTopPadding = 4;
 const hourInMs = 60 * 60 * 1000;
 const dayInMs = 24 * hourInMs;
-const coinFormatter = new Intl.NumberFormat("vi-VN", {
-  maximumFractionDigits: 2,
-});
 
-function formatAcValue(value: number) {
-  return coinFormatter.format(value);
-}
-
-function getRangeLabel(range: ChartRange) {
-  return chartRangeOptions.find((option) => option.value === range)?.label ?? "1 Day";
-}
-
-function formatHourLabel(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatHourLabel(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
     hour: "2-digit",
     hour12: false,
   }).format(date);
 }
 
-function formatDayLabel(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatDayLabel(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
     month: "short",
     day: "numeric",
   }).format(date);
@@ -88,7 +72,7 @@ function startOfDay(date: Date) {
   return nextDate;
 }
 
-function createChartWindow(range: ChartRange): ChartWindow {
+function createChartWindow(range: ChartRange, locale: string): ChartWindow {
   const now = new Date();
 
   if (range === "day") {
@@ -98,7 +82,7 @@ function createChartWindow(range: ChartRange): ChartWindow {
       const bucketEnd = new Date(bucketStart.getTime() + hourInMs);
 
       return {
-        label: formatHourLabel(bucketStart),
+        label: formatHourLabel(bucketStart, locale),
         start: bucketStart,
         end: bucketEnd,
       };
@@ -118,7 +102,7 @@ function createChartWindow(range: ChartRange): ChartWindow {
     const bucketEnd = new Date(bucketStart.getTime() + dayInMs);
 
     return {
-      label: formatDayLabel(bucketStart),
+      label: formatDayLabel(bucketStart, locale),
       start: bucketStart,
       end: bucketEnd,
     };
@@ -216,12 +200,30 @@ function getChartYForValue(value: number, maxValue: number) {
 }
 
 export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletOverviewProps) {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [chartRange, setChartRange] = useState<ChartRange>("day");
   const [chartWindow, setChartWindow] = useState<ChartWindow | null>(null);
   const [earningsHistory, setEarningsHistory] = useState<EarningsHistory[]>([]);
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
   const [isChartLoading, setIsChartLoading] = useState(true);
   const [chartError, setChartError] = useState<string | null>(null);
+
+  const formatAcValue = (value: number) => {
+    return new Intl.NumberFormat(locale === "vi" ? "vi-VN" : "en-US", {
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const chartRangeOptions = [
+    { value: "day" as const, label: t("wallet.overview.chart.ranges.day") },
+    { value: "week" as const, label: t("wallet.overview.chart.ranges.week") },
+    { value: "month" as const, label: t("wallet.overview.chart.ranges.month") },
+  ];
+
+  const getRangeLabel = (range: ChartRange) => {
+    return chartRangeOptions.find((option) => option.value === range)?.label ?? t("wallet.overview.chart.ranges.day");
+  };
 
   const values = {
     total: stats.totalBalance,
@@ -232,7 +234,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
 
   useEffect(() => {
     const controller = new AbortController();
-    const nextChartWindow = createChartWindow(chartRange);
+    const nextChartWindow = createChartWindow(chartRange, locale);
     setChartWindow(nextChartWindow);
     setHoveredPointIndex(null);
 
@@ -256,7 +258,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
         }
 
         setEarningsHistory([]);
-        setChartError(getErrorMessage(error, "Unable to load earnings chart."));
+        setChartError(getErrorMessage(error, t("wallet.overview.chart.error")));
       } finally {
         if (!controller.signal.aborted) {
           setIsChartLoading(false);
@@ -269,7 +271,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
     return () => {
       controller.abort();
     };
-  }, [chartRange]);
+  }, [chartRange, locale, t]);
 
   const chartPoints = useMemo(() => toChartPoints(earningsHistory, chartWindow), [earningsHistory, chartWindow]);
   const visibleLabels = useMemo(() => getVisibleLabels(chartPoints), [chartPoints]);
@@ -295,11 +297,11 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
               </span>
             </div>
             <p className="mb-3 font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {card.label}
+              {t(`wallet.overview.cards.${card.key}`)}
             </p>
             <div className="flex items-baseline gap-2">
               <p className="font-headline text-5xl font-black tracking-tight text-foreground">
-                {values[card.key].toLocaleString()}
+                {formatAcValue(values[card.key])}
               </p>
               <span className="font-headline text-lg font-bold text-secondary">AC</span>
             </div>
@@ -313,13 +315,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
                       ? "lock"
                       : "hourglass_top"}
               </span>
-              {card.key === "total"
-                ? "+12.5% vs last month"
-                : card.key === "available"
-                  ? "Ready to withdraw"
-                  : card.key === "frozen"
-                    ? "Temporarily locked"
-                    : "Awaiting settlement"}
+              {t(`wallet.overview.cards.${card.key}Sub`)}
             </div>
           </article>
         ))}
@@ -329,8 +325,8 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
         <section className="rounded-lg border border-border/30 bg-card p-8 lg:col-span-2">
           <div className="mb-10 flex items-center justify-between gap-4">
             <div>
-              <h2 className="font-headline text-xl font-black tracking-tight text-foreground">Earnings Velocity</h2>
-              <p className="font-body text-xs text-muted-foreground">AC accumulation trend by selected period</p>
+              <h2 className="font-headline text-xl font-black tracking-tight text-foreground">{t("wallet.overview.chart.title")}</h2>
+              <p className="font-body text-xs text-muted-foreground">{t("wallet.overview.chart.description")}</p>
             </div>
             <select
               value={chartRange}
@@ -349,7 +345,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
           <div className="relative h-64 w-full">
             {isChartLoading ? (
               <div className="flex h-full items-center justify-center rounded-md border border-border/20 bg-background/40 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Loading earnings trend...
+                {t("wallet.overview.chart.loading")}
               </div>
             ) : chartError ? (
               <div className="flex h-full items-center justify-center rounded-md border border-primary/30 bg-primary/10 px-6 text-center font-body text-sm text-primary">
@@ -446,18 +442,18 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
               </div>
             ) : (
               <div className="flex h-full items-center justify-center rounded-md border border-border/20 bg-background/40 px-6 text-center font-body text-sm text-muted-foreground">
-                No earnings recorded for the last {selectedRangeLabel}.
+                {t("wallet.overview.chart.empty", { range: selectedRangeLabel })}
               </div>
             )}
           </div>
         </section>
 
         <aside className="rounded-lg border border-border/30 bg-card p-8">
-          <h2 className="mb-8 font-headline text-xl font-black tracking-tight text-foreground">Redemption</h2>
+          <h2 className="mb-8 font-headline text-xl font-black tracking-tight text-foreground">{t("wallet.overview.redemption.title")}</h2>
           <div className="space-y-4">
             <div className="rounded-lg border border-border/30 bg-background p-4">
               <div className="mb-1 flex items-center justify-between">
-                <span className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Conversion Rate</span>
+                <span className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("wallet.overview.redemption.rate")}</span>
                 <span className="material-symbols-outlined text-sm text-secondary" aria-hidden="true">info</span>
               </div>
               <div className="flex items-baseline gap-2">
@@ -468,7 +464,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
             </div>
 
             <div className="rounded-lg border border-border/30 bg-background p-4">
-              <span className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Wallet Status</span>
+              <span className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("wallet.overview.redemption.status")}</span>
               <p className="mt-2 font-headline text-lg font-bold text-foreground">{wallet.status}</p>
             </div>
 
@@ -479,7 +475,7 @@ export function WalletOverview({ wallet, stats, onWithdraw, isLoading }: WalletO
               className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-6 py-4 font-headline text-xs font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">payments</span>
-              {isLoading ? "Processing..." : "Withdraw Now"}
+              {isLoading ? t("wallet.overview.redemption.processing") : t("wallet.overview.redemption.withdrawNow")}
             </button>
           </div>
         </aside>

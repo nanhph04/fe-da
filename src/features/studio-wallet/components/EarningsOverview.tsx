@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { EarningsSummary, MonthlyEarnings } from "../types/earnings.types";
 import { EarningsService } from "../services/earningsService";
 
@@ -13,6 +14,7 @@ export function EarningsOverview({
   initialSummary,
   initialMonthly,
 }: EarningsOverviewProps) {
+  const t = useTranslations("Studio");
   const [summary, setSummary] = useState<EarningsSummary | null>(initialSummary ?? null);
   const [monthly, setMonthly] = useState<MonthlyEarnings | null>(initialMonthly ?? null);
   const [loading, setLoading] = useState(!initialSummary || !initialMonthly);
@@ -39,19 +41,19 @@ export function EarningsOverview({
         setSummary(nextSummary);
         setMonthly(nextMonthly);
       } catch {
-        setError("Failed to load earnings overview.");
+        setError(t("wallet.analytics.error"));
       } finally {
         setLoading(false);
       }
     };
 
     void loadOverview();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (
       <div className="rounded-md border border-border bg-background/80 p-6 text-muted-foreground">
-        Loading earnings overview...
+        {t("wallet.analytics.loading")}
       </div>
     );
   }
@@ -59,7 +61,7 @@ export function EarningsOverview({
   if (error || !summary || !monthly) {
     return (
       <div className="rounded-md border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive-foreground">
-        {error || "No earnings data available."}
+        {error || t("wallet.analytics.empty")}
       </div>
     );
   }
@@ -67,23 +69,23 @@ export function EarningsOverview({
   return (
     <section className="space-y-6 rounded-md border border-border bg-background/80 p-6">
       <div>
-        <h2 className="font-headline text-2xl font-bold text-foreground">Earnings Overview</h2>
+        <h2 className="font-headline text-2xl font-bold text-foreground">{t("wallet.analytics.overview")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Current revenue performance and payout readiness.
+          {t("wallet.analytics.sub")}
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <MetricCard label="Total earnings" value={`$${summary.totalEarnings.toFixed(2)}`} />
-        <MetricCard label="Monthly payout" value={`$${monthly.payoutAmount.toFixed(2)}`} />
-        <MetricCard label="Total views" value={summary.totalViews.toLocaleString()} />
-        <MetricCard label="Videos earning" value={summary.totalVideos.toLocaleString()} />
+        <MetricCard label={t("wallet.analytics.metrics.total")} value={`$${summary.totalEarnings.toFixed(2)}`} />
+        <MetricCard label={t("wallet.analytics.metrics.monthly")} value={`$${monthly.payoutAmount.toFixed(2)}`} />
+        <MetricCard label={t("wallet.analytics.metrics.views")} value={summary.totalViews.toLocaleString()} />
+        <MetricCard label={t("wallet.analytics.metrics.videos")} value={summary.totalVideos.toLocaleString()} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Pending earnings" value={`$${summary.pendingEarnings.toFixed(2)}`} tone="amber" />
-        <MetricCard label="Confirmed earnings" value={`$${summary.confirmedEarnings.toFixed(2)}`} tone="gold" />
-        <MetricCard label="Paid earnings" value={`$${summary.paidEarnings.toFixed(2)}`} tone="green" />
+        <MetricCard label={t("wallet.analytics.metrics.pending")} value={`$${summary.pendingEarnings.toFixed(2)}`} tone="amber" />
+        <MetricCard label={t("wallet.analytics.metrics.confirmed")} value={`$${summary.confirmedEarnings.toFixed(2)}`} tone="gold" />
+        <MetricCard label={t("wallet.analytics.metrics.paid")} value={`$${summary.paidEarnings.toFixed(2)}`} tone="green" />
       </div>
     </section>
   );
@@ -102,10 +104,10 @@ function MetricCard({
     tone === "amber"
       ? "text-[#fcbf49]"
       : tone === "gold"
-        ? "text-[#e9c46a]"
-        : tone === "green"
-          ? "text-[#7bd389]"
-          : "text-foreground";
+      ? "text-[#e9c46a]"
+      : tone === "green"
+      ? "text-[#7bd389]"
+      : "text-foreground";
 
   return (
     <div className="rounded-md border border-border bg-accent/70 p-4">
@@ -116,3 +118,4 @@ function MetricCard({
 }
 
 export default EarningsOverview;
+

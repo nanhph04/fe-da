@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getErrorMessage } from "@/shared/api/client";
@@ -9,6 +10,7 @@ import { StudioWalletService } from "../services/studioWalletService";
 import type { StudioWallet, WalletStats } from "../types/studio-wallet.types";
 
 export function StudioWalletFeature() {
+  const t = useTranslations("Studio");
   const [wallet, setWallet] = useState<StudioWallet | null>(null);
   const [stats, setStats] = useState<WalletStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,11 +31,11 @@ export function StudioWalletFeature() {
     } catch (err) {
       setWallet(null);
       setStats(null);
-      setError(getErrorMessage(err, "Không thể tải dữ liệu ví studio."));
+      setError(getErrorMessage(err, t("wallet.hub.errors.loadFailed")));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchWallet();
@@ -44,7 +46,7 @@ export function StudioWalletFeature() {
   }
 
   if (error || !wallet || !stats) {
-    return <StudioWalletError message={error ?? "Không tìm thấy dữ liệu ví studio."} onRetry={fetchWallet} />;
+    return <StudioWalletError message={error ?? t("wallet.hub.errors.notFound")} onRetry={fetchWallet} />;
   }
 
   return (
@@ -81,6 +83,8 @@ function StudioWalletError({
   message: string;
   onRetry: () => void;
 }) {
+  const t = useTranslations("Studio");
+
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-7xl items-center px-8 py-8">
       <Card className="w-full rounded-lg border-border/40 bg-card">
@@ -90,7 +94,7 @@ function StudioWalletError({
               Studio Wallet
             </p>
             <h1 className="mt-2 font-headline text-2xl font-black tracking-tight text-foreground">
-              Không thể tải ví studio
+              {t("wallet.hub.errors.title")}
             </h1>
             <p className="mt-2 max-w-2xl font-body text-sm text-muted-foreground">{message}</p>
           </div>
@@ -99,7 +103,7 @@ function StudioWalletError({
             onClick={onRetry}
             className="rounded-sm bg-primary px-6 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90"
           >
-            Thử lại
+            {t("wallet.hub.errors.retry")}
           </Button>
         </CardContent>
       </Card>

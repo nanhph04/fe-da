@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getWalletStatusMessage } from "@/features/wallet/types/wallet-utils";
 import type { StudioWallet } from "../types/studio-wallet.types";
 import { WithdrawalService } from "../services/withdrawalService";
 
@@ -20,6 +20,7 @@ export function WithdrawFundsOverlay({
   onClose,
   onSuccess,
 }: WithdrawFundsOverlayProps) {
+  const t = useTranslations("Studio");
   const [amount, setAmount] = useState("");
   const [bankCode, setBankCode] = useState("VCB");
   const [bankName, setBankName] = useState("Vietcombank");
@@ -30,7 +31,14 @@ export function WithdrawFundsOverlay({
   const [error, setError] = useState<string | null>(null);
 
   const withdrawalAmount = Number(amount);
-  const walletStatusMessage = getWalletStatusMessage(wallet.status, "withdraw");
+  
+  const walletStatus = wallet.status.toLowerCase();
+  const walletStatusMessage = walletStatus === "closed"
+    ? t("wallet.withdraw.form.errorClosed")
+    : (walletStatus === "frozen" || walletStatus === "suspended" || walletStatus === "inactive")
+      ? t("wallet.withdraw.form.errorFrozen")
+      : null;
+
   const canSubmit =
     !walletStatusMessage &&
     Number.isFinite(withdrawalAmount) &&
@@ -51,7 +59,7 @@ export function WithdrawFundsOverlay({
     }
 
     if (!canSubmit) {
-      setError("Enter a valid amount and bank account information.");
+      setError(t("wallet.withdraw.form.errorValidAmount"));
       return;
     }
 
@@ -73,7 +81,7 @@ export function WithdrawFundsOverlay({
       await onSuccess?.();
       onClose();
     } catch {
-      setError("Failed to request withdrawal.");
+      setError(t("wallet.withdraw.form.errorFailed"));
     } finally {
       setIsBusy(false);
     }
@@ -88,9 +96,11 @@ export function WithdrawFundsOverlay({
       <div className="w-full max-w-lg rounded-lg border border-border/30 bg-card shadow-2xl">
         <div className="flex items-center justify-between border-b border-border/30 px-6 py-4">
           <div>
-            <h2 className="font-headline text-2xl font-bold text-foreground">Request Withdrawal</h2>
+            <h2 className="font-headline text-2xl font-bold text-foreground">
+              {t("wallet.withdrawOverlay.title")}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Available balance: {wallet.balance.toLocaleString()} AC
+              {t("wallet.withdrawOverlay.balance", { balance: wallet.balance.toLocaleString() })}
             </p>
           </div>
           <Button
@@ -99,13 +109,15 @@ export function WithdrawFundsOverlay({
             className="text-muted-foreground hover:bg-accent hover:text-foreground"
             onClick={onClose}
           >
-            Close
+            {t("wallet.withdrawOverlay.close")}
           </Button>
         </div>
 
         <form className="space-y-5 px-6 py-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground/80">Amount (AC)</label>
+            <label className="text-sm font-medium text-foreground/80">
+              {t("wallet.withdrawOverlay.amount")}
+            </label>
             <Input
               type="number"
               min="1"
@@ -117,29 +129,51 @@ export function WithdrawFundsOverlay({
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
-            <FormField label="Bank code" value={bankCode} onChange={setBankCode} placeholder="VCB" />
-            <FormField label="Bank name" value={bankName} onChange={setBankName} placeholder="Vietcombank" />
-            <FormField label="Account number" value={accountNumber} onChange={setAccountNumber} placeholder="0123456789" />
-            <FormField label="Account holder" value={accountHolderName} onChange={setAccountHolderName} placeholder="Nguyen Van A" />
+            <FormField
+              label={t("wallet.withdrawOverlay.bankCode")}
+              value={bankCode}
+              onChange={setBankCode}
+              placeholder="VCB"
+            />
+            <FormField
+              label={t("wallet.withdrawOverlay.bankName")}
+              value={bankName}
+              onChange={setBankName}
+              placeholder="Vietcombank"
+            />
+            <FormField
+              label={t("wallet.withdrawOverlay.accountNumber")}
+              value={accountNumber}
+              onChange={setAccountNumber}
+              placeholder="0123456789"
+            />
+            <FormField
+              label={t("wallet.withdrawOverlay.accountHolder")}
+              value={accountHolderName}
+              onChange={setAccountHolderName}
+              placeholder="Nguyen Van A"
+            />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground/80">Note</label>
+            <label className="text-sm font-medium text-foreground/80">
+              {t("wallet.withdrawOverlay.note")}
+            </label>
             <Input
               value={description}
               onChange={event => setDescription(event.target.value)}
-              placeholder="Optional withdrawal note"
+              placeholder={t("wallet.withdrawOverlay.notePlaceholder")}
               className="border-border bg-background text-foreground"
             />
           </div>
 
           <div className="rounded-md border border-border bg-background px-4 py-3 text-sm text-foreground/80">
             <div className="flex items-center justify-between">
-              <span>Requested amount</span>
+              <span>{t("wallet.withdrawOverlay.requestedAmount")}</span>
               <span>{Number.isFinite(withdrawalAmount) ? withdrawalAmount.toLocaleString() : 0} AC</span>
             </div>
             <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
-              Finance-service calculates exchange rate and money amount on the backend.
+              {t("wallet.withdrawOverlay.calculation")}
             </p>
           </div>
 
@@ -153,14 +187,14 @@ export function WithdrawFundsOverlay({
               className="border-border bg-transparent text-zinc-100 hover:bg-accent"
               onClick={onClose}
             >
-              Cancel
+              {t("wallet.withdrawOverlay.cancel")}
             </Button>
             <Button
               type="submit"
               className="bg-destructive text-foreground hover:bg-destructive/90"
               disabled={!canSubmit}
             >
-              {isBusy ? "Submitting..." : "Submit withdrawal"}
+              {isBusy ? t("wallet.withdrawOverlay.submitting") : t("wallet.withdrawOverlay.submit")}
             </Button>
           </div>
         </form>
@@ -169,17 +203,14 @@ export function WithdrawFundsOverlay({
   );
 }
 
-function FormField({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
+interface FormFieldProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
-}) {
+}
+
+function FormField({ label, value, onChange, placeholder }: FormFieldProps) {
   return (
     <label className="space-y-2">
       <span className="text-sm font-medium text-foreground/80">{label}</span>
@@ -192,3 +223,4 @@ function FormField({
     </label>
   );
 }
+

@@ -928,6 +928,193 @@
           }
         }
       }
+    },
+    "wallet": {
+      "metadata": {
+        "title": "Ví Studio",
+        "description": "Quản lý doanh thu studio, theo dõi số dư và gửi yêu cầu rút tiền."
+      },
+      "withdrawMetadata": {
+        "title": "Rút tiền",
+        "description": "Tạo yêu cầu rút tiền từ số dư Ví Studio."
+      },
+      "payoutsMetadata": {
+        "title": "Quản lý thanh toán",
+        "description": "Xem lịch sử giao dịch rút tiền và theo dõi các khoản thanh toán đã hoàn thành."
+      },
+      "earningsMetadata": {
+        "title": "Phân tích doanh thu",
+        "description": "Theo dõi doanh thu, khả năng rút tiền và xu hướng doanh thu hàng tháng."
+      },
+      "hub": {
+        "errors": {
+          "loadFailed": "Không thể tải dữ liệu ví studio.",
+          "notFound": "Không tìm thấy dữ liệu ví studio.",
+          "title": "Không thể tải ví studio",
+          "retry": "Thử lại"
+        }
+      },
+      "dashboard": {
+        "breadcrumb": {
+          "studio": "Creator Studio",
+          "wallet": "Ví Aura"
+        },
+        "title": "Ví Aura & Thanh toán",
+        "description": "Theo dõi số lượng Aura Coins kiếm được và chuyển đổi số dư đủ điều kiện sang loại tiền tệ mong muốn.",
+        "convertibleBalance": "Số dư khả dụng",
+        "withdrawNow": "Rút tiền ngay",
+        "refreshError": "Không thể làm mới dữ liệu ví.",
+        "transactionsError": "Không thể tải lịch sử giao dịch.",
+        "history": {
+          "title": "Lịch sử giao dịch Studio",
+          "description": "Các giao dịch nạp tiền, rút tiền và biến động số dư ví studio mới nhất.",
+          "empty": "Không tìm thấy giao dịch nào."
+        }
+      },
+      "overview": {
+        "cards": {
+          "total": "Tổng doanh thu AC",
+          "available": "Khả dụng để rút",
+          "frozen": "Coin đóng băng",
+          "pending": "Thanh toán đang chờ duyệt",
+          "totalSub": "+12.5% so với tháng trước",
+          "availableSub": "Sẵn sàng rút tiền",
+          "frozenSub": "Tạm thời bị khóa",
+          "pendingSub": "Đang chờ thanh toán"
+        },
+        "chart": {
+          "title": "Tốc độ doanh thu",
+          "description": "Xu hướng tích lũy AC theo khoảng thời gian đã chọn",
+          "loading": "Đang tải dữ liệu biểu đồ...",
+          "empty": "Không có doanh thu trong {range} vừa qua.",
+          "error": "Không thể tải biểu đồ doanh thu.",
+          "ranges": {
+            "day": "1 ngày",
+            "week": "1 tuần",
+            "month": "1 tháng"
+          }
+        },
+        "redemption": {
+          "title": "Quy đổi",
+          "rate": "Tỷ giá quy đổi",
+          "status": "Trạng thái ví",
+          "withdrawNow": "Rút tiền ngay",
+          "processing": "Đang xử lý..."
+        }
+      },
+      "withdraw": {
+        "title": "Rút tiền",
+        "description": "Chuyển đổi số Aura Coins có sẵn sang yêu cầu chuyển khoản ngân hàng.",
+        "back": "Quay lại ví",
+        "balance": {
+          "label": "Số dư khả dụng",
+          "sub": "Số dư khả dụng từ doanh thu của nhà sáng tạo.",
+          "status": "Trạng thái ví",
+          "currency": "Tiền tệ",
+          "coins": "Aura Coins"
+        },
+        "guidelines": {
+          "title": "Hướng dẫn rút tiền",
+          "items": [
+            "Dịch vụ tài chính hiện hỗ trợ nhập trực tiếp thông tin ngân hàng trong yêu cầu rút tiền.",
+            "Tỷ giá quy đổi và số tiền thực tế sẽ được tính toán ở backend.",
+            "Các yêu cầu rút tiền sẽ được xem xét bởi quản trị viên trước khi chuyển khoản."
+          ]
+        },
+        "form": {
+          "amount": "Số lượng muốn rút (AC)",
+          "amountPlaceholder": "Nhập số lượng",
+          "bankCode": "Mã ngân hàng",
+          "bankName": "Tên ngân hàng",
+          "accountNumber": "Số tài khoản",
+          "accountHolder": "Tên chủ tài khoản",
+          "note": "Ghi chú",
+          "notePlaceholder": "Ghi chú rút tiền (tùy chọn)",
+          "requestedAmount": "Số lượng yêu cầu",
+          "calculation": "Tính toán ở Backend",
+          "calculationSub": "Số tiền VND + tỷ giá",
+          "submit": "Tạo yêu cầu rút tiền",
+          "submitting": "Đang tạo yêu cầu...",
+          "errorValidAmount": "Vui lòng nhập số tiền hợp lệ và thông tin tài khoản ngân hàng.",
+          "errorFailed": "Không thể gửi yêu cầu rút tiền.",
+          "errorClosed": "Ví đã đóng nên không thể thực hiện giao dịch này.",
+          "errorFrozen": "Ví đang bị đóng băng nên không thể rút tiền.",
+          "success": "Đã tạo yêu cầu rút tiền. Quản trị viên sẽ sớm xem xét."
+        }
+      },
+      "withdrawOverlay": {
+        "title": "Yêu cầu rút tiền",
+        "balance": "Số dư khả dụng: {balance} AC",
+        "close": "Đóng",
+        "cancel": "Hủy",
+        "submit": "Yêu cầu rút tiền",
+        "submitting": "Đang gửi...",
+        "amount": "Số lượng (AC)",
+        "bankCode": "Mã ngân hàng",
+        "bankName": "Tên ngân hàng",
+        "accountNumber": "Số tài khoản",
+        "accountHolder": "Tên chủ tài khoản",
+        "note": "Ghi chú",
+        "notePlaceholder": "Ghi chú rút tiền (tùy chọn)",
+        "requestedAmount": "Số lượng rút",
+        "calculation": "Dịch vụ tài chính sẽ tính toán tỷ giá và số tiền chuyển khoản trên hệ thống."
+      },
+      "payouts": {
+        "title": "Quản lý rút tiền",
+        "description": "Xem xét các yêu cầu rút tiền đang được xử lý và theo dõi các khoản thanh toán đã hoàn thành.",
+        "loading": "Đang tải lịch sử rút tiền...",
+        "error": "Không thể tải danh sách thanh toán",
+        "retry": "Thử lại",
+        "summary": {
+          "pending": "Chờ xử lý",
+          "completed": "Đã hoàn thành",
+          "records": "Giao dịch"
+        }
+      },
+      "history": {
+        "title": "Lịch sử rút tiền",
+        "description": "Xem xét các yêu cầu rút tiền và trạng thái xử lý.",
+        "table": {
+          "requested": "Ngày yêu cầu",
+          "bank": "Ngân hàng",
+          "coinAmount": "Số lượng coin",
+          "moneyAmount": "Số tiền",
+          "status": "Trạng thái",
+          "action": "Thao tác",
+          "loading": "Đang tải lịch sử rút tiền...",
+          "empty": "Không tìm thấy yêu cầu rút tiền nào.",
+          "cancel": "Hủy yêu cầu",
+          "cancelConfirm": "Bạn có chắc chắn muốn hủy yêu cầu rút tiền này?",
+          "keep": "Giữ lại",
+          "confirm": "Xác nhận",
+          "cancelling": "Đang hủy...",
+          "errorLoad": "Không thể tải lịch sử rút tiền.",
+          "errorCancel": "Không thể hủy yêu cầu rút tiền này."
+        },
+        "pagination": {
+          "page": "Trang {page} / {totalPages}",
+          "previous": "Trước",
+          "next": "Tiếp theo"
+        }
+      },
+      "analytics": {
+        "title": "Phân tích doanh thu",
+        "description": "Xem xét khả năng rút tiền, hiệu suất hàng tháng hiện tại và cách dòng tiền chuyển dịch trong studio.",
+        "overview": "Tổng quan doanh thu",
+        "sub": "Hiệu suất doanh thu hiện tại và trạng thái rút tiền.",
+        "loading": "Đang tải tổng quan doanh thu...",
+        "empty": "Chưa có dữ liệu doanh thu.",
+        "error": "Không thể tải tổng quan doanh thu.",
+        "metrics": {
+          "total": "Tổng doanh thu",
+          "monthly": "Thanh toán tháng này",
+          "views": "Tổng lượt xem",
+          "videos": "Video có doanh thu",
+          "pending": "Doanh thu chờ duyệt",
+          "confirmed": "Doanh thu đã xác nhận",
+          "paid": "Doanh thu đã trả"
+        }
+      }
     }
   }
 }

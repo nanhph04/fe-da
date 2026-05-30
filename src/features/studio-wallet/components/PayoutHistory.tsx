@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
 import type { Withdrawal, WithdrawalHistoryFilters } from "../types/withdrawal.types";
@@ -24,6 +25,7 @@ export function PayoutHistory({
   initialPagination,
   onHistoryChanged,
 }: PayoutHistoryProps) {
+  const t = useTranslations("Studio");
   const [items, setItems] = useState<Withdrawal[]>(initialItems);
   const [pagination, setPagination] = useState(
     initialPagination ?? {
@@ -60,14 +62,14 @@ export function PayoutHistory({
         setItems(response.withdrawals);
         setPagination(response.pagination);
       } catch {
-        setError("Failed to load withdrawal history.");
+        setError(t("wallet.history.table.errorLoad"));
       } finally {
         setIsLoading(false);
       }
     };
 
     void loadHistory();
-  }, [filters]);
+  }, [filters, t]);
 
   const handleStatusChange = (status: WithdrawalHistoryFilters["status"]) => {
     setFilters(previous => ({
@@ -96,7 +98,7 @@ export function PayoutHistory({
       setConfirmingCancelId(null);
       onHistoryChanged?.();
     } catch (err) {
-      setCancelError(getErrorMessage(err, "Could not cancel this withdrawal request."));
+      setCancelError(getErrorMessage(err, t("wallet.history.table.errorCancel")));
     } finally {
       setCancellingId(null);
     }
@@ -106,9 +108,9 @@ export function PayoutHistory({
     <section className={`rounded-lg border border-border/30 bg-card p-6 ${className}`}>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="font-headline text-2xl font-bold text-foreground">Withdrawal History</h2>
+          <h2 className="font-headline text-2xl font-bold text-foreground">{t("wallet.history.title")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Review withdrawal requests and processing states.
+            {t("wallet.history.description")}
           </p>
         </div>
 
@@ -138,25 +140,25 @@ export function PayoutHistory({
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-border text-muted-foreground">
             <tr>
-              <th className="pb-3 pr-4 font-medium">Requested</th>
-              <th className="pb-3 pr-4 font-medium">Bank</th>
-              <th className="pb-3 pr-4 font-medium">Coin Amount</th>
-              <th className="pb-3 pr-4 font-medium">Money Amount</th>
-              <th className="pb-3 pr-4 font-medium">Status</th>
-              <th className="pb-3 pr-4 text-right font-medium">Action</th>
+              <th className="pb-3 pr-4 font-medium">{t("wallet.history.table.requested")}</th>
+              <th className="pb-3 pr-4 font-medium">{t("wallet.history.table.bank")}</th>
+              <th className="pb-3 pr-4 font-medium">{t("wallet.history.table.coinAmount")}</th>
+              <th className="pb-3 pr-4 font-medium">{t("wallet.history.table.moneyAmount")}</th>
+              <th className="pb-3 pr-4 font-medium">{t("wallet.history.table.status")}</th>
+              <th className="pb-3 pr-4 text-right font-medium">{t("wallet.history.table.action")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td className="py-6 text-muted-foreground" colSpan={6}>
-                  Loading withdrawal history...
+                  {t("wallet.history.table.loading")}
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
                 <td className="py-6 text-muted-foreground" colSpan={6}>
-                  No withdrawal records found.
+                  {t("wallet.history.table.empty")}
                 </td>
               </tr>
             ) : (
@@ -180,7 +182,7 @@ export function PayoutHistory({
                       {canCancel ? (
                         isConfirming ? (
                           <div className="flex min-w-56 flex-col items-end gap-2">
-                            <span className="text-xs text-muted-foreground">Cancel this pending request?</span>
+                            <span className="text-xs text-muted-foreground">{t("wallet.history.table.cancelConfirm")}</span>
                             <div className="flex gap-2">
                               <Button
                                 type="button"
@@ -190,7 +192,7 @@ export function PayoutHistory({
                                 onClick={() => setConfirmingCancelId(null)}
                                 className="rounded-sm text-muted-foreground hover:text-foreground"
                               >
-                                Keep
+                                {t("wallet.history.table.keep")}
                               </Button>
                               <Button
                                 type="button"
@@ -200,7 +202,7 @@ export function PayoutHistory({
                                 onClick={() => void handleCancelWithdrawal(item.id)}
                                 className="rounded-sm border border-destructive/40 bg-destructive/15 font-headline text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive/25"
                               >
-                                {isCancelling ? "Cancelling..." : "Confirm"}
+                                {isCancelling ? t("wallet.history.table.cancelling") : t("wallet.history.table.confirm")}
                               </Button>
                             </div>
                           </div>
@@ -216,7 +218,7 @@ export function PayoutHistory({
                             }}
                             className="rounded-sm border-destructive/40 bg-transparent font-headline text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10 hover:text-destructive"
                           >
-                            Cancel
+                            {t("wallet.history.table.cancel")}
                           </Button>
                         )
                       ) : (
@@ -234,7 +236,7 @@ export function PayoutHistory({
       {pagination.totalPages > 1 ? (
         <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
           <span>
-            Page {pagination.page} / {pagination.totalPages}
+            {t("wallet.history.pagination.page", { page: pagination.page, totalPages: pagination.totalPages })}
           </span>
           <div className="flex gap-2">
             <Button
@@ -243,7 +245,7 @@ export function PayoutHistory({
               disabled={pagination.page <= 1}
               onClick={() => handlePageChange(pagination.page - 1)}
             >
-              Previous
+              {t("wallet.history.pagination.previous")}
             </Button>
             <Button
               type="button"
@@ -251,7 +253,7 @@ export function PayoutHistory({
               disabled={pagination.page >= pagination.totalPages}
               onClick={() => handlePageChange(pagination.page + 1)}
             >
-              Next
+              {t("wallet.history.pagination.next")}
             </Button>
           </div>
         </div>
@@ -259,3 +261,4 @@ export function PayoutHistory({
     </section>
   );
 }
+

@@ -976,6 +976,193 @@
           }
         }
       }
+    },
+    "wallet": {
+      "metadata": {
+        "title": "Studio Wallet",
+        "description": "Manage studio earnings, track balance, and request creator payouts."
+      },
+      "withdrawMetadata": {
+        "title": "Withdraw Funds",
+        "description": "Create a creator payout request from your Studio Wallet balance."
+      },
+      "payoutsMetadata": {
+        "title": "Withdrawal Management",
+        "description": "Review withdrawal processing and monitor completed creator payouts."
+      },
+      "earningsMetadata": {
+        "title": "Earnings Analytics",
+        "description": "Track earnings, payout readiness, and monthly creator revenue trends."
+      },
+      "hub": {
+        "errors": {
+          "loadFailed": "Unable to load studio wallet data.",
+          "notFound": "Studio wallet data not found.",
+          "title": "Unable to load studio wallet",
+          "retry": "Retry"
+        }
+      },
+      "dashboard": {
+        "breadcrumb": {
+          "studio": "Creator Studio",
+          "wallet": "Aura Wallet"
+        },
+        "title": "Aura Wallet & Payouts",
+        "description": "Track earned Aura Coins and convert eligible balances to your preferred currency.",
+        "convertibleBalance": "Convertible Balance",
+        "withdrawNow": "Withdraw Now",
+        "refreshError": "Failed to refresh wallet data.",
+        "transactionsError": "Failed to load studio transactions.",
+        "history": {
+          "title": "Studio Transaction History",
+          "description": "Latest deposits, withdrawals, and studio wallet movements.",
+          "empty": "No studio transactions found."
+        }
+      },
+      "overview": {
+        "cards": {
+          "total": "Total Earned AC",
+          "available": "Available for Payout",
+          "frozen": "Frozen Coins",
+          "pending": "Pending Payouts",
+          "totalSub": "+12.5% vs last month",
+          "availableSub": "Ready to withdraw",
+          "frozenSub": "Temporarily locked",
+          "pendingSub": "Awaiting settlement"
+        },
+        "chart": {
+          "title": "Earnings Velocity",
+          "description": "AC accumulation trend by selected period",
+          "loading": "Loading earnings trend...",
+          "empty": "No earnings recorded for the last {range}.",
+          "error": "Unable to load earnings chart.",
+          "ranges": {
+            "day": "1 Day",
+            "week": "1 Week",
+            "month": "1 Month"
+          }
+        },
+        "redemption": {
+          "title": "Redemption",
+          "rate": "Conversion Rate",
+          "status": "Wallet Status",
+          "withdrawNow": "Withdraw Now",
+          "processing": "Processing..."
+        }
+      },
+      "withdraw": {
+        "title": "Withdraw Funds",
+        "description": "Convert available Aura Coins to a bank transfer request.",
+        "back": "Back to Wallet",
+        "balance": {
+          "label": "Available Balance",
+          "sub": "Convertible balance from creator earnings.",
+          "status": "Wallet Status",
+          "currency": "Currency",
+          "coins": "Aura Coins"
+        },
+        "guidelines": {
+          "title": "Withdrawal Guidelines",
+          "items": [
+            "Finance-service currently supports direct bank info in the withdrawal request.",
+            "Exchange rate and money amount are calculated by the backend.",
+            "Requests are reviewed by administrators before transfer."
+          ]
+        },
+        "form": {
+          "amount": "Amount to Withdraw (AC)",
+          "amountPlaceholder": "Enter amount",
+          "bankCode": "Bank Code",
+          "bankName": "Bank Name",
+          "accountNumber": "Account Number",
+          "accountHolder": "Account Holder",
+          "note": "Note",
+          "notePlaceholder": "Optional withdrawal note",
+          "requestedAmount": "Requested Amount",
+          "calculation": "Backend Calculates",
+          "calculationSub": "VND amount + rate",
+          "submit": "Create Withdrawal Request",
+          "submitting": "Creating request...",
+          "errorValidAmount": "Enter a valid amount and bank account information.",
+          "errorFailed": "Failed to request withdrawal.",
+          "errorClosed": "Wallet is closed, transactions are not allowed.",
+          "errorFrozen": "Wallet is frozen, withdrawals are not allowed.",
+          "success": "Withdrawal request created. Administrators will review it shortly."
+        }
+      },
+      "withdrawOverlay": {
+        "title": "Request Withdrawal",
+        "balance": "Available balance: {balance} AC",
+        "close": "Close",
+        "cancel": "Cancel",
+        "submit": "Submit withdrawal",
+        "submitting": "Submitting...",
+        "amount": "Amount (AC)",
+        "bankCode": "Bank code",
+        "bankName": "Bank name",
+        "accountNumber": "Account number",
+        "accountHolder": "Account holder",
+        "note": "Note",
+        "notePlaceholder": "Optional withdrawal note",
+        "requestedAmount": "Requested amount",
+        "calculation": "Finance-service calculates exchange rate and money amount on the backend."
+      },
+      "payouts": {
+        "title": "Withdrawal Management",
+        "description": "Review withdrawal processing and monitor completed creator payouts.",
+        "loading": "Loading withdrawal history...",
+        "error": "Unable to load payouts",
+        "retry": "Retry",
+        "summary": {
+          "pending": "Pending",
+          "completed": "Completed",
+          "records": "Records"
+        }
+      },
+      "history": {
+        "title": "Withdrawal History",
+        "description": "Review withdrawal requests and processing states.",
+        "table": {
+          "requested": "Requested",
+          "bank": "Bank",
+          "coinAmount": "Coin Amount",
+          "moneyAmount": "Money Amount",
+          "status": "Status",
+          "action": "Action",
+          "loading": "Loading withdrawal history...",
+          "empty": "No withdrawal records found.",
+          "cancel": "Cancel",
+          "cancelConfirm": "Cancel this pending request?",
+          "keep": "Keep",
+          "confirm": "Confirm",
+          "cancelling": "Cancelling...",
+          "errorLoad": "Failed to load withdrawal history.",
+          "errorCancel": "Could not cancel this withdrawal request."
+        },
+        "pagination": {
+          "page": "Page {page} / {totalPages}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "analytics": {
+        "title": "Earnings Analytics",
+        "description": "Review payout readiness, current monthly performance, and how revenue is moving across the studio.",
+        "overview": "Earnings Overview",
+        "sub": "Current revenue performance and payout readiness.",
+        "loading": "Loading earnings overview...",
+        "empty": "No earnings data available.",
+        "error": "Failed to load earnings overview.",
+        "metrics": {
+          "total": "Total earnings",
+          "monthly": "Monthly payout",
+          "views": "Total views",
+          "videos": "Videos earning",
+          "pending": "Pending earnings",
+          "confirmed": "Confirmed earnings",
+          "paid": "Paid earnings"
+        }
+      }
     }
   }
 }
