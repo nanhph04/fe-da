@@ -1,7 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
-  getVideoJobStatusLabel,
   getVideoStatusFailureReason,
 } from "@/shared/hooks/use-video-status-events";
 
@@ -44,14 +44,15 @@ export function ProcessingProgressTracker({
   isRefreshing = false,
   onRefreshStatus,
 }: ProcessingProgressTrackerProps) {
+  const t = useTranslations("Studio");
   const normalizedStatus = normalizeStatus(jobStatus ?? initialStatus);
   const toneClass = getToneClass(normalizedStatus);
-  const label = jobStatus ? getVideoJobStatusLabel(jobStatus) : normalizedStatus.replaceAll("_", " ").toUpperCase();
+  const label = t(`content.status.${normalizedStatus}`);
   const isFailed = normalizedStatus === "failed" || normalizedStatus === "rejected";
   const isSucceeded = normalizedStatus === "succeeded";
   const message = isFailed
-    ? getVideoStatusFailureReason({ failureReason: failureReason ?? null, moderationDetails: moderationDetails ?? null }) || jobStatusMessage || "Video xử lý thất bại."
-    : jobStatusMessage || (isSucceeded ? "Video đã xử lý xong." : "Video đang được xử lý. Hệ thống sẽ tự cập nhật khi có thay đổi.");
+    ? getVideoStatusFailureReason({ failureReason: failureReason ?? null, moderationDetails: moderationDetails ?? null }) || jobStatusMessage || t("content.preview.statusMessage.failed")
+    : jobStatusMessage || (isSucceeded ? t("content.preview.statusMessage.succeeded") : t("content.preview.statusMessage.processing"));
 
   return (
     <div className={`mt-3 max-w-sm rounded-md border p-3 text-xs ${toneClass}`}>
@@ -66,7 +67,7 @@ export function ProcessingProgressTracker({
             disabled={isRefreshing}
             className="rounded-sm border border-current/30 px-2 py-1 font-bold uppercase tracking-widest transition-colors hover:bg-current/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isRefreshing ? "Refreshing" : "Refresh"}
+            {isRefreshing ? "..." : t("content.refresh")}
           </button>
         ) : null}
       </div>

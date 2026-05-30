@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "next-intl";
 import {
   mediaService,
   type CategoryResponse,
@@ -22,6 +23,7 @@ interface EditVideoMetadataDialogProps {
 type VideoVisibility = NonNullable<UpdateVideoMetadataBody["visibility"]>;
 
 const normalizeLookupValue = (value?: string | null) => value?.trim().toLowerCase() ?? "";
+const normalizeStatus = (status?: string | null) => status?.toLowerCase() || "unknown";
 
 function normalizeEditableVisibility(value?: string | null): VideoVisibility {
   return value === "public" ? "public" : "private";
@@ -50,6 +52,7 @@ function resolveTagIds(video: OwnerVideoDetailResponse, tags: TagResponse[]) {
 }
 
 export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideoMetadataDialogProps) {
+  const t = useTranslations("Studio");
   const [metadata, setMetadata] = useState<OwnerVideoDetailResponse | null>(null);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [tags, setTags] = useState<TagResponse[]>([]);
@@ -98,10 +101,10 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
           return;
         }
 
-        setError(metadataRes.message || "Không tải được dữ liệu video.");
+        setError(metadataRes.message || t("content.metadataDialog.errors.loadFailed"));
       } catch (err) {
         if (isActive) {
-          setError(getErrorMessage(err, "Không tải được dữ liệu video."));
+          setError(getErrorMessage(err, t("content.metadataDialog.errors.loadFailed")));
         }
       } finally {
         if (isActive) {
@@ -115,7 +118,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
     return () => {
       isActive = false;
     };
-  }, [videoId]);
+  }, [videoId, t]);
 
   const selectedCategoryName = useMemo(() => {
     return categories.find(category => category.id === categoryId)?.name;
@@ -126,7 +129,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
 
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      setError("Tiêu đề video không được để trống.");
+      setError(t("content.metadataDialog.errors.titleRequired"));
       return;
     }
 
@@ -148,9 +151,9 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
         return;
       }
 
-      setError(res.message || "Không lưu được metadata video.");
+      setError(res.message || t("content.metadataDialog.errors.saveFailed"));
     } catch (err) {
-      setError(getErrorMessage(err, "Không lưu được metadata video."));
+      setError(getErrorMessage(err, t("content.metadataDialog.errors.saveFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -161,10 +164,10 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-border/30 bg-card shadow-2xl shadow-black/50">
         <div className="flex items-start justify-between gap-4 border-b border-border/30 p-6">
           <div>
-            <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Video Metadata</p>
-            <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">Edit video details</h2>
+            <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("content.metadataDialog.title")}</p>
+            <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">{t("content.metadataDialog.subtitle")}</h2>
             {metadata ? (
-              <p className="mt-1 text-xs text-muted-foreground">Current status: {metadata.status}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("content.metadataDialog.currentStatus", { status: t(`content.status.${normalizeStatus(metadata.status)}`) })}</p>
             ) : null}
           </div>
           <button
@@ -178,12 +181,12 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
         </div>
 
         {isLoading ? (
-          <div className="p-8 text-sm text-muted-foreground">Đang tải dữ liệu video...</div>
+          <div className="p-8 text-sm text-muted-foreground">{t("content.metadataDialog.loading")}</div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5 p-6">
             <div className="space-y-2">
               <label htmlFor="video-title" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Title
+                {t("content.metadataDialog.fields.title")}
               </label>
               <Input
                 id="video-title"
@@ -196,7 +199,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
 
             <div className="space-y-2">
               <label htmlFor="video-description" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Description
+                {t("content.metadataDialog.fields.description")}
               </label>
               <Textarea
                 id="video-description"
@@ -208,7 +211,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
 
             <div className="space-y-2">
               <label htmlFor="video-visibility" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Visibility
+                {t("content.metadataDialog.fields.visibility")}
               </label>
               <select
                 id="video-visibility"
@@ -216,17 +219,17 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                 onChange={event => setVisibility(event.target.value as VideoVisibility)}
                 className="h-10 w-full rounded-md border border-border/40 bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/60"
               >
-                <option value="public">Public</option>
-                <option value="private">Private</option>
+                <option value="public">{t("content.metadataDialog.fields.visibilityPublic")}</option>
+                <option value="private">{t("content.metadataDialog.fields.visibilityPrivate")}</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Public videos can be discovered by viewers. Private videos stay hidden from public discovery.
+                {t("content.metadataDialog.fields.visibilityHint")}
               </p>
             </div>
 
             <div className="space-y-2">
               <label htmlFor="video-category" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Category
+                {t("content.metadataDialog.fields.category")}
               </label>
               <select
                 id="video-category"
@@ -234,7 +237,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                 onChange={event => setCategoryId(event.target.value)}
                 className="h-10 w-full rounded-md border border-border/40 bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/60"
               >
-                <option value="">Keep current category</option>
+                <option value="">{t("content.metadataDialog.fields.categoryKeepCurrent")}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -242,13 +245,13 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                 ))}
               </select>
               <p className="text-xs text-muted-foreground">
-                Current category: {metadata?.category || "Unknown"}{selectedCategoryName ? ` -> ${selectedCategoryName}` : ""}
+                {t("content.metadataDialog.fields.categoryCurrent", { category: metadata?.category || t("content.status.unknown") })}{selectedCategoryName ? ` -> ${selectedCategoryName}` : ""}
               </p>
             </div>
 
             <div className="space-y-2">
               <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Tags
+                {t("content.metadataDialog.fields.tags")}
               </span>
               <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto rounded-md border border-border/30 bg-background p-3">
                 {tags.length > 0 ? (
@@ -274,14 +277,14 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                     );
                   })
                 ) : (
-                  <p className="text-xs text-muted-foreground">Không có tag active.</p>
+                  <p className="text-xs text-muted-foreground">{t("content.metadataDialog.fields.tagsEmpty")}</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
               <label htmlFor="video-thumbnail" className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Thumbnail URL
+                {t("content.metadataDialog.fields.thumbnailUrl")}
               </label>
               <Input
                 id="video-thumbnail"
@@ -290,7 +293,7 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
                 placeholder="https://..."
                 className="border-border/40 bg-background text-foreground focus-visible:ring-primary"
               />
-              <p className="text-xs text-muted-foreground">Chỉ cập nhật URL thumbnail vì service hiện tại chưa có upload thumbnail riêng.</p>
+              <p className="text-xs text-muted-foreground">{t("content.metadataDialog.fields.thumbnailHint")}</p>
             </div>
 
             {error ? (
@@ -301,10 +304,10 @@ export function EditVideoMetadataDialog({ videoId, onClose, onSaved }: EditVideo
 
             <div className="flex justify-end gap-3 border-t border-border/30 pt-5">
               <Button type="button" variant="ghost" onClick={onClose} disabled={isSaving}>
-                Cancel
+                {t("content.metadataDialog.actions.cancel")}
               </Button>
               <Button type="submit" disabled={isSaving} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                {isSaving ? "Saving..." : "Save changes"}
+                {isSaving ? t("content.metadataDialog.actions.saving") : t("content.metadataDialog.actions.save")}
               </Button>
             </div>
           </form>

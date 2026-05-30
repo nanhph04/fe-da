@@ -621,6 +621,182 @@
         "videoStatusDescription": "{title} is {status}.",
         "recently": "Recently"
       }
+    },
+    "content": {
+      "title": "Content Library",
+      "subtitle": "Manage uploads, organize releases, and monitor performance across every access tier.",
+      "refresh": "Refresh",
+      "newUpload": "New Upload",
+      "searchPlaceholder": "Search content...",
+      "table": {
+        "video": "Video",
+        "visibility": "Visibility",
+        "level": "Level",
+        "performance": "Performance",
+        "actions": "Actions",
+        "views": "{count} views",
+        "likesPending": "Likes pending",
+        "ppv": "PPV",
+        "free": "Free"
+      },
+      "filters": {
+        "all": "Videos",
+        "draft": "Drafts",
+        "processing": "Processing",
+        "ready": "Ready",
+        "failed": "Failed"
+      },
+      "status": {
+        "all": "Videos",
+        "draft": "Draft",
+        "waiting": "Waiting in queue",
+        "processing": "Processing video",
+        "succeeded": "Succeeded",
+        "ready": "Ready",
+        "failed": "Processing failed",
+        "rejected": "Video rejected",
+        "private": "Private",
+        "public": "Public",
+        "unknown": "Unknown"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "empty": {
+        "noVideos": "No videos found",
+        "noVideosDesc": "Upload a video to start building your gallery.",
+        "noMatches": "No matching content found",
+        "noMatchesDesc": "Try searching by another title, description, status, or category.",
+        "loading": "Loading videos..."
+      },
+      "actions": {
+        "preview": "Preview",
+        "openDetails": "Open details for",
+        "resumeUpload": "Resume upload",
+        "confirmUpload": "Confirm upload",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "messages": {
+        "loadFailed": "Unable to load content library.",
+        "loadFailedRetry": "Unable to load content library. Please try again.",
+        "retry": "Try again",
+        "deleteFailed": "Unable to delete video. Please try again.",
+        "deleteSuccessFailed": "Deleted failed processing video from Studio.",
+        "deleteSuccessPublic": "Removed video from public library.",
+        "draftMissingSession": "Cannot find upload session details for this draft.",
+        "confirmFailed": "Unable to confirm-upload video draft. If raw file is not uploaded, please click Resume upload.",
+        "confirmSuccess": "Upload confirmed. Video will move to processing queue.",
+        "reuploadSuccess": "Completed file upload to S3. Click checkmark to confirm-upload when ready to process.",
+        "reuploadFailed": "Unable to continue video upload for draft.",
+        "noRejectReason": "No rejection reason provided by the system."
+      },
+      "notices": {
+        "draftWarning": "Video will be deleted after 24 hours if you do not confirm upload. Click upload to replace draft file, then click checkmark to confirm-upload when ready to process.",
+        "failedWarning": "Video processing failed. You can delete the failed version and upload again.",
+        "rejectedWarning": "Video rejected",
+        "viewNotice": "View notice",
+        "hideNotice": "Hide notice",
+        "uploading": "Uploading {progress}%"
+      },
+      "preview": {
+        "back": "Back to Content Library",
+        "creatorPreview": "Creator Preview",
+        "title": "Video preview",
+        "subtitle": "Preview your processed video exactly from Studio. Viewer access, purchases, and membership rules still apply on public watch surfaces.",
+        "detailsTitle": "Asset Details",
+        "fields": {
+          "status": "Status",
+          "published": "Published",
+          "runtime": "Runtime",
+          "views": "Views",
+          "category": "Category",
+          "videoId": "Video ID",
+          "tags": "Tags"
+        },
+        "notReady": {
+          "processingTitle": "Video is still processing",
+          "processingMessage": "Playback becomes available after moderation and HLS processing finish. Refresh this page when the pipeline completes.",
+          "rejectedTitle": "Video was rejected",
+          "rejectedMessage": "Rejected videos cannot be previewed. Review the rejection reason in Content Library, then upload a compliant replacement.",
+          "failedTitle": "Processing failed",
+          "failedMessage": "This asset did not finish processing, so there is no playable stream yet. Delete the failed upload and try again.",
+          "succeededTitle": "Video processing completed",
+          "succeededMessage": "The asset is ready. The preview will unlock once the public-ready state is synced.",
+          "defaultTitle": "Preview is not available yet",
+          "defaultMessage": "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player."
+        },
+        "errors": {
+          "loadFailed": "Unable to load this Studio video.",
+          "loadFailedRetry": "Unable to load this Studio video. Please try again.",
+          "openFailed": "Unable to open video",
+          "tryAgain": "Try again",
+          "noDescription": "No description has been added yet."
+        },
+        "runtimePending": "Runtime pending",
+        "notPublished": "Not published",
+        "unknownDate": "Unknown date",
+        "free": "Free",
+        "uncategorized": "Uncategorized",
+        "statusMessage": {
+          "failed": "Video processing failed.",
+          "processing": "Video is being processed. The system will automatically update when changes occur.",
+          "succeeded": "Video processing completed and ready to play.",
+          "default": "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player."
+        }
+      },
+      "draftActions": {
+        "title": "Complete or cancel this draft",
+        "description": "This video is in draft state. You can continue uploading the video file (Resume upload), confirm upload to start processing, or cancel the upload if you do not wish to continue.",
+        "resumeUpload": "Resume upload",
+        "confirmUpload": "Confirm upload",
+        "cancelUpload": "Cancel upload",
+        "uploading": "Uploading {progress}%",
+        "draftLabel": "Draft upload",
+        "errors": {
+          "missingSession": "Cannot find upload session details for this draft.",
+          "confirmFailed": "Unable to confirm-upload video draft.",
+          "resumeFailed": "Unable to continue video upload for draft.",
+          "cancelFailed": "Unable to cancel upload draft."
+        },
+        "messages": {
+          "confirmSuccess": "Upload confirmed. Video will move to processing queue.",
+          "resumeSuccess": "Completed file upload to S3. Click Confirm upload to place video in processing queue.",
+          "cancelSuccess": "Draft upload cancelled."
+        }
+      },
+      "metadataDialog": {
+        "title": "Video Metadata",
+        "subtitle": "Edit video details",
+        "currentStatus": "Current status: {status}",
+        "loading": "Loading video details...",
+        "fields": {
+          "title": "Title",
+          "description": "Description",
+          "visibility": "Visibility",
+          "visibilityPublic": "Public",
+          "visibilityPrivate": "Private",
+          "visibilityHint": "Public videos can be discovered by viewers. Private videos stay hidden from public discovery.",
+          "category": "Category",
+          "categoryKeepCurrent": "Keep current category",
+          "categoryCurrent": "Current category: {category}",
+          "tags": "Tags",
+          "tagsEmpty": "No active tags available.",
+          "thumbnailUrl": "Thumbnail URL",
+          "thumbnailHint": "Only update thumbnail URL since the current service does not support thumbnail uploads yet."
+        },
+        "errors": {
+          "loadFailed": "Unable to load video details.",
+          "titleRequired": "Video title cannot be empty.",
+          "saveFailed": "Unable to save video metadata."
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "save": "Save changes",
+          "saving": "Saving..."
+        }
+      }
     }
   }
 }

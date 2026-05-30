@@ -3,6 +3,7 @@ import { CircleAlert } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { getReadyOwnerVideoThumbnailUrl, mediaService, type SubmitUploadBody, type OwnerVideoResponse, type OwnerVideosParams } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
@@ -23,6 +24,8 @@ const READY_STATUSES = new Set(["ready", "private"]);
 const REJECTED_STATUS = "rejected";
 const DRAFT_STATUS = "draft";
 const DEFAULT_CONFIRM_RESOLUTIONS: SubmitUploadBody["resolutions"] = ["720p"];
+
+type TFunction = ReturnType<typeof useTranslations>;
 
 type ContentFilter = "all" | "draft" | "processing" | "ready" | "failed";
 
@@ -82,10 +85,6 @@ function getVisibilityTone(video: OwnerVideoResponse) {
   return "text-muted-foreground";
 }
 
-function toTitleCase(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 function getStatusTone(status: string) {
   if (status === "succeeded" || READY_STATUSES.has(status)) {
     return "text-emerald-400";
@@ -102,8 +101,8 @@ function getStatusTone(status: string) {
   return "text-muted-foreground";
 }
 
-function getRejectReason(video: OwnerVideoResponse) {
-  return video.failureReason || getModerationDetailsReason(video.moderationDetails) || video.errorMessage || video.jobStatusMessage || "Chưa có nguyên nhân reject từ hệ thống.";
+function getRejectReason(t: TFunction, video: OwnerVideoResponse) {
+  return video.failureReason || getModerationDetailsReason(video.moderationDetails) || video.errorMessage || video.jobStatusMessage || t("content.messages.noRejectReason");
 }
 
 function getConfirmResolutions(video: OwnerVideoResponse): SubmitUploadBody["resolutions"] {
@@ -126,6 +125,16 @@ function getVideoJobStatusText(payload: Pick<VideoStatusChangedPayload, "jobStat
   return payload.jobStatusMessage || getVideoJobStatusLabel(payload.jobStatus);
 }
 
+// Helper to translate status safely
+function getTranslatedStatus(t: TFunction, status: string) {
+  const normalized = status.toLowerCase();
+  const knownStatuses = ["ready", "pending", "failed", "processing", "rejected", "waiting", "succeeded", "draft", "private", "public", "unknown"];
+  if (knownStatuses.includes(normalized)) {
+    return t(`content.status.${normalized}`);
+  }
+  return status.toUpperCase();
+}
+
 function mergeVideoStatus(video: OwnerVideoResponse, payload: VideoStatusChangedPayload): OwnerVideoResponse {
   return {
     ...video,
@@ -145,6 +154,8 @@ function isStatusRelevantForFilter(video: OwnerVideoResponse, filter: ContentFil
 }
 
 export function StudioContentFeature() {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim().toLowerCase() ?? "";
   const [videos, setVideos] = useState<OwnerVideoResponse[]>([]);
@@ -190,7 +201,7 @@ export function StudioContentFeature() {
         return true;
       }
 
-      const message = res.message || "Không thể tải danh sách video.";
+      const message = res.message || t("content.messages.loadFailed");
       if (showLoading) {
         setVideos([]);
         setError(message);
@@ -199,7 +210,7 @@ export function StudioContentFeature() {
       }
       return false;
     } catch (err) {
-      const message = getErrorMessage(err, "Không thể tải danh sách video. Vui lòng thử lại.");
+      const message = getErrorMessage(err, t("content.messages.loadFailedRetry"));
       if (showLoading) {
         setVideos([]);
         setError(message);
@@ -211,7 +222,7 @@ export function StudioContentFeature() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [showActionMessage]);
+  }, [showActionMessage, t]);
 
   useEffect(() => {
     void fetchVideos(true, activeFilter);
@@ -235,12 +246,14 @@ export function StudioContentFeature() {
       .filter(video => isStatusRelevantForFilter(video, activeFilter))
     );
 
-    showActionMessage(`${existingVideo.title}: ${getVideoJobStatusLabel(payload.jobStatus)}${getVideoJobStatusText(payload) ? ` - ${getVideoJobStatusText(payload)}` : ""}`);
+    const statusText = getTranslatedStatus(t, payload.jobStatus);
+    const detailsText = getVideoJobStatusText(payload);
+    showActionMessage(`${existingVideo.title}: ${statusText}${detailsText ? ` - ${detailsText}` : ""}`);
 
     if (!isStatusRelevantForFilter(nextVideo, activeFilter) || payload.jobStatus === "succeeded" || payload.jobStatus === "failed" || payload.jobStatus === "rejected") {
       void fetchVideos(false, activeFilter);
     }
-  }, [activeFilter, fetchVideos, showActionMessage]);
+  }, [activeFilter, fetchVideos, showActionMessage, t]);
 
   useVideoStatusEventSubscription(handleVideoStatusChanged);
 
@@ -286,18 +299,18 @@ export function StudioContentFeature() {
         : await mediaService.deleteVideo(video.id);
 
       if (!response.success) {
-        showActionMessage(response.message || "Không thể xoá video. Vui lòng thử lại.");
+        showActionMessage(response.message || t("content.messages.deleteFailed"));
         return;
       }
 
       showActionMessage(
         FAILED_STATUSES.has(status)
-          ? "Đã xoá video xử lý thất bại khỏi Studio."
-          : "Đã gỡ video khỏi thư viện công khai."
+          ? t("content.messages.deleteSuccessFailed")
+          : t("content.messages.deleteSuccessPublic")
       );
       await fetchVideos(false, activeFilter);
     } catch (err) {
-      showActionMessage(getErrorMessage(err, "Không thể xoá video. Vui lòng thử lại."));
+      showActionMessage(getErrorMessage(err, t("content.messages.deleteFailed")));
     } finally {
       setDeletingVideoId(null);
     }
@@ -309,7 +322,7 @@ export function StudioContentFeature() {
 
     try {
       if (!video.uploadId) {
-        showActionMessage("Không tìm thấy thông tin phiên upload của bản nháp này.");
+        showActionMessage(t("content.messages.draftMissingSession"));
         return;
       }
 
@@ -318,14 +331,14 @@ export function StudioContentFeature() {
       });
 
       if (!(response.success || response.statusCode === 200 || response.statusCode === 201)) {
-        showActionMessage(response.message || "Không thể confirm-upload video draft. Nếu raw file chưa upload, hãy bấm Upload lại file.");
+        showActionMessage(response.message || t("content.messages.confirmFailed"));
         return;
       }
 
-      showActionMessage("Đã confirm-upload. Video sẽ chuyển sang hàng đợi xử lý.");
+      showActionMessage(t("content.messages.confirmSuccess"));
       await fetchVideos(false, activeFilter);
     } catch (err) {
-      showActionMessage(getErrorMessage(err, "Không thể confirm-upload video draft. Nếu raw file chưa upload, hãy bấm Upload lại file."));
+      showActionMessage(getErrorMessage(err, t("content.messages.confirmFailed")));
     } finally {
       setConfirmingVideoId(null);
     }
@@ -337,7 +350,7 @@ export function StudioContentFeature() {
     }
 
     if (!video.uploadId) {
-      showActionMessage("Không tìm thấy thông tin phiên upload của bản nháp này.");
+      showActionMessage(t("content.messages.draftMissingSession"));
       return;
     }
 
@@ -354,10 +367,10 @@ export function StudioContentFeature() {
         onProgress: setReuploadProgress,
       });
 
-      showActionMessage("Đã hoàn tất tải tệp tin lên S3. Bấm dấu tích để confirm-upload khi sẵn sàng xử lý.");
+      showActionMessage(t("content.messages.reuploadSuccess"));
       await fetchVideos(false, activeFilter);
     } catch (err) {
-      showActionMessage(getErrorMessage(err, "Không thể tải tiếp video cho draft."));
+      showActionMessage(getErrorMessage(err, t("content.messages.reuploadFailed")));
     } finally {
       setReuploadingVideoId(null);
       setReuploadProgress(0);
@@ -368,10 +381,10 @@ export function StudioContentFeature() {
     <section className="mx-auto w-full max-w-7xl space-y-8 p-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Gallery</p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">Content Library</h1>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("layout.creatorStudio")}</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">{t("content.title")}</h1>
           <p className="mt-2 max-w-2xl font-body text-sm text-muted-foreground">
-            Manage uploads, organize releases, and monitor performance across every access tier.
+            {t("content.subtitle")}
           </p>
         </div>
 
@@ -383,11 +396,11 @@ export function StudioContentFeature() {
             className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border/30 bg-card px-5 py-3 font-headline text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className={`material-symbols-outlined ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true">refresh</span>
-            Refresh
+            {t("content.refresh")}
           </button>
           <Link href="/studio/upload" className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-6 py-3 font-headline text-sm font-semibold text-primary-foreground shadow-[0_10px_20px_rgba(229,9,20,0.2)] transition-opacity hover:opacity-90">
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
-            New Upload
+            {t("content.newUpload")}
           </Link>
         </div>
       </header>
@@ -402,7 +415,7 @@ export function StudioContentFeature() {
               activeFilter === filter.value ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {filter.label}
+            {t(`content.filters.${filter.value}`)}
             {activeFilter === filter.value ? (
               <span className="ml-2 rounded bg-card px-1.5 py-0.5 font-body text-xs text-muted-foreground">{filteredVideos.length}</span>
             ) : null}
@@ -418,53 +431,53 @@ export function StudioContentFeature() {
 
       <div className="flex w-full flex-col gap-4">
         <div className="grid grid-cols-12 gap-4 px-6 py-3 font-label text-xs uppercase tracking-wider text-muted-foreground">
-          <div className="col-span-12 md:col-span-5">Video</div>
-          <div className="hidden text-center md:col-span-2 md:block">Visibility</div>
-          <div className="hidden text-center md:col-span-1 md:block">Level</div>
-          <div className="hidden text-right md:col-span-2 md:block">Performance</div>
-          <div className="col-span-12 text-right md:col-span-2">Actions</div>
+          <div className="col-span-12 md:col-span-5">{t("content.table.video")}</div>
+          <div className="hidden text-center md:col-span-2 md:block">{t("content.table.visibility")}</div>
+          <div className="hidden text-center md:col-span-1 md:block">{t("content.table.level")}</div>
+          <div className="hidden text-right md:col-span-2 md:block">{t("content.table.performance")}</div>
+          <div className="col-span-12 text-right md:col-span-2">{t("content.table.actions")}</div>
         </div>
 
         {isLoading ? (
-          <div className="rounded-lg border border-border/30 bg-card p-12 text-center text-muted-foreground">Loading videos...</div>
+          <div className="rounded-lg border border-border/30 bg-card p-12 text-center text-muted-foreground">{t("content.empty.loading")}</div>
         ) : error ? (
           <div className="rounded-lg border border-destructive/30 bg-card p-12 text-center">
             <span className="material-symbols-outlined text-4xl text-destructive">error</span>
-            <h2 className="mt-4 font-headline text-xl font-bold text-foreground">Không thể tải Content Library</h2>
+            <h2 className="mt-4 font-headline text-xl font-bold text-foreground">{t("content.messages.loadFailed")}</h2>
             <p className="mx-auto mt-2 max-w-md font-body text-sm text-muted-foreground">{error}</p>
             <button
               type="button"
               onClick={() => void fetchVideos(true, activeFilter)}
               className="mt-6 rounded-sm bg-primary px-5 py-2.5 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Thử lại
+              {t("content.messages.retry")}
             </button>
           </div>
         ) : videos.length === 0 ? (
           <div className="rounded-lg border border-border/30 bg-card p-12 text-center">
             <span className="material-symbols-outlined text-4xl text-muted-foreground">video_library</span>
-            <h2 className="mt-4 font-headline text-xl font-bold text-foreground">No videos found</h2>
-            <p className="mt-2 font-body text-sm text-muted-foreground">Upload a video to start building your gallery.</p>
+            <h2 className="mt-4 font-headline text-xl font-bold text-foreground">{t("content.empty.noVideos")}</h2>
+            <p className="mt-2 font-body text-sm text-muted-foreground">{t("content.empty.noVideosDesc")}</p>
           </div>
         ) : filteredVideos.length === 0 ? (
           <div className="rounded-lg border border-border/30 bg-card p-12 text-center">
             <span className="material-symbols-outlined text-4xl text-muted-foreground">search_off</span>
-            <h2 className="mt-4 font-headline text-xl font-bold text-foreground">Không tìm thấy nội dung phù hợp</h2>
-            <p className="mt-2 font-body text-sm text-muted-foreground">Thử tìm theo tiêu đề, mô tả, trạng thái hoặc category khác.</p>
+            <h2 className="mt-4 font-headline text-xl font-bold text-foreground">{t("content.empty.noMatches")}</h2>
+            <p className="mt-2 font-body text-sm text-muted-foreground">{t("content.empty.noMatchesDesc")}</p>
           </div>
         ) : (
           filteredVideos.map((video) => {
             const status = normalizeStatus(video.status);
             const visibility = normalizeVisibility(video.visibility);
-            const visibilityLabel = toTitleCase(visibility);
-            const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString() : "--";
+            const visibilityLabel = t(`content.visibility.${visibility}`);
+            const formattedDate = video.createdAt ? new Date(video.createdAt).toLocaleDateString(locale) : "--";
             const thumbUrl = getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) || "/images/thumbnail.png";
             const price = video.price ?? 0;
-            const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? "PPV" : "Free";
+            const levelLabel = video.requiredTierLevel ? `LV${video.requiredTierLevel}` : price > 0 ? t("content.table.ppv") : t("content.table.free");
             const viewCount = video.viewCount ?? video.metrics?.viewsCount ?? 0;
             const normalizedJobStatus = video.jobStatus?.toLowerCase();
             const displayStatus = isVideoJobStatus(normalizedJobStatus) ? normalizedJobStatus : status;
-            const statusLabel = isVideoJobStatus(normalizedJobStatus) ? getVideoJobStatusLabel(normalizedJobStatus) : status.toUpperCase();
+            const statusLabel = getTranslatedStatus(t, displayStatus);
             const isRejected = status === REJECTED_STATUS || normalizedJobStatus === "rejected";
             const isDraft = status === DRAFT_STATUS;
             const isFailed = FAILED_STATUSES.has(status) || normalizedJobStatus === "failed" || normalizedJobStatus === "rejected";
@@ -473,9 +486,8 @@ export function StudioContentFeature() {
             const statusTone = getStatusTone(displayStatus);
             const isNoticeExpanded = expandedNoticeVideoId === video.id;
             const hasInlineNotice = isDraft || isFailed;
-            const noticeLabel = isDraft ? "lưu ý draft" : isRejected ? "lý do reject" : "lỗi xử lý";
-            const noticePanelId = `content-notice-${video.id}`;
             const previewHref = `/studio/content/${video.id}`;
+            const noticePanelId = `content-notice-${video.id}`;
 
             return (
               <article
@@ -488,7 +500,7 @@ export function StudioContentFeature() {
                   <Link
                     href={previewHref}
                     className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring/70"
-                    aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
+                    aria-label={`${isReady ? t("content.actions.preview") : t("content.actions.openDetails")} ${video.title}`}
                   >
                     <VideoThumbnail
                       src={thumbUrl}
@@ -521,8 +533,8 @@ export function StudioContentFeature() {
                               ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
                               : "bg-secondary/10 text-secondary hover:bg-secondary/20"
                           }`}
-                          title={`Xem ${noticeLabel}`}
-                          aria-label={`${isNoticeExpanded ? "Ẩn" : "Xem"} ${noticeLabel} cho ${video.title}`}
+                          title={isNoticeExpanded ? t("content.notices.hideNotice") : t("content.notices.viewNotice")}
+                          aria-label={`${isNoticeExpanded ? t("content.notices.hideNotice") : t("content.notices.viewNotice")} cho ${video.title}`}
                           aria-controls={noticePanelId}
                           aria-expanded={isNoticeExpanded}
                         >
@@ -536,7 +548,7 @@ export function StudioContentFeature() {
                         role="note"
                         className="mt-2 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 px-3 py-2 text-xs text-muted-foreground"
                       >
-                        Video sẽ bị xoá sau 24h nếu bạn không confirm-upload. Bấm upload để thay file draft, sau đó bấm dấu tích để confirm-upload khi sẵn sàng xử lý.
+                        {t("content.notices.draftWarning")}
                       </div>
                     ) : null}
                     {isDraft && reuploadingVideoId === video.id ? (
@@ -548,7 +560,7 @@ export function StudioContentFeature() {
                           />
                         </div>
                         <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
-                          Uploading {reuploadProgress}%
+                          {t("content.notices.uploading", { progress: reuploadProgress })}
                         </p>
                       </div>
                     ) : null}
@@ -559,10 +571,10 @@ export function StudioContentFeature() {
                         className="mt-2 max-w-sm rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
                       >
                         <span className="font-bold uppercase tracking-widest">
-                          {isRejected ? "Reject reason" : "Processing failed"}
+                          {isRejected ? t("content.notices.rejectedWarning") : t("content.status.failed")}
                         </span>
                         <p className="mt-1 text-destructive/90">
-                          {isRejected ? getRejectReason(video) : video.failureReason || video.errorMessage || video.jobStatusMessage || "Video xử lý thất bại. Bạn có thể xoá bản lỗi và upload lại."}
+                          {isRejected ? getRejectReason(t, video) : video.failureReason || video.errorMessage || video.jobStatusMessage || t("content.notices.failedWarning")}
                         </p>
                       </div>
                     ) : null}
@@ -595,16 +607,16 @@ export function StudioContentFeature() {
 
                 <div className="hidden flex-col text-right md:col-span-2 md:flex">
                   <span className="font-headline font-semibold text-foreground">
-                    {viewCount.toLocaleString()} <span className="font-body text-xs font-normal text-muted-foreground">views</span>
+                    {t("content.table.views", { count: viewCount })}
                   </span>
-                  <span className="font-body text-xs text-muted-foreground">Likes pending</span>
+                  <span className="font-body text-xs text-muted-foreground">{t("content.table.likesPending")}</span>
                 </div>
 
                 <div className="col-span-12 flex justify-end gap-2 md:col-span-2">
                   <Link
                     href={previewHref}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-full p-0 text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring/70"
-                    aria-label={`${isReady ? "Preview" : "Open details for"} ${video.title}`}
+                    aria-label={`${isReady ? t("content.actions.preview") : t("content.actions.openDetails")} ${video.title}`}
                   >
                     <span className="material-symbols-outlined text-[18px]" aria-hidden="true">{isReady ? "play_arrow" : "visibility"}</span>
                   </Link>
@@ -629,9 +641,9 @@ export function StudioContentFeature() {
                         variant="ghost"
                         onClick={() => draftFileInputRefs.current[video.id]?.click()}
                         disabled={reuploadingVideoId === video.id || confirmingVideoId === video.id}
-                        title="Chọn file video để tiếp tục tải lên (Resume upload). Không tự confirm-upload."
+                        title={t("content.actions.resumeUpload")}
                         className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label={`Resume upload for ${video.title}`}
+                        aria-label={`${t("content.actions.resumeUpload")} ${video.title}`}
                       >
                         <span className={`material-symbols-outlined text-[18px] ${reuploadingVideoId === video.id ? "animate-spin" : ""}`}>
                           {reuploadingVideoId === video.id ? "progress_activity" : "upload_file"}
@@ -642,9 +654,9 @@ export function StudioContentFeature() {
                         variant="ghost"
                         onClick={() => void handleConfirmDraftUpload(video)}
                         disabled={confirmingVideoId === video.id || reuploadingVideoId === video.id}
-                        title="Video sẽ bị xoá sau 24h nếu bạn không confirm-upload. Bấm để confirm-upload nếu raw file đã upload."
+                        title={t("content.notices.draftWarning")}
                         className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label={`Confirm upload for ${video.title}. Video will be deleted after 24 hours if you do not confirm upload.`}
+                        aria-label={`${t("content.actions.confirmUpload")} ${video.title}. Video will be deleted after 24 hours if you do not confirm upload.`}
                       >
                         <span className="material-symbols-outlined text-[18px]">
                           {confirmingVideoId === video.id ? "hourglass_top" : "check_circle"}
@@ -659,21 +671,10 @@ export function StudioContentFeature() {
                         variant="ghost"
                         onClick={() => setEditingVideoId(video.id)}
                         className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-foreground"
-                        aria-label={`Edit ${video.title}`}
+                        aria-label={`${t("content.actions.edit")} ${video.title}`}
                       >
                         <span className="material-symbols-outlined text-[18px]">edit</span>
                       </Button>
-                      {/* Analytics action is hidden until the feature is available.
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => showActionMessage("Analytics API chưa sẵn sàng. Hiện chỉ có views cơ bản trong danh sách.")}
-                        className="h-8 w-8 rounded-full p-0 text-muted-foreground hover:text-secondary"
-                        aria-label={`View analytics for ${video.title}`}
-                      >
-                        <span className="material-symbols-outlined text-[18px]">bar_chart</span>
-                      </Button>
-                      */}
                     </>
                   ) : null}
                   {!isDraft ? (
@@ -683,7 +684,7 @@ export function StudioContentFeature() {
                       onClick={() => void handleDeleteVideo(video)}
                       disabled={deletingVideoId === video.id || PROCESSING_STATUSES.has(status)}
                       className="h-8 w-8 rounded-full p-0 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
-                      aria-label={`Delete ${video.title}`}
+                      aria-label={`${t("content.actions.delete")} ${video.title}`}
                     >
                       <span className="material-symbols-outlined text-[18px]">
                         {deletingVideoId === video.id ? "hourglass_top" : "delete"}

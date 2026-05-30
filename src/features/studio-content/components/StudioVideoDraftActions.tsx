@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import {
   mediaService,
   type SubmitUploadBody,
@@ -33,6 +34,7 @@ function getConfirmResolutions(video: OwnerVideoDetailResponse): SubmitUploadBod
 export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftActionsProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const t = useTranslations("Studio");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeAction, setActiveAction] = useState<"confirm" | "replace" | "cancel" | null>(null);
@@ -47,7 +49,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
 
     try {
       if (!video.uploadId) {
-        setError("Không tìm thấy thông tin phiên upload của bản nháp này.");
+        setError(t("content.draftActions.errors.missingSession"));
         return;
       }
 
@@ -56,14 +58,14 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
       });
 
       if (!(response.success || response.statusCode === 200 || response.statusCode === 201)) {
-        setError(response.message || "Không thể confirm-upload video draft.");
+        setError(response.message || t("content.draftActions.errors.confirmFailed"));
         return;
       }
 
-      setMessage("Đã confirm-upload. Video sẽ chuyển sang hàng đợi xử lý.");
+      setMessage(t("content.draftActions.messages.confirmSuccess"));
       onChanged();
     } catch (err) {
-      setError(getErrorMessage(err, "Không thể confirm-upload video draft."));
+      setError(getErrorMessage(err, t("content.draftActions.errors.confirmFailed")));
     } finally {
       setActiveAction(null);
     }
@@ -75,7 +77,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
     }
 
     if (!video.uploadId) {
-      setError("Không tìm thấy thông tin phiên upload của bản nháp này.");
+      setError(t("content.draftActions.errors.missingSession"));
       return;
     }
 
@@ -93,10 +95,10 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
         onProgress: setUploadProgress,
       });
 
-      setMessage("Đã hoàn tất tải tệp tin lên S3. Bấm Confirm upload để đưa video vào hàng đợi xử lý.");
+      setMessage(t("content.draftActions.messages.resumeSuccess"));
       onChanged();
     } catch (err) {
-      setError(getErrorMessage(err, "Không thể tải tiếp video cho draft."));
+      setError(getErrorMessage(err, t("content.draftActions.errors.resumeFailed")));
     } finally {
       setActiveAction(null);
       setUploadProgress(0);
@@ -111,14 +113,14 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
     try {
       const response = await mediaService.cancelUpload(video.id, video.uploadId || "");
       if (!response.success) {
-        setError(response.message || "Không thể hủy upload draft.");
+        setError(response.message || t("content.draftActions.errors.cancelFailed"));
         return;
       }
 
-      setMessage("Đã hủy upload draft.");
+      setMessage(t("content.draftActions.messages.cancelSuccess"));
       router.push("/studio/content");
     } catch (err) {
-      setError(getErrorMessage(err, "Không thể hủy upload draft."));
+      setError(getErrorMessage(err, t("content.draftActions.errors.cancelFailed")));
     } finally {
       setActiveAction(null);
     }
@@ -129,14 +131,13 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl space-y-2">
           <p className="font-label text-xs font-bold uppercase tracking-[0.24em] text-secondary">
-            Draft upload
+            {t("content.draftActions.draftLabel")}
           </p>
           <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
-            Hoàn tất hoặc hủy bản nháp này
+            {t("content.draftActions.title")}
           </h2>
           <p className="font-body text-sm leading-6 text-muted-foreground">
-            Video đang ở trạng thái draft. Bạn có thể tiếp tục tải lên tệp tin (Resume upload), confirm-upload để bắt đầu xử lý,
-            hoặc hủy upload nếu không tiếp tục.
+            {t("content.draftActions.description")}
           </p>
         </div>
 
@@ -162,7 +163,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             <span className={`material-symbols-outlined text-[18px] ${activeAction === "replace" ? "animate-spin" : ""}`} aria-hidden="true">
               {activeAction === "replace" ? "progress_activity" : "upload_file"}
             </span>
-            Resume upload
+            {t("content.draftActions.resumeUpload")}
           </button>
           <button
             type="button"
@@ -173,7 +174,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
               {activeAction === "confirm" ? "hourglass_top" : "check_circle"}
             </span>
-            Confirm upload
+            {t("content.draftActions.confirmUpload")}
           </button>
           <button
             type="button"
@@ -184,7 +185,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
               {activeAction === "cancel" ? "hourglass_top" : "delete"}
             </span>
-            Cancel upload
+            {t("content.draftActions.cancelUpload")}
           </button>
         </div>
       </div>
@@ -198,7 +199,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             />
           </div>
           <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
-            Uploading {uploadProgress}%
+            {t("content.draftActions.uploading", { progress: uploadProgress })}
           </p>
         </div>
       ) : null}

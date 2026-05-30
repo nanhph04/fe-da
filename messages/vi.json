@@ -573,6 +573,182 @@
         "videoStatusDescription": "{title} ở trạng thái {status}.",
         "recently": "Vừa xong"
       }
+    },
+    "content": {
+      "title": "Thư viện nội dung",
+      "subtitle": "Quản lý lượt tải lên, sắp xếp các bản phát hành và giám sát hiệu suất trên từng cấp độ truy cập.",
+      "refresh": "Làm mới",
+      "newUpload": "Tải lên mới",
+      "searchPlaceholder": "Tìm kiếm nội dung...",
+      "table": {
+        "video": "Video",
+        "visibility": "Chế độ hiển thị",
+        "level": "Cấp độ",
+        "performance": "Hiệu suất",
+        "actions": "Thao tác",
+        "views": "{count} lượt xem",
+        "likesPending": "Đang cập nhật thích",
+        "ppv": "PPV",
+        "free": "Miễn phí"
+      },
+      "filters": {
+        "all": "Video",
+        "draft": "Bản nháp",
+        "processing": "Đang xử lý",
+        "ready": "Sẵn sàng",
+        "failed": "Thất bại"
+      },
+      "status": {
+        "all": "Video",
+        "draft": "Bản nháp",
+        "waiting": "Đang chờ duyệt",
+        "processing": "Đang xử lý video",
+        "succeeded": "Thành công",
+        "ready": "Sẵn sàng",
+        "failed": "Xử lý thất bại",
+        "rejected": "Video bị từ chối",
+        "private": "Riêng tư",
+        "public": "Công khai",
+        "unknown": "Không rõ"
+      },
+      "visibility": {
+        "public": "Công khai",
+        "private": "Riêng tư"
+      },
+      "empty": {
+        "noVideos": "Không tìm thấy video nào",
+        "noVideosDesc": "Tải lên video để bắt đầu xây dựng thư viện của bạn.",
+        "noMatches": "Không tìm thấy nội dung phù hợp",
+        "noMatchesDesc": "Thử tìm kiếm theo tiêu đề, mô tả, trạng thái hoặc danh mục khác.",
+        "loading": "Đang tải danh sách video..."
+      },
+      "actions": {
+        "preview": "Xem trước",
+        "openDetails": "Mở chi tiết cho",
+        "resumeUpload": "Tiếp tục tải lên",
+        "confirmUpload": "Xác nhận tải lên",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa"
+      },
+      "messages": {
+        "loadFailed": "Không thể tải danh sách video.",
+        "loadFailedRetry": "Không thể tải danh sách video. Vui lòng thử lại.",
+        "retry": "Thử lại",
+        "deleteFailed": "Không thể xóa video. Vui lòng thử lại.",
+        "deleteSuccessFailed": "Đã xóa video xử lý thất bại khỏi Studio.",
+        "deleteSuccessPublic": "Đã gỡ video khỏi thư viện công khai.",
+        "draftMissingSession": "Không tìm thấy thông tin phiên upload của bản nháp này.",
+        "confirmFailed": "Không thể xác nhận tải lên bản nháp. Nếu file gốc chưa tải lên, vui lòng bấm Tải lên lại.",
+        "confirmSuccess": "Đã xác nhận tải lên. Video sẽ chuyển sang hàng đợi xử lý.",
+        "reuploadSuccess": "Đã hoàn tất tải tệp tin lên S3. Bấm dấu tích để xác nhận tải lên khi sẵn sàng xử lý.",
+        "reuploadFailed": "Không thể tiếp tục tải lên video cho bản nháp.",
+        "noRejectReason": "Chưa có nguyên nhân từ chối từ hệ thống."
+      },
+      "notices": {
+        "draftWarning": "Video sẽ bị xóa sau 24 giờ nếu bạn không xác nhận tải lên. Bấm tải lên để thay tệp nháp, sau đó bấm dấu tích để xác nhận tải lên khi sẵn sàng xử lý.",
+        "failedWarning": "Video xử lý thất bại. Bạn có thể xóa bản lỗi và tải lên lại.",
+        "rejectedWarning": "Video bị từ chối",
+        "viewNotice": "Xem lưu ý",
+        "hideNotice": "Ẩn lưu ý",
+        "uploading": "Đang tải lên {progress}%"
+      },
+      "preview": {
+        "back": "Quay lại Thư viện nội dung",
+        "creatorPreview": "Bản xem trước",
+        "title": "Xem trước video",
+        "subtitle": "Xem trước video đã được xử lý của bạn ngay trong Studio. Quyền truy cập của người xem, lượt mua và các quy tắc hội viên vẫn áp dụng trên trang xem công khai.",
+        "detailsTitle": "Chi tiết video",
+        "fields": {
+          "status": "Trạng thái",
+          "published": "Xuất bản ngày",
+          "runtime": "Thời lượng",
+          "views": "Lượt xem",
+          "category": "Danh mục",
+          "videoId": "Mã Video",
+          "tags": "Thẻ"
+        },
+        "notReady": {
+          "processingTitle": "Video vẫn đang được xử lý",
+          "processingMessage": "Video sẽ sẵn sàng để xem sau khi kiểm duyệt và xử lý HLS hoàn tất. Làm mới trang này khi quy trình hoàn thành.",
+          "rejectedTitle": "Video bị từ chối",
+          "rejectedMessage": "Không thể xem trước video bị từ chối. Hãy xem lý do từ chối trong Thư viện nội dung, sau đó tải lên một video thay thế phù hợp.",
+          "failedTitle": "Xử lý thất bại",
+          "failedMessage": "Video này không hoàn tất xử lý nên chưa có luồng phát. Hãy xóa video lỗi và tải lên lại.",
+          "succeededTitle": "Đã xử lý video thành công",
+          "succeededMessage": "Video đã sẵn sàng. Bản xem trước sẽ mở khóa khi trạng thái sẵn sàng công khai được đồng bộ.",
+          "defaultTitle": "Chưa có bản xem trước",
+          "defaultMessage": "Chỉ video ở trạng thái SẴN SÀNG mới có thể phát trong Creator Studio. Hoàn thành tải lên và xử lý trước khi mở trình phát."
+        },
+        "errors": {
+          "loadFailed": "Không thể tải dữ liệu video này.",
+          "loadFailedRetry": "Không thể tải dữ liệu video này. Vui lòng thử lại.",
+          "openFailed": "Không thể mở video",
+          "tryAgain": "Thử lại",
+          "noDescription": "Chưa có mô tả nào được thêm."
+        },
+        "runtimePending": "Đang cập nhật thời lượng",
+        "notPublished": "Chưa xuất bản",
+        "unknownDate": "Không rõ ngày",
+        "free": "Miễn phí",
+        "uncategorized": "Chưa phân loại",
+        "statusMessage": {
+          "failed": "Video xử lý thất bại.",
+          "processing": "Video đang được xử lý. Hệ thống sẽ tự cập nhật khi có thay đổi.",
+          "succeeded": "Video đã xử lý xong và sẵn sàng phát.",
+          "default": "Chỉ video ở trạng thái SẴN SÀNG mới có thể phát trong Creator Studio. Hoàn thành tải lên và xử lý trước khi mở trình phát."
+        }
+      },
+      "draftActions": {
+        "title": "Hoàn tất hoặc hủy bản nháp này",
+        "description": "Video đang ở trạng thái bản nháp. Bạn có thể tiếp tục tải lên tệp tin (Tiếp tục tải lên), xác nhận tải lên để bắt đầu xử lý, hoặc hủy tải lên nếu không tiếp tục.",
+        "resumeUpload": "Tiếp tục tải lên",
+        "confirmUpload": "Xác nhận tải lên",
+        "cancelUpload": "Hủy tải lên",
+        "uploading": "Đang tải lên {progress}%",
+        "draftLabel": "Tải lên bản nháp",
+        "errors": {
+          "missingSession": "Không tìm thấy thông tin phiên upload của bản nháp này.",
+          "confirmFailed": "Không thể xác nhận tải lên bản nháp.",
+          "resumeFailed": "Không thể tiếp tục tải lên video cho bản nháp.",
+          "cancelFailed": "Không thể hủy tải lên bản nháp."
+        },
+        "messages": {
+          "confirmSuccess": "Đã xác nhận tải lên. Video sẽ chuyển sang hàng đợi xử lý.",
+          "resumeSuccess": "Đã hoàn tất tải tệp tin lên S3. Bấm Xác nhận tải lên để đưa video vào hàng đợi xử lý.",
+          "cancelSuccess": "Đã hủy tải lên bản nháp."
+        }
+      },
+      "metadataDialog": {
+        "title": "Video Metadata",
+        "subtitle": "Chỉnh sửa chi tiết video",
+        "currentStatus": "Trạng thái hiện tại: {status}",
+        "loading": "Đang tải thông tin video...",
+        "fields": {
+          "title": "Tiêu đề",
+          "description": "Mô tả",
+          "visibility": "Chế độ hiển thị",
+          "visibilityPublic": "Công khai",
+          "visibilityPrivate": "Riêng tư",
+          "visibilityHint": "Video công khai có thể được tìm thấy bởi người xem. Video riêng tư sẽ bị ẩn khỏi danh sách tìm kiếm công khai.",
+          "category": "Thể loại",
+          "categoryKeepCurrent": "Giữ thể loại hiện tại",
+          "categoryCurrent": "Thể loại hiện tại: {category}",
+          "tags": "Thẻ",
+          "tagsEmpty": "Chưa có thẻ hoạt động.",
+          "thumbnailUrl": "Đường dẫn ảnh đại diện (Thumbnail URL)",
+          "thumbnailHint": "Chỉ cập nhật URL ảnh đại diện vì dịch vụ hiện tại chưa hỗ trợ tải ảnh đại diện trực tiếp."
+        },
+        "errors": {
+          "loadFailed": "Không tải được thông tin video.",
+          "titleRequired": "Tiêu đề video không được để trống.",
+          "saveFailed": "Không lưu được thông tin video."
+        },
+        "actions": {
+          "cancel": "Hủy",
+          "save": "Lưu thay đổi",
+          "saving": "Đang lưu..."
+        }
+      }
     }
   }
 }

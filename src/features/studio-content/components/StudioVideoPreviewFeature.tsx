@@ -1,11 +1,12 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PlayerContainerClient } from "@/features/watch/components/PlayerContainerClient";
 import { getReadyOwnerVideoThumbnailUrl, mediaService, type OwnerVideoDetailResponse } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
-import { getVideoJobStatusLabel, getVideoStatusFailureReason, isVideoJobStatus, useVideoStatusEventSubscription, type VideoStatusChangedPayload } from "@/shared/hooks/use-video-status-events";
+import { getVideoStatusFailureReason, isVideoJobStatus, useVideoStatusEventSubscription, type VideoStatusChangedPayload } from "@/shared/hooks/use-video-status-events";
 import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 import { StudioVideoDraftActions } from "./StudioVideoDraftActions";
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
@@ -21,6 +22,8 @@ type NotReadyCopy = {
   className: string;
 };
 
+type TFunction = ReturnType<typeof useTranslations>;
+
 const READY_STATUS = "ready";
 const DRAFT_STATUS = "draft";
 const PLAYABLE_STATUSES = new Set([READY_STATUS, "private"]);
@@ -31,30 +34,39 @@ function normalizeStatus(status?: string | null) {
   return status?.toLowerCase() || "unknown";
 }
 
-function formatStatus(status?: string | null) {
-  return normalizeStatus(status).replaceAll("_", " ").toUpperCase();
+function normalizeVisibility(visibility?: string | null) {
+  return visibility?.toLowerCase() || "private";
 }
 
-function formatDate(value?: string | null) {
+function formatStatus(t: TFunction, status?: string | null) {
+  const normalized = normalizeStatus(status);
+  const knownStatuses = ["ready", "pending", "failed", "processing", "rejected", "waiting", "succeeded", "draft", "private", "public", "unknown"];
+  if (knownStatuses.includes(normalized)) {
+    return t(`content.status.${normalized}`);
+  }
+  return normalized.replaceAll("_", " ").toUpperCase();
+}
+
+function formatDate(t: TFunction, locale: string, value?: string | null) {
   if (!value) {
-    return "Not published";
+    return t("content.preview.notPublished");
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Unknown date";
+    return t("content.preview.unknownDate");
   }
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(date);
 }
 
-function formatDuration(seconds?: number | null) {
+function formatDuration(t: TFunction, seconds?: number | null) {
   if (!seconds || seconds <= 0) {
-    return "Runtime pending";
+    return t("content.preview.runtimePending");
   }
 
   const hours = Math.floor(seconds / 3600);
@@ -68,16 +80,16 @@ function formatDuration(seconds?: number | null) {
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-function getAccessLabel(video: OwnerVideoDetailResponse) {
+function getAccessLabel(t: TFunction, video: OwnerVideoDetailResponse) {
   if (video.requiredTierLevel) {
     return `LV${video.requiredTierLevel}`;
   }
 
   if ((video.price ?? 0) > 0) {
-    return `${video.price.toLocaleString("en")} AC`;
+    return `${video.price.toLocaleString()} AC`;
   }
 
-  return "Free";
+  return t("content.preview.free");
 }
 
 function getStatusClass(status: string) {
@@ -100,31 +112,31 @@ function getStatusClass(status: string) {
   return "border-border/40 bg-muted text-muted-foreground";
 }
 
-function getVideoStatusMessage(video: OwnerVideoDetailResponse, status: string) {
+function getVideoStatusMessage(t: TFunction, video: OwnerVideoDetailResponse, status: string) {
   if (status === "rejected" || status === "failed") {
     return getVideoStatusFailureReason({
       failureReason: video.failureReason || video.errorMessage || null,
       moderationDetails: video.moderationDetails,
-    }) || video.jobStatusMessage || "Video xử lý thất bại.";
+    }) || video.jobStatusMessage || t("content.preview.statusMessage.failed");
   }
 
   if (PROCESSING_STATUSES.has(status)) {
-    return video.jobStatusMessage || "Video đang được xử lý. Hệ thống sẽ tự cập nhật khi có thay đổi.";
+    return video.jobStatusMessage || t("content.preview.statusMessage.processing");
   }
 
   if (status === "succeeded" || status === "ready") {
-    return "Video đã xử lý xong và sẵn sàng phát.";
+    return t("content.preview.statusMessage.succeeded");
   }
 
-  return "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player.";
+  return t("content.preview.statusMessage.default");
 }
 
-function getNotReadyCopy(status: string): NotReadyCopy {
+function getNotReadyCopy(t: TFunction, status: string): NotReadyCopy {
   if (PROCESSING_STATUSES.has(status)) {
     return {
       icon: "hourglass_top",
-      title: "Video is still processing",
-      message: "Playback becomes available after moderation and HLS processing finish. Refresh this page when the pipeline completes.",
+      title: t("content.preview.notReady.processingTitle"),
+      message: t("content.preview.notReady.processingMessage"),
       className: "border-secondary/30 bg-secondary/10 text-secondary",
     };
   }
@@ -132,8 +144,8 @@ function getNotReadyCopy(status: string): NotReadyCopy {
   if (status === "rejected") {
     return {
       icon: "report",
-      title: "Video was rejected",
-      message: "Rejected videos cannot be previewed. Review the rejection reason in Content Library, then upload a compliant replacement.",
+      title: t("content.preview.notReady.rejectedTitle"),
+      message: t("content.preview.notReady.rejectedMessage"),
       className: "border-destructive/30 bg-destructive/10 text-destructive",
     };
   }
@@ -141,8 +153,8 @@ function getNotReadyCopy(status: string): NotReadyCopy {
   if (status === "failed") {
     return {
       icon: "error",
-      title: "Processing failed",
-      message: "This asset did not finish processing, so there is no playable stream yet. Delete the failed upload and try again.",
+      title: t("content.preview.notReady.failedTitle"),
+      message: t("content.preview.notReady.failedMessage"),
       className: "border-destructive/30 bg-destructive/10 text-destructive",
     };
   }
@@ -150,16 +162,16 @@ function getNotReadyCopy(status: string): NotReadyCopy {
   if (status === "succeeded") {
     return {
       icon: "play_circle",
-      title: "Video processing completed",
-      message: "The asset is ready. The preview will unlock once the public-ready state is synced.",
+      title: t("content.preview.notReady.succeededTitle"),
+      message: t("content.preview.notReady.succeededMessage"),
       className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
     };
   }
 
   return {
     icon: "lock_clock",
-    title: "Preview is not available yet",
-    message: "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player.",
+    title: t("content.preview.notReady.defaultTitle"),
+    message: t("content.preview.notReady.defaultMessage"),
     className: "border-border/40 bg-muted text-muted-foreground",
   };
 }
@@ -196,6 +208,8 @@ function StudioVideoPreviewSkeleton() {
 }
 
 export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeatureProps) {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [video, setVideo] = useState<OwnerVideoDetailResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -230,11 +244,11 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
           return;
         }
 
-        setError(response.message || "Unable to load this Studio video.");
+        setError(response.message || t("content.preview.errors.loadFailed"));
         setVideo(null);
       } catch (err) {
         if (!cancelled) {
-          setError(getErrorMessage(err, "Unable to load this Studio video. Please try again."));
+          setError(getErrorMessage(err, t("content.preview.errors.loadFailedRetry")));
           setVideo(null);
         }
       } finally {
@@ -251,7 +265,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
     return () => {
       cancelled = true;
     };
-  }, [refreshKey, videoId]);
+  }, [refreshKey, videoId, t]);
 
   const handleVideoStatusChanged = useCallback((payload: VideoStatusChangedPayload) => {
     if (payload.videoId !== videoId) {
@@ -270,9 +284,9 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
   const status = normalizeStatus(video?.status);
   const normalizedJobStatus = video?.jobStatus?.toLowerCase();
   const displayStatus = isVideoJobStatus(normalizedJobStatus) ? normalizedJobStatus : status;
-  const statusLabel = isVideoJobStatus(normalizedJobStatus) ? getVideoJobStatusLabel(normalizedJobStatus) : formatStatus(video?.status);
+  const statusLabel = isVideoJobStatus(normalizedJobStatus) ? t(`content.status.${normalizedJobStatus}`) : formatStatus(t, video?.status);
   const isReady = PLAYABLE_STATUSES.has(status);
-  const notReadyCopy = useMemo(() => getNotReadyCopy(status), [status]);
+  const notReadyCopy = useMemo(() => getNotReadyCopy(t, status), [t, status]);
   const isDraft = status === DRAFT_STATUS;
   const poster = getReadyOwnerVideoThumbnailUrl(video?.id, video?.thumbnailUrl, video?.thumbnailStatus) || "/images/thumbnail.png";
   const viewCount = video?.viewCount ?? video?.metrics?.viewsCount ?? 0;
@@ -295,15 +309,15 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
             className="inline-flex items-center gap-2 font-headline text-sm font-bold text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/60"
           >
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
-            Back to Content Library
+            {t("content.preview.back")}
           </Link>
           <div>
-            <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Preview</p>
+            <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("content.preview.creatorPreview")}</p>
             <h1 className="max-w-4xl truncate font-headline text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">
-              {video?.title || "Video preview"}
+              {video?.title || t("content.preview.title")}
             </h1>
             <p className="mt-2 max-w-2xl font-body text-sm leading-6 text-muted-foreground">
-              Preview your processed video exactly from Studio. Viewer access, purchases, and membership rules still apply on public watch surfaces.
+              {t("content.preview.subtitle")}
             </p>
           </div>
         </div>
@@ -316,7 +330,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
             className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-border/40 bg-card px-4 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className={`material-symbols-outlined text-[18px] ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true">refresh</span>
-            Refresh
+            {t("content.refresh")}
           </button>
           {video ? (
             <Link
@@ -324,7 +338,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
               className="inline-flex min-h-11 items-center gap-2 rounded-sm bg-primary px-4 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring/60"
             >
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">video_library</span>
-              Manage
+              {t("content.actions.edit")}
             </Link>
           ) : null}
         </div>
@@ -333,14 +347,14 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
       {error ? (
         <div className="rounded-lg border border-destructive/30 bg-card p-10 text-center">
           <span className="material-symbols-outlined text-5xl text-destructive" aria-hidden="true">error</span>
-          <h2 className="mt-4 font-headline text-2xl font-extrabold tracking-tight text-foreground">Unable to open video</h2>
+          <h2 className="mt-4 font-headline text-2xl font-extrabold tracking-tight text-foreground">{t("content.preview.errors.openFailed")}</h2>
           <p className="mx-auto mt-2 max-w-xl font-body text-sm leading-6 text-muted-foreground">{error}</p>
           <button
             type="button"
             onClick={() => setRefreshKey(value => value + 1)}
             className="mt-6 inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-5 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring/60"
           >
-            Try again
+            {t("content.preview.errors.tryAgain")}
           </button>
         </div>
       ) : null}
@@ -365,7 +379,7 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
                   </div>
                   <div className="max-w-lg space-y-2">
                     <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">{notReadyCopy.title}</h2>
-                    <p className="font-body text-sm leading-6 text-muted-foreground">{video ? getVideoStatusMessage(video, status) : notReadyCopy.message}</p>
+                    <p className="font-body text-sm leading-6 text-muted-foreground">{video ? getVideoStatusMessage(t, video, status) : notReadyCopy.message}</p>
                   </div>
                 </div>
               </div>
@@ -381,14 +395,14 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
                   {statusLabel}
                 </span>
                 <span className="rounded-sm border border-secondary/30 bg-secondary/10 px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
-                  {getAccessLabel(video)}
+                  {getAccessLabel(t, video)}
                 </span>
                 <span className="rounded-sm border border-border/40 bg-muted px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {video.visibility}
+                  {t(`content.visibility.${normalizeVisibility(video.visibility)}`)}
                 </span>
               </div>
               <p className="mt-5 whitespace-pre-line font-body text-sm leading-7 text-muted-foreground">
-                {video.description || "No description has been added yet."}
+                {video.description || t("content.preview.errors.noDescription")}
               </p>
               {video.jobStatus || PROCESSING_STATUSES.has(status) || FAILED_STATUSES.has(status) ? (
                 <ProcessingProgressTracker
@@ -404,37 +418,37 @@ export function StudioVideoPreviewFeature({ videoId }: StudioVideoPreviewFeature
           </div>
 
           <aside className="h-fit rounded-lg border border-border/30 bg-card p-6">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Asset Details</p>
+            <p className="font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("content.preview.detailsTitle")}</p>
             <dl className="mt-5 space-y-4 text-sm">
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
-                <dt className="text-muted-foreground">Status</dt>
+                <dt className="text-muted-foreground">{t("content.preview.fields.status")}</dt>
                 <dd className="text-right font-headline font-bold text-foreground">{statusLabel}</dd>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
-                <dt className="text-muted-foreground">Published</dt>
-                <dd className="text-right font-headline font-bold text-foreground">{formatDate(video.publishedAt || video.createdAt)}</dd>
+                <dt className="text-muted-foreground">{t("content.preview.fields.published")}</dt>
+                <dd className="text-right font-headline font-bold text-foreground">{formatDate(t, locale, video.publishedAt || video.createdAt)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
-                <dt className="text-muted-foreground">Runtime</dt>
-                <dd className="text-right font-headline font-bold text-foreground">{formatDuration(video.durationSeconds)}</dd>
+                <dt className="text-muted-foreground">{t("content.preview.fields.runtime")}</dt>
+                <dd className="text-right font-headline font-bold text-foreground">{formatDuration(t, video.durationSeconds)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
-                <dt className="text-muted-foreground">Views</dt>
-                <dd className="text-right font-headline font-bold text-foreground">{viewCount.toLocaleString("en")}</dd>
+                <dt className="text-muted-foreground">{t("content.preview.fields.views")}</dt>
+                <dd className="text-right font-headline font-bold text-foreground">{viewCount.toLocaleString(locale)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/30 pb-4">
-                <dt className="text-muted-foreground">Category</dt>
-                <dd className="text-right font-headline font-bold text-foreground">{video.category || "Uncategorized"}</dd>
+                <dt className="text-muted-foreground">{t("content.preview.fields.category")}</dt>
+                <dd className="text-right font-headline font-bold text-foreground">{video.category || t("content.preview.uncategorized")}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-muted-foreground">Video ID</dt>
+                <dt className="text-muted-foreground">{t("content.preview.fields.videoId")}</dt>
                 <dd className="max-w-[190px] truncate text-right font-mono text-xs text-foreground">{video.id}</dd>
               </div>
             </dl>
 
             {tags.length > 0 ? (
               <div className="mt-6 border-t border-border/30 pt-5">
-                <p className="mb-3 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tags</p>
+                <p className="mb-3 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("content.preview.fields.tags")}</p>
                 <div className="flex flex-wrap gap-2">
                   {tags.map(tag => (
                     <span key={tag} className="rounded-sm border border-border/30 bg-muted px-2 py-1 text-xs text-muted-foreground">
