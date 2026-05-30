@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { TIER_LEVELS, type TierEditorPayload, type TierEditorState, type TierLevel } from "./StudioMembershipFeature";
 
 interface TierEditorOverlayProps {
@@ -24,10 +25,13 @@ export function TierEditorOverlay({
   onClose,
   onSave,
 }: TierEditorOverlayProps) {
+  const t = useTranslations("Studio.memberships.editor");
+  const locale = useLocale();
+  const numberLocale = locale === "vi" ? "vi-VN" : "en-US";
   const editingTier = editorState.mode === "edit" ? editorState.tier : null;
   const initialLevel = editorState.mode === "create" ? editorState.level : editingTier?.level ?? 1;
   const [level, setLevel] = useState<TierLevel>(initialLevel);
-  const [name, setName] = useState(editingTier?.name || `Level ${initialLevel} Membership`);
+  const [name, setName] = useState(editingTier?.name || t("defaultName", { level: initialLevel }));
   const [price, setPrice] = useState(editingTier?.price || MIN_PRICE_BY_LEVEL[initialLevel]);
   const [isAcceptingNew, setIsAcceptingNew] = useState(editingTier?.isAcceptingNew ?? true);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -40,10 +44,14 @@ export function TierEditorOverlay({
       : [level];
 
   const handleLevelChange = (nextLevel: TierLevel) => {
+    const isDefaultName = TIER_LEVELS.some((option) => (
+      name === t("defaultName", { level: option }) || name === `Level ${option} Membership`
+    ));
+
     setLevel(nextLevel);
     setPrice((currentPrice) => Math.max(currentPrice, MIN_PRICE_BY_LEVEL[nextLevel]));
-    if (!name.trim() || name.startsWith("Level ")) {
-      setName(`Level ${nextLevel} Membership`);
+    if (!name.trim() || isDefaultName) {
+      setName(t("defaultName", { level: nextLevel }));
     }
   };
 
@@ -51,12 +59,12 @@ export function TierEditorOverlay({
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      setValidationError("Please enter a tier name.");
+      setValidationError(t("validation.nameRequired"));
       return;
     }
 
     if (price < minPrice) {
-      setValidationError(`Tier price must be at least ${minPrice} AC for Level ${level}.`);
+      setValidationError(t("validation.minPrice", { minPrice, level }));
       return;
     }
 
@@ -75,20 +83,20 @@ export function TierEditorOverlay({
         <aside className="hidden border-r border-border/30 bg-muted/30 p-8 lg:flex lg:flex-col lg:justify-between">
           <div>
             <span className="mb-4 inline-flex rounded-sm bg-primary/15 px-3 py-1 font-label text-xs font-bold uppercase tracking-widest text-primary">
-              {editorState.mode === "edit" ? "Edit Tier" : "Create Tier"}
+              {editorState.mode === "edit" ? t("eyebrow.edit") : t("eyebrow.create")}
             </span>
             <h3 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">
-              Shape the member room
+              {t("sideTitle")}
             </h3>
             <p className="mt-4 font-body text-sm leading-6 text-muted-foreground">
-              Pricing and join status are saved directly to Media Service.
+              {t("sideDescription")}
             </p>
           </div>
 
           <div className="rounded-lg border border-secondary/20 bg-secondary/10 p-5">
-            <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">Monthly Price</p>
-            <p className="mt-2 font-headline text-4xl font-black text-secondary">{price.toLocaleString("vi-VN")} AC</p>
-            <p className="mt-2 font-body text-xs text-muted-foreground">Level {level} membership tier.</p>
+            <p className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">{t("monthlyPrice")}</p>
+            <p className="mt-2 font-headline text-4xl font-black text-secondary">{price.toLocaleString(numberLocale)} AC</p>
+            <p className="mt-2 font-body text-xs text-muted-foreground">{t("levelSummary", { level })}</p>
           </div>
         </aside>
 
@@ -96,16 +104,16 @@ export function TierEditorOverlay({
           <header className="flex items-center justify-between border-b border-border/30 bg-muted/40 px-6 py-4">
             <div>
               <h3 className="font-headline text-xl font-bold text-foreground">
-                {editorState.mode === "edit" ? "Edit Tier" : "Create New Tier"}
+                {editorState.mode === "edit" ? t("title.edit") : t("title.create")}
               </h3>
-              <p className="font-body text-xs text-muted-foreground">Configure tier level, name, AC price, and join status.</p>
+              <p className="font-body text-xs text-muted-foreground">{t("description")}</p>
             </div>
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
               className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label="Close tier editor"
+              aria-label={t("actions.closeAria")}
             >
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -114,7 +122,7 @@ export function TierEditorOverlay({
           <div className="grid gap-6 overflow-y-auto p-6 md:grid-cols-2">
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Access Level</label>
+                <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.accessLevel")}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {TIER_LEVELS.map((option) => {
                     const disabled = !selectableLevels.includes(option);
@@ -128,7 +136,7 @@ export function TierEditorOverlay({
                           level === option ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
                         }`}
                       >
-                        Lv{option}
+                        {t("fields.levelShort", { level: option })}
                       </button>
                     );
                   })}
@@ -136,12 +144,12 @@ export function TierEditorOverlay({
               </div>
 
               <div className="space-y-2">
-                <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Tier Name</label>
+                <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.tierName")}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="e.g. Silver Member"
+                  placeholder={t("fields.namePlaceholder")}
                   disabled={isSaving}
                   className="w-full rounded-md border border-border/40 bg-input px-4 py-3 font-headline font-bold text-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
                 />
@@ -149,7 +157,7 @@ export function TierEditorOverlay({
 
               <div className="space-y-2">
                 <label className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  Monthly Price (AC)
+                  {t("fields.monthlyPrice")}
                 </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary">
@@ -165,17 +173,17 @@ export function TierEditorOverlay({
                   />
                 </div>
                 <p className="font-body text-[10px] text-muted-foreground">
-                  Pricing starts at {minPrice} AC for Level {level}.
+                  {t("fields.priceHint", { minPrice, level })}
                 </p>
               </div>
 
               <div className="flex items-center justify-between gap-4 rounded-md border border-border/30 bg-muted/40 p-4">
                 <div className="min-w-0 space-y-1">
                   <span id="accept-new-members-label" className="block font-label text-xs font-bold uppercase tracking-widest text-foreground">
-                    Accept new members
+                    {t("fields.acceptNewMembers")}
                   </span>
                   <span className="block font-body text-xs leading-5 text-muted-foreground">
-                    Disable this when the tier should remain visible but closed.
+                    {t("fields.acceptNewMembersHint")}
                   </span>
                 </div>
                 <button
@@ -200,16 +208,16 @@ export function TierEditorOverlay({
 
             <div className="space-y-4">
               <div className="rounded-md border border-border/30 bg-muted/40 p-4">
-                <p className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Join Status</p>
+                <p className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("joinStatus.title")}</p>
                 <div className="mt-3 flex items-start justify-between gap-4">
                   <div className="space-y-1">
                     <p className="font-body text-sm font-semibold text-foreground">
-                      {isAcceptingNew ? "Open to new members" : "Closed to new members"}
+                      {isAcceptingNew ? t("joinStatus.open") : t("joinStatus.closed")}
                     </p>
                     <p className="font-body text-xs leading-5 text-muted-foreground">
                       {isAcceptingNew
-                        ? "Fans can join this tier immediately after save."
-                        : "The tier stays visible, but new joins are paused."}
+                        ? t("joinStatus.openDescription")
+                        : t("joinStatus.closedDescription")}
                     </p>
                   </div>
                   <span
@@ -219,15 +227,15 @@ export function TierEditorOverlay({
                         : "border-border/40 bg-muted/30 text-muted-foreground"
                     }`}
                   >
-                    {isAcceptingNew ? "On" : "Off"}
+                    {isAcceptingNew ? t("joinStatus.on") : t("joinStatus.off")}
                   </span>
                 </div>
               </div>
 
               <div className="rounded-md border border-secondary/20 bg-secondary/10 p-4">
-                <p className="font-label text-xs font-bold uppercase tracking-widest text-secondary">Payout Notice</p>
+                <p className="font-label text-xs font-bold uppercase tracking-widest text-secondary">{t("payout.title")}</p>
                 <p className="mt-2 font-body text-xs leading-5 text-foreground">
-                  Membership income becomes available after 72 hours.
+                  {t("payout.description")}
                 </p>
               </div>
             </div>
@@ -246,7 +254,7 @@ export function TierEditorOverlay({
               disabled={isSaving}
               className="flex-1 py-3 font-headline text-sm font-bold text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Cancel
+              {t("actions.cancel")}
             </button>
             <button
               type="button"
@@ -254,7 +262,7 @@ export function TierEditorOverlay({
               disabled={isSaving}
               className="flex-[2] rounded-sm bg-primary py-3 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSaving ? "Saving..." : "Save Tier"}
+              {isSaving ? t("actions.saving") : t("actions.save")}
             </button>
           </footer>
         </section>

@@ -117,6 +117,19 @@
     }
   },
   "Wallet": {
+    "Dashboard": {
+      "title": "Ví của tôi",
+      "description": "Tiếp sức cho nhà sáng tạo bạn yêu thích và mở khóa trải nghiệm điện ảnh độc quyền bằng Aura Coins.",
+      "currentBalance": "Số dư hiện tại",
+      "errors": {
+        "loadBalanceFailed": "Không thể tải số dư ví.",
+        "loadTransactionsFailed": "Không thể tải lịch sử giao dịch."
+      },
+      "statusMessages": {
+        "depositClosed": "Ví đã đóng nên không thể nạp thêm Aura Coins.",
+        "unknown": "Không thể xác định trạng thái ví. Vui lòng tải lại ví rồi thử lại."
+      }
+    },
     "TopUpPackages": {
       "title": "Gói nạp Aura Coin",
       "loadingLabel": "Đang tải gói nạp",
@@ -131,6 +144,31 @@
       "bonusAmount": "+ {amount} coin thưởng",
       "currencyUnit": "VND",
       "buyNow": "Nạp ngay"
+    },
+    "TransactionHistory": {
+      "title": "Lịch sử giao dịch",
+      "empty": "Chưa có giao dịch nào.",
+      "loading": "Đang tải giao dịch...",
+      "columns": {
+        "date": "Ngày",
+        "description": "Mô tả",
+        "amount": "Số tiền",
+        "status": "Trạng thái"
+      },
+      "descriptions": {
+        "depositSuccessVnd": "Nạp thành công {amount} VND",
+        "depositSuccess": "Nạp coin thành công",
+        "membershipPayment": "Thanh toán gói hội viên",
+        "videoPayment": "Thanh toán video",
+        "servicePayment": "Thanh toán dịch vụ",
+        "studioRevenue": "Doanh thu studio"
+      },
+      "statuses": {
+        "completed": "Thành công",
+        "pending": "Đang xử lý",
+        "cancelled": "Đã hủy",
+        "failed": "Thất bại"
+      }
     },
     "TopUpSuccess": {
       "metadataTitle": "Nạp tiền thành công - Velvet Gallery",
@@ -168,7 +206,9 @@
       "continueToPayOS": "Tiếp tục với PayOS",
       "continueDescription": "Hệ thống sẽ tạo yêu cầu nạp và tải trang thanh toán an toàn của PayOS.",
       "errors": {
-        "createPaymentFailed": "Không thể tạo thanh toán PayOS. Vui lòng thử lại."
+        "createPaymentFailed": "Không thể tạo thanh toán PayOS. Vui lòng thử lại.",
+        "missingCheckoutUrl": "Backend chưa trả checkoutUrl cho giao dịch PayOS.",
+        "invalidCheckoutUrl": "Backend trả checkoutUrl không hợp lệ."
       }
     }
   },
@@ -927,6 +967,188 @@
             "descriptionShort": "Chỉ hiển thị với bạn hoặc những người có liên kết."
           }
         }
+      }
+    },
+    "memberships": {
+      "page": {
+        "eyebrow": "Hội viên Creator",
+        "title": "Hội viên cộng đồng",
+        "subtitle": "Mở bán các bản phát hành độc quyền cho hội viên và thiết lập cấp Aura Coin dành cho người xem trung thành nhất.",
+        "errorTitle": "Không thể tải dữ liệu hội viên",
+        "retry": "Thử lại",
+        "loadingLabel": "Đang tải chi tiết hội viên"
+      },
+      "messages": {
+        "channelUnavailable": "Kênh creator chưa sẵn sàng.",
+        "dataUnavailable": "Dữ liệu hội viên chưa sẵn sàng.",
+        "tiersUnavailable": "Danh sách cấp hội viên chưa sẵn sàng.",
+        "loadFallback": "Không thể tải dữ liệu hội viên. Vui lòng thử lại.",
+        "adminClosed": "Hội viên của kênh này đã bị quản trị viên đóng.",
+        "approvalRequired": "Cần quản trị viên phê duyệt trước khi tạo cấp hội viên.",
+        "allLevelsExist": "Cả 3 cấp hội viên đã tồn tại. Hãy chỉnh sửa một cấp hiện có.",
+        "channelMissingReview": "Không tìm thấy kênh creator để gửi yêu cầu duyệt hội viên.",
+        "requestFailedResponse": "Không thể gửi yêu cầu duyệt hội viên.",
+        "reviewSent": "Đã gửi yêu cầu duyệt hội viên. Đang chờ quản trị viên phê duyệt.",
+        "requestFailed": "Không thể gửi yêu cầu duyệt hội viên. Vui lòng kiểm tra điều kiện và thử lại.",
+        "channelMissingSave": "Không tìm thấy kênh creator để lưu cấp hội viên này.",
+        "saveFailedResponse": "Không thể lưu cấp hội viên.",
+        "updateNewTierStatusFailed": "Không thể cập nhật trạng thái cấp mới.",
+        "tierUpdated": "Đã cập nhật cấp hội viên.",
+        "tierCreated": "Đã tạo cấp hội viên.",
+        "saveFallback": "Không thể lưu cấp hội viên. Vui lòng thử lại.",
+        "channelMissingUpdate": "Không tìm thấy kênh creator để cập nhật cấp này.",
+        "updateStatusFailedResponse": "Không thể cập nhật trạng thái cấp.",
+        "tierResumed": "Cấp này đã nhận hội viên mới trở lại.",
+        "tierPaused": "Cấp này đã tạm dừng nhận hội viên mới.",
+        "updateStatusFallback": "Không thể cập nhật trạng thái cấp."
+      },
+      "management": {
+        "summary": {
+          "eyebrow": "Hội viên đang hoạt động",
+          "title": "Hệ thống cấp của bạn đã kết nối",
+          "acceptingCount": "{count} cấp đang nhận hội viên mới",
+          "across": "với tổng giá vào cấp hằng tháng",
+          "monthlyFloor": "{amount} AC",
+          "review": "Duyệt: {status}",
+          "closedByAdmin": "Đã bị quản trị viên đóng"
+        },
+        "reviewStatus": {
+          "not_requested": "Chưa yêu cầu",
+          "pending": "Đang chờ",
+          "approved": "Đã duyệt",
+          "rejected": "Bị từ chối"
+        },
+        "actions": {
+          "addTier": "Thêm cấp",
+          "editTierAria": "Chỉnh sửa {name}",
+          "saving": "Đang lưu...",
+          "pauseJoins": "Tạm dừng tham gia",
+          "resumeJoins": "Mở lại tham gia"
+        },
+        "tier": {
+          "level": "Cấp {level}",
+          "monthlyPrice": "Giá hằng tháng",
+          "joinStatus": "Trạng thái tham gia",
+          "accepting": "Đang nhận hội viên mới",
+          "paused": "Tạm dừng nhận hội viên mới"
+        },
+        "perks": {
+          "level1": {
+            "access": "Truy cập video Lv1",
+            "badge": "Huy hiệu cộng đồng",
+            "comments": "Bình luận chỉ dành cho hội viên"
+          },
+          "level2": {
+            "access": "Truy cập video Lv1-Lv2",
+            "earlyAccess": "Xem sớm các bản phát hành",
+            "livestreams": "Livestream creator hằng tháng"
+          },
+          "level3": {
+            "access": "Truy cập tất cả video",
+            "behindScenes": "Tư liệu hậu trường",
+            "updates": "Cập nhật trực tiếp từ creator"
+          }
+        }
+      },
+      "eligibility": {
+        "requirements": {
+          "readyVideos": {
+            "label": "Video sẵn sàng",
+            "detail": "Video đã xuất bản ở trạng thái READY"
+          },
+          "totalViews": {
+            "label": "Tổng lượt xem",
+            "detail": "Nhu cầu người xem ở cấp kênh"
+          }
+        },
+        "actions": {
+          "createFirstTier": "Tạo cấp đầu tiên",
+          "membershipClosed": "Hội viên đã đóng",
+          "sending": "Đang gửi...",
+          "waitingForAdmin": "Chờ quản trị viên",
+          "requestOpening": "Yêu cầu mở hội viên"
+        },
+        "hero": {
+          "eyebrow": "Cột mốc độc quyền",
+          "createTitle": "Tạo cấp đầu tiên của bạn",
+          "closedTitle": "Hội viên đã đóng",
+          "reviewTitle": "Yêu cầu duyệt hội viên",
+          "unlockTitle": "Mở khóa Hội viên",
+          "closedDescription": "Quản trị viên đã đóng hội viên cho kênh này. Hội viên mới không thể tham gia.",
+          "createDescription": "Quản trị viên đã phê duyệt hội viên cho kênh này. Bạn có thể tạo các cấp được đồng bộ qua API.",
+          "pendingDescription": "Yêu cầu của bạn đang trong hàng đợi quản trị viên. Tạo cấp sẽ mở khóa sau khi được phê duyệt.",
+          "requestDescription": "Bạn đã đạt tất cả yêu cầu. Gửi yêu cầu mở để quản trị viên phê duyệt tạo cấp.",
+          "lockedDescription": "Hoàn thành các yêu cầu bên dưới trước khi gửi duyệt hội viên để tạo doanh thu Aura Coin định kỳ."
+        },
+        "review": "Duyệt: {status}",
+        "reviewStatus": {
+          "not_requested": "Chưa yêu cầu",
+          "pending": "Đang chờ",
+          "approved": "Đã duyệt",
+          "rejected": "Bị từ chối"
+        },
+        "detailsAriaLabel": "Chi tiết điều kiện hội viên",
+        "details": {
+          "title": "Chi tiết cột mốc",
+          "metTitle": "Đã đạt yêu cầu",
+          "description": "Theo dõi hai ngưỡng bắt buộc trước khi yêu cầu duyệt hội viên.",
+          "metDescription": "Số video sẵn sàng và tổng lượt xem đã đạt ngưỡng mở hội viên."
+        }
+      },
+      "editor": {
+        "defaultName": "Hội viên Cấp {level}",
+        "eyebrow": {
+          "edit": "Chỉnh sửa cấp",
+          "create": "Tạo cấp"
+        },
+        "sideTitle": "Định hình phòng hội viên",
+        "sideDescription": "Giá và trạng thái tham gia được lưu trực tiếp vào Media Service.",
+        "monthlyPrice": "Giá hằng tháng",
+        "levelSummary": "Cấp hội viên {level}.",
+        "title": {
+          "edit": "Chỉnh sửa cấp",
+          "create": "Tạo cấp mới"
+        },
+        "description": "Cấu hình cấp truy cập, tên, giá AC và trạng thái tham gia.",
+        "fields": {
+          "accessLevel": "Cấp truy cập",
+          "levelShort": "Lv{level}",
+          "tierName": "Tên cấp",
+          "namePlaceholder": "VD: Hội viên Bạc",
+          "monthlyPrice": "Giá hằng tháng (AC)",
+          "priceHint": "Giá bắt đầu từ {minPrice} AC cho Cấp {level}.",
+          "acceptNewMembers": "Nhận hội viên mới",
+          "acceptNewMembersHint": "Tắt khi cấp vẫn hiển thị nhưng tạm đóng."
+        },
+        "joinStatus": {
+          "title": "Trạng thái tham gia",
+          "open": "Mở cho hội viên mới",
+          "closed": "Đóng với hội viên mới",
+          "openDescription": "Người hâm mộ có thể tham gia cấp này ngay sau khi lưu.",
+          "closedDescription": "Cấp vẫn hiển thị, nhưng lượt tham gia mới sẽ tạm dừng.",
+          "on": "Bật",
+          "off": "Tắt"
+        },
+        "payout": {
+          "title": "Lưu ý thanh toán",
+          "description": "Doanh thu hội viên có thể rút sau 72 giờ."
+        },
+        "validation": {
+          "nameRequired": "Vui lòng nhập tên cấp.",
+          "minPrice": "Giá cấp phải tối thiểu {minPrice} AC cho Cấp {level}."
+        },
+        "actions": {
+          "closeAria": "Đóng trình chỉnh sửa cấp",
+          "cancel": "Hủy",
+          "saving": "Đang lưu...",
+          "save": "Lưu cấp"
+        }
+      },
+      "moved": {
+        "eyebrow": "Cấp hội viên",
+        "title": "Trình chỉnh sửa cấp đã được chuyển",
+        "description": "Tạo và chỉnh sửa cấp hội viên từ màn hình quản lý hội viên đã kết nối.",
+        "back": "Quay lại Hội viên"
       }
     },
     "wallet": {

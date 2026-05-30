@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import type { Transaction } from "../types/wallet.types";
 
@@ -22,10 +24,8 @@ type TransactionMetadata = {
   serviceType?: string;
 };
 
-const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
-
-function formatWalletNumber(value: number) {
-  return walletNumberFormatter.format(value);
+function getNumberLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
 }
 
 function normalizeText(value: string | null | undefined) {
@@ -73,57 +73,10 @@ function getTransactionIcon(transaction: Transaction) {
   return "receipt_long";
 }
 
-function getDepositDescription(transaction: Transaction) {
-  const moneyAmount = readNumberMetadata(transaction.metadata, "moneyAmount");
-
-  if (moneyAmount !== null) {
-    return `Nạp thành công ${formatWalletNumber(moneyAmount)} VND`;
-  }
-
-  return "Nạp coin thành công";
-}
-
-function getPaymentDescription(transaction: Transaction) {
-  const serviceType = normalizeText(
-    typeof transaction.metadata.serviceType === "string" ? transaction.metadata.serviceType : undefined
-  );
-
-  if (serviceType === "membership") {
-    return "Thanh toán gói hội viên";
-  }
-
-  if (serviceType === "video") {
-    return "Thanh toán video";
-  }
-
-  return "Thanh toán dịch vụ";
-}
-
-function getTransactionDescription(transaction: Transaction) {
-  if (transaction.description) {
-    return transaction.description;
-  }
-
-  if (isDepositTransaction(transaction)) {
-    return getDepositDescription(transaction);
-  }
-
-  if (isInternalRevenueTransaction(transaction)) {
-    return "Doanh thu studio";
-  }
-
-  return getPaymentDescription(transaction);
-}
-
-function getDisplayAmount(transaction: Transaction) {
-  const isDeposit = isDepositTransaction(transaction);
-  const coinAmount = isDeposit
+function getTransactionCoinAmount(transaction: Transaction) {
+  return isDepositTransaction(transaction)
     ? readNumberMetadata(transaction.metadata, "totalCoinAmount") ?? transaction.amount
     : transaction.amount;
-  const sign = isIncomingTransaction(transaction) ? "+" : "-";
-  const assetLabel = normalizeText(transaction.assetType) === "coin" ? "AC" : transaction.assetType.toUpperCase();
-
-  return `${sign}${formatWalletNumber(coinAmount)} ${assetLabel}`;
 }
 
 const sortTransactions = (transactions: Transaction[]) =>
@@ -135,12 +88,19 @@ export function TransactionHistory({
   error = null,
   initialTransactions = [],
   loading = false,
-  title = "Transaction History",
+  title,
   description,
   excludeInternalRevenue = true,
-  emptyMessage = "No transactions found.",
+  emptyMessage,
   className = "mt-20",
 }: TransactionHistoryProps) {
+  const t = useTranslations("Wallet.TransactionHistory");
+  const locale = useLocale();
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(getNumberLocale(locale)),
+    [locale]
+  );
+  const formatWalletNumber = (value: number) => numberFormatter.format(value);
   const transactions = sortTransactions(
     excludeInternalRevenue
       ? initialTransactions.filter((transaction) => !isInternalRevenueTransaction(transaction))
@@ -148,18 +108,67 @@ export function TransactionHistory({
   );
 
   const formatDate = (dateStr: string) => {
-    return new Intl.DateTimeFormat("vi-VN", {
+    return new Intl.DateTimeFormat(getNumberLocale(locale), {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     }).format(new Date(dateStr));
   };
 
+  const getDepositDescription = (transaction: Transaction) => {
+    const moneyAmount = readNumberMetadata(transaction.metadata, "moneyAmount");
+
+    if (moneyAmount !== null) {
+      return t("descriptions.depositSuccessVnd", { amount: formatWalletNumber(moneyAmount) });
+    }
+
+    return t("descriptions.depositSuccess");
+  };
+
+  const getPaymentDescription = (transaction: Transaction) => {
+    const serviceType = normalizeText(
+      typeof transaction.metadata.serviceType === "string" ? transaction.metadata.serviceType : undefined
+    );
+
+    if (serviceType === "membership") {
+      return t("descriptions.membershipPayment");
+    }
+
+    if (serviceType === "video") {
+      return t("descriptions.videoPayment");
+    }
+
+    return t("descriptions.servicePayment");
+  };
+
+  const getTransactionDescription = (transaction: Transaction) => {
+    if (transaction.description) {
+      return transaction.description;
+    }
+
+    if (isDepositTransaction(transaction)) {
+      return getDepositDescription(transaction);
+    }
+
+    if (isInternalRevenueTransaction(transaction)) {
+      return t("descriptions.studioRevenue");
+    }
+
+    return getPaymentDescription(transaction);
+  };
+
+  const getDisplayAmount = (transaction: Transaction) => {
+    const sign = isIncomingTransaction(transaction) ? "+" : "-";
+    const assetLabel = normalizeText(transaction.assetType) === "coin" ? "AC" : transaction.assetType.toUpperCase();
+
+    return `${sign}${formatWalletNumber(getTransactionCoinAmount(transaction))} ${assetLabel}`;
+  };
+
   return (
     <section className={`rounded-lg border border-border/30 bg-card p-6 ${className}`}>
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
-          <h2 className="font-headline text-2xl font-bold text-foreground">{title}</h2>
+          <h2 className="font-headline text-2xl font-bold text-foreground">{title ?? t("title")}</h2>
           {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
         </div>
       </div>
@@ -169,16 +178,16 @@ export function TransactionHistory({
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="bg-accent border-b border-border">
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Amount</th>
-                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("columns.date")}</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("columns.description")}</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("columns.amount")}</th>
+                <th className="px-6 py-4 font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("columns.status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">Loading transactions...</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">{t("loading")}</td>
                 </tr>
               ) : error ? (
                 <tr>
@@ -186,7 +195,7 @@ export function TransactionHistory({
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">{emptyMessage}</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">{emptyMessage ?? t("empty")}</td>
                 </tr>
               ) : (
                 transactions.map((tx) => {
@@ -215,13 +224,13 @@ export function TransactionHistory({
                       </td>
                       <td className="px-6 py-5">
                         {status === "completed" ? (
-                          <Badge className="rounded-full border-0 bg-green-500/10 px-2.5 py-0.5 text-xs font-bold text-green-500 hover:bg-green-500/20">Thành công</Badge>
+                          <Badge className="rounded-full border-0 bg-green-500/10 px-2.5 py-0.5 text-xs font-bold text-green-500 hover:bg-green-500/20">{t("statuses.completed")}</Badge>
                         ) : status === "pending" ? (
-                          <Badge className="rounded-full border-0 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-bold text-yellow-500 hover:bg-yellow-500/20">Đang xử lý</Badge>
+                          <Badge className="rounded-full border-0 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-bold text-yellow-500 hover:bg-yellow-500/20">{t("statuses.pending")}</Badge>
                         ) : status === "cancelled" ? (
-                          <Badge className="rounded-full border-0 bg-zinc-500/10 px-2.5 py-0.5 text-xs font-bold text-muted-foreground hover:bg-zinc-500/20">Đã hủy</Badge>
+                          <Badge className="rounded-full border-0 bg-zinc-500/10 px-2.5 py-0.5 text-xs font-bold text-muted-foreground hover:bg-zinc-500/20">{t("statuses.cancelled")}</Badge>
                         ) : (
-                          <Badge className="rounded-full border-0 bg-red-500/10 px-2.5 py-0.5 text-xs font-bold text-red-500 hover:bg-red-500/20">Thất bại</Badge>
+                          <Badge className="rounded-full border-0 bg-red-500/10 px-2.5 py-0.5 text-xs font-bold text-red-500 hover:bg-red-500/20">{t("statuses.failed")}</Badge>
                         )}
                       </td>
                     </tr>

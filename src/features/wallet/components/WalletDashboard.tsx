@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { getErrorMessage } from "@/shared/api/client";
 import { createAsyncState, isAsyncLoading } from "@/shared/api/async-state";
 import { TopUpPackages } from "./TopUpPackages";
@@ -9,12 +10,27 @@ import { EmbeddedPayOsCheckout } from "./EmbeddedPayOsCheckout";
 import { WalletService } from "../services/walletService";
 import { TransactionService } from "../services/transactionService";
 import type { DepositPackage, Transaction, Wallet } from "../types/wallet.types";
-import { getWalletStatusMessage } from "../types/wallet-utils";
 
-const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
+function getNumberLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
+}
 
-function formatWalletNumber(value: number) {
-  return walletNumberFormatter.format(value);
+function normalizeWalletStatus(status: string) {
+  const normalizedStatus = status.toLowerCase();
+
+  if (normalizedStatus === "active") {
+    return "active";
+  }
+
+  if (["frozen", "suspended", "inactive"].includes(normalizedStatus)) {
+    return "frozen";
+  }
+
+  if (normalizedStatus === "closed") {
+    return "closed";
+  }
+
+  return "unknown";
 }
 
 interface WalletDashboardProps {
@@ -22,6 +38,15 @@ interface WalletDashboardProps {
 }
 
 export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
+  const t = useTranslations("Wallet.Dashboard");
+  const locale = useLocale();
+  const walletNumberFormatter = useMemo(
+    () => new Intl.NumberFormat(getNumberLocale(locale)),
+    [locale]
+  );
+  const formatWalletNumber = (value: number) => walletNumberFormatter.format(value);
+  const loadBalanceFailedMessage = t("errors.loadBalanceFailed");
+  const loadTransactionsFailedMessage = t("errors.loadTransactionsFailed");
   const [walletState, setWalletState] = useState(() => createAsyncState<Wallet | null>(null));
   const [transactionState, setTransactionState] = useState(() =>
     createAsyncState<Transaction[]>([])
@@ -50,7 +75,7 @@ export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
         setWalletState({
           status: "error",
           data: null,
-          error: getErrorMessage(walletResult.reason, "Không thể tải số dư ví."),
+          error: getErrorMessage(walletResult.reason, loadBalanceFailedMessage),
         });
       }
 
@@ -64,7 +89,7 @@ export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
         setTransactionState({
           status: "error",
           data: [],
-          error: getErrorMessage(transactionResult.reason, "Không thể tải lịch sử giao dịch."),
+          error: getErrorMessage(transactionResult.reason, loadTransactionsFailedMessage),
         });
       }
     }
@@ -74,7 +99,7 @@ export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadBalanceFailedMessage, loadTransactionsFailedMessage]);
 
   useEffect(() => {
     if (selectedPackage) {
@@ -89,25 +114,28 @@ export function WalletDashboard({ initialPackages }: WalletDashboardProps) {
 
   const balanceLabel = walletState.data ? formatWalletNumber(walletState.data.balance) : "--";
   const hasWalletError = walletState.status === "error";
-  const topUpDisabledReason = walletState.data
-    ? getWalletStatusMessage(walletState.data.status, "deposit")
-    : null;
+  const walletStatus = walletState.data ? normalizeWalletStatus(walletState.data.status) : "active";
+  const topUpDisabledReason = walletStatus === "closed"
+    ? t("statusMessages.depositClosed")
+    : walletStatus === "unknown"
+      ? t("statusMessages.unknown")
+      : null;
 
   return (
     <main className="min-h-screen flex-1 bg-background p-8 pt-24 md:pl-64">
       <section className="mx-auto mb-12 flex max-w-7xl flex-col justify-between gap-6 md:flex-row md:items-end">
         <div>
           <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tighter text-foreground">
-            My Wallet
+            {t("title")}
           </h1>
           <p className="max-w-md text-sm text-muted-foreground">
-            Fuel your favorite creators and unlock exclusive cinematic experiences with Aura Coins.
+            {t("description")}
           </p>
         </div>
 
         <div className="flex min-w-[240px] flex-col items-center justify-center rounded-lg border border-secondary/20 bg-card px-8 py-6 shadow-[0px_10px_30px_rgba(245,158,11,0.08)]">
           <span className="mb-1 text-xs font-bold uppercase tracking-widest text-secondary">
-            Current Balance
+            {t("currentBalance")}
           </span>
           <div className="flex items-center gap-3">
             <span

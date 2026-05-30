@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/shared/api/client";
 import {
   mediaService,
@@ -24,7 +25,6 @@ export interface StudioTier {
   isAcceptingNew: boolean;
   createdAt: string;
   updatedAt: string;
-  perks: string[];
 }
 
 export type TierEditorState =
@@ -38,12 +38,6 @@ export interface TierEditorPayload {
   isAcceptingNew: boolean;
 }
 
-const DEFAULT_TIER_PERKS: Record<TierLevel, string[]> = {
-  1: ["Access to Lv1 videos", "Community badge", "Member-only comments"],
-  2: ["Access to Lv1-Lv2 videos", "Early access releases", "Monthly creator livestreams"],
-  3: ["Access to all videos", "Behind-the-scenes footage", "Direct creator updates"],
-};
-
 function normalizeTierLevel(level: number): TierLevel {
   if (level === 2 || level === 3) {
     return level;
@@ -53,18 +47,15 @@ function normalizeTierLevel(level: number): TierLevel {
 }
 
 function mapMembershipTier(tier: MembershipTierResponse): StudioTier {
-  const level = normalizeTierLevel(tier.level);
-
   return {
     id: tier.id,
     channelId: tier.channelId,
-    level,
+    level: normalizeTierLevel(tier.level),
     name: tier.name,
     price: tier.priceCoin,
     isAcceptingNew: tier.isAcceptingNew,
     createdAt: tier.createdAt,
     updatedAt: tier.updatedAt,
-    perks: DEFAULT_TIER_PERKS[level],
   };
 }
 
@@ -73,6 +64,7 @@ function sortTiers(tiers: StudioTier[]) {
 }
 
 export function StudioMembershipFeature() {
+  const t = useTranslations("Studio.memberships");
   const [editorState, setEditorState] = useState<TierEditorState | null>(null);
   const [tiers, setTiers] = useState<StudioTier[]>([]);
   const [channelDetail, setChannelDetail] = useState<ChannelDetailResponse | null>(null);
@@ -101,7 +93,7 @@ export function StudioMembershipFeature() {
       const channelId = myChannelRes.data?.channelId;
 
       if (!myChannelRes.success || !channelId) {
-        throw new Error(myChannelRes.message || "Creator channel is not available.");
+        throw new Error(myChannelRes.message || t("messages.channelUnavailable"));
       }
 
       const [detailRes, tiersRes] = await Promise.all([
@@ -110,24 +102,24 @@ export function StudioMembershipFeature() {
       ]);
 
       if (!detailRes.success || !detailRes.data) {
-        throw new Error(detailRes.message || "Membership data is not available.");
+        throw new Error(detailRes.message || t("messages.dataUnavailable"));
       }
 
       if (!tiersRes.success) {
-        throw new Error(tiersRes.message || "Membership tiers are not available.");
+        throw new Error(tiersRes.message || t("messages.tiersUnavailable"));
       }
 
       setChannelDetail(detailRes.data);
       setTiers(sortTiers((tiersRes.data ?? []).map(mapMembershipTier)));
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to load membership data. Please try again."));
+      setError(getErrorMessage(err, t("messages.loadFallback")));
       setTiers([]);
     } finally {
       if (!silent) {
         setIsLoading(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchMembershipData();
@@ -140,25 +132,25 @@ export function StudioMembershipFeature() {
 
   const openCreateTierEditor = useCallback(() => {
     if (channelDetail?.isMembershipClosedByAdmin) {
-      showActionMessage("Membership is closed by admin for this channel.");
+      showActionMessage(t("messages.adminClosed"));
       return;
     }
 
     if (channelDetail?.membershipReviewStatus !== "approved") {
-      showActionMessage("Admin approval is required before creating membership tiers.");
+      showActionMessage(t("messages.approvalRequired"));
       return;
     }
 
     const nextLevel = availableLevels[0];
 
     if (!nextLevel) {
-      showActionMessage("All 3 membership levels already exist. Edit an existing tier instead.");
+      showActionMessage(t("messages.allLevelsExist"));
       return;
     }
 
     setEditorError(null);
     setEditorState({ mode: "create", level: nextLevel });
-  }, [availableLevels, channelDetail?.isMembershipClosedByAdmin, channelDetail?.membershipReviewStatus, showActionMessage]);
+  }, [availableLevels, channelDetail?.isMembershipClosedByAdmin, channelDetail?.membershipReviewStatus, showActionMessage, t]);
 
   const openEditTierEditor = useCallback((tier: StudioTier) => {
     setEditorError(null);
@@ -167,7 +159,7 @@ export function StudioMembershipFeature() {
 
   const handleRequestMembershipReview = useCallback(async () => {
     if (!channelDetail?.id) {
-      showActionMessage("Creator channel was not found for requesting membership review.");
+      showActionMessage(t("messages.channelMissingReview"));
       return;
     }
 
@@ -177,27 +169,27 @@ export function StudioMembershipFeature() {
       const response = await mediaService.requestChannelMembershipReview(channelDetail.id);
 
       if (!response.success || !response.data) {
-        throw new Error(response.message || "Unable to request membership review.");
+        throw new Error(response.message || t("messages.requestFailedResponse"));
       }
 
       setChannelDetail((current) => current ? { ...current, ...response.data } : current);
-      showActionMessage("Membership review request sent. Admin approval is now pending.");
+      showActionMessage(t("messages.reviewSent"));
       void fetchMembershipData({ silent: true });
     } catch (err) {
-      showActionMessage(getErrorMessage(err, "Unable to request membership review. Please check eligibility and try again."));
+      showActionMessage(getErrorMessage(err, t("messages.requestFailed")));
     } finally {
       setIsRequestingReview(false);
     }
-  }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
+  }, [channelDetail?.id, fetchMembershipData, showActionMessage, t]);
 
   const handleSaveTier = useCallback(async (payload: TierEditorPayload) => {
     if (!channelDetail?.id) {
-      setEditorError("Creator channel was not found for saving this tier.");
+      setEditorError(t("messages.channelMissingSave"));
       return;
     }
 
     if (editorState?.mode !== "edit" && channelDetail.membershipReviewStatus !== "approved") {
-      setEditorError("Admin approval is required before creating membership tiers.");
+      setEditorError(t("messages.approvalRequired"));
       return;
     }
 
@@ -218,7 +210,7 @@ export function StudioMembershipFeature() {
           });
 
       if (!response.success || !response.data) {
-        throw new Error(response.message || "Unable to save membership tier.");
+        throw new Error(response.message || t("messages.saveFailedResponse"));
       }
 
       if (editorState?.mode !== "edit" && !payload.isAcceptingNew) {
@@ -227,7 +219,7 @@ export function StudioMembershipFeature() {
         });
 
         if (!response.success || !response.data) {
-          throw new Error(response.message || "Unable to update the new tier status.");
+          throw new Error(response.message || t("messages.updateNewTierStatusFailed"));
         }
       }
 
@@ -241,18 +233,18 @@ export function StudioMembershipFeature() {
         return sortTiers(nextTiers);
       });
       setEditorState(null);
-      showActionMessage(editorState?.mode === "edit" ? "Membership tier updated." : "Membership tier created.");
+      showActionMessage(editorState?.mode === "edit" ? t("messages.tierUpdated") : t("messages.tierCreated"));
       void fetchMembershipData({ silent: true });
     } catch (err) {
-      setEditorError(getErrorMessage(err, "Unable to save membership tier. Please try again."));
+      setEditorError(getErrorMessage(err, t("messages.saveFallback")));
     } finally {
       setIsSavingTier(false);
     }
-  }, [channelDetail?.id, channelDetail?.membershipReviewStatus, editorState, fetchMembershipData, showActionMessage]);
+  }, [channelDetail?.id, channelDetail?.membershipReviewStatus, editorState, fetchMembershipData, showActionMessage, t]);
 
   const handleToggleTierStatus = useCallback(async (tier: StudioTier) => {
     if (!channelDetail?.id) {
-      showActionMessage("Creator channel was not found for updating this tier.");
+      showActionMessage(t("messages.channelMissingUpdate"));
       return;
     }
 
@@ -264,19 +256,19 @@ export function StudioMembershipFeature() {
       });
 
       if (!response.success || !response.data) {
-        throw new Error(response.message || "Unable to update tier status.");
+        throw new Error(response.message || t("messages.updateStatusFailedResponse"));
       }
 
       const updatedTier = mapMembershipTier(response.data);
       setTiers((currentTiers) => sortTiers(currentTiers.map((item) => item.id === updatedTier.id ? updatedTier : item)));
-      showActionMessage(updatedTier.isAcceptingNew ? "Tier is accepting new members again." : "Tier is paused for new members.");
+      showActionMessage(updatedTier.isAcceptingNew ? t("messages.tierResumed") : t("messages.tierPaused"));
       void fetchMembershipData({ silent: true });
     } catch (err) {
-      showActionMessage(getErrorMessage(err, "Unable to update tier status."));
+      showActionMessage(getErrorMessage(err, t("messages.updateStatusFallback")));
     } finally {
       setMutatingTierId(null);
     }
-  }, [channelDetail?.id, fetchMembershipData, showActionMessage]);
+  }, [channelDetail?.id, fetchMembershipData, showActionMessage, t]);
 
   const reviewStatus = channelDetail?.membershipReviewStatus ?? "not_requested";
   const isReviewApproved = reviewStatus === "approved";
@@ -294,9 +286,9 @@ export function StudioMembershipFeature() {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8 p-8">
       <header>
-        <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Memberships</p>
-        <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tight text-foreground">Community Memberships</h1>
-        <p className="max-w-2xl font-body text-sm text-muted-foreground">Offer exclusive member-only releases and Aura Coin tiers to your most dedicated viewers.</p>
+        <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("page.eyebrow")}</p>
+        <h1 className="mb-2 font-headline text-4xl font-extrabold tracking-tight text-foreground">{t("page.title")}</h1>
+        <p className="max-w-2xl font-body text-sm text-muted-foreground">{t("page.subtitle")}</p>
       </header>
 
       {actionMessage ? (
@@ -307,18 +299,18 @@ export function StudioMembershipFeature() {
 
       {error ? (
         <section className="rounded-lg border border-destructive/30 bg-destructive/10 p-8">
-          <p className="font-headline text-xl font-bold text-foreground">Unable to load membership data</p>
+          <p className="font-headline text-xl font-bold text-foreground">{t("page.errorTitle")}</p>
           <p className="mt-2 font-body text-sm text-muted-foreground">{error}</p>
           <button
             type="button"
             onClick={() => void fetchMembershipData()}
             className="mt-6 rounded-sm bg-primary px-5 py-3 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
           >
-            Try again
+            {t("page.retry")}
           </button>
         </section>
       ) : isLoading ? (
-        <div className="grid gap-6 md:grid-cols-3" aria-label="Loading membership details">
+        <div className="grid gap-6 md:grid-cols-3" aria-label={t("page.loadingLabel")}>
           {[1, 2, 3].map((item) => (
             <div key={item} className="h-56 rounded-lg border border-border/30 bg-card">
               <div className="h-full animate-pulse bg-muted/20" />

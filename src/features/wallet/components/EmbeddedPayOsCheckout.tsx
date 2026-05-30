@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, Loader2, ShieldCheck, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { DepositService } from "../services/depositService";
 import type { Deposit, DepositPackage } from "../types/wallet.types";
 import { useAuth } from "@/features/auth/context/AuthContext";
@@ -36,10 +36,8 @@ interface EmbeddedPayOsCheckoutProps {
 
 const PAYOS_CHECKOUT_CONTAINER_ID = "payos-checkout-container";
 
-const walletNumberFormatter = new Intl.NumberFormat("vi-VN");
-
-function formatWalletNumber(value: number) {
-  return walletNumberFormatter.format(value);
+function getNumberLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
 }
 
 function getPayOsIframe() {
@@ -58,11 +56,17 @@ function createPaymentAttemptKey() {
   return `deposit-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function getValidCheckoutUrl(checkoutUrl: string) {
-  const paymentUrl = new URL(checkoutUrl);
+function getValidCheckoutUrl(checkoutUrl: string, invalidUrlMessage: string) {
+  let paymentUrl: URL;
+
+  try {
+    paymentUrl = new URL(checkoutUrl);
+  } catch {
+    throw new Error(invalidUrlMessage);
+  }
 
   if (!paymentUrl.protocol.startsWith("http")) {
-    throw new Error("Backend tra checkoutUrl khong hop le.");
+    throw new Error(invalidUrlMessage);
   }
 
   return paymentUrl.toString();
@@ -78,6 +82,12 @@ export function EmbeddedPayOsCheckout({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const t = useTranslations("Wallet.EmbeddedCheckout");
+  const locale = useLocale();
+  const walletNumberFormatter = useMemo(
+    () => new Intl.NumberFormat(getNumberLocale(locale)),
+    [locale]
+  );
+  const formatWalletNumber = (value: number) => walletNumberFormatter.format(value);
   const { user } = useAuth();
   const userId = user?.userId || "guest";
 
@@ -171,10 +181,13 @@ export function EmbeddedPayOsCheckout({
       );
 
       if (!createdDeposit.checkoutUrl) {
-        throw new Error("Backend chua tra checkoutUrl cho giao dich PayOS.");
+        throw new Error(t("errors.missingCheckoutUrl"));
       }
 
-      const paymentUrl = getValidCheckoutUrl(createdDeposit.checkoutUrl);
+      const paymentUrl = getValidCheckoutUrl(
+        createdDeposit.checkoutUrl,
+        t("errors.invalidCheckoutUrl")
+      );
       setDeposit(createdDeposit);
       setCheckoutUrl(paymentUrl);
       clearPersistedSession(storageKey);

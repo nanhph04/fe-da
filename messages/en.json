@@ -117,6 +117,19 @@
     }
   },
   "Wallet": {
+    "Dashboard": {
+      "title": "My Wallet",
+      "description": "Fuel your favorite creators and unlock exclusive cinematic experiences with Aura Coins.",
+      "currentBalance": "Current Balance",
+      "errors": {
+        "loadBalanceFailed": "Unable to load wallet balance.",
+        "loadTransactionsFailed": "Unable to load transaction history."
+      },
+      "statusMessages": {
+        "depositClosed": "This wallet is closed, so you cannot top up more Aura Coins.",
+        "unknown": "Unable to verify the wallet status. Please refresh your wallet and try again."
+      }
+    },
     "TopUpPackages": {
       "title": "Aura Coin Top-up Packages",
       "loadingLabel": "Loading top-up packages",
@@ -131,6 +144,31 @@
       "bonusAmount": "+ {amount} bonus coins",
       "currencyUnit": "VND",
       "buyNow": "Top up now"
+    },
+    "TransactionHistory": {
+      "title": "Transaction History",
+      "empty": "No transactions found.",
+      "loading": "Loading transactions...",
+      "columns": {
+        "date": "Date",
+        "description": "Description",
+        "amount": "Amount",
+        "status": "Status"
+      },
+      "descriptions": {
+        "depositSuccessVnd": "Successfully deposited {amount} VND",
+        "depositSuccess": "Successfully deposited coins",
+        "membershipPayment": "Membership payment",
+        "videoPayment": "Video payment",
+        "servicePayment": "Service payment",
+        "studioRevenue": "Studio revenue"
+      },
+      "statuses": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "cancelled": "Cancelled",
+        "failed": "Failed"
+      }
     },
     "TopUpSuccess": {
       "metadataTitle": "Top-up Successful - Velvet Gallery",
@@ -161,14 +199,16 @@
       "totalPayable": "Total payable",
       "hostedByPayOS": "Hosted by PayOS",
       "hostedDescription": "You will continue on the official PayOS payment page.",
-      "webhookVerified": "Webhook verified",
-      "webhookDescription": "Aura Coins are added after backend confirmation.",
+      "webhookVerified": "Automatic verification",
+      "webhookDescription": "Aura Coins are added after the system confirms the payment.",
       "codeLabel": "Code: ",
       "cancel": "Cancel",
       "continueToPayOS": "Continue to PayOS",
       "continueDescription": "We will create a deposit request and load the secure PayOS payment form.",
       "errors": {
-        "createPaymentFailed": "Unable to create PayOS payment. Please try again."
+        "createPaymentFailed": "Unable to create PayOS payment. Please try again.",
+        "missingCheckoutUrl": "The backend did not return a checkout URL for this PayOS transaction.",
+        "invalidCheckoutUrl": "The backend returned an invalid checkout URL."
       }
     }
   },
@@ -975,6 +1015,188 @@
             "descriptionShort": "Only visible to you or those with link."
           }
         }
+      }
+    },
+    "memberships": {
+      "page": {
+        "eyebrow": "Creator Memberships",
+        "title": "Community Memberships",
+        "subtitle": "Offer exclusive member-only releases and Aura Coin tiers to your most dedicated viewers.",
+        "errorTitle": "Unable to load membership data",
+        "retry": "Try again",
+        "loadingLabel": "Loading membership details"
+      },
+      "messages": {
+        "channelUnavailable": "Creator channel is not available.",
+        "dataUnavailable": "Membership data is not available.",
+        "tiersUnavailable": "Membership tiers are not available.",
+        "loadFallback": "Unable to load membership data. Please try again.",
+        "adminClosed": "Membership is closed by admin for this channel.",
+        "approvalRequired": "Admin approval is required before creating membership tiers.",
+        "allLevelsExist": "All 3 membership levels already exist. Edit an existing tier instead.",
+        "channelMissingReview": "Creator channel was not found for requesting membership review.",
+        "requestFailedResponse": "Unable to request membership review.",
+        "reviewSent": "Membership review request sent. Admin approval is now pending.",
+        "requestFailed": "Unable to request membership review. Please check eligibility and try again.",
+        "channelMissingSave": "Creator channel was not found for saving this tier.",
+        "saveFailedResponse": "Unable to save membership tier.",
+        "updateNewTierStatusFailed": "Unable to update the new tier status.",
+        "tierUpdated": "Membership tier updated.",
+        "tierCreated": "Membership tier created.",
+        "saveFallback": "Unable to save membership tier. Please try again.",
+        "channelMissingUpdate": "Creator channel was not found for updating this tier.",
+        "updateStatusFailedResponse": "Unable to update tier status.",
+        "tierResumed": "Tier is accepting new members again.",
+        "tierPaused": "Tier is paused for new members.",
+        "updateStatusFallback": "Unable to update tier status."
+      },
+      "management": {
+        "summary": {
+          "eyebrow": "Membership Active",
+          "title": "Your tier system is connected",
+          "acceptingCount": "{count} tiers accepting new members",
+          "across": "across",
+          "monthlyFloor": "{amount} AC total monthly entry price",
+          "review": "Review: {status}",
+          "closedByAdmin": "Closed by admin"
+        },
+        "reviewStatus": {
+          "not_requested": "Not requested",
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "actions": {
+          "addTier": "Add Tier",
+          "editTierAria": "Edit {name}",
+          "saving": "Saving...",
+          "pauseJoins": "Pause Joins",
+          "resumeJoins": "Resume Joins"
+        },
+        "tier": {
+          "level": "Level {level}",
+          "monthlyPrice": "Monthly Price",
+          "joinStatus": "Join Status",
+          "accepting": "Accepting new members",
+          "paused": "Paused for new members"
+        },
+        "perks": {
+          "level1": {
+            "access": "Access to Lv1 videos",
+            "badge": "Community badge",
+            "comments": "Member-only comments"
+          },
+          "level2": {
+            "access": "Access to Lv1-Lv2 videos",
+            "earlyAccess": "Early access releases",
+            "livestreams": "Monthly creator livestreams"
+          },
+          "level3": {
+            "access": "Access to all videos",
+            "behindScenes": "Behind-the-scenes footage",
+            "updates": "Direct creator updates"
+          }
+        }
+      },
+      "eligibility": {
+        "requirements": {
+          "readyVideos": {
+            "label": "Ready Videos",
+            "detail": "Published videos in READY state"
+          },
+          "totalViews": {
+            "label": "Total Views",
+            "detail": "Channel-level viewer demand"
+          }
+        },
+        "actions": {
+          "createFirstTier": "Create First Tier",
+          "membershipClosed": "Membership Closed",
+          "sending": "Sending...",
+          "waitingForAdmin": "Waiting for Admin",
+          "requestOpening": "Request Opening"
+        },
+        "hero": {
+          "eyebrow": "Exclusive Milestone",
+          "createTitle": "Create your first tier",
+          "closedTitle": "Membership closed",
+          "reviewTitle": "Request membership review",
+          "unlockTitle": "Unlock Memberships",
+          "closedDescription": "Admin closed membership for this channel. New members cannot join.",
+          "createDescription": "Admin approved membership for this channel. You can now create API-backed tiers.",
+          "pendingDescription": "Your request is in the admin queue. Tier creation unlocks after approval.",
+          "requestDescription": "All requirements are met. Send the opening request so admin can approve tier creation.",
+          "lockedDescription": "Meet the requirements below before requesting admin review for recurring Aura Coin revenue."
+        },
+        "review": "Review: {status}",
+        "reviewStatus": {
+          "not_requested": "Not requested",
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "detailsAriaLabel": "Membership requirement details",
+        "details": {
+          "title": "Milestone details",
+          "metTitle": "Requirements met",
+          "description": "Track the two thresholds required before requesting membership review.",
+          "metDescription": "Ready video count and total views have reached the opening thresholds."
+        }
+      },
+      "editor": {
+        "defaultName": "Level {level} Membership",
+        "eyebrow": {
+          "edit": "Edit Tier",
+          "create": "Create Tier"
+        },
+        "sideTitle": "Shape the member room",
+        "sideDescription": "Pricing and join status are saved directly to Media Service.",
+        "monthlyPrice": "Monthly Price",
+        "levelSummary": "Level {level} membership tier.",
+        "title": {
+          "edit": "Edit Tier",
+          "create": "Create New Tier"
+        },
+        "description": "Configure tier level, name, AC price, and join status.",
+        "fields": {
+          "accessLevel": "Access Level",
+          "levelShort": "Lv{level}",
+          "tierName": "Tier Name",
+          "namePlaceholder": "e.g. Silver Member",
+          "monthlyPrice": "Monthly Price (AC)",
+          "priceHint": "Pricing starts at {minPrice} AC for Level {level}.",
+          "acceptNewMembers": "Accept new members",
+          "acceptNewMembersHint": "Disable this when the tier should remain visible but closed."
+        },
+        "joinStatus": {
+          "title": "Join Status",
+          "open": "Open to new members",
+          "closed": "Closed to new members",
+          "openDescription": "Fans can join this tier immediately after save.",
+          "closedDescription": "The tier stays visible, but new joins are paused.",
+          "on": "On",
+          "off": "Off"
+        },
+        "payout": {
+          "title": "Payout Notice",
+          "description": "Membership income becomes available after 72 hours."
+        },
+        "validation": {
+          "nameRequired": "Please enter a tier name.",
+          "minPrice": "Tier price must be at least {minPrice} AC for Level {level}."
+        },
+        "actions": {
+          "closeAria": "Close tier editor",
+          "cancel": "Cancel",
+          "saving": "Saving...",
+          "save": "Save Tier"
+        }
+      },
+      "moved": {
+        "eyebrow": "Membership Tier",
+        "title": "Tier editor moved",
+        "description": "Create and edit membership tiers from the connected membership management screen.",
+        "back": "Back to Memberships"
       }
     },
     "wallet": {
