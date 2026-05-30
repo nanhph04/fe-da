@@ -50,13 +50,13 @@ function buildSummary(summary: AdminWithdrawalSummary | null) {
       icon: "pending_actions",
       accent: "secondary",
     },
-    {
-      label: "Approved / Processing",
-      value: summary ? numberFormatter.format(summary.approvedCount + summary.processingCount) : "-",
-      detail: summary ? `${numberFormatter.format(summary.pendingCoinAmount)} AC pending` : "Waiting for API response",
-      icon: "task_alt",
-      accent: "success",
-    },
+    // {
+    //   label: "Approved / Processing",
+    //   value: summary ? numberFormatter.format(summary.approvedCount + summary.processingCount) : "-",
+    //   detail: summary ? `${numberFormatter.format(summary.pendingCoinAmount)} AC pending` : "Waiting for API response",
+    //   icon: "task_alt",
+    //   accent: "success",
+    // },
     {
       label: "Completed (30 Days)",
       value: summary ? currencyFormatter.format(summary.completed30dMoneyAmount) : "-",
@@ -72,9 +72,9 @@ function getSummaryAccent(accent: ReturnType<typeof buildSummary>[number]["accen
     return "border-l-secondary text-secondary";
   }
 
-  if (accent === "success") {
-    return "border-l-emerald-500 text-emerald-400";
-  }
+  // if (accent === "success") {
+  //   return "border-l-emerald-500 text-emerald-400";
+  // }
 
   return "border-l-primary text-primary";
 }
@@ -152,7 +152,7 @@ export function PayoutManagementFeature() {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {payoutSummary.map((item) => (
           <article
             key={item.label}
