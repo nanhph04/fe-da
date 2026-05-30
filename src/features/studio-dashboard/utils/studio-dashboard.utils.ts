@@ -1,6 +1,7 @@
 import { getReadyOwnerVideoThumbnailUrl, type OwnerVideoResponse } from "@/features/watch/services/mediaService";
 import type { EarningsSummary, MonthlyEarnings, VideoEarnings } from "@/features/studio-wallet/types/earnings.types";
 import type { StudioWallet, WalletStats } from "@/features/studio-wallet/types/studio-wallet.types";
+import { useTranslations } from "next-intl";
 import type {
   DashboardActivity,
   DashboardStatCard,
@@ -9,43 +10,45 @@ import type {
   StudioDashboardRange,
 } from "../types/studio-dashboard.types";
 
+type TFunction = ReturnType<typeof useTranslations>;
+
 const DEFAULT_THUMBNAIL = "/images/thumbnail.png";
 
-function compactNumber(value: number) {
-  return new Intl.NumberFormat("en", {
+function compactNumber(value: number, locale = "en") {
+  return new Intl.NumberFormat(locale, {
     notation: "compact",
     maximumFractionDigits: 1,
   }).format(value);
 }
 
-function formatNumber(value: number) {
-  return new Intl.NumberFormat("en").format(value);
+function formatNumber(value: number, locale = "en") {
+  return new Intl.NumberFormat(locale).format(value);
 }
 
-function formatCoins(value: number) {
-  return `${formatNumber(Math.round(value))} AC`;
+function formatCoins(value: number, locale = "en") {
+  return `${formatNumber(Math.round(value), locale)} AC`;
 }
 
-function formatPercent(value?: number | null) {
+function formatPercent(t: TFunction, value?: number | null) {
   if (value === undefined || value === null || Number.isNaN(value)) {
-    return "No comparison data";
+    return t("dashboard.stats.noComparisonData");
   }
 
   const sign = value > 0 ? "+" : "";
   return `${sign}${value.toFixed(1)}%`;
 }
 
-function formatDateLabel(value?: string | null) {
+function formatDateLabel(t: TFunction, locale: string, value?: string | null) {
   if (!value) {
-    return "Recently";
+    return t("dashboard.recentActivities.recently");
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Recently";
+    return t("dashboard.recentActivities.recently");
   }
 
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "2-digit",
   }).format(date);
@@ -53,6 +56,15 @@ function formatDateLabel(value?: string | null) {
 
 function normalizeStatus(status?: string | null) {
   return status?.toLowerCase() || "unknown";
+}
+
+function translateStatus(t: TFunction, status: string) {
+  const normalized = status.toLowerCase();
+  const knownStatuses = ["ready", "pending", "failed", "processing", "rejected"];
+  if (knownStatuses.includes(normalized)) {
+    return t(`dashboard.topVideos.status.${normalized}`);
+  }
+  return status;
 }
 
 function countVideosByStatus(videos: OwnerVideoResponse[], status: string) {
@@ -68,7 +80,9 @@ export function buildDashboardStats(
   studioWallet: StudioWallet | null,
   walletStats: WalletStats | null,
   earningsSummary: EarningsSummary | null,
-  monthlyEarnings: MonthlyEarnings | null
+  monthlyEarnings: MonthlyEarnings | null,
+  t: TFunction,
+  locale: string
 ): DashboardStatCard[] {
   const mediaTotalViews = getTotalViews(videos);
   const totalViews = mediaTotalViews || walletStats?.totalViews || studioWallet?.totalViews || earningsSummary?.totalViews || 0;
@@ -80,34 +94,34 @@ export function buildDashboardStats(
 
   return [
     {
-      label: "Total Views",
-      value: formatNumber(totalViews),
+      label: t("dashboard.stats.totalViews"),
+      value: formatNumber(totalViews, locale),
       icon: "visibility",
-      trend: totalViews > 0 ? "Live data" : "No views yet",
+      trend: totalViews > 0 ? t("dashboard.stats.liveData") : t("dashboard.stats.noViewsYet"),
       trendIcon: totalViews > 0 ? "visibility" : "visibility_off",
       tone: totalViews > 0 ? "primary" : "muted",
     },
     {
-      label: "Ready Videos",
-      value: formatNumber(readyVideos),
+      label: t("dashboard.stats.readyVideos"),
+      value: formatNumber(readyVideos, locale),
       icon: "video_library",
-      trend: `${formatNumber(totalUploads)} total uploads`,
+      trend: t("dashboard.stats.totalUploads", { count: totalUploads }),
       trendIcon: "movie",
       tone: readyVideos > 0 ? "primary" : "muted",
     },
     {
-      label: "Earnings (Aura Coins)",
-      value: formatCoins(totalEarnings),
+      label: t("dashboard.stats.earnings"),
+      value: formatCoins(totalEarnings, locale),
       icon: "monetization_on",
-      trend: formatPercent(growth),
+      trend: formatPercent(t, growth),
       trendIcon: growth !== null && growth < 0 ? "trending_down" : "payments",
       tone: "secondary",
     },
     {
-      label: "Frozen Coins",
-      value: formatCoins(frozenCoins),
+      label: t("dashboard.stats.frozenCoins"),
+      value: formatCoins(frozenCoins, locale),
       icon: "lock_clock",
-      trend: frozenCoins > 0 ? "Pending release" : "No frozen coins",
+      trend: frozenCoins > 0 ? t("dashboard.stats.pendingRelease") : t("dashboard.stats.noFrozenCoins"),
       trendIcon: frozenCoins > 0 ? "ac_unit" : "lock_open",
       tone: frozenCoins > 0 ? "secondary" : "muted",
     },
@@ -116,7 +130,9 @@ export function buildDashboardStats(
 
 export function buildTopVideos(
   videos: OwnerVideoResponse[],
-  topEarningVideos: VideoEarnings[]
+  topEarningVideos: VideoEarnings[],
+  t: TFunction,
+  locale: string
 ): DashboardTopVideo[] {
   if (topEarningVideos.length > 0) {
     return topEarningVideos.slice(0, 3).map((earningVideo, index) => {
@@ -128,10 +144,10 @@ export function buildTopVideos(
         id: earningVideo.videoId,
         title: mediaVideo?.title || (financeTitleIsPlaceholder ? `Video ${earningVideo.videoId.slice(0, 8)}` : earningVideo.videoTitle),
         thumbnailUrl: getReadyOwnerVideoThumbnailUrl(mediaVideo?.id, mediaVideo?.thumbnailUrl, mediaVideo?.thumbnailStatus) || DEFAULT_THUMBNAIL,
-        views: compactNumber(mediaViews ?? earningVideo.views),
-        likes: "No API",
-        earnings: formatCoins(earningVideo.revenue || earningVideo.estimatedRevenue),
-        badgeLabel: index === 0 ? "Top earning" : earningVideo.status,
+        views: compactNumber(mediaViews ?? earningVideo.views, locale),
+        likes: t("dashboard.topVideos.noApi"),
+        earnings: formatCoins(earningVideo.revenue || earningVideo.estimatedRevenue, locale),
+        badgeLabel: index === 0 ? t("dashboard.topVideos.topEarning") : translateStatus(t, earningVideo.status),
         badgeTone: index === 0 ? "secondary" : "muted",
       };
     });
@@ -144,15 +160,15 @@ export function buildTopVideos(
       id: video.id,
       title: video.title,
       thumbnailUrl: getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) || DEFAULT_THUMBNAIL,
-      views: compactNumber(video.viewCount ?? video.metrics?.viewsCount ?? 0),
-      likes: "No API",
-      earnings: video.price ? formatCoins(video.price) : "0 AC",
-      badgeLabel: index === 0 ? "Most viewed" : normalizeStatus(video.status),
+      views: compactNumber(video.viewCount ?? video.metrics?.viewsCount ?? 0, locale),
+      likes: t("dashboard.topVideos.noApi"),
+      earnings: video.price ? formatCoins(video.price, locale) : "0 AC",
+      badgeLabel: index === 0 ? t("dashboard.topVideos.mostViewed") : translateStatus(t, normalizeStatus(video.status)),
       badgeTone: index === 0 ? "primary" : "muted",
     }));
 }
 
-export function buildActivities(videos: OwnerVideoResponse[]): DashboardActivity[] {
+export function buildActivities(videos: OwnerVideoResponse[], t: TFunction, locale: string): DashboardActivity[] {
   return [...videos]
     .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
     .slice(0, 4)
@@ -163,9 +179,9 @@ export function buildActivities(videos: OwnerVideoResponse[]): DashboardActivity
 
       return {
         id: video.id,
-        title: isRejected ? "Video rejected" : isReady ? "Video ready" : "Video updated",
-        description: `${video.title} is ${status.replaceAll("_", " ")}.`,
-        timeLabel: formatDateLabel(video.updatedAt || video.createdAt),
+        title: isRejected ? t("dashboard.recentActivities.videoRejected") : isReady ? t("dashboard.recentActivities.videoReady") : t("dashboard.recentActivities.videoUpdated"),
+        description: t("dashboard.recentActivities.videoStatusDescription", { title: video.title, status: translateStatus(t, status) }),
+        timeLabel: formatDateLabel(t, locale, video.updatedAt || video.createdAt),
         tone: isRejected ? "danger" : isReady ? "secondary" : "muted",
       };
     });

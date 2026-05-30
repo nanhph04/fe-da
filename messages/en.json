@@ -556,5 +556,71 @@
       "passwordsMismatch": "Passwords do not match.",
       "otpMinLength": "OTP must be 6 digits."
     }
+  },
+  "Studio": {
+    "navigation": {
+      "dashboard": "Dashboard",
+      "content": "Content",
+      "upload": "Upload",
+      "studioWallet": "Studio Wallet",
+      "memberships": "Memberships",
+      "wallet": "Wallet",
+      "earnings": "Earnings",
+      "payouts": "Payouts"
+    },
+    "layout": {
+      "creatorStudio": "Creator Studio",
+      "upload": "Upload",
+      "backToLibrary": "Back to Library",
+      "signOut": "Sign Out",
+      "myProfile": "My Profile",
+      "searchPlaceholder": "Search content..."
+    },
+    "dashboard": {
+      "title": "Creator Dashboard",
+      "subtitle": "Channel health, revenue, and audience signals from live Studio APIs.",
+      "refresh": "Refresh",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "stats": {
+        "totalViews": "Total Views",
+        "readyVideos": "Ready Videos",
+        "earnings": "Earnings (Aura Coins)",
+        "frozenCoins": "Frozen Coins",
+        "liveData": "Live data",
+        "noViewsYet": "No views yet",
+        "totalUploads": "{count} total uploads",
+        "pendingRelease": "Pending release",
+        "noFrozenCoins": "No frozen coins",
+        "noComparisonData": "No comparison data",
+        "currentPeriod": "vs previous period"
+      },
+      "topVideos": {
+        "title": "Top Performing Videos",
+        "subtitle": "Live Studio data",
+        "emptyTitle": "No videos yet",
+        "emptyDescription": "Upload and publish videos to see top performers here.",
+        "topEarning": "Top earning",
+        "mostViewed": "Most viewed",
+        "noApi": "No API",
+        "status": {
+          "ready": "Ready",
+          "pending": "Pending",
+          "failed": "Failed",
+          "processing": "Processing",
+          "rejected": "Rejected"
+        }
+      },
+      "recentActivities": {
+        "title": "Recent Activity",
+        "emptyTitle": "No recent video activity",
+        "emptyDescription": "Upload or update videos to populate this feed.",
+        "videoRejected": "Video rejected",
+        "videoReady": "Video ready",
+        "videoUpdated": "Video updated",
+        "videoStatusDescription": "{title} is {status}.",
+        "recently": "Recently"
+      }
+    }
   }
 }

@@ -508,5 +508,71 @@
       "passwordsMismatch": "Mật khẩu không khớp.",
       "otpMinLength": "Mã OTP phải có 6 chữ số."
     }
+  },
+  "Studio": {
+    "navigation": {
+      "dashboard": "Bảng điều khiển",
+      "content": "Nội dung",
+      "upload": "Tải lên",
+      "studioWallet": "Ví Studio",
+      "memberships": "Hội viên",
+      "wallet": "Ví",
+      "earnings": "Doanh thu",
+      "payouts": "Thanh toán"
+    },
+    "layout": {
+      "creatorStudio": "Creator Studio",
+      "upload": "Tải lên",
+      "backToLibrary": "Quay lại Thư viện",
+      "signOut": "Đăng xuất",
+      "myProfile": "Hồ sơ của tôi",
+      "searchPlaceholder": "Tìm kiếm nội dung..."
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển",
+      "subtitle": "Thông tin về kênh, doanh thu và tín hiệu người xem từ API Studio trực tiếp.",
+      "refresh": "Làm mới",
+      "last7Days": "7 ngày qua",
+      "last30Days": "30 ngày qua",
+      "stats": {
+        "totalViews": "Tổng lượt xem",
+        "readyVideos": "Video sẵn sàng",
+        "earnings": "Doanh thu (Aura Coins)",
+        "frozenCoins": "Coin đóng băng",
+        "liveData": "Dữ liệu trực tiếp",
+        "noViewsYet": "Chưa có lượt xem",
+        "totalUploads": "Tổng cộng {count} video tải lên",
+        "pendingRelease": "Đang chờ mở khóa",
+        "noFrozenCoins": "Không có coin đóng băng",
+        "noComparisonData": "Không có dữ liệu so sánh",
+        "currentPeriod": "so với chu kỳ trước"
+      },
+      "topVideos": {
+        "title": "Video hiệu quả nhất",
+        "subtitle": "Dữ liệu Studio trực tiếp",
+        "emptyTitle": "Chưa có video",
+        "emptyDescription": "Tải lên và xuất bản video để xem các video hiệu quả nhất tại đây.",
+        "topEarning": "Doanh thu cao nhất",
+        "mostViewed": "Xem nhiều nhất",
+        "noApi": "Chưa có API",
+        "status": {
+          "ready": "Sẵn sàng",
+          "pending": "Đang chờ",
+          "failed": "Thất bại",
+          "processing": "Đang xử lý",
+          "rejected": "Bị từ chối"
+        }
+      },
+      "recentActivities": {
+        "title": "Hoạt động gần đây",
+        "emptyTitle": "Chưa có hoạt động video gần đây",
+        "emptyDescription": "Tải lên hoặc cập nhật video để hiển thị thông tin tại đây.",
+        "videoRejected": "Video bị từ chối",
+        "videoReady": "Video sẵn sàng",
+        "videoUpdated": "Video được cập nhật",
+        "videoStatusDescription": "{title} ở trạng thái {status}.",
+        "recently": "Vừa xong"
+      }
+    }
   }
 }

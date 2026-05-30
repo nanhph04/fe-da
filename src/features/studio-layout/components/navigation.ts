@@ -7,17 +7,17 @@ export interface StudioNavItem {
 }
 
 export const studioSidebarItems: StudioNavItem[] = [
-  { label: "Dashboard", path: "/studio", icon: "dashboard" },
-  { label: "Content", path: "/studio/content", icon: "video_library", matchStartsWith: true },
-  { label: "Upload", path: "/studio/upload", icon: "add_circle", matchStartsWith: true },
-  { label: "Studio Wallet", path: "/studio/wallet", icon: "account_balance_wallet", matchStartsWith: true },
-  { label: "Memberships", path: "/studio/memberships", icon: "stars", matchStartsWith: true },
+  { label: "dashboard", path: "/studio", icon: "dashboard" },
+  { label: "content", path: "/studio/content", icon: "video_library", matchStartsWith: true },
+  { label: "upload", path: "/studio/upload", icon: "add_circle", matchStartsWith: true },
+  { label: "studioWallet", path: "/studio/wallet", icon: "account_balance_wallet", matchStartsWith: true },
+  { label: "memberships", path: "/studio/memberships", icon: "stars", matchStartsWith: true },
 ];
 
 export const studioQuickLinks: StudioNavItem[] = [
-  { label: "Content", path: "/studio/content", icon: "video_library", matchStartsWith: true },
-  { label: "Wallet", path: "/studio/wallet", icon: "account_balance_wallet" },
-  { label: "Earnings", path: "/studio/wallet/earnings", icon: "monitoring", matchStartsWith: true },
-  { label: "Payouts", path: "/studio/wallet/payouts", icon: "payments", matchStartsWith: true },
-  { label: "Memberships", path: "/studio/memberships", icon: "stars", matchStartsWith: true },
+  { label: "content", path: "/studio/content", icon: "video_library", matchStartsWith: true },
+  { label: "wallet", path: "/studio/wallet", icon: "account_balance_wallet" },
+  { label: "earnings", path: "/studio/wallet/earnings", icon: "monitoring", matchStartsWith: true },
+  { label: "payouts", path: "/studio/wallet/payouts", icon: "payments", matchStartsWith: true },
+  { label: "memberships", path: "/studio/memberships", icon: "stars", matchStartsWith: true },
 ];

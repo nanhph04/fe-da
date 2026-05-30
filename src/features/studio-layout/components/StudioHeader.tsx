@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useTranslations } from "next-intl";
 import { StudioWalletService } from "@/features/studio-wallet";
 import { studioQuickLinks } from "./navigation";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
@@ -23,6 +24,7 @@ export function StudioHeader() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
+  const t = useTranslations("Studio");
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
@@ -82,7 +84,7 @@ export function StudioHeader() {
                   isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {item.label}
+                {t(`navigation.${item.label}`)}
               </Link>
             );
           })}
@@ -97,7 +99,7 @@ export function StudioHeader() {
               className="h-9 w-64 rounded-sm border-border/40 bg-input pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
               defaultValue={searchParams.get("q") ?? ""}
               name="q"
-              placeholder="Search content..."
+              placeholder={t("layout.searchPlaceholder")}
               type="search"
             />
           </Form>
@@ -138,21 +140,21 @@ export function StudioHeader() {
             <div className="absolute right-0 top-11 w-56 rounded-sm border border-border/30 bg-card py-2 shadow-2xl shadow-black/40">
               <div className="mb-2 border-b border-border/30 px-4 py-2">
                 <p className="truncate font-headline text-sm font-bold text-foreground">{avatarLabel}</p>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Creator Studio</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">{t("layout.creatorStudio")}</p>
               </div>
               <Link
                 href="/profile"
                 className="block px-4 py-2 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setShowAccountMenu(false)}
               >
-                My Profile
+                {t("layout.myProfile")}
               </Link>
               <Link
                 href="/library"
                 className="block px-4 py-2 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
                 onClick={() => setShowAccountMenu(false)}
               >
-                Back to Library
+                {t("layout.backToLibrary")}
               </Link>
               <button
                 type="button"
@@ -162,7 +164,7 @@ export function StudioHeader() {
                 }}
                 className="w-full px-4 py-2 text-left text-sm font-bold text-red-500 transition-colors hover:bg-muted"
               >
-                Sign Out
+                {t("layout.signOut")}
               </button>
             </div>
           ) : null}

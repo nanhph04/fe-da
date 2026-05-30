@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import type { DashboardTopVideo } from "../types/studio-dashboard.types";
 
@@ -21,11 +22,13 @@ function getBadgeClass(tone: DashboardTopVideo["badgeTone"]) {
 }
 
 export function TopVideos({ videos, isLoading = false }: TopVideosProps) {
+  const t = useTranslations("Studio");
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">Top Performing Videos</h2>
-        <span className="text-sm font-bold text-muted-foreground">Live Studio data</span>
+        <h2 className="font-headline text-2xl font-extrabold tracking-tight text-foreground">{t("dashboard.topVideos.title")}</h2>
+        <span className="text-sm font-bold text-muted-foreground">{t("dashboard.topVideos.subtitle")}</span>
       </div>
 
       <div className="space-y-4">
@@ -70,11 +73,11 @@ export function TopVideos({ videos, isLoading = false }: TopVideosProps) {
               </div>
             </div>
           ))
-        ) : (
+         ) : (
           <div className="rounded-sm border border-dashed border-border/40 bg-card p-8 text-center">
             <span className="material-symbols-outlined text-4xl text-muted-foreground">video_library</span>
-            <p className="mt-3 font-headline text-sm font-bold text-foreground">No videos yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">Upload and publish videos to see top performers here.</p>
+            <p className="mt-3 font-headline text-sm font-bold text-foreground">{t("dashboard.topVideos.emptyTitle")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.topVideos.emptyDescription")}</p>
           </div>
         )}
       </div>

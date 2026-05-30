@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { DashboardStatCard } from "../types/studio-dashboard.types";
 
 interface StatCardsProps {
@@ -6,6 +7,8 @@ interface StatCardsProps {
 }
 
 export function StatCards({ cards, isLoading = false }: StatCardsProps) {
+  const t = useTranslations("Studio");
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -48,7 +51,7 @@ export function StatCards({ cards, isLoading = false }: StatCardsProps) {
             >
               <span className="material-symbols-outlined text-sm">{card.trendIcon}</span>
               {card.trend}
-              {!isSecondary && !isMuted ? <span className="ml-1 font-normal text-muted-foreground">current period</span> : null}
+              {!isSecondary && !isMuted ? <span className="ml-1 font-normal text-muted-foreground">{t("dashboard.stats.currentPeriod")}</span> : null}
             </div>
           </article>
         );

@@ -5,6 +5,7 @@ import { mediaService } from "@/features/watch/services/mediaService";
 import { EarningsService } from "@/features/studio-wallet/services/earningsService";
 import { StudioWalletService } from "@/features/studio-wallet/services/studioWalletService";
 import { getErrorMessage } from "@/shared/api/client";
+import { useLocale, useTranslations } from "next-intl";
 import { StatCards } from "./StatCards";
 import { RecentActivities } from "./RecentActivities";
 import { TopVideos } from "./TopVideos";
@@ -31,6 +32,8 @@ export function StudioDashboardFeature() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("Studio");
+  const locale = useLocale();
 
   const loadDashboard = useCallback(async (showLoading = true) => {
     if (showLoading) {
@@ -95,23 +98,25 @@ export function StudioDashboardFeature() {
       dashboardData.studioWallet,
       dashboardData.walletStats,
       dashboardData.earningsSummary,
-      dashboardData.monthlyEarnings
+      dashboardData.monthlyEarnings,
+      t,
+      locale
     ),
-    [dashboardData]
+    [dashboardData, t, locale]
   );
   const topVideos = useMemo(
-    () => buildTopVideos(dashboardData.videos, dashboardData.topEarningVideos),
-    [dashboardData]
+    () => buildTopVideos(dashboardData.videos, dashboardData.topEarningVideos, t, locale),
+    [dashboardData, t, locale]
   );
-  const activities = useMemo(() => buildActivities(dashboardData.videos), [dashboardData.videos]);
+  const activities = useMemo(() => buildActivities(dashboardData.videos, t, locale), [dashboardData.videos, t, locale]);
 
   return (
     <section className="mx-auto w-full max-w-7xl space-y-12 p-8">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Studio</p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Dashboard Overview</h1>
-          <p className="mt-2 font-body text-sm text-muted-foreground">Channel health, revenue, and audience signals from live Studio APIs.</p>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("layout.creatorStudio")}</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">{t("dashboard.title")}</h1>
+          <p className="mt-2 font-body text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -124,7 +129,7 @@ export function StudioDashboardFeature() {
                 className={`rounded px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest transition-all ${dateRange === range ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
               >
-                Last {range === "7D" ? "7" : "30"} Days
+                {range === "7D" ? t("dashboard.last7Days") : t("dashboard.last30Days")}
               </button>
             ))}
           </div>
@@ -135,7 +140,7 @@ export function StudioDashboardFeature() {
             className="inline-flex items-center gap-2 rounded-sm border border-border/40 bg-card px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className={`material-symbols-outlined text-sm ${isRefreshing ? "animate-spin" : ""}`}>refresh</span>
-            Refresh
+            {t("dashboard.refresh")}
           </button>
         </div>
       </header>

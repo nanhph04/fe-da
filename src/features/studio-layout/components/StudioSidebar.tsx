@@ -3,17 +3,19 @@
 import { Link } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useTranslations } from "next-intl";
 import { studioSidebarItems } from "./navigation";
 
 export function StudioSidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const t = useTranslations("Studio");
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 border-r-0 bg-background shadow-2xl shadow-black z-50 flex flex-col hidden md:flex">
       <div className="p-8">
         <h1 className="text-2xl font-black tracking-tighter text-[#ff1a1a] uppercase font-headline">Velvet Gallery</h1>
-        <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1">Creator Studio</p>
+        <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1">{t("layout.creatorStudio")}</p>
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
@@ -32,7 +34,7 @@ export function StudioSidebar() {
           const content = (
             <>
               <span className="material-symbols-outlined">{item.icon}</span>
-              {item.label}
+              {t(`navigation.${item.label}`)}
             </>
           );
 
@@ -62,7 +64,7 @@ export function StudioSidebar() {
           className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-3 font-headline text-xs font-black uppercase tracking-widest text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
         >
           <span className="material-symbols-outlined">add_circle</span>
-          Upload
+          {t("layout.upload")}
         </Link>
       </div>
 
@@ -72,14 +74,14 @@ export function StudioSidebar() {
           className="flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground/80 font-headline text-sm"
         >
           <span className="material-symbols-outlined">public</span>
-          Back to Library
+          {t("layout.backToLibrary")}
         </Link>
         <button 
           onClick={logout}
           className="flex w-full items-center gap-3 px-4 py-2 text-red-500/70 hover:text-red-500 font-headline text-sm cursor-pointer"
         >
           <span className="material-symbols-outlined">logout</span>
-          Sign Out
+          {t("layout.signOut")}
         </button>
       </div>
     </aside>

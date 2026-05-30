@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { DashboardActivity } from "../types/studio-dashboard.types";
 
 interface RecentActivitiesProps {
@@ -22,9 +23,11 @@ function getDotClass(tone: DashboardActivity["tone"]) {
 }
 
 export function RecentActivities({ activities, isLoading = false }: RecentActivitiesProps) {
+  const t = useTranslations("Studio");
+
   return (
     <div className="flex h-full flex-col rounded-sm border border-border/30 bg-card p-8">
-      <h2 className="mb-6 font-headline text-xl font-bold text-foreground">Recent Activity</h2>
+      <h2 className="mb-6 font-headline text-xl font-bold text-foreground">{t("dashboard.recentActivities.title")}</h2>
 
       <div className="flex-1 space-y-6">
         {isLoading ? (
@@ -53,8 +56,8 @@ export function RecentActivities({ activities, isLoading = false }: RecentActivi
         ) : (
           <div className="rounded-sm border border-dashed border-border/40 bg-background/50 p-6 text-center">
             <span className="material-symbols-outlined text-3xl text-muted-foreground">history</span>
-            <p className="mt-2 font-headline text-sm font-bold text-foreground">No recent video activity</p>
-            <p className="mt-1 text-xs text-muted-foreground">Upload or update videos to populate this feed.</p>
+            <p className="mt-2 font-headline text-sm font-bold text-foreground">{t("dashboard.recentActivities.emptyTitle")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.recentActivities.emptyDescription")}</p>
           </div>
         )}
       </div>
