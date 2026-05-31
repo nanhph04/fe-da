@@ -1372,6 +1372,172 @@
       "title": "Đang thiết lập kết nối bảo mật",
       "description": "Đang xác thực V-CONSOLE..."
     },
+    "content": {
+      "statuses": {
+        "draft": "Bản nháp",
+        "pending_moderation": "Chờ kiểm duyệt",
+        "processing": "Đang xử lý",
+        "pending_manual_review": "Chờ duyệt thủ công",
+        "rejected": "Bị từ chối",
+        "ready": "Sẵn sàng",
+        "failed": "Thất bại",
+        "deleted": "Đã xóa"
+      },
+      "visibilities": {
+        "public": "Công khai",
+        "private": "Riêng tư"
+      },
+      "library": {
+        "notPublished": "Chưa xuất bản",
+        "header": {
+          "eyebrow": "Kho quản trị toàn cục",
+          "title": "Quản lý video",
+          "loading": "Đang tải video...",
+          "summary": "{count, plural, =0 {Chưa có video nào trong mọi trạng thái.} one {# video trong mọi trạng thái.} other {# video trong mọi trạng thái.}}"
+        },
+        "actions": {
+          "reviewQueue": "Hàng đợi duyệt",
+          "filters": "Bộ lọc",
+          "reset": "Đặt lại",
+          "apply": "Áp dụng",
+          "retry": "Thử lại",
+          "close": "Đóng",
+          "reviewVideo": "Duyệt video",
+          "viewDetailsAria": "Xem chi tiết {title}"
+        },
+        "filters": {
+          "searchLabel": "Tên video / Mô tả",
+          "searchPlaceholder": "Tìm kiếm...",
+          "channelLabel": "Mã kênh",
+          "channelPlaceholder": "Nhập UUID...",
+          "categoryLabel": "Thể loại",
+          "allCategories": "Tất cả thể loại",
+          "statusLabel": "Trạng thái",
+          "allStatuses": "Tất cả trạng thái",
+          "visibilityLabel": "Quyền riêng tư",
+          "allVisibilities": "Tất cả quyền riêng tư"
+        },
+        "table": {
+          "videoAsset": "Tài nguyên video",
+          "channel": "Kênh",
+          "channelId": "Mã kênh: {id}",
+          "privacy": "Quyền riêng tư",
+          "access": "Quyền xem",
+          "status": "Trạng thái",
+          "actions": "Thao tác"
+        },
+        "access": {
+          "tier": "Tier {level}",
+          "paid": "Trả phí",
+          "free": "Miễn phí"
+        },
+        "metrics": {
+          "views": "{count} lượt xem",
+          "purchases": "{count} lượt mua"
+        },
+        "empty": "Chưa có video nào trong danh sách quản lý.",
+        "pagination": {
+          "range": "Hiển thị từ <strong>{from}</strong> đến <strong>{to}</strong> trong tổng số <strong>{total}</strong> video",
+          "total": "Hiển thị <strong>{total}</strong> video",
+          "rows": "Số hàng:",
+          "previous": "Trang trước",
+          "next": "Trang sau"
+        },
+        "errors": {
+          "loadFailed": "Không thể tải danh sách video admin.",
+          "detailFailed": "Không thể tải thông tin chi tiết video."
+        },
+        "detail": {
+          "title": "Chi tiết video (Admin)",
+          "loading": "Đang tải thông tin chi tiết...",
+          "price": "Giá bán:",
+          "requiredTier": "Cấp hội viên yêu cầu:",
+          "ownerChannel": "Kênh sở hữu",
+          "category": "Thể loại",
+          "uncategorized": "Chưa phân loại",
+          "duration": "Thời lượng",
+          "views": "Lượt xem",
+          "purchases": "Lượt mua",
+          "resolutions": "Độ phân giải",
+          "notProcessed": "Chưa xử lý xong",
+          "thumbnailSource": "Nguồn thumbnail",
+          "createdAt": "Ngày tạo",
+          "updatedAt": "Cập nhật lần cuối",
+          "systemError": "Thông tin lỗi hệ thống",
+          "failureReason": "Lý do thất bại:",
+          "errorMessage": "Thông điệp lỗi:",
+          "jobStatus": "Trạng thái job:",
+          "jobInfo": "Thông tin job:",
+          "description": "Mô tả video"
+        }
+      },
+      "reviewQueue": {
+        "header": {
+          "eyebrow": "Hàng đợi kiểm duyệt",
+          "title": "Duyệt nội dung",
+          "loading": "Đang tải báo cáo kiểm duyệt...",
+          "summary": "{count, plural, =0 {Không có cờ nào đang chờ quản trị viên duyệt.} one {# cờ đang chờ quản trị viên duyệt.} other {# cờ đang chờ quản trị viên duyệt.}}",
+          "liveApi": "Live API"
+        },
+        "actions": {
+          "backToContent": "Quản lý video",
+          "review": "Duyệt"
+        },
+        "table": {
+          "flaggedMedia": "Media bị gắn cờ",
+          "reporter": "Người báo cáo",
+          "reason": "Lý do",
+          "priority": "Ưu tiên",
+          "confidence": "Độ tin cậy",
+          "actions": "Thao tác"
+        },
+        "empty": "Chưa có báo cáo nào từ Media Service cần duyệt.",
+        "errors": {
+          "loadFailed": "Không thể tải hàng đợi kiểm duyệt."
+        }
+      },
+      "detail": {
+        "manualReviewRequired": "Cần duyệt thủ công",
+        "header": {
+          "eyebrow": "Chi tiết kiểm duyệt",
+          "loadingStatus": "đang tải"
+        },
+        "preview": {
+          "loading": "Đang tải bản xem trước...",
+          "unavailable": "Không có bản xem trước thô cho video này."
+        },
+        "video": {
+          "noDescription": "Không có mô tả.",
+          "owner": "Chủ sở hữu",
+          "category": "Thể loại",
+          "evidenceTime": "Mốc bằng chứng"
+        },
+        "judgement": {
+          "title": "Kết luận duyệt",
+          "reason": "Lý do: {value}",
+          "label": "Nhãn: {value}",
+          "confidence": "Độ tin cậy: {value}",
+          "nsfw": "NSFW: {value}",
+          "safe": "An toàn: {value}",
+          "sampledFrames": "Khung đã lấy mẫu: {value}",
+          "notes": "Ghi chú duyệt",
+          "notesPlaceholder": "Bắt buộc khi từ chối..."
+        },
+        "actions": {
+          "backToReviewQueue": "Quay lại hàng đợi duyệt",
+          "approveAndProcess": "Duyệt và xử lý",
+          "rejectVideo": "Từ chối video",
+          "approvedMessage": "Video đã được duyệt và đưa vào hàng đợi xử lý.",
+          "rejectedMessage": "Video đã bị từ chối."
+        },
+        "errors": {
+          "loadFailed": "Không thể tải chi tiết kiểm duyệt.",
+          "approveFailed": "Không thể duyệt video.",
+          "rejectFailed": "Không thể từ chối video.",
+          "rejectReasonRequired": "Nhập lý do từ chối trước khi từ chối video này."
+        }
+      }
+    },
     "dashboard": {
       "common": {
         "unavailable": "Không khả dụng",

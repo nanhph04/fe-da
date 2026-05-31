@@ -2,6 +2,7 @@
 
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import { Link } from "@/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { formatDuration } from "@/features/home/utils/format";
 
@@ -20,40 +21,70 @@ import type {
 
 const initialPagination: ApiPagination = { page: 1, limit: 20, total: 0, totalPages: 0 };
 
-function formatDate(value: string | null) {
+function getIntlLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
+}
+
+function formatDate(value: string | null, locale: string, fallback: string) {
   if (!value) {
-    return "Not published";
+    return fallback;
   }
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   }).format(new Date(value));
 }
 
-function formatCompactNumber(value: number) {
-  return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+function formatCompactNumber(value: number, locale: string) {
+  return new Intl.NumberFormat(getIntlLocale(locale), { notation: "compact", maximumFractionDigits: 1 }).format(value);
 }
 
 function formatLabel(value: string) {
   return value.replace(/_/g, " ");
 }
 
-function getAccessLabel(video: AdminVideoItem) {
+function getAccessLabel(video: AdminVideoItem, t: ReturnType<typeof useTranslations>) {
   if (video.requiredTierLevel) {
-    return `LV${video.requiredTierLevel}`;
+    return t("library.access.tier", { level: video.requiredTierLevel });
   }
 
   if (video.price > 0) {
-    return "Paid";
+    return t("library.access.paid");
   }
 
-  return "Free";
+  return t("library.access.free");
 }
 
 function getStatusLabel(video: AdminVideoItem) {
   return video.isDeleted ? "deleted" : video.status;
+}
+
+function getStatusDisplayLabel(video: AdminVideoItem, t: ReturnType<typeof useTranslations>) {
+  const status = getStatusLabel(video);
+  if (
+    status === "draft" ||
+    status === "pending_moderation" ||
+    status === "processing" ||
+    status === "pending_manual_review" ||
+    status === "rejected" ||
+    status === "ready" ||
+    status === "failed" ||
+    status === "deleted"
+  ) {
+    return t(`statuses.${status}`);
+  }
+
+  return formatLabel(status);
+}
+
+function getVisibilityLabel(value: string, t: ReturnType<typeof useTranslations>) {
+  if (value === "public" || value === "private") {
+    return t(`visibilities.${value}`);
+  }
+
+  return formatLabel(value);
 }
 
 function getStatusClass(video: AdminVideoItem) {
@@ -99,6 +130,8 @@ function ContentSkeletonRows() {
 }
 
 export function ContentLibraryFeature() {
+  const t = useTranslations("Admin.content");
+  const locale = useLocale();
   const [videos, setVideos] = useState<AdminVideoItem[]>([]);
   const [pagination, setPagination] = useState<ApiPagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(true);
@@ -130,7 +163,7 @@ export function ContentLibraryFeature() {
       const detail = await adminContentService.getVideo(id);
       setSelectedVideoDetail(detail);
     } catch (err) {
-      setDetailError(getErrorMessage(err, "Không thể tải thông tin chi tiết video."));
+      setDetailError(getErrorMessage(err, t("library.errors.detailFailed")));
     } finally {
       setIsDetailLoading(false);
     }
@@ -183,7 +216,7 @@ export function ContentLibraryFeature() {
       setVideos(data.items);
       setPagination(data.pagination);
     } catch (err) {
-      setError(getErrorMessage(err, "Không thể tải danh sách video admin."));
+      setError(getErrorMessage(err, t("library.errors.loadFailed")));
       setVideos([]);
       setPagination(initialPagination);
     } finally {
@@ -259,16 +292,16 @@ export function ContentLibraryFeature() {
     <section className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Global Registry</p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Quản lý video</h1>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("library.header.eyebrow")}</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">{t("library.header.title")}</h1>
           <p className="mt-2 font-body text-sm text-muted-foreground">
-            {isLoading ? "Đang tải video..." : `${pagination.total} video trong tất cả các trạng thái.`}
+            {isLoading ? t("library.header.loading") : t("library.header.summary", { count: pagination.total })}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link href="/admin/content/review" className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
             <span className="material-symbols-outlined text-base" aria-hidden="true">fact_check</span>
-            Review Queue
+            {t("library.actions.reviewQueue")}
           </Link>
           <button
             type="button"
@@ -280,7 +313,7 @@ export function ContentLibraryFeature() {
             }`}
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">filter_list</span>
-            Filters
+            {t("library.actions.filters")}
           </button>
         </div>
       </header>
@@ -294,11 +327,11 @@ export function ContentLibraryFeature() {
             {/* Search Input */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Tên video / Mô tả
+                {t("library.filters.searchLabel")}
               </label>
               <input
                 type="text"
-                placeholder="Tìm kiếm..."
+                placeholder={t("library.filters.searchPlaceholder")}
                 value={filterQ}
                 onChange={(e) => setFilterQ(e.target.value)}
                 className="h-10 w-full rounded border border-border/40 bg-background px-3 font-body text-xs text-foreground outline-none focus:border-primary transition-colors"
@@ -308,11 +341,11 @@ export function ContentLibraryFeature() {
             {/* Channel ID Input */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Mã kênh (Channel ID)
+                {t("library.filters.channelLabel")}
               </label>
               <input
                 type="text"
-                placeholder="Nhập UUID..."
+                placeholder={t("library.filters.channelPlaceholder")}
                 value={filterChannelId}
                 onChange={(e) => setFilterChannelId(e.target.value)}
                 className="h-10 w-full rounded border border-border/40 bg-background px-3 font-body text-xs text-foreground outline-none focus:border-primary transition-colors"
@@ -322,14 +355,14 @@ export function ContentLibraryFeature() {
             {/* Category Select */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Thể loại (Category)
+                {t("library.filters.categoryLabel")}
               </label>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="h-10 w-full rounded border border-border/40 bg-background px-3 font-body text-xs text-foreground outline-none focus:border-primary transition-colors"
               >
-                <option value="">Tất cả thể loại</option>
+                <option value="">{t("library.filters.allCategories")}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.slug}>
                     {cat.name}
@@ -341,37 +374,37 @@ export function ContentLibraryFeature() {
             {/* Status Select */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Trạng thái (Status)
+                {t("library.filters.statusLabel")}
               </label>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="h-10 w-full rounded border border-border/40 bg-background px-3 font-body text-xs text-foreground outline-none focus:border-primary transition-colors"
               >
-                <option value="">Tất cả trạng thái</option>
-                <option value="draft">Draft</option>
-                <option value="pending_moderation">Pending Moderation</option>
-                <option value="processing">Processing</option>
-                <option value="pending_manual_review">Pending Manual Review</option>
-                <option value="rejected">Rejected</option>
-                <option value="ready">Ready</option>
-                <option value="failed">Failed</option>
+                <option value="">{t("library.filters.allStatuses")}</option>
+                <option value="draft">{t("statuses.draft")}</option>
+                <option value="pending_moderation">{t("statuses.pending_moderation")}</option>
+                <option value="processing">{t("statuses.processing")}</option>
+                <option value="pending_manual_review">{t("statuses.pending_manual_review")}</option>
+                <option value="rejected">{t("statuses.rejected")}</option>
+                <option value="ready">{t("statuses.ready")}</option>
+                <option value="failed">{t("statuses.failed")}</option>
               </select>
             </div>
 
             {/* Visibility Select */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Quyền riêng tư (Privacy)
+                {t("library.filters.visibilityLabel")}
               </label>
               <select
                 value={filterVisibility}
                 onChange={(e) => setFilterVisibility(e.target.value)}
                 className="h-10 w-full rounded border border-border/40 bg-background px-3 font-body text-xs text-foreground outline-none focus:border-primary transition-colors"
               >
-                <option value="">Tất cả quyền riêng tư</option>
-                <option value="public">Public</option>
-                <option value="private">Private</option>
+                <option value="">{t("library.filters.allVisibilities")}</option>
+                <option value="public">{t("visibilities.public")}</option>
+                <option value="private">{t("visibilities.private")}</option>
               </select>
             </div>
           </div>
@@ -382,13 +415,13 @@ export function ContentLibraryFeature() {
               onClick={handleResetFilters}
               className="inline-flex h-9 items-center justify-center rounded border border-border/40 bg-muted/20 px-4 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-colors"
             >
-              Đặt lại
+              {t("library.actions.reset")}
             </button>
             <button
               type="submit"
               className="inline-flex h-9 items-center justify-center rounded bg-primary px-4 text-xs font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90 transition-opacity"
             >
-              Áp dụng
+              {t("library.actions.apply")}
             </button>
           </div>
         </form>
@@ -405,12 +438,12 @@ export function ContentLibraryFeature() {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                <th className="px-6 py-4">Video Asset</th>
-                <th className="px-6 py-4">Channel</th>
-                <th className="px-6 py-4">Privacy</th>
-                <th className="px-6 py-4">Access</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4">{t("library.table.videoAsset")}</th>
+                <th className="px-6 py-4">{t("library.table.channel")}</th>
+                <th className="px-6 py-4">{t("library.table.privacy")}</th>
+                <th className="px-6 py-4">{t("library.table.access")}</th>
+                <th className="px-6 py-4">{t("library.table.status")}</th>
+                <th className="px-6 py-4 text-right">{t("library.table.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -419,7 +452,7 @@ export function ContentLibraryFeature() {
               ) : videos.length === 0 ? (
                 <tr>
                   <td className="px-6 py-12 text-center font-body text-sm text-muted-foreground" colSpan={6}>
-                    Chưa có video nào trong danh sách quản lý.
+                    {t("library.empty")}
                   </td>
                 </tr>
               ) : (
@@ -449,14 +482,14 @@ export function ContentLibraryFeature() {
                               </>
                             )}
                             <span className="text-muted-foreground/50">•</span>
-                            <span>{formatDate(video.updatedAt)}</span>
+                            <span>{formatDate(video.updatedAt, locale, t("library.notPublished"))}</span>
                             <span className="text-muted-foreground/50">•</span>
-                            <span>{formatCompactNumber(video.viewCount)} lượt xem</span>
+                            <span>{t("library.metrics.views", { count: formatCompactNumber(video.viewCount, locale) })}</span>
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4" title={`Channel ID: ${video.channelId}`}>
+                    <td className="px-6 py-4" title={t("library.table.channelId", { id: video.channelId })}>
                       <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-[16px] text-muted-foreground/80" aria-hidden="true">
                           storefront
@@ -468,16 +501,16 @@ export function ContentLibraryFeature() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="rounded-sm border border-secondary/30 px-2 py-0.5 font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
-                        {formatLabel(video.visibility)}
+                        {getVisibilityLabel(video.visibility, t)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="rounded-sm border border-border/30 bg-muted px-2 py-0.5 font-label text-[10px] font-bold text-foreground">{getAccessLabel(video)}</span>
+                      <span className="rounded-sm border border-border/30 bg-muted px-2 py-0.5 font-label text-[10px] font-bold text-foreground">{getAccessLabel(video, t)}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`flex items-center gap-1 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(video)}`}>
                         <span className="material-symbols-outlined text-[14px]" aria-hidden="true">{getStatusIcon(video)}</span>
-                        {formatLabel(getStatusLabel(video))}
+                        {getStatusDisplayLabel(video, t)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -485,7 +518,7 @@ export function ContentLibraryFeature() {
                         type="button"
                         onClick={() => handleOpenDetail(video.id)}
                         className="inline-flex rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        aria-label={`Xem chi tiết ${video.title}`}
+                        aria-label={t("library.actions.viewDetailsAria", { title: video.title })}
                       >
                         <span className="material-symbols-outlined text-[18px]" aria-hidden="true">visibility</span>
                       </button>
@@ -501,16 +534,17 @@ export function ContentLibraryFeature() {
         {pagination.totalPages > 1 ? (
           <div className="flex flex-col items-center justify-between gap-4 border-t border-border/30 bg-muted/20 px-6 py-4 sm:flex-row">
             <div className="font-body text-xs text-muted-foreground">
-              Hiển thị từ <span className="font-bold text-foreground">{(pagination.page - 1) * pagination.limit + 1}</span> đến{" "}
-              <span className="font-bold text-foreground">
-                {Math.min(pagination.page * pagination.limit, pagination.total)}
-              </span>{" "}
-              trong tổng số <span className="font-bold text-foreground">{pagination.total}</span> video
+              {t.rich("library.pagination.range", {
+                from: (pagination.page - 1) * pagination.limit + 1,
+                to: Math.min(pagination.page * pagination.limit, pagination.total),
+                total: pagination.total,
+                strong: (chunks) => <span className="font-bold text-foreground">{chunks}</span>,
+              })}
             </div>
             
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <span className="font-body text-xs text-muted-foreground">Số hàng:</span>
+                <span className="font-body text-xs text-muted-foreground">{t("library.pagination.rows")}</span>
                 <select
                   value={pagination.limit}
                   onChange={(e) => handleLimitChange(Number(e.target.value))}
@@ -529,7 +563,7 @@ export function ContentLibraryFeature() {
                   disabled={pagination.page <= 1}
                   onClick={() => handlePageChange(pagination.page - 1)}
                   className="inline-flex h-8 w-8 items-center justify-center rounded border border-border/40 bg-background text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Trang trước"
+                  aria-label={t("library.pagination.previous")}
                 >
                   <span className="material-symbols-outlined text-lg">chevron_left</span>
                 </button>
@@ -578,7 +612,7 @@ export function ContentLibraryFeature() {
                   disabled={pagination.page >= pagination.totalPages}
                   onClick={() => handlePageChange(pagination.page + 1)}
                   className="inline-flex h-8 w-8 items-center justify-center rounded border border-border/40 bg-background text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Trang sau"
+                  aria-label={t("library.pagination.next")}
                 >
                   <span className="material-symbols-outlined text-lg">chevron_right</span>
                 </button>
@@ -588,10 +622,13 @@ export function ContentLibraryFeature() {
         ) : pagination.total > 0 ? (
           <div className="flex flex-col items-center justify-between gap-4 border-t border-border/30 bg-muted/20 px-6 py-4 sm:flex-row">
             <div className="font-body text-xs text-muted-foreground">
-              Hiển thị <span className="font-bold text-foreground">{pagination.total}</span> video
+              {t.rich("library.pagination.total", {
+                total: pagination.total,
+                strong: (chunks) => <span className="font-bold text-foreground">{chunks}</span>,
+              })}
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-body text-xs text-muted-foreground">Số hàng:</span>
+              <span className="font-body text-xs text-muted-foreground">{t("library.pagination.rows")}</span>
               <select
                 value={pagination.limit}
                 onChange={(e) => handleLimitChange(Number(e.target.value))}
@@ -619,13 +656,13 @@ export function ContentLibraryFeature() {
           >
             <header className="flex items-center justify-between border-b border-border/30 pb-4">
               <h2 className="font-headline text-lg font-bold text-foreground">
-                Chi tiết Video (Admin)
+                {t("library.detail.title")}
               </h2>
               <button
                 type="button"
                 onClick={handleCloseDetail}
                 className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                aria-label="Đóng"
+                aria-label={t("library.actions.close")}
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
@@ -634,7 +671,7 @@ export function ContentLibraryFeature() {
             {isDetailLoading && (
               <div className="flex flex-col items-center justify-center py-12 space-y-4">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="text-sm text-muted-foreground">Đang tải thông tin chi tiết...</p>
+                <p className="text-sm text-muted-foreground">{t("library.detail.loading")}</p>
               </div>
             )}
 
@@ -646,7 +683,7 @@ export function ContentLibraryFeature() {
                   onClick={() => handleOpenDetail(selectedVideoId)}
                   className="self-start text-xs font-bold underline hover:no-underline"
                 >
-                  Thử lại
+                  {t("library.actions.retry")}
                 </button>
               </div>
             )}
@@ -668,7 +705,7 @@ export function ContentLibraryFeature() {
                       {/* Status */}
                       <span className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(selectedVideoDetail)} bg-muted/40 border border-current/20`}>
                         <span className="material-symbols-outlined text-[12px]">{getStatusIcon(selectedVideoDetail)}</span>
-                        {formatLabel(getStatusLabel(selectedVideoDetail))}
+                        {getStatusDisplayLabel(selectedVideoDetail, t)}
                       </span>
 
                       {/* Visibility */}
@@ -678,14 +715,14 @@ export function ContentLibraryFeature() {
 
                       {/* Access Label */}
                       <span className="rounded-sm border border-border/30 bg-muted px-2 py-0.5 font-label text-[10px] font-bold text-foreground">
-                        {getAccessLabel(selectedVideoDetail)}
+                        {getAccessLabel(selectedVideoDetail, t)}
                       </span>
                     </div>
 
                     {/* Price if paid */}
                     {selectedVideoDetail.price > 0 && (
                       <div className="rounded border border-border/30 bg-muted/10 p-3 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Giá bán:</span>
+                        <span className="text-muted-foreground">{t("library.detail.price")}</span>
                         <span className="font-mono font-bold text-secondary flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px]">monetization_on</span>
                           {selectedVideoDetail.price} AC
@@ -696,9 +733,9 @@ export function ContentLibraryFeature() {
                     {/* Required Tier Level */}
                     {selectedVideoDetail.requiredTierLevel !== null && (
                       <div className="rounded border border-border/30 bg-muted/10 p-3 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Cấp độ Sub yêu cầu:</span>
+                        <span className="text-muted-foreground">{t("library.detail.requiredTier")}</span>
                         <span className="font-bold text-primary">
-                          Tier {selectedVideoDetail.requiredTierLevel}
+                          {t("library.access.tier", { level: selectedVideoDetail.requiredTierLevel })}
                         </span>
                       </div>
                     )}
@@ -717,7 +754,7 @@ export function ContentLibraryFeature() {
 
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/20 pt-4">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Kênh sở hữu</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.ownerChannel")}</p>
                         <p className="mt-0.5 font-semibold text-foreground/90 flex items-center gap-1">
                           <span className="material-symbols-outlined text-[14px] text-muted-foreground">storefront</span>
                           {selectedVideoDetail.channelName || selectedVideoDetail.channel?.name || "Velvet Gallery"}
@@ -725,35 +762,35 @@ export function ContentLibraryFeature() {
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Thể loại</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.category")}</p>
                         <p className="mt-0.5 font-semibold text-foreground/90">
-                          {selectedVideoDetail.categoryTitle || selectedVideoDetail.category || "Chưa phân loại"}
+                          {selectedVideoDetail.categoryTitle || selectedVideoDetail.category || t("library.detail.uncategorized")}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Thời lượng</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.duration")}</p>
                         <p className="mt-0.5 font-mono">
                           {selectedVideoDetail.durationSeconds !== null ? formatDuration(selectedVideoDetail.durationSeconds) : "N/A"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Lượt xem</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.views")}</p>
                         <p className="mt-0.5 font-semibold">
-                          {formatCompactNumber(selectedVideoDetail.viewCount)} lượt xem
+                          {t("library.metrics.views", { count: formatCompactNumber(selectedVideoDetail.viewCount, locale) })}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Lượt mua</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.purchases")}</p>
                         <p className="mt-0.5 font-semibold text-secondary">
-                          {selectedVideoDetail.purchaseCount !== undefined ? formatCompactNumber(selectedVideoDetail.purchaseCount) : 0} lượt mua
+                          {t("library.metrics.purchases", { count: selectedVideoDetail.purchaseCount !== undefined ? formatCompactNumber(selectedVideoDetail.purchaseCount, locale) : "0" })}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Độ phân giải</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.resolutions")}</p>
                         <p className="mt-0.5 flex flex-wrap gap-1">
                           {selectedVideoDetail.resolutions && selectedVideoDetail.resolutions.length > 0 ? (
                             selectedVideoDetail.resolutions.map((res) => (
@@ -762,13 +799,13 @@ export function ContentLibraryFeature() {
                               </span>
                             ))
                           ) : (
-                            <span className="text-muted-foreground italic">Chưa xử lý xong</span>
+                            <span className="text-muted-foreground italic">{t("library.detail.notProcessed")}</span>
                           )}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nguồn Thumbnail</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.thumbnailSource")}</p>
                         <p className="mt-0.5 font-semibold capitalize text-foreground/80">
                           {selectedVideoDetail.thumbnailSource}
                         </p>
@@ -777,12 +814,12 @@ export function ContentLibraryFeature() {
 
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-border/20 pt-4 text-[11px]">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ngày tạo</p>
-                        <p className="mt-0.5 text-muted-foreground">{formatDate(selectedVideoDetail.createdAt)}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.createdAt")}</p>
+                        <p className="mt-0.5 text-muted-foreground">{formatDate(selectedVideoDetail.createdAt, locale, t("library.notPublished"))}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cập nhật lần cuối</p>
-                        <p className="mt-0.5 text-muted-foreground">{formatDate(selectedVideoDetail.updatedAt)}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.updatedAt")}</p>
+                        <p className="mt-0.5 text-muted-foreground">{formatDate(selectedVideoDetail.updatedAt, locale, t("library.notPublished"))}</p>
                       </div>
                     </div>
                   </div>
@@ -793,30 +830,30 @@ export function ContentLibraryFeature() {
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-2">
                     <h4 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-destructive">
                       <span className="material-symbols-outlined text-[16px]">report_problem</span>
-                      Thông tin lỗi hệ thống
+                      {t("library.detail.systemError")}
                     </h4>
                     <div className="grid grid-cols-1 gap-2 text-xs md:grid-cols-2">
                       {selectedVideoDetail.failureReason && (
                         <div>
-                          <span className="font-semibold text-muted-foreground">Lý do thất bại:</span>{" "}
+                          <span className="font-semibold text-muted-foreground">{t("library.detail.failureReason")}</span>{" "}
                           <span className="font-mono text-destructive">{selectedVideoDetail.failureReason}</span>
                         </div>
                       )}
                       {selectedVideoDetail.errorMessage && (
                         <div className="col-span-2">
-                          <span className="font-semibold text-muted-foreground">Thông điệp lỗi:</span>{" "}
+                          <span className="font-semibold text-muted-foreground">{t("library.detail.errorMessage")}</span>{" "}
                           <span className="font-mono text-destructive">{selectedVideoDetail.errorMessage}</span>
                         </div>
                       )}
                       {selectedVideoDetail.jobStatus && (
                         <div>
-                          <span className="font-semibold text-muted-foreground">Trạng thái Job:</span>{" "}
+                          <span className="font-semibold text-muted-foreground">{t("library.detail.jobStatus")}</span>{" "}
                           <span className="font-mono text-foreground/80 uppercase">{selectedVideoDetail.jobStatus}</span>
                         </div>
                       )}
                       {selectedVideoDetail.jobStatusMessage && (
                         <div className="col-span-2">
-                          <span className="font-semibold text-muted-foreground">Thông tin Job:</span>{" "}
+                          <span className="font-semibold text-muted-foreground">{t("library.detail.jobInfo")}</span>{" "}
                           <span className="font-mono text-foreground/70">{selectedVideoDetail.jobStatusMessage}</span>
                         </div>
                       )}
@@ -827,7 +864,7 @@ export function ContentLibraryFeature() {
                 {/* Mô tả */}
                 {selectedVideoDetail.description && (
                   <div className="border-t border-border/20 pt-4 space-y-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mô tả video</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("library.detail.description")}</h4>
                     <p className="whitespace-pre-wrap rounded border border-border/20 bg-muted/20 p-3 font-body text-xs text-foreground/80 leading-relaxed max-h-36 overflow-y-auto">
                       {selectedVideoDetail.description}
                     </p>
@@ -841,7 +878,7 @@ export function ContentLibraryFeature() {
                     onClick={handleCloseDetail}
                     className="inline-flex h-9 items-center justify-center rounded border border-border/40 bg-muted/20 px-4 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-muted/40 transition-colors"
                   >
-                    Đóng
+                    {t("library.actions.close")}
                   </button>
                   {(selectedVideoDetail.status === "pending_moderation" || selectedVideoDetail.status === "pending_manual_review") && (
                     <Link
@@ -849,7 +886,7 @@ export function ContentLibraryFeature() {
                       className="inline-flex h-9 items-center justify-center gap-1.5 rounded bg-primary px-4 text-xs font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90 transition-opacity"
                     >
                       <span className="material-symbols-outlined text-[16px]">gavel</span>
-                      Duyệt Video
+                      {t("library.actions.reviewVideo")}
                     </Link>
                   )}
                 </footer>

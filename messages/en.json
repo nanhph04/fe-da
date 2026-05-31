@@ -1420,6 +1420,172 @@
       "title": "Establishing secure connection",
       "description": "Authenticating V-CONSOLE..."
     },
+    "content": {
+      "statuses": {
+        "draft": "Draft",
+        "pending_moderation": "Pending moderation",
+        "processing": "Processing",
+        "pending_manual_review": "Pending manual review",
+        "rejected": "Rejected",
+        "ready": "Ready",
+        "failed": "Failed",
+        "deleted": "Deleted"
+      },
+      "visibilities": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "library": {
+        "notPublished": "Not published",
+        "header": {
+          "eyebrow": "Global Registry",
+          "title": "Video Management",
+          "loading": "Loading videos...",
+          "summary": "{count, plural, =0 {No videos across all states.} one {# video across all states.} other {# videos across all states.}}"
+        },
+        "actions": {
+          "reviewQueue": "Review Queue",
+          "filters": "Filters",
+          "reset": "Reset",
+          "apply": "Apply",
+          "retry": "Try again",
+          "close": "Close",
+          "reviewVideo": "Review Video",
+          "viewDetailsAria": "View details for {title}"
+        },
+        "filters": {
+          "searchLabel": "Video title / Description",
+          "searchPlaceholder": "Search...",
+          "channelLabel": "Channel ID",
+          "channelPlaceholder": "Enter UUID...",
+          "categoryLabel": "Category",
+          "allCategories": "All categories",
+          "statusLabel": "Status",
+          "allStatuses": "All statuses",
+          "visibilityLabel": "Privacy",
+          "allVisibilities": "All privacy levels"
+        },
+        "table": {
+          "videoAsset": "Video Asset",
+          "channel": "Channel",
+          "channelId": "Channel ID: {id}",
+          "privacy": "Privacy",
+          "access": "Access",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "access": {
+          "tier": "Tier {level}",
+          "paid": "Paid",
+          "free": "Free"
+        },
+        "metrics": {
+          "views": "{count} views",
+          "purchases": "{count} purchases"
+        },
+        "empty": "No videos are currently in the management list.",
+        "pagination": {
+          "range": "Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> videos",
+          "total": "Showing <strong>{total}</strong> videos",
+          "rows": "Rows:",
+          "previous": "Previous page",
+          "next": "Next page"
+        },
+        "errors": {
+          "loadFailed": "Unable to load the admin video list.",
+          "detailFailed": "Unable to load video details."
+        },
+        "detail": {
+          "title": "Video Details (Admin)",
+          "loading": "Loading details...",
+          "price": "Sale price:",
+          "requiredTier": "Required subscription tier:",
+          "ownerChannel": "Owner channel",
+          "category": "Category",
+          "uncategorized": "Uncategorized",
+          "duration": "Duration",
+          "views": "Views",
+          "purchases": "Purchases",
+          "resolutions": "Resolutions",
+          "notProcessed": "Not processed yet",
+          "thumbnailSource": "Thumbnail source",
+          "createdAt": "Created at",
+          "updatedAt": "Last updated",
+          "systemError": "System error details",
+          "failureReason": "Failure reason:",
+          "errorMessage": "Error message:",
+          "jobStatus": "Job status:",
+          "jobInfo": "Job info:",
+          "description": "Video description"
+        }
+      },
+      "reviewQueue": {
+        "header": {
+          "eyebrow": "Moderation Queue",
+          "title": "Content Review",
+          "loading": "Loading moderation reports...",
+          "summary": "{count, plural, =0 {No pending flags require administrator review.} one {# pending flag requires administrator review.} other {# pending flags require administrator review.}}",
+          "liveApi": "Live API"
+        },
+        "actions": {
+          "backToContent": "Video Management",
+          "review": "Review"
+        },
+        "table": {
+          "flaggedMedia": "Flagged Media",
+          "reporter": "Reporter",
+          "reason": "Reason",
+          "priority": "Priority",
+          "confidence": "Confidence",
+          "actions": "Actions"
+        },
+        "empty": "No reports from Media Service currently need review.",
+        "errors": {
+          "loadFailed": "Unable to load the moderation queue."
+        }
+      },
+      "detail": {
+        "manualReviewRequired": "Manual review required",
+        "header": {
+          "eyebrow": "Moderation Detail",
+          "loadingStatus": "loading"
+        },
+        "preview": {
+          "loading": "Loading preview...",
+          "unavailable": "Raw preview is not available for this video."
+        },
+        "video": {
+          "noDescription": "No description.",
+          "owner": "Owner",
+          "category": "Category",
+          "evidenceTime": "Evidence Time"
+        },
+        "judgement": {
+          "title": "Review Judgement",
+          "reason": "Reason: {value}",
+          "label": "Label: {value}",
+          "confidence": "Confidence: {value}",
+          "nsfw": "NSFW: {value}",
+          "safe": "Safe: {value}",
+          "sampledFrames": "Sampled frames: {value}",
+          "notes": "Mod Notes",
+          "notesPlaceholder": "Required for rejection..."
+        },
+        "actions": {
+          "backToReviewQueue": "Back to moderation queue",
+          "approveAndProcess": "Approve and Process",
+          "rejectVideo": "Reject Video",
+          "approvedMessage": "Video approved and queued for processing.",
+          "rejectedMessage": "Video rejected."
+        },
+        "errors": {
+          "loadFailed": "Unable to load moderation details.",
+          "approveFailed": "Unable to approve video.",
+          "rejectFailed": "Unable to reject video.",
+          "rejectReasonRequired": "Enter a rejection reason before rejecting this video."
+        }
+      }
+    },
     "dashboard": {
       "common": {
         "unavailable": "Unavailable",

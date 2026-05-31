@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
+import { useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -42,6 +43,7 @@ function formatPercent(value: number | null) {
 }
 
 export function ContentModerationDetailFeature() {
+  const t = useTranslations("Admin.content.detail");
   const params = useParams();
   const searchParams = useSearchParams();
   const id = params.id as string;
@@ -73,7 +75,7 @@ export function ContentModerationDetailFeature() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(getErrorMessage(err, "Khong the tai chi tiet kiem duyet."));
+          setError(getErrorMessage(err, t("errors.loadFailed")));
         }
       } finally {
         if (!cancelled) {
@@ -87,7 +89,7 @@ export function ContentModerationDetailFeature() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, t]);
 
   const moderationDetails =
     preview?.moderationDetails ?? video?.moderationDetails ?? null;
@@ -105,7 +107,7 @@ export function ContentModerationDetailFeature() {
   const reason =
     getModerationText(moderationDetails, "reason") ??
     video?.errorMessage ??
-    "Manual review required";
+    t("manualReviewRequired");
   const canModerate = video?.status === "pending_manual_review";
 
   const seekToEvidence = () => {
@@ -122,9 +124,9 @@ export function ContentModerationDetailFeature() {
         action: "approve",
       });
       setVideo(updated);
-      setActionMessage("Video approved and queued for processing.");
+      setActionMessage(t("actions.approvedMessage"));
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the approve video."));
+      setError(getErrorMessage(err, t("errors.approveFailed")));
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +135,7 @@ export function ContentModerationDetailFeature() {
   const handleReject = async () => {
     const reasonText = notes.trim();
     if (!reasonText) {
-      setError("Nhap ly do reject truoc khi tu choi video.");
+      setError(t("errors.rejectReasonRequired"));
       return;
     }
 
@@ -145,9 +147,9 @@ export function ContentModerationDetailFeature() {
         reason: reasonText,
       });
       setVideo(updated);
-      setActionMessage("Video rejected.");
+      setActionMessage(t("actions.rejectedMessage"));
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the reject video."));
+      setError(getErrorMessage(err, t("errors.rejectFailed")));
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +162,7 @@ export function ContentModerationDetailFeature() {
           <Link
             href="/admin/content/review"
             className="flex h-10 w-10 items-center justify-center rounded border border-border/30 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Back to moderation queue"
+            aria-label={t("actions.backToReviewQueue")}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
               arrow_back
@@ -168,7 +170,7 @@ export function ContentModerationDetailFeature() {
           </Link>
           <div>
             <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">
-              Moderation Detail
+              {t("header.eyebrow")}
             </p>
             <h1 className="font-headline text-3xl font-extrabold tracking-tight text-foreground">
               {video?.title ?? id}
@@ -179,7 +181,7 @@ export function ContentModerationDetailFeature() {
           </div>
         </div>
         <span className="w-fit rounded-sm border border-primary/30 bg-primary/10 px-3 py-1 font-label text-xs font-bold uppercase tracking-widest text-primary">
-          {video?.status ?? "loading"}
+          {video?.status ?? t("header.loadingStatus")}
         </span>
       </header>
 
@@ -200,7 +202,7 @@ export function ContentModerationDetailFeature() {
           <div className="overflow-hidden rounded-sm border border-border/30 bg-background">
             {isLoading ? (
               <div className="flex aspect-video items-center justify-center font-body text-sm text-muted-foreground">
-                Loading preview...
+                {t("preview.loading")}
               </div>
             ) : preview?.previewUrl ? (
               <video
@@ -212,7 +214,7 @@ export function ContentModerationDetailFeature() {
               />
             ) : (
               <div className="flex aspect-video items-center justify-center p-6 text-center font-body text-sm text-muted-foreground">
-                Raw preview is not available for this video.
+                {t("preview.unavailable")}
               </div>
             )}
           </div>
@@ -222,12 +224,12 @@ export function ContentModerationDetailFeature() {
               {video?.title ?? "Video"}
             </h2>
             <p className="mb-4 font-body text-sm leading-relaxed text-muted-foreground">
-              {video?.description || "No description."}
+              {video?.description || t("video.noDescription")}
             </p>
             <div className="grid grid-cols-1 gap-4 border-t border-border/30 pt-4 md:grid-cols-3">
               <div>
                 <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Owner
+                  {t("video.owner")}
                 </p>
                 <p className="mt-1 font-mono text-sm text-foreground">
                   {video?.ownerId ?? "N/A"}
@@ -235,7 +237,7 @@ export function ContentModerationDetailFeature() {
               </div>
               <div>
                 <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Category
+                  {t("video.category")}
                 </p>
                 <p className="mt-1 font-mono text-sm text-foreground">
                   {video?.category ?? "N/A"}
@@ -243,7 +245,7 @@ export function ContentModerationDetailFeature() {
               </div>
               <div>
                 <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Evidence Time
+                  {t("video.evidenceTime")}
                 </p>
                 <button
                   type="button"
@@ -261,24 +263,24 @@ export function ContentModerationDetailFeature() {
           <aside className="space-y-6 lg:col-span-4">
             <div className="sticky top-28 rounded-lg border border-primary/30 bg-primary/10 p-6">
               <h2 className="mb-6 font-headline text-xl font-bold uppercase tracking-widest text-primary">
-                Review Judgement
+                {t("judgement.title")}
               </h2>
               <div className="space-y-6">
                 <div className="border-l-2 border-primary pl-3 font-mono text-xs leading-5 text-primary">
-                  <p>Reason: {reason}</p>
-                  <p>Label: {label}</p>
-                  <p>Confidence: {formatPercent(confidence)}</p>
-                  <p>NSFW: {formatPercent(nsfwScore)}</p>
-                  <p>Safe: {formatPercent(safeScore)}</p>
-                  <p>Sampled frames: {sampledFrameCount ?? "N/A"}</p>
+                  <p>{t("judgement.reason", { value: reason })}</p>
+                  <p>{t("judgement.label", { value: label })}</p>
+                  <p>{t("judgement.confidence", { value: formatPercent(confidence) })}</p>
+                  <p>{t("judgement.nsfw", { value: formatPercent(nsfwScore) })}</p>
+                  <p>{t("judgement.safe", { value: formatPercent(safeScore) })}</p>
+                  <p>{t("judgement.sampledFrames", { value: sampledFrameCount ?? "N/A" })}</p>
                 </div>
                 <div>
                   <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Mod Notes
+                    {t("judgement.notes")}
                   </label>
                   <textarea
                     className="min-h-[120px] w-full rounded-sm border border-primary/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
-                    placeholder="Required for rejection..."
+                    placeholder={t("judgement.notesPlaceholder")}
                     value={notes}
                     onChange={(event) => setNotes(event.target.value)}
                     disabled={!canModerate || isSubmitting}
@@ -294,7 +296,7 @@ export function ContentModerationDetailFeature() {
                     <span className="material-symbols-outlined text-[16px]">
                       check_circle
                     </span>
-                    Approve and Process
+                    {t("actions.approveAndProcess")}
                   </button>
                   <button
                     type="button"
@@ -305,7 +307,7 @@ export function ContentModerationDetailFeature() {
                     <span className="material-symbols-outlined text-[16px]">
                       block
                     </span>
-                    Reject Video
+                    {t("actions.rejectVideo")}
                   </button>
                 </div>
               </div>
