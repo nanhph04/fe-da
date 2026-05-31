@@ -665,14 +665,14 @@ function UserDetailPanel({
       ) : user ? (
         <div className="mt-8 space-y-5">
           <div className="rounded-sm border border-border/30 bg-background p-5">
-            <p className="font-headline text-base font-bold text-foreground">{user.profile.displayName || user.email}</p>
+            <p className="font-headline text-base font-bold text-foreground">{user.profile?.displayName || user.email}</p>
             <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{user.email}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className={`rounded-sm border px-2 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${user.status === "active" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-primary/30 bg-primary/10 text-primary"}`}>
                 {user.status}
               </span>
               <span className="rounded-sm border border-border/30 bg-muted px-2 py-1 font-label text-[10px] font-bold uppercase tracking-widest text-foreground">
-                {user.profile.isCreator ? "Creator" : "Viewer"}
+                {user.profile?.isCreator ? "Creator" : "Viewer"}
               </span>
               <span className={`rounded-sm border px-2 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${user.isEmailVerified ? "border-emerald-500/30 text-emerald-400" : "border-secondary/30 text-secondary"}`}>
                 {user.isEmailVerified ? "Email Verified" : "Email Unverified"}
@@ -681,10 +681,10 @@ function UserDetailPanel({
           </div>
 
           <DetailBlock title="Profile">
-            <DetailLine label="Bio" value={user.profile.bio || "No bio"} />
-            <DetailLine label="Phone" value={user.profile.phone ? String(user.profile.phone) : "N/A"} />
-            <DetailLine label="Gender" value={user.profile.gender || "N/A"} />
-            <DetailLine label="Birthday" value={formatDate(user.profile.birthday)} />
+            <DetailLine label="Bio" value={user.profile?.bio || "No bio"} />
+            <DetailLine label="Phone" value={user.profile?.phone ? String(user.profile.phone) : "N/A"} />
+            <DetailLine label="Gender" value={user.profile?.gender || "N/A"} />
+            <DetailLine label="Birthday" value={formatDate(user.profile?.birthday)} />
           </DetailBlock>
 
           <DetailBlock title="Sessions">

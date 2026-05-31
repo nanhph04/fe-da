@@ -54,7 +54,7 @@ export interface AdminUserDetail {
   isEmailVerified: boolean;
   createdAt: string;
   updatedAt: string;
-  profile: AdminUserProfile;
+  profile?: AdminUserProfile | null;
   sessions: AdminUserSessionSummary;
 }
 
