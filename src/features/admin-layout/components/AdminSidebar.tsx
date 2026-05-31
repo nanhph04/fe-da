@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 import { LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { adminSidebarItems, type AdminNavItem } from "./navigation";
 
@@ -31,6 +32,7 @@ function getNavItemClassName(isActive: boolean, disabled?: boolean) {
 }
 
 function AdminNavLink({ item }: { item: AdminNavItem }) {
+  const t = useTranslations("Admin.navigation");
   const pathname = usePathname();
   const isActive = isActivePath(pathname, item);
   const Icon = item.icon;
@@ -41,7 +43,7 @@ function AdminNavLink({ item }: { item: AdminNavItem }) {
   const content = (
     <>
       <Icon className="h-4 w-4 shrink-0" strokeWidth={1.8} aria-hidden="true" />
-      <span className="truncate">{item.label}</span>
+      <span className="truncate">{t(item.labelKey)}</span>
     </>
   );
 
@@ -61,16 +63,17 @@ function AdminNavLink({ item }: { item: AdminNavItem }) {
 }
 
 export function AdminSidebar() {
+  const t = useTranslations("Admin.shell");
   const { logout } = useAuth();
 
   return (
     <aside className="fixed left-0 top-0 z-50 hidden h-full w-64 flex-col border-r border-border/30 bg-sidebar py-7 font-body text-sm font-medium shadow-[20px_0_40px_rgba(0,0,0,0.34)] md:flex">
       <div className="mb-9 flex flex-col items-start gap-1.5 px-6">
-        <span className="font-headline text-lg font-extrabold tracking-[-0.03em] text-foreground">System Admin</span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Admin Console</span>
+        <span className="font-headline text-lg font-extrabold tracking-[-0.03em] text-foreground">{t("brand")}</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("console")}</span>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3" aria-label="Admin primary navigation">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3" aria-label={t("primaryNavigation")}>
         {adminSidebarItems.map((item) => (
           <AdminNavLink key={item.path} item={item} />
         ))}
@@ -83,7 +86,7 @@ export function AdminSidebar() {
           className="flex min-h-11 w-full items-center gap-3 rounded-sm border-r-2 border-transparent px-4 py-2.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-primary"
         >
           <LogOut className="h-4 w-4" aria-hidden="true" />
-          <span>Sign Out</span>
+          <span>{t("signOut")}</span>
         </button>
       </footer>
     </aside>

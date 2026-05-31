@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 import { Menu, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { adminFooterItems, adminSidebarItems } from "./navigation";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
@@ -14,6 +15,8 @@ function getInitials(displayName?: string, email?: string) {
 }
 
 export function AdminHeader() {
+  const t = useTranslations("Admin.shell");
+  const tNav = useTranslations("Admin.navigation");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
@@ -27,7 +30,7 @@ export function AdminHeader() {
         <div className="flex min-w-0 items-center gap-4">
           <button
             type="button"
-            aria-label={isMobileMenuOpen ? "Close admin navigation" : "Open admin navigation"}
+            aria-label={isMobileMenuOpen ? t("closeNavigation") : t("openNavigation")}
             aria-expanded={isMobileMenuOpen}
             onClick={() => setIsMobileMenuOpen((current) => !current)}
             className="flex h-10 w-10 items-center justify-center rounded-sm border border-border/40 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 md:hidden"
@@ -36,19 +39,19 @@ export function AdminHeader() {
           </button>
 
           <Link href="/admin" className="min-w-0 font-headline text-base font-extrabold tracking-[-0.03em] text-foreground md:hidden">
-            System Admin
+            {t("brand")}
           </Link>
 
           <form action="/admin/content" className="group relative hidden md:block" role="search">
             <label htmlFor="admin-global-search" className="sr-only">
-              Search admin console
+              {t("searchLabel")}
             </label>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" aria-hidden="true" />
             <input
               id="admin-global-search"
               name="q"
               className="w-[min(34rem,42vw)] rounded-sm border border-border/40 bg-input py-2.5 pl-10 pr-4 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Search UID, email, video hash..."
+              placeholder={t("searchPlaceholder")}
               type="search"
             />
           </form>
@@ -56,7 +59,7 @@ export function AdminHeader() {
 
         <div className="flex items-center gap-3 md:gap-6">
           <Link href="/admin/content/review" className="hidden font-headline text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary lg:block">
-            Review Queue
+            {t("reviewQueue")}
           </Link>
 
           <LanguageSwitcher />
@@ -75,7 +78,7 @@ export function AdminHeader() {
 
       {isMobileMenuOpen ? (
         <div className="fixed inset-x-0 top-16 z-30 border-b border-border/30 bg-background/95 px-4 py-4 shadow-[0_24px_48px_rgba(0,0,0,0.45)] backdrop-blur-xl md:hidden">
-          <nav className="grid max-h-[70dvh] grid-cols-1 gap-1 overflow-y-auto" aria-label="Admin mobile navigation">
+          <nav className="grid max-h-[70dvh] grid-cols-1 gap-1 overflow-y-auto" aria-label={t("mobileNavigation")}>
             {mobileNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.path || Boolean(item.matchStartsWith && pathname?.startsWith(item.path));
@@ -84,7 +87,7 @@ export function AdminHeader() {
                 return (
                   <div key={item.path} aria-disabled="true" className="flex min-h-11 items-center gap-3 rounded-sm border border-dashed border-border/30 px-4 py-2.5 text-sm text-muted-foreground/40">
                     <Icon className="h-4 w-4" aria-hidden="true" />
-                    <span>{item.label}</span>
+                    <span>{tNav(item.labelKey)}</span>
                   </div>
                 );
               }
@@ -101,7 +104,7 @@ export function AdminHeader() {
                     }`}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
-                  <span>{item.label}</span>
+                  <span>{tNav(item.labelKey)}</span>
                 </Link>
               );
             })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getErrorMessage } from "@/shared/api/client";
 import {
@@ -26,6 +27,10 @@ const DEFAULT_WIDGETS: DashboardWidgetConfig[] = [
   { id: "dataSources", title: "Data Contract Status", visible: true },
 ];
 
+function getWidgetTitle(t: ReturnType<typeof useTranslations>, id: DashboardWidgetConfig["id"]) {
+  return t(`widgets.${id}`);
+}
+
 const statToneClasses: Record<AdminStatCard["tone"], string> = {
   default: "border-border/30 bg-card text-foreground",
   primary: "border-border/30 bg-card text-primary",
@@ -40,23 +45,27 @@ const actionToneClasses: Record<AdminPriorityAction["tone"], string> = {
 };
 
 // Formatting helpers
-const formatVND = (value: number) => {
-  return new Intl.NumberFormat("vi-VN", {
+const getIntlLocale = (locale: string) => (locale === "en" ? "en-US" : "vi-VN");
+
+const formatVND = (value: number, locale = "vi") => {
+  return new Intl.NumberFormat(getIntlLocale(locale), {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
   }).format(value);
 };
 
-const formatCoins = (value: number) => {
-  return `${new Intl.NumberFormat("en-US").format(value)} AC`;
+const formatCoins = (value: number, locale = "vi") => {
+  return `${new Intl.NumberFormat(getIntlLocale(locale)).format(value)} AC`;
 };
 
-const formatNumber = (value: number) => {
-  return new Intl.NumberFormat("en-US").format(value);
+const formatNumber = (value: number, locale = "vi") => {
+  return new Intl.NumberFormat(getIntlLocale(locale)).format(value);
 };
 
 export function AdminOverviewFeature() {
+  const t = useTranslations("Admin.dashboard");
+  const locale = useLocale();
   const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
   const [financeOverview, setFinanceOverview] = useState<FinanceOverviewData | null>(null);
   const [healthStatuses, setHealthStatuses] = useState<ServiceHealthStatus[]>([]);
@@ -174,9 +183,9 @@ export function AdminOverviewFeature() {
   // Poll health checks
   const checkAllServicesHealth = useCallback(async () => {
     const services = [
-      { name: "Finance Service", endpoint: "/api/health" },
-      { name: "Identity Service", endpoint: "/api/identity/health" },
-      { name: "Media Service", endpoint: "/api/media/health" },
+      { name: t("health.services.finance"), endpoint: "/api/health" },
+      { name: t("health.services.identity"), endpoint: "/api/identity/health" },
+      { name: t("health.services.media"), endpoint: "/api/media/health" },
     ];
 
     setHealthStatuses(services.map(s => ({ service: s.name, endpoint: s.endpoint, status: "checking" })));
@@ -185,7 +194,7 @@ export function AdminOverviewFeature() {
       services.map(s => checkServiceHealth(s.name, s.endpoint))
     );
     setHealthStatuses(results);
-  }, []);
+  }, [t]);
 
   // Full reload
   const loadDashboard = useCallback(async () => {
@@ -201,11 +210,11 @@ export function AdminOverviewFeature() {
       ]);
     } catch (err) {
       setDashboardData(null);
-      setError(getErrorMessage(err, "Không thể tải dashboard admin."));
+      setError(getErrorMessage(err, t("error.loadFailed")));
     } finally {
       setIsLoading(false);
     }
-  }, [computedDateRange, loadFinanceOverview, checkAllServicesHealth]);
+  }, [computedDateRange, loadFinanceOverview, checkAllServicesHealth, t]);
 
   useEffect(() => {
     void loadDashboard();
@@ -219,23 +228,23 @@ export function AdminOverviewFeature() {
   }, [computedDateRange, loadFinanceOverview, isLoading, dashboardData]);
 
   const statCards = useMemo(
-    () => (dashboardData ? buildAdminStatCards(dashboardData) : []),
-    [dashboardData]
+    () => (dashboardData ? buildAdminStatCards(dashboardData, t) : []),
+    [dashboardData, t]
   );
 
   const priorityActions = useMemo(
-    () => (dashboardData ? buildAdminPriorityActions(dashboardData) : []),
-    [dashboardData]
+    () => (dashboardData ? buildAdminPriorityActions(dashboardData, t) : []),
+    [dashboardData, t]
   );
 
   return (
     <section className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-6 border-b border-border/30 pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="mb-1 font-label text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Velvet Gallery System</p>
-          <h1 className="font-headline text-4xl font-extrabold uppercase tracking-tight text-foreground">Command Center</h1>
+          <p className="mb-1 font-label text-[10px] font-bold uppercase tracking-[0.3em] text-primary">{t("header.eyebrow")}</p>
+          <h1 className="font-headline text-4xl font-extrabold uppercase tracking-tight text-foreground">{t("header.title")}</h1>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
-            ADMINISTRATOR NETWORK STATUS & TRANSACTION AGGREGATION
+            {t("header.description")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -249,7 +258,7 @@ export function AdminOverviewFeature() {
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">settings_accessibility</span>
-            {isCustomizing ? "Hoàn thành" : "Bố cục"}
+            {isCustomizing ? t("header.done") : t("header.layout")}
           </button>
           <button
             type="button"
@@ -258,7 +267,7 @@ export function AdminOverviewFeature() {
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-[16px] animate-none">sync</span>
-            {isLoading ? "Đang đồng bộ..." : "Đồng bộ dữ liệu"}
+            {isLoading ? t("header.syncing") : t("header.sync")}
           </button>
         </div>
       </header>
@@ -268,51 +277,55 @@ export function AdminOverviewFeature() {
         <section className="rounded-lg border border-primary/30 bg-primary/5 p-6 animate-in slide-in-from-top duration-300">
           <div className="mb-4 flex items-center justify-between border-b border-border/20 pb-3">
             <div>
-              <h2 className="font-headline text-base font-bold text-foreground">Tùy chỉnh cấu trúc giao diện</h2>
-              <p className="text-xs text-muted-foreground">Nhấp vào mũi tên để di chuyển widget hoặc tắt hiển thị để ẩn widget.</p>
+              <h2 className="font-headline text-base font-bold text-foreground">{t("layoutEditor.title")}</h2>
+              <p className="text-xs text-muted-foreground">{t("layoutEditor.description")}</p>
             </div>
             <button
               type="button"
               onClick={resetLayout}
               className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary"
             >
-              Đặt lại mặc định
+              {t("layoutEditor.reset")}
             </button>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-            {widgets.map((widget, index) => (
-              <div key={widget.id} className="flex items-center justify-between rounded-sm border border-border/40 bg-card p-3 font-mono text-xs">
-                <span className="truncate font-semibold text-zinc-300">{widget.title}</span>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => toggleWidgetVisibility(widget.id)}
-                    aria-label={`Ẩn/Hiện ${widget.title}`}
-                    className={`material-symbols-outlined text-[18px] ${widget.visible ? "text-primary" : "text-zinc-600 hover:text-zinc-400"}`}
-                  >
-                    {widget.visible ? "visibility" : "visibility_off"}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={index === 0}
-                    onClick={() => moveWidget(index, -1)}
-                    aria-label={`Di chuyển ${widget.title} lên`}
-                    className="material-symbols-outlined text-[18px] text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  >
-                    arrow_upward
-                  </button>
-                  <button
-                    type="button"
-                    disabled={index === widgets.length - 1}
-                    onClick={() => moveWidget(index, 1)}
-                    aria-label={`Di chuyển ${widget.title} xuống`}
-                    className="material-symbols-outlined text-[18px] text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  >
-                    arrow_downward
-                  </button>
+            {widgets.map((widget, index) => {
+              const widgetTitle = getWidgetTitle(t, widget.id);
+
+              return (
+                <div key={widget.id} className="flex items-center justify-between rounded-sm border border-border/40 bg-card p-3 font-mono text-xs">
+                  <span className="truncate font-semibold text-zinc-300">{widgetTitle}</span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleWidgetVisibility(widget.id)}
+                      aria-label={t("layoutEditor.toggleVisibility", { title: widgetTitle })}
+                      className={`material-symbols-outlined text-[18px] ${widget.visible ? "text-primary" : "text-zinc-600 hover:text-zinc-400"}`}
+                    >
+                      {widget.visible ? "visibility" : "visibility_off"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => moveWidget(index, -1)}
+                      aria-label={t("layoutEditor.moveUp", { title: widgetTitle })}
+                      className="material-symbols-outlined text-[18px] text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    >
+                      arrow_upward
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === widgets.length - 1}
+                      onClick={() => moveWidget(index, 1)}
+                      aria-label={t("layoutEditor.moveDown", { title: widgetTitle })}
+                      className="material-symbols-outlined text-[18px] text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    >
+                      arrow_downward
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
@@ -327,7 +340,7 @@ export function AdminOverviewFeature() {
             .map(widget => {
               switch (widget.id) {
                 case "health":
-                  return <ServicesHealthWidget key="health" statuses={healthStatuses} onPing={checkAllServicesHealth} />;
+                  return <ServicesHealthWidget key="health" statuses={healthStatuses} onPing={checkAllServicesHealth} locale={locale} />;
                 case "stats":
                   return (
                     <div key="stats" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -351,7 +364,7 @@ export function AdminOverviewFeature() {
                 case "priorityActions":
                   return <PriorityActions key="priorityActions" actions={priorityActions} />;
                 case "dataSources":
-                  return <DataSourcesPanel key="dataSources" data={dashboardData} />;
+                  return <DataSourcesPanel key="dataSources" data={dashboardData} locale={locale} />;
                 default:
                   return null;
               }
@@ -363,11 +376,13 @@ export function AdminOverviewFeature() {
 }
 
 function AdminErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useTranslations("Admin.dashboard");
+
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/10 p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="font-headline text-lg font-bold text-foreground">Không thể tải dữ liệu admin</h2>
+          <h2 className="font-headline text-lg font-bold text-foreground">{t("error.title")}</h2>
           <p className="mt-1 font-body text-sm text-muted-foreground">{message}</p>
         </div>
         <button
@@ -375,7 +390,7 @@ function AdminErrorState({ message, onRetry }: { message: string; onRetry: () =>
           onClick={onRetry}
           className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90"
         >
-          Thử lại
+          {t("error.retry")}
         </button>
       </div>
     </div>
@@ -383,8 +398,10 @@ function AdminErrorState({ message, onRetry }: { message: string; onRetry: () =>
 }
 
 function AdminDashboardSkeleton() {
+  const t = useTranslations("Admin.dashboard");
+
   return (
-    <div className="space-y-6" aria-label="Loading admin dashboard">
+    <div className="space-y-6" aria-label={t("loading.dashboard")}>
       <div className="h-40 rounded-lg border border-border/30 bg-card p-6">
         <div className="h-4 w-1/4 rounded-sm bg-muted animate-pulse" />
         <div className="mt-6 space-y-3">
@@ -406,6 +423,7 @@ function AdminDashboardSkeleton() {
 }
 
 function StatCard({ card }: { card: AdminStatCard }) {
+  const t = useTranslations("Admin.dashboard");
   const content = (
     <article className={`group relative min-h-36 overflow-hidden rounded-lg border p-5 transition-colors ${statToneClasses[card.tone]}`}>
       <div className="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
@@ -418,7 +436,7 @@ function StatCard({ card }: { card: AdminStatCard }) {
       <p className="mt-3 max-w-[15rem] font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{card.detail}</p>
       {card.unavailable ? (
         <span className="mt-3 inline-flex rounded-sm border border-border/30 bg-background px-2 py-0.5 font-label text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-          API Needed
+          {t("common.apiNeeded")}
         </span>
       ) : null}
     </article>
@@ -435,13 +453,15 @@ function StatCard({ card }: { card: AdminStatCard }) {
   );
 }
 
-function ServicesHealthWidget({ statuses, onPing }: { statuses: ServiceHealthStatus[]; onPing: () => void }) {
+function ServicesHealthWidget({ statuses, onPing, locale }: { statuses: ServiceHealthStatus[]; onPing: () => void; locale: string }) {
+  const t = useTranslations("Admin.dashboard");
+
   return (
     <section className="overflow-hidden rounded-lg border border-border/30 bg-card">
       <div className="flex flex-col gap-3 border-b border-border/30 bg-background/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-headline text-lg font-extrabold uppercase tracking-tight text-foreground">Services Health Status</h2>
-          <p className="font-body text-xs text-muted-foreground">Thời gian thực tế phản hồi giữa Gateway và các Services.</p>
+          <h2 className="font-headline text-lg font-extrabold uppercase tracking-tight text-foreground">{t("health.title")}</h2>
+          <p className="font-body text-xs text-muted-foreground">{t("health.description")}</p>
         </div>
         <button
           type="button"
@@ -449,18 +469,18 @@ function ServicesHealthWidget({ statuses, onPing }: { statuses: ServiceHealthSta
           className="inline-flex h-9 items-center justify-center gap-1 rounded-sm border border-border bg-card px-3 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-300 hover:text-foreground hover:bg-muted"
         >
           <span className="material-symbols-outlined text-[14px]">refresh</span>
-          Ping
+          {t("health.ping")}
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left font-mono text-xs">
           <thead className="bg-background/20 text-muted-foreground uppercase tracking-widest text-[9px]">
             <tr className="border-b border-border/20">
-              <th className="px-5 py-3 font-semibold">Service Name</th>
-              <th className="px-5 py-3 font-semibold">Endpoint</th>
-              <th className="px-5 py-3 font-semibold">Status</th>
-              <th className="px-5 py-3 font-semibold text-right">Ping (Latency)</th>
-              <th className="px-5 py-3 font-semibold text-right">Last Verified</th>
+              <th className="px-5 py-3 font-semibold">{t("health.columns.service")}</th>
+              <th className="px-5 py-3 font-semibold">{t("health.columns.endpoint")}</th>
+              <th className="px-5 py-3 font-semibold">{t("health.columns.status")}</th>
+              <th className="px-5 py-3 font-semibold text-right">{t("health.columns.latency")}</th>
+              <th className="px-5 py-3 font-semibold text-right">{t("health.columns.lastVerified")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/20">
@@ -483,7 +503,7 @@ function ServicesHealthWidget({ statuses, onPing }: { statuses: ServiceHealthSta
                         ? "bg-amber-400 animate-pulse"
                         : "bg-primary"
                     }`} />
-                    {s.status === "healthy" ? "Online" : s.status === "checking" ? "Checking" : "Offline"}
+                    {s.status === "healthy" ? t("health.status.online") : s.status === "checking" ? t("health.status.checking") : t("health.status.offline")}
                   </span>
                   {s.error && <p className="mt-1 text-[10px] text-primary">{s.error}</p>}
                 </td>
@@ -491,7 +511,7 @@ function ServicesHealthWidget({ statuses, onPing }: { statuses: ServiceHealthSta
                   {s.latency !== undefined ? `${s.latency} ms` : "--"}
                 </td>
                 <td className="px-5 py-3.5 text-right text-muted-foreground text-[10px]">
-                  {s.timestamp ? new Date(s.timestamp).toLocaleTimeString() : "--"}
+                  {s.timestamp ? new Date(s.timestamp).toLocaleTimeString(getIntlLocale(locale)) : "--"}
                 </td>
               </tr>
             ))}
@@ -523,12 +543,14 @@ function FinanceOverviewWidget({
   setEndDate,
   isLoading,
 }: FinanceOverviewProps) {
+  const t = useTranslations("Admin.dashboard");
+
   return (
     <section className="space-y-6 rounded-lg border border-border/30 bg-card p-6">
       <div className="flex flex-col gap-4 border-b border-border/20 pb-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="font-headline text-lg font-extrabold uppercase tracking-tight text-foreground">Finance Overview Dashboard</h2>
-          <p className="font-body text-xs text-muted-foreground">Thống kê giao dịch, ví, dòng tiền doanh thu toàn hệ thống.</p>
+          <h2 className="font-headline text-lg font-extrabold uppercase tracking-tight text-foreground">{t("finance.title")}</h2>
+          <p className="font-body text-xs text-muted-foreground">{t("finance.description")}</p>
         </div>
 
         {/* Date Filters */}
@@ -545,7 +567,7 @@ function FinanceOverviewWidget({
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {preset === "all" ? "Tất cả" : preset === "today" ? "Hôm nay" : preset === "7d" ? "7 Ngày" : preset === "30d" ? "30 Ngày" : preset === "month" ? "Tháng này" : "Tự chọn"}
+                {t(`finance.presets.${preset}`)}
               </button>
             ))}
           </div>
@@ -558,7 +580,7 @@ function FinanceOverviewWidget({
                 onChange={(e) => setStartDate(e.target.value)}
                 className="h-8 rounded-sm border border-border/40 bg-background px-2 font-mono text-xs text-foreground focus:outline-none focus:border-primary"
               />
-              <span className="font-mono text-xs text-muted-foreground">đến</span>
+              <span className="font-mono text-xs text-muted-foreground">{t("finance.to")}</span>
               <input
                 type="date"
                 value={endDate}
@@ -579,7 +601,7 @@ function FinanceOverviewWidget({
       {!isLoading && !data && (
         <div className="flex min-h-64 flex-col items-center justify-center p-6 text-center">
           <span className="material-symbols-outlined text-4xl text-muted-foreground mb-2">error</span>
-          <p className="text-sm text-muted-foreground">Không thể tải dữ liệu tài chính hoặc chưa có giao dịch nào.</p>
+          <p className="text-sm text-muted-foreground">{t("finance.empty")}</p>
         </div>
       )}
 
@@ -587,34 +609,34 @@ function FinanceOverviewWidget({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Revenue Panel */}
           <div className="rounded-lg border border-border/20 bg-background/30 p-5">
-            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">Revenue (Doanh thu)</h3>
+            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">{t("finance.revenue.title")}</h3>
             <div className="space-y-3 font-mono text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tổng nạp AC:</span>
+                <span className="text-muted-foreground">{t("finance.revenue.totalPaymentCoins")}</span>
                 <span className="font-bold text-foreground">{formatCoins(data.revenue.totalPaymentCoins)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Chia sẻ Creator:</span>
+                <span className="text-muted-foreground">{t("finance.revenue.creatorShare")}</span>
                 <span className="font-bold text-secondary">{formatCoins(data.revenue.creatorRevenueCoins)}</span>
               </div>
               <div className="flex justify-between border-t border-border/10 pt-2 font-semibold">
-                <span className="text-zinc-300">Hệ thống thực nhận:</span>
+                <span className="text-zinc-300">{t("finance.revenue.systemRevenue")}</span>
                 <span className="font-bold text-emerald-400">{formatCoins(data.revenue.systemRevenueCoins)}</span>
               </div>
               <div className="flex justify-between pl-3 text-[11px] text-muted-foreground">
-                <span>• Từ Video:</span>
+                <span>• {t("finance.revenue.fromVideo")}</span>
                 <span>{formatCoins(data.revenue.videoSystemRevenueCoins)}</span>
               </div>
               <div className="flex justify-between pl-3 text-[11px] text-muted-foreground">
-                <span>• Từ Membership:</span>
+                <span>• {t("finance.revenue.fromMembership")}</span>
                 <span>{formatCoins(data.revenue.membershipSystemRevenueCoins)}</span>
               </div>
               <div className="flex justify-between border-t border-border/10 pt-2">
-                <span className="text-muted-foreground">Đang xử lý (Pending):</span>
+                <span className="text-muted-foreground">{t("finance.revenue.pending")}</span>
                 <span>{formatCoins(data.revenue.pendingSystemRevenueCoins)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Đã ghi nhận (Released):</span>
+                <span className="text-muted-foreground">{t("finance.revenue.released")}</span>
                 <span>{formatCoins(data.revenue.releasedSystemRevenueCoins)}</span>
               </div>
             </div>
@@ -622,30 +644,30 @@ function FinanceOverviewWidget({
 
           {/* Deposits Panel */}
           <div className="rounded-lg border border-border/20 bg-background/30 p-5">
-            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">Deposits (Nạp tiền)</h3>
+            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">{t("finance.deposits.title")}</h3>
             <div className="space-y-3 font-mono text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tổng số lệnh nạp:</span>
+                <span className="text-muted-foreground">{t("finance.deposits.totalCount")}</span>
                 <span className="font-bold text-foreground">{formatNumber(data.deposits.totalCount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Đã hoàn thành:</span>
+                <span className="text-muted-foreground">{t("finance.deposits.completed")}</span>
                 <span className="font-bold text-emerald-400">{formatNumber(data.deposits.completedCount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Đang xử lý/Chờ duyệt:</span>
+                <span className="text-muted-foreground">{t("finance.deposits.processing")}</span>
                 <span>{formatNumber(data.deposits.pendingCount + data.deposits.processingCount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Lỗi/Đã hủy:</span>
+                <span className="text-muted-foreground">{t("finance.deposits.failedCancelled")}</span>
                 <span>{formatNumber(data.deposits.failedCount + data.deposits.cancelledCount)}</span>
               </div>
               <div className="flex justify-between border-t border-border/10 pt-2 font-semibold">
-                <span className="text-zinc-300">Doanh thu VNĐ:</span>
+                <span className="text-zinc-300">{t("finance.deposits.vndRevenue")}</span>
                 <span className="font-bold text-emerald-400">{formatVND(data.deposits.completedMoneyAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Quy đổi xu nạp:</span>
+                <span className="text-muted-foreground">{t("finance.deposits.coinConversion")}</span>
                 <span>{formatCoins(data.deposits.completedCoinAmount)}</span>
               </div>
             </div>
@@ -653,34 +675,34 @@ function FinanceOverviewWidget({
 
           {/* Withdrawals Panel */}
           <div className="rounded-lg border border-border/20 bg-background/30 p-5">
-            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">Withdrawals (Rút tiền)</h3>
+            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">{t("finance.withdrawals.title")}</h3>
             <div className="space-y-3 font-mono text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tổng lệnh rút:</span>
+                <span className="text-muted-foreground">{t("finance.withdrawals.totalCount")}</span>
                 <span className="font-bold text-foreground">{formatNumber(data.withdrawals.totalCount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Đã rút thành công:</span>
+                <span className="text-muted-foreground">{t("finance.withdrawals.completed")}</span>
                 <span className="font-bold text-emerald-400">{formatNumber(data.withdrawals.completedCount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Lệnh chờ duyệt (Pending):</span>
+                <span className="text-muted-foreground">{t("finance.withdrawals.pending")}</span>
                 <span className="text-amber-400 font-bold">{formatNumber(data.withdrawals.pendingCount)}</span>
               </div>
               <div className="flex justify-between border-t border-border/10 pt-2">
-                <span className="text-muted-foreground">Tiền rút thành công:</span>
+                <span className="text-muted-foreground">{t("finance.withdrawals.completedMoney")}</span>
                 <span className="font-bold text-foreground">{formatVND(data.withdrawals.completedMoneyAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tổng phí rút thu được:</span>
+                <span className="text-muted-foreground">{t("finance.withdrawals.totalFee")}</span>
                 <span className="font-bold text-secondary">{formatVND(data.withdrawals.totalFeeAmount)}</span>
               </div>
               <div className="flex justify-between pl-3 text-[11px] text-muted-foreground">
-                <span>• Đã thu (Completed Fee):</span>
+                <span>• {t("finance.withdrawals.completedFee")}</span>
                 <span>{formatVND(data.withdrawals.completedFeeAmount)}</span>
               </div>
               <div className="flex justify-between pl-3 text-[11px] text-muted-foreground">
-                <span>• Chờ thu (Pending Fee):</span>
+                <span>• {t("finance.withdrawals.pendingFee")}</span>
                 <span>{formatVND(data.withdrawals.pendingFeeAmount)}</span>
               </div>
             </div>
@@ -688,26 +710,26 @@ function FinanceOverviewWidget({
 
           {/* Ledger & Transactions Panel */}
           <div className="rounded-lg border border-border/20 bg-background/30 p-5">
-            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">Ledger (Sổ cái giao dịch)</h3>
+            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">{t("finance.ledger.title")}</h3>
             <div className="space-y-3 font-mono text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tổng Ledger:</span>
+                <span className="text-muted-foreground">{t("finance.ledger.total")}</span>
                 <span className="font-bold text-foreground">{formatNumber(data.transactions.totalCount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Hoàn thành / Thất bại:</span>
+                <span className="text-muted-foreground">{t("finance.ledger.completedFailed")}</span>
                 <span>{formatNumber(data.transactions.completedCount)} / {formatNumber(data.transactions.failedCount)}</span>
               </div>
               <div className="flex justify-between border-t border-border/10 pt-2">
-                <span className="text-muted-foreground">Dòng coin nạp:</span>
+                <span className="text-muted-foreground">{t("finance.ledger.depositFlow")}</span>
                 <span>{formatCoins(data.transactions.depositCoinAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Dòng coin rút:</span>
+                <span className="text-muted-foreground">{t("finance.ledger.withdrawalFlow")}</span>
                 <span>{formatCoins(data.transactions.withdrawalCoinAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Mua Video / Membership:</span>
+                <span className="text-muted-foreground">{t("finance.ledger.videoMembership")}</span>
                 <span>{formatCoins(data.transactions.videoPurchaseCoins)} / {formatCoins(data.transactions.membershipCoins)}</span>
               </div>
             </div>
@@ -715,38 +737,38 @@ function FinanceOverviewWidget({
 
           {/* Wallets & Balances Panel */}
           <div className="rounded-lg border border-border/20 bg-background/30 p-5 lg:col-span-2">
-            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">Wallets Snapshot (Số dư ví hiện tại)</h3>
+            <h3 className="mb-4 font-headline text-xs font-bold uppercase tracking-widest text-zinc-300 border-b border-border/10 pb-2">{t("finance.wallets.title")}</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2.5 font-mono text-xs border-r border-border/10 pr-2">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tổng số ví User:</span>
+                  <span className="text-muted-foreground">{t("finance.wallets.userWallets")}</span>
                   <span className="font-bold text-foreground">{formatNumber(data.wallets.userWalletCount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Ví có phát sinh GD:</span>
+                  <span className="text-muted-foreground">{t("finance.wallets.activeWallets")}</span>
                   <span>{formatNumber(data.wallets.activeUserWalletCount)}</span>
                 </div>
                 <div className="flex justify-between border-t border-border/10 pt-2">
-                  <span className="text-muted-foreground">Khả dụng của User:</span>
+                  <span className="text-muted-foreground">{t("finance.wallets.userAvailable")}</span>
                   <span className="font-bold text-foreground">{formatCoins(data.wallets.totalUserAvailableBalance)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Bị đóng băng (Frozen):</span>
+                  <span className="text-muted-foreground">{t("finance.wallets.userFrozen")}</span>
                   <span className="text-primary">{formatCoins(data.wallets.totalUserFrozenBalance)}</span>
                 </div>
               </div>
 
               <div className="space-y-2.5 font-mono text-xs">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Khả dụng ví Hệ thống:</span>
+                  <span className="text-muted-foreground">{t("finance.wallets.systemAvailable")}</span>
                   <span className="font-bold text-emerald-400">{formatCoins(data.wallets.systemRevenueAvailableBalance)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Bị đóng băng (System):</span>
+                  <span className="text-muted-foreground">{t("finance.wallets.systemFrozen")}</span>
                   <span>{formatCoins(data.wallets.systemRevenueFrozenBalance)}</span>
                 </div>
                 <div className="mt-4 rounded-sm border border-secondary/20 bg-secondary/5 p-2 text-[10px] text-secondary">
-                  <span>* Snapshot thời gian thực tại thời điểm xem, không phụ thuộc vào bộ lọc khoảng ngày.</span>
+                  <span>{t("finance.wallets.snapshotNote")}</span>
                 </div>
               </div>
             </div>
@@ -757,29 +779,30 @@ function FinanceOverviewWidget({
   );
 }
 
-function DataSourcesPanel({ data }: { data: AdminDashboardData }) {
+function DataSourcesPanel({ data, locale }: { data: AdminDashboardData; locale: string }) {
+  const t = useTranslations("Admin.dashboard");
   const readyCount = data.dataSources.filter(source => source.status === "ready").length;
 
   return (
     <section className="overflow-hidden rounded-lg border border-border/30 bg-card">
       <div className="flex flex-col gap-2 border-b border-border/30 bg-background px-5 py-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="font-headline text-lg font-bold text-foreground">Data Contract Status</h2>
-          <p className="font-body text-xs text-muted-foreground">{readyCount} of {data.dataSources.length} sources are backed by confirmed APIs.</p>
+          <h2 className="font-headline text-lg font-bold text-foreground">{t("dataSources.title")}</h2>
+          <p className="font-body text-xs text-muted-foreground">{t("dataSources.description", { ready: readyCount, total: data.dataSources.length })}</p>
         </div>
         <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          Loaded {new Date(data.loadedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+          {t("dataSources.loaded", { time: new Date(data.loadedAt).toLocaleTimeString(getIntlLocale(locale), { hour: "2-digit", minute: "2-digit" }) })}
         </span>
       </div>
       <div className="divide-y divide-border/30">
         {data.dataSources.map((source, index) => (
           <div key={`${source.key}-${index}`} className="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="font-headline text-sm font-bold text-foreground">{source.label}</p>
-              <p className="mt-0.5 font-body text-xs text-muted-foreground">{source.message}</p>
+              <p className="font-headline text-sm font-bold text-foreground">{t(`dataSources.sources.${source.key}`)}</p>
+              <p className="mt-0.5 font-body text-xs text-muted-foreground">{source.status === "ready" ? t("dataSources.readyMessage") : source.message}</p>
             </div>
             <span className={`shrink-0 rounded-sm border px-2 py-0.5 font-label text-[9px] font-bold uppercase tracking-widest ${source.status === "ready" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-border/30 bg-muted text-muted-foreground"}`}>
-              {source.status === "ready" ? "Ready" : "API Needed"}
+              {source.status === "ready" ? t("common.ready") : t("common.apiNeeded")}
             </span>
           </div>
         ))}
@@ -789,9 +812,11 @@ function DataSourcesPanel({ data }: { data: AdminDashboardData }) {
 }
 
 function PriorityActions({ actions }: { actions: AdminPriorityAction[] }) {
+  const t = useTranslations("Admin.dashboard");
+
   return (
     <section className="rounded-lg border border-border/30 bg-card p-6">
-      <h2 className="mb-4 font-label text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Priority Actions</h2>
+      <h2 className="mb-4 font-label text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">{t("priorityActions.title")}</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {actions.map(action => (
           <Link

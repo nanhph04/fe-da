@@ -1338,5 +1338,237 @@
         }
       }
     }
+  },
+  "Admin": {
+    "navigation": {
+      "dashboard": "Tổng quan",
+      "contentReview": "Duyệt nội dung",
+      "users": "Người dùng",
+      "channels": "Kênh",
+      "membershipReview": "Duyệt hội viên",
+      "categories": "Danh mục",
+      "finance": "Tài chính",
+      "payouts": "Thanh toán",
+      "systemSettings": "Cài đặt hệ thống",
+      "contentPolicies": "Chính sách nội dung",
+      "support": "Hỗ trợ",
+      "viewLivePlatform": "Xem nền tảng"
+    },
+    "shell": {
+      "brand": "Quản trị hệ thống",
+      "console": "Bảng điều khiển Admin",
+      "signOut": "Đăng xuất",
+      "primaryNavigation": "Điều hướng chính admin",
+      "mobileNavigation": "Điều hướng admin trên di động",
+      "openNavigation": "Mở điều hướng admin",
+      "closeNavigation": "Đóng điều hướng admin",
+      "searchLabel": "Tìm kiếm trong bảng admin",
+      "searchPlaceholder": "Tìm UID, email, mã video...",
+      "reviewQueue": "Hàng đợi duyệt",
+      "authorizing": "Đang xác thực bảng admin",
+      "authorizingDescription": "Đang kiểm tra phiên đăng nhập và quyền truy cập trước khi tải công cụ hệ thống."
+    },
+    "loading": {
+      "title": "Đang thiết lập kết nối bảo mật",
+      "description": "Đang xác thực V-CONSOLE..."
+    },
+    "dashboard": {
+      "common": {
+        "unavailable": "Không khả dụng",
+        "apiNeeded": "Cần API",
+        "ready": "Sẵn sàng"
+      },
+      "loading": {
+        "dashboard": "Đang tải bảng điều khiển admin"
+      },
+      "header": {
+        "eyebrow": "Hệ thống Velvet Gallery",
+        "title": "Trung tâm điều hành",
+        "description": "TRẠNG THÁI MẠNG LƯỚI & TỔNG HỢP GIAO DỊCH CHO QUẢN TRỊ VIÊN",
+        "done": "Hoàn thành",
+        "layout": "Bố cục",
+        "syncing": "Đang đồng bộ...",
+        "sync": "Đồng bộ dữ liệu"
+      },
+      "layoutEditor": {
+        "title": "Tùy chỉnh cấu trúc giao diện",
+        "description": "Nhấp vào mũi tên để di chuyển widget hoặc tắt hiển thị để ẩn widget.",
+        "reset": "Đặt lại mặc định",
+        "toggleVisibility": "Ẩn hoặc hiện {title}",
+        "moveUp": "Di chuyển {title} lên",
+        "moveDown": "Di chuyển {title} xuống"
+      },
+      "widgets": {
+        "health": "Trạng thái dịch vụ",
+        "stats": "Thống kê mạng lưới",
+        "financeOverview": "Tổng quan tài chính",
+        "priorityActions": "Việc cần ưu tiên",
+        "dataSources": "Trạng thái hợp đồng dữ liệu"
+      },
+      "error": {
+        "title": "Không thể tải dữ liệu admin",
+        "retry": "Thử lại",
+        "loadFailed": "Không thể tải dashboard admin."
+      },
+      "utils": {
+        "growthUnavailable": "chưa có dữ liệu tăng trưởng",
+        "percent30Days": "{value}% / 30 ngày"
+      },
+      "stats": {
+        "users": {
+          "label": "Tổng người dùng mạng lưới",
+          "detail": "{active} người dùng hoạt động - {growth}",
+          "unavailableDetail": "Không tải được tổng quan người dùng từ Identity Service"
+        },
+        "creators": {
+          "label": "Nhà sáng tạo hoạt động",
+          "detail": "{reviews} hồ sơ hội viên cần duyệt - {uploading} đang tải lên",
+          "unavailableDetail": "Không tải được tổng quan creator/channel"
+        },
+        "moderation": {
+          "label": "Cảnh báo / báo cáo đang mở",
+          "detail": "{manual} lượt duyệt thủ công - {flagged} video tự động gắn cờ",
+          "unavailableDetail": "Không tải được tổng quan moderation"
+        },
+        "payouts": {
+          "label": "Thanh toán đang chờ",
+          "detail": "{requests} yêu cầu - {amount}",
+          "unavailableDetail": "Không tải được tổng quan rút tiền"
+        },
+        "taxonomy": {
+          "label": "Danh mục đang hoạt động",
+          "detail": "{tags} tag đã tải, {pendingTags} đang chờ - {packages} gói coin / {coins} coin"
+        }
+      },
+      "actions": {
+        "counts": {
+          "pending": "{count} đang chờ",
+          "requests": "{count} yêu cầu"
+        },
+        "membershipReview": {
+          "label": "Duyệt hội viên",
+          "description": "{approved} kênh đã duyệt / {rejected} kênh bị từ chối.",
+          "unavailableDescription": "Không tải được tổng quan creator/channel."
+        },
+        "reviewQueue": {
+          "label": "Hàng đợi duyệt",
+          "emptyDescription": "Media Service không trả về nội dung moderation đang chờ.",
+          "unavailableDescription": "Không tải được tổng quan moderation."
+        },
+        "approvePayouts": {
+          "label": "Duyệt thanh toán",
+          "description": "{amount} AC được yêu cầu bởi {userId}",
+          "emptyDescription": "Finance Service không trả về yêu cầu rút tiền đang chờ.",
+          "unavailableDescription": "Không tải được tổng quan rút tiền."
+        },
+        "taxonomy": {
+          "label": "Sức khỏe taxonomy",
+          "description": "Dữ liệu thực từ Media Service cho tag và danh mục.",
+          "countLabel": "{pendingTags} tag chờ / {inactiveCategories} danh mục không hoạt động"
+        }
+      },
+      "health": {
+        "title": "Trạng thái dịch vụ",
+        "description": "Độ trễ phản hồi thực tế giữa Gateway và các service.",
+        "ping": "Ping",
+        "services": {
+          "finance": "Dịch vụ tài chính",
+          "identity": "Dịch vụ định danh",
+          "media": "Dịch vụ media"
+        },
+        "columns": {
+          "service": "Tên dịch vụ",
+          "endpoint": "Endpoint",
+          "status": "Trạng thái",
+          "latency": "Ping (độ trễ)",
+          "lastVerified": "Xác minh lần cuối"
+        },
+        "status": {
+          "online": "Online",
+          "checking": "Đang kiểm tra",
+          "offline": "Offline"
+        }
+      },
+      "finance": {
+        "title": "Bảng tổng quan tài chính",
+        "description": "Thống kê giao dịch, ví và dòng tiền doanh thu toàn hệ thống.",
+        "empty": "Không thể tải dữ liệu tài chính hoặc chưa có giao dịch nào.",
+        "to": "đến",
+        "presets": {
+          "all": "Tất cả",
+          "today": "Hôm nay",
+          "7d": "7 ngày",
+          "30d": "30 ngày",
+          "month": "Tháng này",
+          "custom": "Tự chọn"
+        },
+        "revenue": {
+          "title": "Doanh thu",
+          "totalPaymentCoins": "Tổng nạp AC:",
+          "creatorShare": "Chia sẻ creator:",
+          "systemRevenue": "Hệ thống thực nhận:",
+          "fromVideo": "Từ video:",
+          "fromMembership": "Từ membership:",
+          "pending": "Đang xử lý:",
+          "released": "Đã ghi nhận:"
+        },
+        "deposits": {
+          "title": "Nạp tiền",
+          "totalCount": "Tổng số lệnh nạp:",
+          "completed": "Đã hoàn thành:",
+          "processing": "Đang xử lý/chờ duyệt:",
+          "failedCancelled": "Lỗi/đã hủy:",
+          "vndRevenue": "Doanh thu VNĐ:",
+          "coinConversion": "Quy đổi xu nạp:"
+        },
+        "withdrawals": {
+          "title": "Rút tiền",
+          "totalCount": "Tổng lệnh rút:",
+          "completed": "Đã rút thành công:",
+          "pending": "Lệnh chờ duyệt:",
+          "completedMoney": "Tiền rút thành công:",
+          "totalFee": "Tổng phí rút thu được:",
+          "completedFee": "Đã thu:",
+          "pendingFee": "Chờ thu:"
+        },
+        "ledger": {
+          "title": "Sổ cái giao dịch",
+          "total": "Tổng ledger:",
+          "completedFailed": "Hoàn thành / thất bại:",
+          "depositFlow": "Dòng coin nạp:",
+          "withdrawalFlow": "Dòng coin rút:",
+          "videoMembership": "Mua video / membership:"
+        },
+        "wallets": {
+          "title": "Snapshot số dư ví hiện tại",
+          "userWallets": "Tổng số ví user:",
+          "activeWallets": "Ví có phát sinh GD:",
+          "userAvailable": "Khả dụng của user:",
+          "userFrozen": "Bị đóng băng:",
+          "systemAvailable": "Khả dụng ví hệ thống:",
+          "systemFrozen": "Đóng băng hệ thống:",
+          "snapshotNote": "* Snapshot thời gian thực tại thời điểm xem, không phụ thuộc vào bộ lọc khoảng ngày."
+        }
+      },
+      "dataSources": {
+        "title": "Trạng thái hợp đồng dữ liệu",
+        "description": "{ready} / {total} nguồn dữ liệu được xác nhận bởi API.",
+        "loaded": "Đã tải {time}",
+        "readyMessage": "Nguồn dữ liệu đã kết nối với API xác nhận.",
+        "sources": {
+          "finance": "Tài chính",
+          "taxonomy": "Taxonomy",
+          "users": "Người dùng",
+          "creators": "Creator / kênh",
+          "moderation": "Moderation",
+          "payouts": "Thanh toán",
+          "verifications": "Xác minh",
+          "activity": "Hoạt động"
+        }
+      },
+      "priorityActions": {
+        "title": "Việc cần ưu tiên"
+      }
+    }
   }
 }

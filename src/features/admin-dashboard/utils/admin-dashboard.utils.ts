@@ -1,4 +1,7 @@
+import type { useTranslations } from "next-intl";
 import type { AdminDashboardData, AdminPriorityAction, AdminStatCard } from "../types/admin-dashboard.types";
+
+type TFunction = ReturnType<typeof useTranslations>;
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
@@ -11,15 +14,15 @@ export function formatCount(value: number): string {
   return numberFormatter.format(value);
 }
 
-function formatPercent(value: number | null): string {
+function formatPercent(t: TFunction, value: number | null): string {
   if (value === null) {
-    return "growth unavailable";
+    return t("utils.growthUnavailable");
   }
 
-  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}% / 30 days`;
+  return t("utils.percent30Days", { value: `${value >= 0 ? "+" : ""}${value.toFixed(1)}` });
 }
 
-export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
+export function buildAdminStatCards(data: AdminDashboardData, t: TFunction): AdminStatCard[] {
   const activePackages = data.depositPackages.filter(item => item.isActive !== false).length;
   const totalConfiguredCoins = data.depositPackages.reduce(
     (total, item) => total + (item.totalCoinAmount || item.baseCoinAmount + item.bonusCoinAmount),
@@ -32,18 +35,21 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
     data.usersSummary
       ? {
           id: "users",
-          label: "Total Network Users",
+          label: t("stats.users.label"),
           value: formatCount(data.usersSummary.totalUsers),
-          detail: `${formatCount(data.usersSummary.activeUsers30d)} active users - ${formatPercent(data.usersSummary.growth30dPercent)}`,
+          detail: t("stats.users.detail", {
+            active: formatCount(data.usersSummary.activeUsers30d),
+            growth: formatPercent(t, data.usersSummary.growth30dPercent),
+          }),
           icon: "groups",
           tone: "default",
           href: "/admin/users",
         }
       : {
           id: "users",
-          label: "Total Network Users",
-          value: "Unavailable",
-          detail: "Identity users summary did not load",
+          label: t("stats.users.label"),
+          value: t("common.unavailable"),
+          detail: t("stats.users.unavailableDetail"),
           icon: "groups",
           tone: "default",
           href: "/admin/users",
@@ -52,18 +58,21 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
     data.channelsSummary
       ? {
           id: "creators",
-          label: "Active Creators",
+          label: t("stats.creators.label"),
           value: formatCount(data.channelsSummary.activeCreators30d),
-          detail: `${formatCount(data.channelsSummary.membershipPendingReview)} membership reviews - ${formatCount(data.channelsSummary.uploadingNow)} uploading now`,
+          detail: t("stats.creators.detail", {
+            reviews: formatCount(data.channelsSummary.membershipPendingReview),
+            uploading: formatCount(data.channelsSummary.uploadingNow),
+          }),
           icon: "movie_edit",
           tone: "primary",
           href: "/admin/verifications",
         }
       : {
           id: "creators",
-          label: "Active Creators",
-          value: "Unavailable",
-          detail: "Creator/channel summary did not load",
+          label: t("stats.creators.label"),
+          value: t("common.unavailable"),
+          detail: t("stats.creators.unavailableDetail"),
           icon: "movie_edit",
           tone: "primary",
           href: "/admin/channels",
@@ -72,18 +81,21 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
     data.reportsSummary
       ? {
           id: "moderation",
-          label: "Active Alerts / Reports",
+          label: t("stats.moderation.label"),
           value: formatCount(data.reportsSummary.pendingReports),
-          detail: `${formatCount(data.reportsSummary.pendingManualReviewVideos)} manual reviews - ${formatCount(data.reportsSummary.autoFlaggedVideos)} auto flagged`,
+          detail: t("stats.moderation.detail", {
+            manual: formatCount(data.reportsSummary.pendingManualReviewVideos),
+            flagged: formatCount(data.reportsSummary.autoFlaggedVideos),
+          }),
           icon: "warning",
           tone: "warning",
           href: "/admin/content/review",
         }
       : {
           id: "moderation",
-          label: "Active Alerts / Reports",
-          value: "Unavailable",
-          detail: "Moderation summary did not load",
+          label: t("stats.moderation.label"),
+          value: t("common.unavailable"),
+          detail: t("stats.moderation.unavailableDetail"),
           icon: "warning",
           tone: "warning",
           href: "/admin/content/review",
@@ -92,18 +104,21 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
     data.withdrawalSummary
       ? {
           id: "payouts",
-          label: "Payouts Pending",
+          label: t("stats.payouts.label"),
           value: formatCount(data.withdrawalSummary.pendingCoinAmount),
-          detail: `${formatCount(data.withdrawalSummary.pendingCount)} requests - ${currencyFormatter.format(data.withdrawalSummary.pendingMoneyAmount)}`,
+          detail: t("stats.payouts.detail", {
+            requests: formatCount(data.withdrawalSummary.pendingCount),
+            amount: currencyFormatter.format(data.withdrawalSummary.pendingMoneyAmount),
+          }),
           icon: "account_balance_wallet",
           tone: "secondary",
           href: "/admin/payouts",
         }
       : {
           id: "payouts",
-          label: "Payouts Pending",
-          value: "Unavailable",
-          detail: "Withdrawal summary did not load",
+          label: t("stats.payouts.label"),
+          value: t("common.unavailable"),
+          detail: t("stats.payouts.unavailableDetail"),
           icon: "account_balance_wallet",
           tone: "secondary",
           href: "/admin/payouts",
@@ -111,9 +126,14 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
         },
     {
       id: "taxonomy",
-      label: "Active Categories",
+      label: t("stats.taxonomy.label"),
       value: formatCount(activeCategories),
-      detail: `${formatCount(data.tags.length)} tags loaded, ${formatCount(pendingTags)} pending - ${formatCount(activePackages)} coin packages / ${formatCount(totalConfiguredCoins)} coins`,
+      detail: t("stats.taxonomy.detail", {
+        tags: formatCount(data.tags.length),
+        pendingTags: formatCount(pendingTags),
+        packages: formatCount(activePackages),
+        coins: formatCount(totalConfiguredCoins),
+      }),
       icon: "category",
       tone: "default",
       href: "/admin/categories",
@@ -121,7 +141,7 @@ export function buildAdminStatCards(data: AdminDashboardData): AdminStatCard[] {
   ];
 }
 
-export function buildAdminPriorityActions(data: AdminDashboardData): AdminPriorityAction[] {
+export function buildAdminPriorityActions(data: AdminDashboardData, t: TFunction): AdminPriorityAction[] {
   const pendingTags = data.tags.filter(item => item.status === "pending").length;
   const inactiveCategories = data.categories.filter(item => item.status !== "active").length;
   const latestReport = data.reports[0];
@@ -131,75 +151,84 @@ export function buildAdminPriorityActions(data: AdminDashboardData): AdminPriori
     data.channelsSummary
       ? {
           id: "membership-review",
-          label: "Membership Review",
-          description: `${formatCount(data.channelsSummary.membershipApproved)} approved / ${formatCount(data.channelsSummary.membershipRejected)} rejected channels.`,
+          label: t("actions.membershipReview.label"),
+          description: t("actions.membershipReview.description", {
+            approved: formatCount(data.channelsSummary.membershipApproved),
+            rejected: formatCount(data.channelsSummary.membershipRejected),
+          }),
           href: "/admin/verifications",
           icon: "verified_user",
           tone: "primary",
-          countLabel: `${formatCount(data.channelsSummary.membershipPendingReview)} pending`,
+          countLabel: t("actions.counts.pending", { count: formatCount(data.channelsSummary.membershipPendingReview) }),
         }
       : {
           id: "membership-review",
-          label: "Membership Review",
-          description: "Creator/channel summary did not load.",
+          label: t("actions.membershipReview.label"),
+          description: t("actions.membershipReview.unavailableDescription"),
           href: "/admin/verifications",
           icon: "verified_user",
           tone: "primary",
-          countLabel: "Unavailable",
+          countLabel: t("common.unavailable"),
           unavailable: true,
         },
     data.reportsSummary
       ? {
           id: "review-queue",
-          label: "Review Queue",
+          label: t("actions.reviewQueue.label"),
           description: latestReport
             ? `${latestReport.title} - ${latestReport.reason}`
-            : "No pending moderation items returned by media service.",
+            : t("actions.reviewQueue.emptyDescription"),
           href: "/admin/content/review",
           icon: "gavel",
           tone: "primary",
-          countLabel: `${formatCount(data.reportsSummary.pendingReports)} pending`,
+          countLabel: t("actions.counts.pending", { count: formatCount(data.reportsSummary.pendingReports) }),
         }
       : {
           id: "review-queue",
-          label: "Review Queue",
-          description: "Moderation summary did not load.",
+          label: t("actions.reviewQueue.label"),
+          description: t("actions.reviewQueue.unavailableDescription"),
           href: "/admin/content/review",
           icon: "gavel",
           tone: "primary",
-          countLabel: "Unavailable",
+          countLabel: t("common.unavailable"),
           unavailable: true,
         },
     data.withdrawalSummary
       ? {
           id: "payouts",
-          label: "Approve Payouts",
+          label: t("actions.approvePayouts.label"),
           description: latestWithdrawal
-            ? `${formatCount(latestWithdrawal.coinAmount)} AC requested by ${latestWithdrawal.userId}`
-            : "No pending withdrawal items returned by finance service.",
+            ? t("actions.approvePayouts.description", {
+                amount: formatCount(latestWithdrawal.coinAmount),
+                userId: latestWithdrawal.userId,
+              })
+            : t("actions.approvePayouts.emptyDescription"),
           href: "/admin/payouts",
           icon: "monetization_on",
           tone: "secondary",
-          countLabel: `${formatCount(data.withdrawalSummary.pendingCount)} requests`,
+          countLabel: t("actions.counts.requests", { count: formatCount(data.withdrawalSummary.pendingCount) }),
         }
       : {
           id: "payouts",
-          label: "Approve Payouts",
-          description: "Withdrawal summary did not load.",
+          label: t("actions.approvePayouts.label"),
+          description: t("actions.approvePayouts.unavailableDescription"),
           href: "/admin/payouts",
           icon: "monetization_on",
           tone: "secondary",
-          countLabel: "Unavailable",
+          countLabel: t("common.unavailable"),
           unavailable: true,
         },
     {
       id: "taxonomy",
-      label: "Taxonomy Health",
-      description: "Real media-service data for tags and categories.",
+      label: t("actions.taxonomy.label"),
+      description: t("actions.taxonomy.description"),
       href: "/admin/categories",
       icon: "sell",
       tone: "muted",
-      countLabel: `${formatCount(pendingTags)} pending tags / ${formatCount(inactiveCategories)} inactive categories`,
+      countLabel: t("actions.taxonomy.countLabel", {
+        pendingTags: formatCount(pendingTags),
+        inactiveCategories: formatCount(inactiveCategories),
+      }),
     },
   ];
 }

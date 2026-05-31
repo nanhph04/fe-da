@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
@@ -9,6 +10,7 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { normalizeInternalPath } from "@/shared/utils/locale-path";
 
 export function AdminLayoutFeature({ children }: { children: ReactNode }) {
+  const t = useTranslations("Admin.shell");
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -39,10 +41,10 @@ export function AdminLayoutFeature({ children }: { children: ReactNode }) {
         <section className="relative w-full max-w-sm rounded-lg border border-border/40 bg-card p-6 text-center shadow-[0_24px_64px_rgba(0,0,0,0.38)]">
           <div className="mx-auto mb-4 h-1 w-20 rounded-full bg-primary" />
           <p className="font-headline text-sm font-bold uppercase tracking-[0.22em] text-foreground">
-            Authorizing admin console
+            {t("authorizing")}
           </p>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Validating your session and access level before loading system controls.
+            {t("authorizingDescription")}
           </p>
         </section>
       </div>

@@ -1386,5 +1386,237 @@
         }
       }
     }
+  },
+  "Admin": {
+    "navigation": {
+      "dashboard": "Overview",
+      "contentReview": "Content Review",
+      "users": "Users",
+      "channels": "Channels",
+      "membershipReview": "Membership Review",
+      "categories": "Categories",
+      "finance": "Finance",
+      "payouts": "Payouts",
+      "systemSettings": "System Settings",
+      "contentPolicies": "Content Policies",
+      "support": "Support",
+      "viewLivePlatform": "View Live Platform"
+    },
+    "shell": {
+      "brand": "System Admin",
+      "console": "Admin Console",
+      "signOut": "Sign Out",
+      "primaryNavigation": "Admin primary navigation",
+      "mobileNavigation": "Admin mobile navigation",
+      "openNavigation": "Open admin navigation",
+      "closeNavigation": "Close admin navigation",
+      "searchLabel": "Search admin console",
+      "searchPlaceholder": "Search UID, email, video hash...",
+      "reviewQueue": "Review Queue",
+      "authorizing": "Authorizing admin console",
+      "authorizingDescription": "Validating your session and access level before loading system controls."
+    },
+    "loading": {
+      "title": "Establishing secure connection",
+      "description": "Authenticating V-CONSOLE..."
+    },
+    "dashboard": {
+      "common": {
+        "unavailable": "Unavailable",
+        "apiNeeded": "API Needed",
+        "ready": "Ready"
+      },
+      "loading": {
+        "dashboard": "Loading admin dashboard"
+      },
+      "header": {
+        "eyebrow": "Velvet Gallery System",
+        "title": "Command Center",
+        "description": "ADMINISTRATOR NETWORK STATUS & TRANSACTION AGGREGATION",
+        "done": "Done",
+        "layout": "Layout",
+        "syncing": "Syncing...",
+        "sync": "Sync Data"
+      },
+      "layoutEditor": {
+        "title": "Customize interface structure",
+        "description": "Use the arrows to move widgets or toggle visibility to hide widgets.",
+        "reset": "Reset defaults",
+        "toggleVisibility": "Hide or show {title}",
+        "moveUp": "Move {title} up",
+        "moveDown": "Move {title} down"
+      },
+      "widgets": {
+        "health": "Services Health Status",
+        "stats": "Network Statistics",
+        "financeOverview": "Finance Overview",
+        "priorityActions": "Priority Actions",
+        "dataSources": "Data Contract Status"
+      },
+      "error": {
+        "title": "Unable to load admin data",
+        "retry": "Retry",
+        "loadFailed": "Unable to load admin dashboard."
+      },
+      "utils": {
+        "growthUnavailable": "growth unavailable",
+        "percent30Days": "{value}% / 30 days"
+      },
+      "stats": {
+        "users": {
+          "label": "Total Network Users",
+          "detail": "{active} active users - {growth}",
+          "unavailableDetail": "Identity users summary did not load"
+        },
+        "creators": {
+          "label": "Active Creators",
+          "detail": "{reviews} membership reviews - {uploading} uploading now",
+          "unavailableDetail": "Creator/channel summary did not load"
+        },
+        "moderation": {
+          "label": "Active Alerts / Reports",
+          "detail": "{manual} manual reviews - {flagged} auto flagged",
+          "unavailableDetail": "Moderation summary did not load"
+        },
+        "payouts": {
+          "label": "Payouts Pending",
+          "detail": "{requests} requests - {amount}",
+          "unavailableDetail": "Withdrawal summary did not load"
+        },
+        "taxonomy": {
+          "label": "Active Categories",
+          "detail": "{tags} tags loaded, {pendingTags} pending - {packages} coin packages / {coins} coins"
+        }
+      },
+      "actions": {
+        "counts": {
+          "pending": "{count} pending",
+          "requests": "{count} requests"
+        },
+        "membershipReview": {
+          "label": "Membership Review",
+          "description": "{approved} approved / {rejected} rejected channels.",
+          "unavailableDescription": "Creator/channel summary did not load."
+        },
+        "reviewQueue": {
+          "label": "Review Queue",
+          "emptyDescription": "No pending moderation items returned by media service.",
+          "unavailableDescription": "Moderation summary did not load."
+        },
+        "approvePayouts": {
+          "label": "Approve Payouts",
+          "description": "{amount} AC requested by {userId}",
+          "emptyDescription": "No pending withdrawal items returned by finance service.",
+          "unavailableDescription": "Withdrawal summary did not load."
+        },
+        "taxonomy": {
+          "label": "Taxonomy Health",
+          "description": "Real media-service data for tags and categories.",
+          "countLabel": "{pendingTags} pending tags / {inactiveCategories} inactive categories"
+        }
+      },
+      "health": {
+        "title": "Services Health Status",
+        "description": "Realtime response latency between the Gateway and services.",
+        "ping": "Ping",
+        "services": {
+          "finance": "Finance Service",
+          "identity": "Identity Service",
+          "media": "Media Service"
+        },
+        "columns": {
+          "service": "Service Name",
+          "endpoint": "Endpoint",
+          "status": "Status",
+          "latency": "Ping (Latency)",
+          "lastVerified": "Last Verified"
+        },
+        "status": {
+          "online": "Online",
+          "checking": "Checking",
+          "offline": "Offline"
+        }
+      },
+      "finance": {
+        "title": "Finance Overview Dashboard",
+        "description": "System-wide transaction, wallet, and revenue-flow statistics.",
+        "empty": "Unable to load finance data or no transactions are available yet.",
+        "to": "to",
+        "presets": {
+          "all": "All",
+          "today": "Today",
+          "7d": "7 days",
+          "30d": "30 days",
+          "month": "This month",
+          "custom": "Custom"
+        },
+        "revenue": {
+          "title": "Revenue",
+          "totalPaymentCoins": "Total AC deposited:",
+          "creatorShare": "Creator share:",
+          "systemRevenue": "System net revenue:",
+          "fromVideo": "From video:",
+          "fromMembership": "From membership:",
+          "pending": "Pending:",
+          "released": "Released:"
+        },
+        "deposits": {
+          "title": "Deposits",
+          "totalCount": "Total deposit orders:",
+          "completed": "Completed:",
+          "processing": "Processing/pending:",
+          "failedCancelled": "Failed/cancelled:",
+          "vndRevenue": "VND revenue:",
+          "coinConversion": "Converted deposit coins:"
+        },
+        "withdrawals": {
+          "title": "Withdrawals",
+          "totalCount": "Total withdrawals:",
+          "completed": "Completed withdrawals:",
+          "pending": "Pending requests:",
+          "completedMoney": "Completed withdrawal money:",
+          "totalFee": "Total withdrawal fees:",
+          "completedFee": "Collected:",
+          "pendingFee": "Pending fee:"
+        },
+        "ledger": {
+          "title": "Ledger",
+          "total": "Total ledger:",
+          "completedFailed": "Completed / failed:",
+          "depositFlow": "Deposit coin flow:",
+          "withdrawalFlow": "Withdrawal coin flow:",
+          "videoMembership": "Video / membership purchases:"
+        },
+        "wallets": {
+          "title": "Wallets Snapshot",
+          "userWallets": "Total user wallets:",
+          "activeWallets": "Wallets with activity:",
+          "userAvailable": "User available balance:",
+          "userFrozen": "Frozen balance:",
+          "systemAvailable": "System wallet available:",
+          "systemFrozen": "System frozen balance:",
+          "snapshotNote": "* Realtime snapshot at viewing time, independent of the date-range filter."
+        }
+      },
+      "dataSources": {
+        "title": "Data Contract Status",
+        "description": "{ready} of {total} sources are backed by confirmed APIs.",
+        "loaded": "Loaded {time}",
+        "readyMessage": "This data source is connected to a confirmed API.",
+        "sources": {
+          "finance": "Finance",
+          "taxonomy": "Taxonomy",
+          "users": "Users",
+          "creators": "Creators / channels",
+          "moderation": "Moderation",
+          "payouts": "Payouts",
+          "verifications": "Verifications",
+          "activity": "Activity"
+        }
+      },
+      "priorityActions": {
+        "title": "Priority Actions"
+      }
+    }
   }
 }
