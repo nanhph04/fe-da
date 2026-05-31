@@ -42,6 +42,8 @@ import type {
   UserMembershipResponse,
   VideoMetadataResponse,
   VideoPurchaseResponse,
+  MetadataSuggestionsBody,
+  MetadataSuggestionsResponse,
 } from "./mediaService.types";
 
 export type * from "./mediaService.types";
@@ -422,5 +424,12 @@ export const mediaService = {
   },
   deleteTagAdmin: async (id: string) => {
     return api.delete<TagResponse>(`/api/media/admin/tags/${id}`, { requireAuth: true });
+  },
+  getMetadataSuggestions: async (data: MetadataSuggestionsBody) => {
+    return api.post<MetadataSuggestionsResponse>(
+      "/api/media/studio/videos/metadata-suggestions",
+      data,
+      { requireAuth: true }
+    );
   },
 };

@@ -466,8 +466,28 @@ export interface PublicVideosParams extends SearchMediaParams {
   tags?: string | string[];
 }
 
-export interface OwnerVideosParams {
-  limit?: number;
+export interface MetadataSuggestionsBody {
+  title: string;
+  description?: string;
+  categoryId: string;
+  tagIds?: string[];
+  language?: "vi" | "en";
+  tone?: "natural" | "professional" | "seo";
+  maxDescriptionLength?: number;
+}
+
+export interface MetadataSuggestionsResponse {
+  title: string;
+  description: string;
+  hashtags: string[];
+  suggestedTags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+  provider: string;
+  model: string;
+}export interface OwnerVideosParams extends PaginationParams {
   status?: string | string[];
   visibility?: string | string[];
 }

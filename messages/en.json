@@ -1645,6 +1645,78 @@
       },
       "avatarAlt": "{channel} channel avatar"
     },
+    "verifications": {
+      "header": {
+        "eyebrow": "Membership Review",
+        "title": "Creator Membership Queue",
+        "description": "Approve eligible channels before creators can publish paid membership tiers."
+      },
+      "tabs": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "stats": {
+        "currentView": "Current View",
+        "avgReadyVideos": "Avg. Ready Videos",
+        "highMomentum": "High Momentum Channels",
+        "highMomentumDescription": "Channels with at least 2x the minimum view requirement."
+      },
+      "filters": {
+        "status": "Status: {status}"
+      },
+      "table": {
+        "channel": "Channel",
+        "requested": "Requested",
+        "readyVideos": "Ready Videos",
+        "totalViews": "Total Views",
+        "status": "Status",
+        "action": "Action"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "retry": "Retry",
+        "approve": "Approve",
+        "approving": "Approving",
+        "reject": "Reject",
+        "rejecting": "Rejecting",
+        "confirmReject": "Confirm Reject",
+        "cancel": "Cancel",
+        "noAction": "No action"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "reject": {
+        "reasonLabel": "Reject reason",
+        "reasonPlaceholder": "Policy issue or missing context..."
+      },
+      "fallbacks": {
+        "notRecorded": "Not recorded"
+      },
+      "errors": {
+        "title": "Unable to load queue",
+        "loadFailed": "Unable to load the membership review list.",
+        "approveFailed": "Unable to approve membership review.",
+        "rejectFailed": "Unable to reject membership review.",
+        "rejectReasonRequired": "Please enter a rejection reason."
+      },
+      "empty": {
+        "title": "No channels found",
+        "description": "No membership reviews are in {status} status."
+      },
+      "detail": {
+        "backAria": "Back to membership review queue",
+        "eyebrow": "Membership Review",
+        "title": "Review Detail",
+        "description": "Membership review actions are handled from the queue list.",
+        "cardTitle": "Use the review queue",
+        "cardDescription": "Media Service currently exposes list and decision endpoints for membership reviews, but does not expose a separate detail endpoint by channel id. Approve or reject channels directly from the queue to keep the UI aligned with the available API contract.",
+        "openQueue": "Open Queue"
+      }
+    },
     "content": {
       "statuses": {
         "draft": "Draft",

@@ -1597,6 +1597,78 @@
       },
       "avatarAlt": "Ảnh đại diện của kênh {channel}"
     },
+    "verifications": {
+      "header": {
+        "eyebrow": "Duyệt hội viên",
+        "title": "Hàng đợi hội viên creator",
+        "description": "Duyệt các kênh đủ điều kiện trước khi creator có thể xuất bản gói hội viên trả phí."
+      },
+      "tabs": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Bị từ chối"
+      },
+      "stats": {
+        "currentView": "Đang hiển thị",
+        "avgReadyVideos": "TB video sẵn sàng",
+        "highMomentum": "Kênh tăng trưởng mạnh",
+        "highMomentumDescription": "Các kênh đạt ít nhất 2x yêu cầu lượt xem tối thiểu."
+      },
+      "filters": {
+        "status": "Trạng thái: {status}"
+      },
+      "table": {
+        "channel": "Kênh",
+        "requested": "Yêu cầu lúc",
+        "readyVideos": "Video sẵn sàng",
+        "totalViews": "Tổng lượt xem",
+        "status": "Trạng thái",
+        "action": "Thao tác"
+      },
+      "actions": {
+        "refresh": "Làm mới",
+        "retry": "Thử lại",
+        "approve": "Duyệt",
+        "approving": "Đang duyệt",
+        "reject": "Từ chối",
+        "rejecting": "Đang từ chối",
+        "confirmReject": "Xác nhận từ chối",
+        "cancel": "Hủy",
+        "noAction": "Không có thao tác"
+      },
+      "statuses": {
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Bị từ chối"
+      },
+      "reject": {
+        "reasonLabel": "Lý do từ chối",
+        "reasonPlaceholder": "Vấn đề chính sách hoặc thiếu ngữ cảnh..."
+      },
+      "fallbacks": {
+        "notRecorded": "Chưa ghi nhận"
+      },
+      "errors": {
+        "title": "Không thể tải hàng đợi",
+        "loadFailed": "Không thể tải danh sách duyệt hội viên.",
+        "approveFailed": "Không thể duyệt yêu cầu hội viên.",
+        "rejectFailed": "Không thể từ chối yêu cầu hội viên.",
+        "rejectReasonRequired": "Vui lòng nhập lý do từ chối."
+      },
+      "empty": {
+        "title": "Không có kênh nào",
+        "description": "Không có yêu cầu duyệt hội viên nào ở trạng thái {status}."
+      },
+      "detail": {
+        "backAria": "Quay lại hàng đợi duyệt hội viên",
+        "eyebrow": "Duyệt hội viên",
+        "title": "Chi tiết duyệt",
+        "description": "Thao tác duyệt hội viên được xử lý từ danh sách hàng đợi.",
+        "cardTitle": "Sử dụng hàng đợi duyệt",
+        "cardDescription": "Media Service hiện chỉ cung cấp endpoint danh sách và endpoint quyết định cho duyệt hội viên, chưa có endpoint chi tiết riêng theo mã kênh. Hãy duyệt hoặc từ chối kênh trực tiếp từ hàng đợi để giao diện khớp với hợp đồng API hiện có.",
+        "openQueue": "Mở hàng đợi"
+      }
+    },
     "content": {
       "statuses": {
         "draft": "Bản nháp",
