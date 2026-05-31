@@ -7,7 +7,6 @@ import { getErrorMessage } from "@/shared/api/client";
 import {
   getChannelDetailCached,
   getReadyPublicThumbnailUrl,
-  getVideoMetadataCached,
   getVideoMetadataFresh,
   type PublicApiError,
   type PublicMembershipTier,
@@ -33,23 +32,6 @@ function resolveRequiredTierLevel(video: PublicVideoMetadata) {
 }
 
 async function getVideoMetadataForWatch(videoId: string) {
-  try {
-    const cachedResponse = await getVideoMetadataCached(videoId);
-    if (cachedResponse.success && cachedResponse.data) {
-      return cachedResponse;
-    }
-  } catch (error) {
-    const apiError = error as PublicApiError;
-    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code;
-    if (statusCode !== 404) {
-      console.warn("Failed to load video metadata from cache, retrying fresh:", {
-        videoId,
-        statusCode: statusCode ?? null,
-        message: getErrorMessage(error),
-      });
-    }
-  }
-
   return getVideoMetadataFresh(videoId);
 }
 

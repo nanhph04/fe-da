@@ -104,6 +104,9 @@ function getDisplayTitle(video: PublicDiscoveryVideo) {
 }
 
 function getChannelLabel(video: PublicDiscoveryVideo) {
+  if (video.channelName) {
+    return video.channelName;
+  }
   if (video.channel?.name) {
     return video.channel.name;
   }
@@ -218,9 +221,10 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
   const hasTierGate = video.requiredTierLevel !== null;
 
   return (
-    <Link href={`/watch/${video.id}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <article className="h-full rounded-lg transition-colors hover:bg-foreground/[0.04]">
-        <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
+    <article className="group h-full rounded-lg transition-colors hover:bg-foreground/[0.04]">
+      {/* Thumbnail Link */}
+      <Link href={`/watch/${video.id}`} aria-label={`Watch ${displayTitle}`} className="block focus:outline-none">
+        <div className="relative aspect-video overflow-hidden rounded-lg bg-muted cursor-pointer">
           <VideoThumbnail
             src={thumbnailUrl}
             alt={displayTitle}
@@ -242,47 +246,54 @@ function VideoCard({ video }: { video: PublicDiscoveryVideo }) {
             ) : null}
           </div>
         </div>
+      </Link>
 
-        <div className="flex gap-3 px-1 pt-3">
-          <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted text-sm font-black text-foreground">
+      <div className="flex gap-3 px-1 pt-3">
+        {/* Channel Avatar Link */}
+        <Link href={`/channel/${video.channelId}`} className="block focus:outline-none">
+          <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-muted text-sm font-black text-foreground hover:bg-muted/80 transition-colors">
             {getChannelInitial(video)}
           </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
+        </Link>
+        <div className="min-w-0 flex-1">
+          {/* Title Link */}
+          <Link href={`/watch/${video.id}`} className="block group-hover:text-primary transition-colors">
+            <h3 className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-foreground">
               {displayTitle}
             </h3>
-            <p className="mt-1 truncate text-sm font-medium text-muted-foreground">
-              {getChannelLabel(video)}
-            </p>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-              <span>{formatViewCount(video.viewCount)} lượt xem</span>
-              <span aria-hidden="true">-</span>
-              <span>{formatPublishedAt(video.publishedAt || video.createdAt)}</span>
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {hasCoinPrice ? (
-                <span className="inline-flex items-center gap-1 rounded-sm bg-secondary/15 px-2 py-1 text-[11px] font-bold text-secondary">
-                  <Coins className="h-3 w-3" aria-hidden="true" />
-                  {video.price} Coin
-                </span>
-              ) : (
-                <span className="rounded-sm bg-foreground/10 px-2 py-1 text-[11px] font-bold text-foreground">
-                  Free
-                </span>
-              )}
-              {video.tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-sm bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
+          </Link>
+          {/* Channel Name Link */}
+          <Link href={`/channel/${video.channelId}`} className="inline-block mt-1 truncate text-sm font-medium text-muted-foreground hover:text-primary transition-colors max-w-full">
+            {getChannelLabel(video)}
+          </Link>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <span>{formatViewCount(video.viewCount)} lượt xem</span>
+            <span aria-hidden="true">-</span>
+            <span>{formatPublishedAt(video.publishedAt || video.createdAt)}</span>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {hasCoinPrice ? (
+              <span className="inline-flex items-center gap-1 rounded-sm bg-secondary/15 px-2 py-1 text-[11px] font-bold text-secondary">
+                <Coins className="h-3 w-3" aria-hidden="true" />
+                {video.price} Coin
+              </span>
+            ) : (
+              <span className="rounded-sm bg-foreground/10 px-2 py-1 text-[11px] font-bold text-foreground">
+                Free
+              </span>
+            )}
+            {video.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-sm bg-foreground/5 px-2 py-1 text-[11px] font-medium text-muted-foreground"
+              >
+                #{tag}
+              </span>
+            ))}
           </div>
         </div>
-      </article>
-    </Link>
+      </div>
+    </article>
   );
 }
 

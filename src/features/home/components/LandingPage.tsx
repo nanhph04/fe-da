@@ -36,7 +36,8 @@ interface LandingPageProps {
 function toMediaCard(video: PublicDiscoveryVideo): MediaCardProps {
   return {
     title: video.title,
-    creator: video.channel?.name ?? "Velvet Gallery",
+    creator: video.channelName ?? video.channel?.name ?? "Velvet Gallery",
+    channelId: video.channelId,
     views: formatViewCount(video.viewCount),
     imageUrl: getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ?? FALLBACK_THUMBNAIL,
     duration: formatDuration(video.durationSeconds),

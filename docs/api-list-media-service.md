@@ -1,6 +1,6 @@
 # Media Service API
 
-**Last updated:** 24/05/2026
+**Last updated:** 31/05/2026
 
 **Base URL:** `/api/media`
 
@@ -16,9 +16,9 @@
 ```json
   {
     "success": true,
-    "code": 200,
+    "statusCode": 200,
     "data": { ... } | [ ... ] | "Hello World!" | null,
-    "mess": "optional",
+    "message": "optional",
     "pagination": {
       "page": 1,
       "limit": 20,
@@ -28,7 +28,7 @@
   }
 ```
 
-- Voi endpoint `POST`, neu NestJS tra HTTP 201 thi response envelope co `code = 201`.
+- Voi endpoint `POST`, neu NestJS tra HTTP 201 thi response envelope co `statusCode = 201`.
 - Error response dung format `ApiError` o cuoi tai lieu nay.
 
 ## 1. HEALTH CHECK
@@ -661,6 +661,7 @@ Public/list/metadata/studio response deu tra URL public truc tiep trong `thumbna
   - Envelope `data`: array, moi object gom:
     - `id` (string)
     - `channelId` (string)
+    - `channelName` (string | null)
     - `title` (string)
     - `description` (string)
     - `category` (string)
@@ -724,7 +725,7 @@ Public/list/metadata/studio response deu tra URL public truc tiep trong `thumbna
 ```json
 {
   "success": true,
-  "code": 201,
+  "statusCode": 201,
   "data": {
     "videoId": "video-123",
     "status": "draft",
@@ -1082,6 +1083,7 @@ Public/list/metadata/studio response deu tra URL public truc tiep trong `thumbna
   - Envelope `data`: array, moi object gom:
     - `id` (string)
     - `channelId` (string)
+    - `channelName` (string | null)
     - `title` (string)
     - `description` (string)
     - `category` (string)
@@ -1099,6 +1101,28 @@ Public/list/metadata/studio response deu tra URL public truc tiep trong `thumbna
     - `publishedAt` (string ISO | null)
     - `createdAt` (string ISO)
     - `updatedAt` (string ISO)
+  - Envelope `pagination`: `page`, `limit`, `total`, `totalPages`
+
+### 4.12A GET `/api/media/videos/ranking?metric=views&period=day&page=1&limit=20`
+
+- Muc dich: lay danh sach video public xep hang theo luot xem hoac luot mua trong khoang thoi gian.
+- Public API: khong can `x-internal-secret`.
+- Query:
+  - `metric` (bat buoc): `views` hoac `purchases`.
+  - `period` (bat buoc): `day`, `week`, hoac `month`.
+  - `page` (number, optional, default 1, min 1)
+  - `limit` (number, optional, default 20, min 1, max 50)
+- Ghi chu:
+  - `period=day` tinh tu dau ngay UTC hien tai.
+  - `period=week` la rolling 7 ngay gan nhat tinh tu dau ngay UTC hien tai.
+  - `period=month` la rolling 30 ngay gan nhat tinh tu dau ngay UTC hien tai.
+  - `metric=purchases` lay du lieu tu `video_purchase_unlocks.created_at`.
+  - `metric=views` lay du lieu tu bang aggregate `video_view_daily_stats`; chi chinh xac cho cac view duoc ghi sau migration tao bang nay.
+  - Chi tra video `ready + public`, channel `active`, video chua bi delete.
+  - Sap xep theo `metricCount DESC`, fallback `publishedAt DESC`, `createdAt DESC`.
+- Response HTTP 200:
+  - Envelope `data`: array, moi object gom cac field nhu `GET /api/media/videos/latest` va them:
+    - `metricCount` (number): so luot xem/luot mua trong period dang query.
   - Envelope `pagination`: `page`, `limit`, `total`, `totalPages`
 
 ### 4.13 GET `/api/media/me/videos/purchased?page=1&limit=20`
@@ -1190,6 +1214,7 @@ Public/list/metadata/studio response deu tra URL public truc tiep trong `thumbna
   - Envelope `data`: array, moi object gom:
     - `id` (string)
     - `channelId` (string)
+    - `channelName` (string | null)
     - `title` (string)
     - `description` (string)
     - `category` (string)
@@ -1235,6 +1260,7 @@ Public/list/metadata/studio response deu tra URL public truc tiep trong `thumbna
   - Envelope `data`: array, moi object gom:
     - `id` (string)
     - `channelId` (string)
+    - `channelName` (string | null)
     - `title` (string)
     - `description` (string)
     - `category` (string)
@@ -1926,10 +1952,10 @@ Khi loi, service dung format:
 ```json
 {
   "success": false,
-  "code": 400,
-  "mess": "Error message",
+  "statusCode": 400,
+  "message": "Error message",
   "data": null,
-  "errors": ["Error detail"],
+  "errorCode": "BAD_REQUEST",
   "requestId": "1744712345-abc1234",
   "timestamp": "2026-04-15T10:19:05.123Z",
   "path": "/api/media/..."

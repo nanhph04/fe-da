@@ -44,12 +44,15 @@ interface HomeDiscoverySectionProps {
   latestVideos: PublicDiscoveryVideo[];
   categories: CategoryPublic[];
   categorySections: HomeCategorySection[];
+  topViewsVideos?: PublicDiscoveryVideo[];
+  topPurchasesVideos?: PublicDiscoveryVideo[];
 }
 
 function toMediaCard(video: PublicDiscoveryVideo): MediaCardProps {
   return {
     title: video.title,
-    creator: video.channel?.name ?? "Velvet Gallery",
+    creator: video.channelName ?? video.channel?.name ?? "Velvet Gallery",
+    channelId: video.channelId,
     views: formatViewCount(video.viewCount),
     imageUrl:
       getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id) ??
@@ -63,9 +66,14 @@ export function HomeDiscoverySection({
   latestVideos,
   categories,
   categorySections,
+  topViewsVideos = [],
+  topPurchasesVideos = [],
 }: HomeDiscoverySectionProps) {
   const t = useTranslations("Home");
   const releaseItems = latestVideos.slice(0, 6).map(toMediaCard);
+  const topViewsItems = topViewsVideos.slice(0, 6).map(toMediaCard);
+  const topPurchasesItems = topPurchasesVideos.slice(0, 6).map(toMediaCard);
+
   const visibleCategorySections = categorySections
     .map((section) => ({
       ...section,
@@ -104,6 +112,14 @@ export function HomeDiscoverySection({
               {t("noContent")}
             </div>
           </section>
+        )}
+
+        {topViewsItems.length > 0 && (
+          <MediaRow title="Xem nhiều nhất tuần" items={topViewsItems} />
+        )}
+
+        {topPurchasesItems.length > 0 && (
+          <MediaRow title="Mua nhiều nhất tuần" items={topPurchasesItems} />
         )}
 
         {visibleCategorySections.map((section) => (

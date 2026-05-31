@@ -38,12 +38,16 @@ interface HomePageProps {
   latestVideos: PublicDiscoveryVideo[];
   categories: CategoryPublic[];
   categorySections: HomeCategorySection[];
+  topViewsVideos?: PublicDiscoveryVideo[];
+  topPurchasesVideos?: PublicDiscoveryVideo[];
 }
 
 export function HomePage({
   latestVideos,
   categories,
   categorySections,
+  topViewsVideos = [],
+  topPurchasesVideos = [],
 }: HomePageProps) {
   const t = useTranslations("Home");
 
@@ -57,6 +61,8 @@ export function HomePage({
         latestVideos={latestVideos}
         categories={categories}
         categorySections={categorySections}
+        topViewsVideos={topViewsVideos}
+        topPurchasesVideos={topPurchasesVideos}
       />
 
       {/* Features Section */}

@@ -183,7 +183,7 @@ export function AdminOverviewFeature() {
   // Poll health checks
   const checkAllServicesHealth = useCallback(async () => {
     const services = [
-      { name: t("health.services.finance"), endpoint: "/api/health" },
+      { name: t("health.services.finance"), endpoint: "/api/finance/health" },
       { name: t("health.services.identity"), endpoint: "/api/identity/health" },
       { name: t("health.services.media"), endpoint: "/api/media/health" },
     ];
@@ -251,11 +251,10 @@ export function AdminOverviewFeature() {
           <button
             type="button"
             onClick={() => setIsCustomizing(prev => !prev)}
-            className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-sm border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
-              isCustomizing
+            className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-sm border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${isCustomizing
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-card text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[16px]">settings_accessibility</span>
             {isCustomizing ? t("header.done") : t("header.layout")}
@@ -489,20 +488,18 @@ function ServicesHealthWidget({ statuses, onPing, locale }: { statuses: ServiceH
                 <td className="px-5 py-3.5 font-bold text-foreground">{s.service}</td>
                 <td className="px-5 py-3.5 text-muted-foreground text-[11px]">{s.endpoint}</td>
                 <td className="px-5 py-3.5">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                    s.status === "healthy"
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold ${s.status === "healthy"
                       ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                       : s.status === "checking"
-                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                      : "bg-destructive/15 text-primary border border-primary/20"
-                  }`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${
-                      s.status === "healthy"
+                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        : "bg-destructive/15 text-primary border border-primary/20"
+                    }`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${s.status === "healthy"
                         ? "bg-emerald-400"
                         : s.status === "checking"
-                        ? "bg-amber-400 animate-pulse"
-                        : "bg-primary"
-                    }`} />
+                          ? "bg-amber-400 animate-pulse"
+                          : "bg-primary"
+                      }`} />
                     {s.status === "healthy" ? t("health.status.online") : s.status === "checking" ? t("health.status.checking") : t("health.status.offline")}
                   </span>
                   {s.error && <p className="mt-1 text-[10px] text-primary">{s.error}</p>}
@@ -561,11 +558,10 @@ function FinanceOverviewWidget({
                 key={preset}
                 type="button"
                 onClick={() => setDatePreset(preset)}
-                className={`rounded-sm px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors ${
-                  datePreset === preset
+                className={`rounded-sm px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors ${datePreset === preset
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 {t(`finance.presets.${preset}`)}
               </button>

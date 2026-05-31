@@ -23,6 +23,7 @@ export function getReadyPublicThumbnailUrl(
 export interface PublicDiscoveryVideo {
   id: string;
   channelId: string;
+  channelName?: string | null;
   title: string;
   description: string;
   category: string;
@@ -238,6 +239,45 @@ export async function getLatestVideosCached(limit = 10) {
 
     const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code ?? 503;
     const message = apiError.message || "Unable to load latest videos from the media service.";
+
+    return {
+      success: false,
+      statusCode,
+      code: statusCode,
+      data: [],
+      message,
+      mess: message,
+      errors: apiError.errors,
+    } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
+  }
+}
+
+export async function getVideosRankingCached(
+  metric: "views" | "purchases",
+  period: "day" | "week" | "month" = "week",
+  limit = 10
+) {
+  "use cache";
+
+  cacheLife("minutes");
+  cacheTag("media:ranking", `media:ranking:${metric}:${period}`);
+
+  const normalizedLimit = normalizePublicVideoLimit(limit, 10);
+  const query = new URLSearchParams({
+    metric,
+    period,
+    limit: String(normalizedLimit),
+  });
+
+  try {
+    return await fetchPublicApi<PublicDiscoveryVideo[]>(
+      `/api/media/videos/ranking?${query.toString()}`
+    );
+  } catch (error) {
+    const apiError = error as PublicApiError;
+
+    const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code ?? 503;
+    const message = apiError.message || "Unable to load ranked videos from the media service.";
 
     return {
       success: false,

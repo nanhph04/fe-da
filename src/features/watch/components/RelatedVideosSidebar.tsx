@@ -39,7 +39,7 @@ function formatDuration(seconds: number | null) {
 }
 
 function getChannelName(video: PublicDiscoveryVideo) {
-  return video.channel?.name || "Velvet Gallery";
+  return video.channelName || video.channel?.name || "Velvet Gallery";
 }
 
 export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSidebarProps) {
@@ -74,8 +74,9 @@ export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSide
 
       <div className="space-y-6">
         {videos.map((video) => (
-          <Link key={video.id} href={`/watch/${video.id}`} className="group flex gap-4">
-            <div className="relative h-24 w-44 flex-shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted">
+          <div key={video.id} className="group flex gap-4">
+            {/* Thumbnail Link */}
+            <Link href={`/watch/${video.id}`} className="relative h-24 w-44 flex-shrink-0 overflow-hidden rounded-lg border border-border/20 bg-muted">
               <VideoThumbnail
                 src={getReadyPublicThumbnailUrl(video.thumbnailUrl, video.thumbnailStatus, video.id)}
                 alt={video.title}
@@ -84,15 +85,27 @@ export async function RelatedVideosSidebar({ currentVideoId }: RelatedVideosSide
               <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-black uppercase text-foreground">
                 {formatDuration(video.durationSeconds)}
               </span>
-            </div>
+            </Link>
+            
             <div className="flex min-w-0 flex-col gap-1.5">
-              <h4 className="line-clamp-2 text-sm font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-                {video.title}
-              </h4>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{getChannelName(video)}</p>
+              {/* Title Link */}
+              <Link href={`/watch/${video.id}`} className="group-hover:text-primary transition-colors">
+                <h4 className="line-clamp-2 text-sm font-bold leading-snug text-foreground">
+                  {video.title}
+                </h4>
+              </Link>
+              
+              {/* Channel Link */}
+              <Link
+                href={`/channel/${video.channelId}`}
+                className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors w-fit"
+              >
+                {getChannelName(video)}
+              </Link>
+              
               <p className="text-[11px] font-bold text-muted-foreground/50">{formatViews(video.viewCount)}</p>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </aside>
