@@ -1420,6 +1420,123 @@
       "title": "Establishing secure connection",
       "description": "Authenticating V-CONSOLE..."
     },
+    "users": {
+      "header": {
+        "eyebrow": "Identity Control",
+        "title": "User Management",
+        "loading": "Loading identity directory...",
+        "summary": "{count} platform users from identity-service.",
+        "liveApi": "Live API"
+      },
+      "summary": {
+        "totalUsers": "Total Users",
+        "activeUsers30d": "Active Users 30D",
+        "newUsers30d": "New Users 30D",
+        "suspendedUsers": "Suspended Users",
+        "noBaseline": "No baseline",
+        "percentVsPrevious": "{value}% vs previous period",
+        "identityUnavailable": "Identity service unavailable",
+        "refreshTokenWindow": "Refresh-token activity window",
+        "freshGrowth": "Fresh account growth",
+        "flaggedContract": "{count} flagged in v1 contract",
+        "waiting": "Waiting for summary"
+      },
+      "directory": {
+        "title": "User Directory",
+        "description": "Search account email or profile display name. Identity API excludes admin accounts."
+      },
+      "filters": {
+        "searchLabel": "Search users",
+        "searchPlaceholder": "Search email or display name",
+        "status": "Status",
+        "anyStatus": "Any Status",
+        "role": "Role",
+        "allUsers": "All Users",
+        "creators": "Creators",
+        "viewers": "Viewers",
+        "sort": "Sort",
+        "created": "Created",
+        "updated": "Updated",
+        "order": "Order",
+        "desc": "Desc",
+        "asc": "Asc"
+      },
+      "table": {
+        "userProfile": "User Profile",
+        "role": "Role",
+        "email": "Email",
+        "status": "Status",
+        "joinDate": "Join Date",
+        "actions": "Actions",
+        "lastActive": "Active {date}"
+      },
+      "actions": {
+        "search": "Search",
+        "cancel": "Cancel",
+        "suspending": "Suspending...",
+        "confirmSuspend": "Confirm Suspend",
+        "viewAria": "View {email}",
+        "suspendAria": "Suspend {email}",
+        "reactivateAria": "Reactivate {email}",
+        "closeDetail": "Close user detail"
+      },
+      "statuses": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "roles": {
+        "creator": "Creator",
+        "viewer": "Viewer"
+      },
+      "email": {
+        "verified": "Email Verified",
+        "unverified": "Email Unverified"
+      },
+      "genders": {
+        "male": "Male",
+        "female": "Female"
+      },
+      "pagination": {
+        "summary": "Showing page {page} of {totalPages} - {total} users",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "suspend": {
+        "title": "Suspend user",
+        "description": "Suspending {user} revokes all refresh tokens and triggers downstream sync events.",
+        "reason": "Reason",
+        "placeholder": "Violation of platform policy"
+      },
+      "detail": {
+        "eyebrow": "Account Detail",
+        "title": "Selected User",
+        "empty": "Select a user to inspect profile data and active session summary.",
+        "profile": "Profile",
+        "bio": "Bio",
+        "phone": "Phone",
+        "gender": "Gender",
+        "birthday": "Birthday",
+        "sessions": "Sessions",
+        "activeSessions": "Active Sessions",
+        "lastActive": "Last Active",
+        "created": "Created",
+        "updated": "Updated"
+      },
+      "fallbacks": {
+        "unnamedUser": "Unnamed User",
+        "notAvailable": "N/A",
+        "noBio": "No bio"
+      },
+      "errors": {
+        "loadFailed": "Unable to load the admin user list.",
+        "detailFailed": "Unable to load user details.",
+        "reactivateFailed": "Unable to reactivate this user.",
+        "reasonRequired": "Please enter a reason before suspending this user.",
+        "suspendFailed": "Unable to suspend this user."
+      },
+      "empty": "No users match the current filters.",
+      "avatarAlt": "{user} avatar"
+    },
     "content": {
       "statuses": {
         "draft": "Draft",

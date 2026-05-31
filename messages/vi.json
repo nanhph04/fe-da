@@ -1372,6 +1372,123 @@
       "title": "Đang thiết lập kết nối bảo mật",
       "description": "Đang xác thực V-CONSOLE..."
     },
+    "users": {
+      "header": {
+        "eyebrow": "Kiểm soát định danh",
+        "title": "Quản lý người dùng",
+        "loading": "Đang tải danh bạ định danh...",
+        "summary": "{count} người dùng nền tảng từ identity-service.",
+        "liveApi": "API trực tiếp"
+      },
+      "summary": {
+        "totalUsers": "Tổng người dùng",
+        "activeUsers30d": "Người dùng hoạt động 30 ngày",
+        "newUsers30d": "Người dùng mới 30 ngày",
+        "suspendedUsers": "Người dùng bị khóa",
+        "noBaseline": "Chưa có mốc so sánh",
+        "percentVsPrevious": "{value}% so với kỳ trước",
+        "identityUnavailable": "Dịch vụ định danh chưa khả dụng",
+        "refreshTokenWindow": "Khung hoạt động refresh-token",
+        "freshGrowth": "Tăng trưởng tài khoản mới",
+        "flaggedContract": "{count} tài khoản bị gắn cờ trong contract v1",
+        "waiting": "Đang chờ dữ liệu tổng quan"
+      },
+      "directory": {
+        "title": "Danh bạ người dùng",
+        "description": "Tìm theo email tài khoản hoặc tên hiển thị hồ sơ. Identity API không bao gồm tài khoản admin."
+      },
+      "filters": {
+        "searchLabel": "Tìm người dùng",
+        "searchPlaceholder": "Tìm email hoặc tên hiển thị",
+        "status": "Trạng thái",
+        "anyStatus": "Mọi trạng thái",
+        "role": "Vai trò",
+        "allUsers": "Tất cả người dùng",
+        "creators": "Nhà sáng tạo",
+        "viewers": "Người xem",
+        "sort": "Sắp xếp",
+        "created": "Ngày tạo",
+        "updated": "Ngày cập nhật",
+        "order": "Thứ tự",
+        "desc": "Giảm dần",
+        "asc": "Tăng dần"
+      },
+      "table": {
+        "userProfile": "Hồ sơ người dùng",
+        "role": "Vai trò",
+        "email": "Email",
+        "status": "Trạng thái",
+        "joinDate": "Ngày tham gia",
+        "actions": "Thao tác",
+        "lastActive": "Hoạt động {date}"
+      },
+      "actions": {
+        "search": "Tìm kiếm",
+        "cancel": "Hủy",
+        "suspending": "Đang khóa...",
+        "confirmSuspend": "Xác nhận khóa",
+        "viewAria": "Xem {email}",
+        "suspendAria": "Khóa {email}",
+        "reactivateAria": "Mở khóa {email}",
+        "closeDetail": "Đóng chi tiết người dùng"
+      },
+      "statuses": {
+        "active": "Đang hoạt động",
+        "suspended": "Đã khóa"
+      },
+      "roles": {
+        "creator": "Nhà sáng tạo",
+        "viewer": "Người xem"
+      },
+      "email": {
+        "verified": "Email đã xác minh",
+        "unverified": "Email chưa xác minh"
+      },
+      "genders": {
+        "male": "Nam",
+        "female": "Nữ"
+      },
+      "pagination": {
+        "summary": "Đang hiển thị trang {page} / {totalPages} - {total} người dùng",
+        "previous": "Trước",
+        "next": "Sau"
+      },
+      "suspend": {
+        "title": "Khóa người dùng",
+        "description": "Khóa {user} sẽ thu hồi toàn bộ refresh token và kích hoạt sự kiện đồng bộ xuống các dịch vụ liên quan.",
+        "reason": "Lý do",
+        "placeholder": "Vi phạm chính sách nền tảng"
+      },
+      "detail": {
+        "eyebrow": "Chi tiết tài khoản",
+        "title": "Người dùng đã chọn",
+        "empty": "Chọn một người dùng để kiểm tra dữ liệu hồ sơ và tóm tắt phiên hoạt động.",
+        "profile": "Hồ sơ",
+        "bio": "Tiểu sử",
+        "phone": "Điện thoại",
+        "gender": "Giới tính",
+        "birthday": "Ngày sinh",
+        "sessions": "Phiên đăng nhập",
+        "activeSessions": "Phiên đang hoạt động",
+        "lastActive": "Hoạt động gần nhất",
+        "created": "Đã tạo",
+        "updated": "Đã cập nhật"
+      },
+      "fallbacks": {
+        "unnamedUser": "Người dùng chưa đặt tên",
+        "notAvailable": "Không có",
+        "noBio": "Chưa có tiểu sử"
+      },
+      "errors": {
+        "loadFailed": "Không thể tải danh sách người dùng admin.",
+        "detailFailed": "Không thể tải chi tiết người dùng.",
+        "reactivateFailed": "Không thể mở khóa người dùng này.",
+        "reasonRequired": "Vui lòng nhập lý do trước khi khóa người dùng này.",
+        "suspendFailed": "Không thể khóa người dùng này."
+      },
+      "empty": "Không có người dùng nào khớp bộ lọc hiện tại.",
+      "avatarAlt": "Ảnh đại diện của {user}"
+    },
     "content": {
       "statuses": {
         "draft": "Bản nháp",
