@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,10 +44,14 @@ const initialTagFormState: TagFormState = {
 const taxonomyPageLimit = 20;
 const initialPagination: ApiPagination = { page: 1, limit: taxonomyPageLimit, total: 0, totalPages: 0 };
 
-const tabOptions: Array<{ value: TaxonomyTab; label: string; icon: string }> = [
-  { value: "categories", label: "Categories", icon: "category" },
-  { value: "tags", label: "Tags", icon: "sell" },
+const tabOptions: Array<{ value: TaxonomyTab; labelKey: "tabs.categories" | "tabs.tags"; icon: string }> = [
+  { value: "categories", labelKey: "tabs.categories", icon: "category" },
+  { value: "tags", labelKey: "tabs.tags", icon: "sell" },
 ];
+
+function getIntlLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
+}
 
 function normalizeStatus(status: string): TaxonomyStatus {
   if (status === "inactive" || status === "pending" || status === "deleted") {
@@ -56,8 +61,8 @@ function normalizeStatus(status: string): TaxonomyStatus {
   return "active";
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("vi-VN", {
+function formatDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -82,11 +87,21 @@ function getStatusClass(status: string) {
   return "border-border/30 bg-muted text-muted-foreground";
 }
 
-function StatusBadge({ status }: { status: string }) {
+function getStatusLabel(status: string, t: ReturnType<typeof useTranslations>) {
+  const normalizedStatus = normalizeStatus(status);
+
+  if (normalizedStatus === "active" || normalizedStatus === "inactive" || normalizedStatus === "pending" || normalizedStatus === "deleted") {
+    return t(`statuses.${normalizedStatus}`);
+  }
+
+  return status;
+}
+
+function StatusBadge({ status, t }: { status: string; t: ReturnType<typeof useTranslations> }) {
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(status)}`}>
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
-      {status}
+      {getStatusLabel(status, t)}
     </span>
   );
 }
@@ -119,10 +134,12 @@ function PaginationControls({
   pagination,
   isLoading,
   onPageChange,
+  t,
 }: {
   pagination: ApiPagination;
   isLoading: boolean;
   onPageChange: (page: number) => void;
+  t: ReturnType<typeof useTranslations>;
 }) {
   const hasPrevious = pagination.page > 1;
   const hasNext = pagination.page < pagination.totalPages;
@@ -130,7 +147,12 @@ function PaginationControls({
   return (
     <div className="flex flex-col gap-3 border-t border-border/30 bg-background px-5 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
       <span>
-        Page <strong className="text-foreground">{pagination.page}</strong> / {pagination.totalPages || 1} - {pagination.total} records
+        {t.rich("pagination.summary", {
+          page: pagination.page,
+          totalPages: pagination.totalPages || 1,
+          total: pagination.total,
+          strong: chunks => <strong className="text-foreground">{chunks}</strong>,
+        })}
       </span>
       <div className="flex gap-2">
         <Button
@@ -140,7 +162,7 @@ function PaginationControls({
           onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
           className="h-10 border-border/40 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
         >
-          Previous
+          {t("pagination.previous")}
         </Button>
         <Button
           type="button"
@@ -148,7 +170,7 @@ function PaginationControls({
           onClick={() => onPageChange(pagination.page + 1)}
           className="h-10 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
-          Next
+          {t("pagination.next")}
         </Button>
       </div>
     </div>
@@ -156,6 +178,8 @@ function PaginationControls({
 }
 
 export function CategoryManagementFeature() {
+  const t = useTranslations("Admin.content.taxonomy");
+  const locale = useLocale();
   const [activeTab, setActiveTab] = useState<TaxonomyTab>("categories");
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [tags, setTags] = useState<TagResponse[]>([]);
@@ -209,8 +233,8 @@ export function CategoryManagementFeature() {
       }
 
       const errors = [
-        categoryRes.success ? null : categoryRes.message || "Unable to load categories.",
-        tagRes.success ? null : tagRes.message || "Unable to load tags.",
+        categoryRes.success ? null : categoryRes.message || t("errors.loadCategoriesFailed"),
+        tagRes.success ? null : tagRes.message || t("errors.loadTagsFailed"),
       ].filter(Boolean);
 
       if (errors.length > 0) {
@@ -221,7 +245,7 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(getErrorMessage(err, "Unable to load taxonomy."));
+      setError(getErrorMessage(err, t("errors.loadFailed")));
       setCategories([]);
       setTags([]);
       setCategoryPagination(initialPagination);
@@ -231,7 +255,7 @@ export function CategoryManagementFeature() {
         setIsLoading(false);
       }
     }
-  }, [categoryPage, searchQuery, tagPage]);
+  }, [categoryPage, searchQuery, tagPage, t]);
 
   useEffect(() => {
     void loadTaxonomy();
@@ -311,7 +335,7 @@ export function CategoryManagementFeature() {
   const handleCategorySubmit = async () => {
     const name = categoryFormState.name.trim();
     if (!name) {
-      setError("Category name is required.");
+      setError(t("errors.categoryNameRequired"));
       return;
     }
 
@@ -334,15 +358,15 @@ export function CategoryManagementFeature() {
         : await mediaService.createCategoryAdmin(payload);
 
       if (res.success && res.data) {
-        setNotice(editingState?.type === "category" ? "Category updated." : "Category created.");
+        setNotice(editingState?.type === "category" ? t("notices.categoryUpdated") : t("notices.categoryCreated"));
         resetForms();
         await loadTaxonomy();
         return;
       }
 
-      setError(res.message || "Unable to save category.");
+      setError(res.message || t("errors.saveCategoryFailed"));
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to save category."));
+      setError(getErrorMessage(err, t("errors.saveCategoryFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -351,7 +375,7 @@ export function CategoryManagementFeature() {
   const handleTagSubmit = async () => {
     const name = tagFormState.name.trim();
     if (!name) {
-      setError("Tag name is required.");
+      setError(t("errors.tagNameRequired"));
       return;
     }
 
@@ -368,15 +392,15 @@ export function CategoryManagementFeature() {
         : await mediaService.createTagAdmin({ name });
 
       if (res.success && res.data) {
-        setNotice(editingState?.type === "tag" ? "Tag updated." : "Tag created.");
+        setNotice(editingState?.type === "tag" ? t("notices.tagUpdated") : t("notices.tagCreated"));
         resetForms();
         await loadTaxonomy();
         return;
       }
 
-      setError(res.message || "Unable to save tag.");
+      setError(res.message || t("errors.saveTagFailed"));
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to save tag."));
+      setError(getErrorMessage(err, t("errors.saveTagFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -403,7 +427,7 @@ export function CategoryManagementFeature() {
     try {
       const res = await mediaService.updateCategoryAdmin(category.id, { status: nextStatus });
       if (res.success) {
-        setNotice(`Category ${category.name} ${nextStatus === "active" ? "activated" : "set to inactive"}.`);
+        setNotice(t(nextStatus === "active" ? "notices.categoryActivated" : "notices.categoryInactivated", { name: category.name }));
         if (editingState?.type === "category" && editingState.id === category.id) {
           setCategoryFormState(current => ({ ...current, status: nextStatus }));
         }
@@ -411,9 +435,9 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(res.message || "Unable to update category status.");
+      setError(res.message || t("errors.updateCategoryStatusFailed"));
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to update category status."));
+      setError(getErrorMessage(err, t("errors.updateCategoryStatusFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -429,7 +453,7 @@ export function CategoryManagementFeature() {
     try {
       const res = await mediaService.updateTagAdmin(tag.id, { status: nextStatus });
       if (res.success) {
-        setNotice(`Tag ${tag.name} ${nextStatus === "active" ? "activated" : "set to inactive"}.`);
+        setNotice(t(nextStatus === "active" ? "notices.tagActivated" : "notices.tagInactivated", { name: tag.name }));
         if (editingState?.type === "tag" && editingState.id === tag.id) {
           setTagFormState(current => ({ ...current, status: nextStatus }));
         }
@@ -437,9 +461,9 @@ export function CategoryManagementFeature() {
         return;
       }
 
-      setError(res.message || "Unable to update tag status.");
+      setError(res.message || t("errors.updateTagStatusFailed"));
     } catch (err) {
-      setError(getErrorMessage(err, "Unable to update tag status."));
+      setError(getErrorMessage(err, t("errors.updateTagStatusFailed")));
     } finally {
       setIsSaving(false);
     }
@@ -448,30 +472,30 @@ export function CategoryManagementFeature() {
   const activePagination = activeTab === "categories" ? categoryPagination : tagPagination;
   const activeTotal = activePagination.total;
   const editorTitle = activeTab === "categories"
-    ? editingState?.type === "category" ? "Edit Category" : "Create Category"
-    : editingState?.type === "tag" ? "Edit Tag" : "Create Tag";
+    ? editingState?.type === "category" ? t("editor.editCategory") : t("editor.createCategory")
+    : editingState?.type === "tag" ? t("editor.editTag") : t("editor.createTag");
 
   return (
     <section className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Media Taxonomy</p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Taxonomy Management</h1>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("header.eyebrow")}</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">{t("header.title")}</h1>
           <p className="mt-2 max-w-2xl font-body text-sm text-muted-foreground">
-            Organize discovery categories and searchable tags from the media service in one admin registry.
+            {t("header.description")}
           </p>
         </div>
         <Button type="button" variant="outline" className="h-11 border-border/40 bg-transparent px-5 text-muted-foreground hover:bg-muted hover:text-foreground" onClick={loadTaxonomy} disabled={isLoading || isSaving}>
           <span className="material-symbols-outlined mr-2 text-[18px]" aria-hidden="true">sync</span>
-          Refresh
+          {t("actions.refresh")}
         </Button>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <TaxonomyStatCard label="Categories" value={stats.categoryTotal} icon="category" tone="primary" />
-        <TaxonomyStatCard label="Active on Page" value={stats.categoryActive} icon="verified" />
-        <TaxonomyStatCard label="Tags" value={stats.tagTotal} icon="sell" tone="secondary" />
-        <TaxonomyStatCard label="Pending on Page" value={stats.tagPending} icon="pending_actions" tone="secondary" />
+        <TaxonomyStatCard label={t("stats.categories")} value={stats.categoryTotal} icon="category" tone="primary" />
+        <TaxonomyStatCard label={t("stats.activeOnPage")} value={stats.categoryActive} icon="verified" />
+        <TaxonomyStatCard label={t("stats.tags")} value={stats.tagTotal} icon="sell" tone="secondary" />
+        <TaxonomyStatCard label={t("stats.pendingOnPage")} value={stats.tagPending} icon="pending_actions" tone="secondary" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -490,7 +514,7 @@ export function CategoryManagementFeature() {
                       className={`inline-flex min-h-10 items-center gap-2 rounded-sm px-4 font-headline text-xs font-bold uppercase tracking-widest transition-colors ${isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
                     >
                       <span className="material-symbols-outlined text-[18px]" aria-hidden="true">{tab.icon}</span>
-                      {tab.label}
+                      {t(tab.labelKey)}
                     </button>
                   );
                 })}
@@ -500,7 +524,7 @@ export function CategoryManagementFeature() {
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-muted-foreground" aria-hidden="true">search</span>
                 <Input
                   className="h-11 w-full rounded-md border-border/30 bg-background pl-11 pr-4 text-foreground focus-visible:ring-primary"
-                  placeholder={activeTab === "categories" ? "Search categories..." : "Search tags..."}
+                  placeholder={activeTab === "categories" ? t("filters.searchCategories") : t("filters.searchTags")}
                   value={searchQuery}
                   onChange={event => {
                     setSearchQuery(event.target.value);
@@ -518,10 +542,10 @@ export function CategoryManagementFeature() {
           <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
             <div className="border-b border-border/30 bg-background px-5 py-4">
               <p className="font-headline text-sm font-bold text-foreground">
-                {activeTab === "categories" ? "Category Registry" : "Tag Registry"}
+                {activeTab === "categories" ? t("registry.categoryTitle") : t("registry.tagTitle")}
               </p>
               <p className="mt-1 font-body text-xs text-muted-foreground">
-                {isLoading ? "Loading taxonomy records..." : `${activeTotal} records match the current view.`}
+                {isLoading ? t("registry.loading") : t("registry.summary", { count: activeTotal })}
               </p>
             </div>
 
@@ -530,13 +554,13 @@ export function CategoryManagementFeature() {
                 <table className="w-full min-w-[860px] border-collapse text-left">
                   <thead>
                     <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                      <th className="px-5 py-4">Category</th>
-                      <th className="px-5 py-4">Slug</th>
-                      <th className="px-5 py-4">Description</th>
-                      <th className="px-5 py-4">Order</th>
-                      <th className="px-5 py-4">Parent</th>
-                      <th className="px-5 py-4">Status</th>
-                      <th className="px-5 py-4 text-right">Active</th>
+                      <th className="px-5 py-4">{t("table.category")}</th>
+                      <th className="px-5 py-4">{t("table.slug")}</th>
+                      <th className="px-5 py-4">{t("table.description")}</th>
+                      <th className="px-5 py-4">{t("table.order")}</th>
+                      <th className="px-5 py-4">{t("table.parent")}</th>
+                      <th className="px-5 py-4">{t("table.status")}</th>
+                      <th className="px-5 py-4 text-right">{t("table.active")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -545,7 +569,7 @@ export function CategoryManagementFeature() {
                     ) : filteredCategories.length === 0 ? (
                       <tr>
                         <td className="px-5 py-12 text-center font-body text-sm text-muted-foreground" colSpan={7}>
-                          No categories found. Create a category from the editor panel.
+                          {t("empty.categories")}
                         </td>
                       </tr>
                     ) : (
@@ -567,14 +591,14 @@ export function CategoryManagementFeature() {
                             </td>
                             <td className="px-5 py-4 font-mono text-xs text-muted-foreground">/{category.slug}</td>
                             <td className="max-w-[260px] px-5 py-4 font-body text-sm text-muted-foreground">
-                              <span className="line-clamp-2">{category.description || "No description."}</span>
+                              <span className="line-clamp-2">{category.description || t("empty.noDescription")}</span>
                             </td>
                             <td className="px-5 py-4 font-headline text-sm font-bold text-foreground">{category.displayOrder}</td>
-                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{category.parentId || "None"}</td>
-                            <td className="px-5 py-4"><StatusBadge status={category.status} /></td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{category.parentId || t("empty.none")}</td>
+                            <td className="px-5 py-4"><StatusBadge status={category.status} t={t} /></td>
                             <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end gap-3">
-                                <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleCategoryEdit(category)} aria-label={`Edit ${category.name}`}>
+                                <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleCategoryEdit(category)} aria-label={t("actions.editCategory", { name: category.name })}>
                                   <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
                                 </button>
                                 <button
@@ -586,7 +610,7 @@ export function CategoryManagementFeature() {
                                   className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
                                     isCategoryActive ? "border-emerald-500/40 bg-emerald-500/90" : "border-border/50 bg-input"
                                   }`}
-                                  aria-label={`${isCategoryActive ? "Deactivate" : "Activate"} ${category.name}`}
+                                  aria-label={t(isCategoryActive ? "actions.deactivateCategory" : "actions.activateCategory", { name: category.name })}
                                 >
                                   <span
                                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform duration-200 ${
@@ -606,12 +630,12 @@ export function CategoryManagementFeature() {
                 <table className="w-full min-w-[720px] border-collapse text-left">
                   <thead>
                     <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                      <th className="px-5 py-4">Tag</th>
-                      <th className="px-5 py-4">Slug</th>
-                      <th className="px-5 py-4">Status</th>
-                      <th className="px-5 py-4">Created</th>
-                      <th className="px-5 py-4">Updated</th>
-                      <th className="px-5 py-4 text-right">Active</th>
+                      <th className="px-5 py-4">{t("table.tag")}</th>
+                      <th className="px-5 py-4">{t("table.slug")}</th>
+                      <th className="px-5 py-4">{t("table.status")}</th>
+                      <th className="px-5 py-4">{t("table.created")}</th>
+                      <th className="px-5 py-4">{t("table.updated")}</th>
+                      <th className="px-5 py-4 text-right">{t("table.active")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -620,7 +644,7 @@ export function CategoryManagementFeature() {
                     ) : filteredTags.length === 0 ? (
                       <tr>
                         <td className="px-5 py-12 text-center font-body text-sm text-muted-foreground" colSpan={6}>
-                          No tags found. Create a tag from the editor panel.
+                          {t("empty.tags")}
                         </td>
                       </tr>
                     ) : (
@@ -641,12 +665,12 @@ export function CategoryManagementFeature() {
                               </div>
                             </td>
                             <td className="px-5 py-4 font-mono text-xs text-muted-foreground">#{tag.slug}</td>
-                            <td className="px-5 py-4"><StatusBadge status={tag.status} /></td>
-                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.createdAt)}</td>
-                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.updatedAt)}</td>
+                            <td className="px-5 py-4"><StatusBadge status={tag.status} t={t} /></td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.createdAt, locale)}</td>
+                            <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{formatDate(tag.updatedAt, locale)}</td>
                             <td className="px-5 py-4 text-right">
                               <div className="flex items-center justify-end gap-3">
-                                <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleTagEdit(tag)} aria-label={`Edit ${tag.name}`}>
+                                <button type="button" className="rounded p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-secondary" onClick={() => handleTagEdit(tag)} aria-label={t("actions.editTag", { name: tag.name })}>
                                   <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
                                 </button>
                                 <button
@@ -658,7 +682,7 @@ export function CategoryManagementFeature() {
                                   className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 ${
                                     isTagActive ? "border-emerald-500/40 bg-emerald-500/90" : "border-border/50 bg-input"
                                   }`}
-                                  aria-label={`${isTagActive ? "Deactivate" : "Activate"} ${tag.name}`}
+                                  aria-label={t(isTagActive ? "actions.deactivateTag" : "actions.activateTag", { name: tag.name })}
                                 >
                                   <span
                                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform duration-200 ${
@@ -679,6 +703,7 @@ export function CategoryManagementFeature() {
             <PaginationControls
               pagination={activePagination}
               isLoading={isLoading}
+              t={t}
               onPageChange={page => {
                 if (activeTab === "categories") {
                   setCategoryPage(page);
@@ -693,16 +718,16 @@ export function CategoryManagementFeature() {
 
         <aside className="rounded-lg border border-border/30 bg-card p-5 xl:sticky xl:top-24 xl:self-start">
           <div className="mb-5 border-b border-border/30 pb-5">
-            <p className="font-label text-[10px] font-bold uppercase tracking-[0.22em] text-primary">Editor</p>
+            <p className="font-label text-[10px] font-bold uppercase tracking-[0.22em] text-primary">{t("editor.eyebrow")}</p>
             <h2 className="mt-2 font-headline text-2xl font-extrabold tracking-tight text-foreground">{editorTitle}</h2>
             <p className="mt-1 font-body text-sm text-muted-foreground">
-              {activeTab === "categories" ? "Shape discovery shelves with ordered categories." : "Maintain searchable tags used by uploads and discovery."}
+              {activeTab === "categories" ? t("editor.categoryDescription") : t("editor.tagDescription")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Name</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("form.name")}</span>
               <Input
                 value={activeTab === "categories" ? categoryFormState.name : tagFormState.name}
                 onChange={event => {
@@ -713,7 +738,7 @@ export function CategoryManagementFeature() {
 
                   setTagFormState(current => ({ ...current, name: event.target.value }));
                 }}
-                placeholder={activeTab === "categories" ? "Category name" : "Tag name"}
+                placeholder={activeTab === "categories" ? t("form.categoryNamePlaceholder") : t("form.tagNamePlaceholder")}
                 className="border-border/40 bg-background text-foreground focus-visible:ring-primary"
               />
             </label>
@@ -721,16 +746,16 @@ export function CategoryManagementFeature() {
             {activeTab === "categories" ? (
               <>
                 <label className="block space-y-2">
-                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Description</span>
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("form.description")}</span>
                   <Input
                     value={categoryFormState.description}
                     onChange={event => setCategoryFormState(current => ({ ...current, description: event.target.value }))}
-                    placeholder="Discovery description"
+                    placeholder={t("form.descriptionPlaceholder")}
                     className="border-border/40 bg-background text-foreground focus-visible:ring-primary"
                   />
                 </label>
                 <label className="block space-y-2">
-                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Display Order</span>
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("form.displayOrder")}</span>
                   <Input
                     type="number"
                     min={0}
@@ -745,7 +770,7 @@ export function CategoryManagementFeature() {
 
             {(activeTab === "categories" && editingState?.type === "category") || (activeTab === "tags" && editingState?.type === "tag") ? (
               <label className="block space-y-2">
-                <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Status</span>
+                <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("form.status")}</span>
                 <select
                   value={activeTab === "categories" ? categoryFormState.status : tagFormState.status}
                   onChange={event => {
@@ -759,21 +784,21 @@ export function CategoryManagementFeature() {
                   }}
                   className="h-10 w-full rounded-md border border-border/40 bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/60"
                 >
-                  <option value="active">active</option>
-                  <option value="inactive">inactive</option>
-                  {activeTab === "tags" ? <option value="pending">pending</option> : null}
-                  <option value="deleted">deleted</option>
+                  <option value="active">{t("statuses.active")}</option>
+                  <option value="inactive">{t("statuses.inactive")}</option>
+                  {activeTab === "tags" ? <option value="pending">{t("statuses.pending")}</option> : null}
+                  <option value="deleted">{t("statuses.deleted")}</option>
                 </select>
               </label>
             ) : null}
 
             <div className="flex flex-col gap-2 pt-2 sm:flex-row xl:flex-col 2xl:flex-row">
               <Button type="submit" disabled={isSaving} className="rounded-sm bg-primary px-5 font-headline font-bold text-primary-foreground transition-opacity hover:opacity-90">
-                {editingState ? "Update" : "Create"}
+                {editingState ? t("actions.update") : t("actions.create")}
               </Button>
               {editingState ? (
                 <Button type="button" variant="outline" onClick={resetForms} disabled={isSaving} className="border-border/40 bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground">
-                  Cancel
+                  {t("actions.cancel")}
                 </Button>
               ) : null}
             </div>

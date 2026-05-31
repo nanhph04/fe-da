@@ -1833,6 +1833,345 @@
           "rejectFailed": "Không thể từ chối video.",
           "rejectReasonRequired": "Nhập lý do từ chối trước khi từ chối video này."
         }
+      },
+      "taxonomy": {
+        "metadata": {
+          "title": "Phân loại - Bảng điều khiển Admin",
+          "description": "Quản lý danh mục nội dung và thẻ cho Velvet Gallery"
+        },
+        "header": {
+          "eyebrow": "Phân loại nội dung",
+          "title": "Quản lý phân loại",
+          "description": "Tổ chức danh mục khám phá và thẻ tìm kiếm từ media service trong cùng một sổ đăng ký admin."
+        },
+        "tabs": {
+          "categories": "Danh mục",
+          "tags": "Thẻ"
+        },
+        "stats": {
+          "categories": "Danh mục",
+          "activeOnPage": "Đang bật trên trang",
+          "tags": "Thẻ",
+          "pendingOnPage": "Đang chờ trên trang"
+        },
+        "filters": {
+          "searchCategories": "Tìm danh mục...",
+          "searchTags": "Tìm thẻ..."
+        },
+        "registry": {
+          "categoryTitle": "Sổ đăng ký danh mục",
+          "tagTitle": "Sổ đăng ký thẻ",
+          "loading": "Đang tải bản ghi phân loại...",
+          "summary": "{count, plural, =0 {Không có bản ghi nào khớp với chế độ xem hiện tại.} one {# bản ghi khớp với chế độ xem hiện tại.} other {# bản ghi khớp với chế độ xem hiện tại.}}"
+        },
+        "table": {
+          "category": "Danh mục",
+          "tag": "Thẻ",
+          "slug": "Slug",
+          "description": "Mô tả",
+          "order": "Thứ tự",
+          "parent": "Cha",
+          "status": "Trạng thái",
+          "active": "Đang bật",
+          "created": "Ngày tạo",
+          "updated": "Cập nhật"
+        },
+        "statuses": {
+          "active": "Đang hoạt động",
+          "inactive": "Không hoạt động",
+          "pending": "Đang chờ",
+          "deleted": "Đã xóa"
+        },
+        "empty": {
+          "categories": "Không tìm thấy danh mục nào. Tạo danh mục từ bảng chỉnh sửa.",
+          "tags": "Không tìm thấy thẻ nào. Tạo thẻ từ bảng chỉnh sửa.",
+          "noDescription": "Chưa có mô tả.",
+          "none": "Không có"
+        },
+        "editor": {
+          "eyebrow": "Trình chỉnh sửa",
+          "createCategory": "Tạo danh mục",
+          "editCategory": "Sửa danh mục",
+          "createTag": "Tạo thẻ",
+          "editTag": "Sửa thẻ",
+          "categoryDescription": "Định hình các kệ khám phá bằng danh mục có thứ tự.",
+          "tagDescription": "Duy trì các thẻ tìm kiếm được dùng khi tải lên và khám phá."
+        },
+        "form": {
+          "name": "Tên",
+          "categoryNamePlaceholder": "Tên danh mục",
+          "tagNamePlaceholder": "Tên thẻ",
+          "description": "Mô tả",
+          "descriptionPlaceholder": "Mô tả khám phá",
+          "displayOrder": "Thứ tự hiển thị",
+          "status": "Trạng thái"
+        },
+        "actions": {
+          "refresh": "Làm mới",
+          "create": "Tạo",
+          "update": "Cập nhật",
+          "cancel": "Hủy",
+          "editCategory": "Sửa {name}",
+          "editTag": "Sửa {name}",
+          "activateCategory": "Bật {name}",
+          "deactivateCategory": "Tắt {name}",
+          "activateTag": "Bật {name}",
+          "deactivateTag": "Tắt {name}"
+        },
+        "pagination": {
+          "summary": "Trang <strong>{page}</strong> / {totalPages} - {total} bản ghi",
+          "previous": "Trước",
+          "next": "Tiếp"
+        },
+        "notices": {
+          "categoryCreated": "Đã tạo danh mục.",
+          "categoryUpdated": "Đã cập nhật danh mục.",
+          "tagCreated": "Đã tạo thẻ.",
+          "tagUpdated": "Đã cập nhật thẻ.",
+          "categoryActivated": "Đã bật danh mục {name}.",
+          "categoryInactivated": "Đã chuyển danh mục {name} sang không hoạt động.",
+          "tagActivated": "Đã bật thẻ {name}.",
+          "tagInactivated": "Đã chuyển thẻ {name} sang không hoạt động."
+        },
+        "errors": {
+          "loadFailed": "Không thể tải dữ liệu phân loại.",
+          "loadCategoriesFailed": "Không thể tải danh mục.",
+          "loadTagsFailed": "Không thể tải thẻ.",
+          "categoryNameRequired": "Vui lòng nhập tên danh mục.",
+          "tagNameRequired": "Vui lòng nhập tên thẻ.",
+          "saveCategoryFailed": "Không thể lưu danh mục.",
+          "saveTagFailed": "Không thể lưu thẻ.",
+          "updateCategoryStatusFailed": "Không thể cập nhật trạng thái danh mục.",
+          "updateTagStatusFailed": "Không thể cập nhật trạng thái thẻ."
+        }
+      }
+    },
+    "payouts": {
+      "header": {
+        "eyebrow": "Kiểm soát tài chính",
+        "title": "Quản lý thanh toán",
+        "description": "Duyệt các yêu cầu rút Aura Coin trước khi tiền rời khỏi quỹ nền tảng.",
+        "liveApi": "API trực tiếp"
+      },
+      "summary": {
+        "pendingRequests": {
+          "label": "Yêu cầu đang chờ"
+        },
+        "completed30d": {
+          "label": "Đã hoàn tất (30 ngày)",
+          "detail": "Hợp đồng dữ liệu thực từ finance-service"
+        },
+        "unavailable": "Không thể kết nối dịch vụ tài chính"
+      },
+      "queue": {
+        "title": "Hàng đợi rút tiền",
+        "loading": "Đang tải...",
+        "pendingCount": "{count} yêu cầu đang chờ",
+        "empty": "Chưa có lệnh rút tiền đang chờ duyệt."
+      },
+      "table": {
+        "requestId": "Mã yêu cầu",
+        "creator": "Nhà sáng tạo",
+        "amount": "Số tiền",
+        "bank": "Ngân hàng",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "actions": {
+        "review": "Duyệt",
+        "receipt": "Biên nhận",
+        "approve": "Duyệt thanh toán",
+        "complete": "Hoàn tất chuyển khoản",
+        "reject": "Từ chối thanh toán"
+      },
+      "statuses": {
+        "pending": "Đang chờ",
+        "approved": "Đã duyệt",
+        "processing": "Đang xử lý",
+        "completed": "Đã hoàn tất",
+        "rejected": "Đã từ chối",
+        "cancelled": "Đã hủy"
+      },
+      "fallbacks": {
+        "notAvailable": "Không có"
+      },
+      "errors": {
+        "loadFailed": "Không thể tải danh sách thanh toán.",
+        "loadDetailFailed": "Không thể tải chi tiết thanh toán.",
+        "updateFailed": "Không thể cập nhật thanh toán."
+      },
+      "messages": {
+        "approved": "Đã duyệt thanh toán thành công.",
+        "rejected": "Đã từ chối thanh toán thành công.",
+        "completed": "Đã hoàn tất thanh toán thành công."
+      },
+      "defaults": {
+        "approvedNote": "Admin đã duyệt",
+        "rejectedReason": "Admin đã từ chối",
+        "rejectedNote": "Admin đã từ chối",
+        "completedNote": "Admin đã hoàn tất chuyển khoản"
+      },
+      "detail": {
+        "backAria": "Quay lại hàng đợi thanh toán",
+        "loading": "Đang tải chi tiết thanh toán...",
+        "notFound": "Không tìm thấy yêu cầu thanh toán.",
+        "header": {
+          "eyebrow": "Yêu cầu thanh toán"
+        },
+        "transaction": {
+          "title": "Chi tiết giao dịch",
+          "creator": "Nhà sáng tạo / Người dùng",
+          "wallet": "Ví: {walletId}",
+          "amountRequested": "Số Aura Coin yêu cầu",
+          "exchangeRate": "Tỷ giá: {rate} VND/AC",
+          "bankDetails": "Thông tin ngân hàng",
+          "bank": "Ngân hàng: {bankName} ({bankCode})",
+          "account": "Tài khoản: {accountNumber}",
+          "accountHolder": "Tên: {accountHolderName}",
+          "qrAvailable": "QR: Có sẵn",
+          "finalPayoutAmount": "Số tiền thực nhận",
+          "requested": "Yêu cầu lúc: {date}"
+        },
+        "audit": {
+          "title": "Metadata kiểm toán",
+          "approvedAt": "Thời điểm duyệt",
+          "completedAt": "Thời điểm hoàn tất",
+          "rejectedAt": "Thời điểm từ chối",
+          "cancelledAt": "Thời điểm hủy",
+          "processedBy": "Admin xử lý",
+          "transferRef": "Mã chuyển khoản",
+          "description": "Mô tả",
+          "rejectionReason": "Lý do từ chối"
+        },
+        "risk": {
+          "title": "Phân tích rủi ro & gian lận",
+          "adminRouteAccess": "Quyền truy cập route admin",
+          "serverOwnershipBypass": "Bỏ qua kiểm tra sở hữu phía server",
+          "bankDetailSource": "Nguồn thông tin ngân hàng",
+          "verified": "Đã xác minh",
+          "adminScoped": "Trong phạm vi admin",
+          "financeApi": "Finance API"
+        },
+        "action": {
+          "title": "Thao tác",
+          "transactionNotes": "Ghi chú giao dịch",
+          "notesPlaceholder": "Ghi chú của admin...",
+          "transferReference": "Mã tham chiếu chuyển khoản",
+          "rejectReason": "Lý do từ chối",
+          "rejectPlaceholder": "Thông tin tài khoản không hợp lệ"
+        }
+      }
+    },
+    "finance": {
+      "common": {
+        "coinAmount": "{amount} AC",
+        "notAvailable": "N/A"
+      },
+      "header": {
+        "eyebrow": "Kiểm soát tài chính",
+        "title": "Quản lý gói nạp",
+        "description": "Quản lý các gói nạp VNĐ sang Aura Coin hiển thị trong luồng thanh toán ví của người xem.",
+        "liveApi": "API trực tiếp"
+      },
+      "summary": {
+        "activePackages": "Gói đang hoạt động",
+        "totalPackages": "{count, plural, =0 {0 gói tổng cộng} one {# gói tổng cộng} other {# gói tổng cộng}}",
+        "bonusPool": "Quỹ coin thưởng",
+        "bonusPoolDetail": "Coin thưởng trên các gói đang hoạt động",
+        "highestTopUp": "Gói nạp cao nhất",
+        "noPackageConfigured": "Chưa cấu hình gói"
+      },
+      "quickCreate": {
+        "title": "Tạo nhanh gói nạp",
+        "description": "Chọn preset để tự điền form, sau đó kiểm tra và bấm tạo gói nạp.",
+        "totalCoins": "Tổng {amount} AC"
+      },
+      "presets": {
+        "50k": {
+          "name": "Gói 50.000 VND",
+          "description": "Gói nạp phổ biến cho người xem mới."
+        },
+        "100k": {
+          "name": "Gói 100.000 VND",
+          "description": "Tặng thêm Aura Coin cho người dùng nạp thường xuyên."
+        },
+        "200k": {
+          "name": "Gói 200.000 VND",
+          "description": "Gói nạp giá trị cao với bonus tốt hơn."
+        },
+        "500k": {
+          "name": "Gói 500.000 VND",
+          "description": "Gói nạp lớn cho người dùng ủng hộ creator thường xuyên."
+        }
+      },
+      "form": {
+        "createTitle": "Tạo gói nạp mới",
+        "editTitle": "Chỉnh sửa gói nạp",
+        "description": "Chỉ gửi các trường được DTO của finance-service chấp nhận. Tổng coin được backend tính trong phản hồi."
+      },
+      "fields": {
+        "code": "Mã gói",
+        "name": "Tên gói",
+        "namePlaceholder": "Gói 500.000 VND",
+        "moneyAmount": "Số tiền",
+        "baseCoins": "Coin cơ bản",
+        "bonusCoins": "Coin thưởng",
+        "sortOrder": "Thứ tự sắp xếp",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Tặng thêm coin cho người dùng nạp lớn",
+        "activeHint": "Gói đang hoạt động và hiển thị trong luồng nạp ví của người xem."
+      },
+      "validation": {
+        "codeRequired": "Vui lòng nhập mã gói.",
+        "nameRequired": "Vui lòng nhập tên gói.",
+        "moneyPositive": "Số tiền phải lớn hơn 0.",
+        "baseCoinsPositive": "Số coin cơ bản phải lớn hơn 0.",
+        "bonusCoinsNonNegative": "Coin thưởng không được âm.",
+        "sortOrderNonNegative": "Thứ tự sắp xếp không được âm."
+      },
+      "success": {
+        "created": "Đã tạo gói nạp thành công.",
+        "updated": "Đã cập nhật gói nạp thành công."
+      },
+      "errors": {
+        "loadPackages": "Không thể tải danh sách gói nạp.",
+        "savePackage": "Không thể lưu gói nạp.",
+        "updateStatus": "Không thể cập nhật trạng thái gói nạp."
+      },
+      "actions": {
+        "createPackage": "Tạo gói nạp",
+        "manualEntry": "Nhập thủ công",
+        "retry": "Thử lại",
+        "close": "Đóng",
+        "saving": "Đang lưu...",
+        "saveChanges": "Lưu thay đổi",
+        "cancel": "Hủy",
+        "edit": "Sửa",
+        "disable": "Tắt",
+        "enable": "Bật"
+      },
+      "table": {
+        "title": "Gói nạp",
+        "loading": "Đang tải...",
+        "returnedCount": "{count, plural, =0 {0 gói được finance-service trả về} one {# gói được finance-service trả về} other {# gói được finance-service trả về}}",
+        "coinBreakdown": "Cơ bản {base} + Thưởng {bonus}",
+        "columns": {
+          "package": "Gói",
+          "money": "Số tiền",
+          "coins": "Coin",
+          "sort": "Thứ tự",
+          "status": "Trạng thái",
+          "updated": "Cập nhật",
+          "actions": "Thao tác"
+        }
+      },
+      "status": {
+        "active": "Đang bật",
+        "inactive": "Đang tắt"
+      },
+      "empty": {
+        "description": "Chưa có gói nạp nào. Tạo gói đầu tiên để hiển thị trong wallet checkout.",
+        "cta": "Tạo gói nạp đầu tiên"
       }
     },
     "dashboard": {

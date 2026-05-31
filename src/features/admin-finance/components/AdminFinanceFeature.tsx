@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { getErrorMessage } from "@/shared/api/client";
 import type { DepositPackage } from "@/features/wallet/types/wallet.types";
@@ -12,17 +13,10 @@ import {
   type UpdatePackagePayload,
 } from "../services/adminDepositService";
 
-const currencyFormatter = new Intl.NumberFormat("vi-VN", {
-  maximumFractionDigits: 0,
-  style: "currency",
-  currency: "VND",
-});
-
-const numberFormatter = new Intl.NumberFormat("en-US");
-
 type PackageFormState = CreatePackagePayload;
-
+type FinanceTranslations = ReturnType<typeof useTranslations>;
 type FormErrors = Partial<Record<keyof PackageFormState, string>>;
+type SummaryAccent = "primary" | "secondary" | "success";
 
 const emptyForm: PackageFormState = {
   code: "",
@@ -35,55 +29,61 @@ const emptyForm: PackageFormState = {
   description: "",
 };
 
-const packagePresets: PackageFormState[] = [
-  {
-    code: "TOPUP_50K",
-    name: "Goi 50.000 VND",
-    moneyAmount: 50000,
-    baseCoinAmount: 500,
-    bonusCoinAmount: 50,
-    sortOrder: 1,
-    isActive: true,
-    description: "Goi nap pho bien cho nguoi xem moi.",
-  },
-  {
-    code: "TOPUP_100K",
-    name: "Goi 100.000 VND",
-    moneyAmount: 100000,
-    baseCoinAmount: 1000,
-    bonusCoinAmount: 120,
-    sortOrder: 2,
-    isActive: true,
-    description: "Tang them Aura Coin cho nguoi dung nap thuong xuyen.",
-  },
-  {
-    code: "TOPUP_200K",
-    name: "Goi 200.000 VND",
-    moneyAmount: 200000,
-    baseCoinAmount: 2000,
-    bonusCoinAmount: 300,
-    sortOrder: 3,
-    isActive: true,
-    description: "Goi nap gia tri cao voi bonus tot hon.",
-  },
-  {
-    code: "TOPUP_500K",
-    name: "Goi 500.000 VND",
-    moneyAmount: 500000,
-    baseCoinAmount: 5000,
-    bonusCoinAmount: 900,
-    sortOrder: 4,
-    isActive: true,
-    description: "Goi nap lon cho nguoi dung ung ho creator thuong xuyen.",
-  },
-];
+function getIntlLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
+}
 
-function formatDate(value: string | null | undefined) {
+function getPackagePresets(t: FinanceTranslations): PackageFormState[] {
+  return [
+    {
+      code: "TOPUP_50K",
+      name: t("presets.50k.name"),
+      moneyAmount: 50000,
+      baseCoinAmount: 500,
+      bonusCoinAmount: 50,
+      sortOrder: 1,
+      isActive: true,
+      description: t("presets.50k.description"),
+    },
+    {
+      code: "TOPUP_100K",
+      name: t("presets.100k.name"),
+      moneyAmount: 100000,
+      baseCoinAmount: 1000,
+      bonusCoinAmount: 120,
+      sortOrder: 2,
+      isActive: true,
+      description: t("presets.100k.description"),
+    },
+    {
+      code: "TOPUP_200K",
+      name: t("presets.200k.name"),
+      moneyAmount: 200000,
+      baseCoinAmount: 2000,
+      bonusCoinAmount: 300,
+      sortOrder: 3,
+      isActive: true,
+      description: t("presets.200k.description"),
+    },
+    {
+      code: "TOPUP_500K",
+      name: t("presets.500k.name"),
+      moneyAmount: 500000,
+      baseCoinAmount: 5000,
+      bonusCoinAmount: 900,
+      sortOrder: 4,
+      isActive: true,
+      description: t("presets.500k.description"),
+    },
+  ];
+}
+
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
   if (!value) {
-    return "N/A";
+    return fallback;
   }
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -103,31 +103,31 @@ function createFormFromPackage(pkg: DepositPackage): PackageFormState {
   };
 }
 
-function validatePackageForm(form: PackageFormState) {
+function validatePackageForm(form: PackageFormState, t: FinanceTranslations) {
   const errors: FormErrors = {};
 
   if (!form.code.trim()) {
-    errors.code = "Package code is required.";
+    errors.code = t("validation.codeRequired");
   }
 
   if (!form.name.trim()) {
-    errors.name = "Package name is required.";
+    errors.name = t("validation.nameRequired");
   }
 
   if (form.moneyAmount <= 0) {
-    errors.moneyAmount = "Money amount must be greater than 0.";
+    errors.moneyAmount = t("validation.moneyPositive");
   }
 
   if (form.baseCoinAmount <= 0) {
-    errors.baseCoinAmount = "Base coin amount must be greater than 0.";
+    errors.baseCoinAmount = t("validation.baseCoinsPositive");
   }
 
   if (form.bonusCoinAmount < 0) {
-    errors.bonusCoinAmount = "Bonus coin amount cannot be negative.";
+    errors.bonusCoinAmount = t("validation.bonusCoinsNonNegative");
   }
 
   if (form.sortOrder < 0) {
-    errors.sortOrder = "Sort order cannot be negative.";
+    errors.sortOrder = t("validation.sortOrderNonNegative");
   }
 
   return errors;
@@ -158,13 +158,18 @@ function buildUpdatePayload(form: PackageFormState): UpdatePackagePayload {
   };
 }
 
-function getStatusClass(isActive: boolean | undefined) {
+function getStatusClass(isActive: boolean) {
   return isActive
     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
     : "border-border/40 bg-muted text-muted-foreground";
 }
 
-function getSummary(packages: DepositPackage[]) {
+function getSummary(
+  packages: DepositPackage[],
+  t: FinanceTranslations,
+  numberFormatter: Intl.NumberFormat,
+  currencyFormatter: Intl.NumberFormat,
+) {
   const activePackages = packages.filter(pkg => pkg.isActive ?? true);
   const totalBonus = activePackages.reduce((sum, pkg) => sum + pkg.bonusCoinAmount, 0);
   const highestPackage = packages.reduce<DepositPackage | null>((highest, pkg) => {
@@ -177,30 +182,30 @@ function getSummary(packages: DepositPackage[]) {
 
   return [
     {
-      label: "Active Packages",
+      label: t("summary.activePackages"),
       value: numberFormatter.format(activePackages.length),
-      detail: `${numberFormatter.format(packages.length)} total packages`,
+      detail: t("summary.totalPackages", { count: packages.length }),
       icon: "inventory_2",
-      accent: "primary",
+      accent: "primary" as SummaryAccent,
     },
     {
-      label: "Bonus Pool",
-      value: `${numberFormatter.format(totalBonus)} AC`,
-      detail: "Bonus coins across active packages",
+      label: t("summary.bonusPool"),
+      value: t("common.coinAmount", { amount: numberFormatter.format(totalBonus) }),
+      detail: t("summary.bonusPoolDetail"),
       icon: "paid",
-      accent: "secondary",
+      accent: "secondary" as SummaryAccent,
     },
     {
-      label: "Highest Top-up",
+      label: t("summary.highestTopUp"),
       value: highestPackage ? currencyFormatter.format(highestPackage.moneyAmount) : "-",
-      detail: highestPackage ? highestPackage.code : "No package configured",
+      detail: highestPackage ? highestPackage.code : t("summary.noPackageConfigured"),
       icon: "trending_up",
-      accent: "success",
+      accent: "success" as SummaryAccent,
     },
   ] as const;
 }
 
-function getSummaryAccent(accent: ReturnType<typeof getSummary>[number]["accent"]) {
+function getSummaryAccent(accent: SummaryAccent) {
   if (accent === "secondary") {
     return "border-l-secondary text-secondary";
   }
@@ -213,6 +218,17 @@ function getSummaryAccent(accent: ReturnType<typeof getSummary>[number]["accent"
 }
 
 export function AdminFinanceFeature() {
+  const t = useTranslations("Admin.finance");
+  const locale = useLocale();
+  const intlLocale = getIntlLocale(locale);
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat(intlLocale, {
+    maximumFractionDigits: 0,
+    style: "currency",
+    currency: "VND",
+  }), [intlLocale]);
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(intlLocale), [intlLocale]);
+  const packagePresets = useMemo(() => getPackagePresets(t), [t]);
+
   const [packages, setPackages] = useState<DepositPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -224,7 +240,10 @@ export function AdminFinanceFeature() {
   const [editingPackage, setEditingPackage] = useState<DepositPackage | null>(null);
   const [form, setForm] = useState<PackageFormState>(emptyForm);
 
-  const packageSummary = useMemo(() => getSummary(packages), [packages]);
+  const packageSummary = useMemo(
+    () => getSummary(packages, t, numberFormatter, currencyFormatter),
+    [currencyFormatter, numberFormatter, packages, t],
+  );
 
   const loadPackages = async () => {
     try {
@@ -234,7 +253,7 @@ export function AdminFinanceFeature() {
       const data = await AdminDepositService.getAdminPackages();
       setPackages([...data].sort((a, b) => a.sortOrder - b.sortOrder));
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the tai danh sach goi nap."));
+      setError(getErrorMessage(err, t("errors.loadPackages")));
       setPackages([]);
     } finally {
       setIsLoading(false);
@@ -255,7 +274,7 @@ export function AdminFinanceFeature() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(getErrorMessage(err, "Khong the tai danh sach goi nap."));
+          setError(getErrorMessage(err, t("errors.loadPackages")));
           setPackages([]);
         }
       } finally {
@@ -270,7 +289,7 @@ export function AdminFinanceFeature() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const openCreateForm = () => {
     setEditingPackage(null);
@@ -283,7 +302,7 @@ export function AdminFinanceFeature() {
 
   const applyPreset = (preset: PackageFormState) => {
     setEditingPackage(null);
-    setForm(preset);
+    setForm({ ...preset });
     setFormErrors({});
     setFormError(null);
     setSuccessMessage(null);
@@ -318,7 +337,7 @@ export function AdminFinanceFeature() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nextErrors = validatePackageForm(form);
+    const nextErrors = validatePackageForm(form, t);
     setFormErrors(nextErrors);
     setFormError(null);
 
@@ -330,16 +349,16 @@ export function AdminFinanceFeature() {
       setIsSaving(true);
       if (editingPackage) {
         await AdminDepositService.updatePackage(editingPackage.id, buildUpdatePayload(form));
-        setSuccessMessage("Da cap nhat goi nap thanh cong.");
+        setSuccessMessage(t("success.updated"));
       } else {
         await AdminDepositService.createPackage(buildPackagePayload(form));
-        setSuccessMessage("Da tao goi nap thanh cong.");
+        setSuccessMessage(t("success.created"));
       }
 
       closeForm();
       await loadPackages();
     } catch (err) {
-      setFormError(getErrorMessage(err, "Khong the luu goi nap."));
+      setFormError(getErrorMessage(err, t("errors.savePackage")));
     } finally {
       setIsSaving(false);
     }
@@ -351,7 +370,7 @@ export function AdminFinanceFeature() {
       await AdminDepositService.updatePackage(pkg.id, { isActive: !(pkg.isActive ?? true) });
       await loadPackages();
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the cap nhat trang thai goi nap."));
+      setError(getErrorMessage(err, t("errors.updateStatus")));
     }
   };
 
@@ -360,25 +379,25 @@ export function AdminFinanceFeature() {
       <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-secondary">
-            Finance Control
+            {t("header.eyebrow")}
           </p>
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">
-            Deposit Package Management
+            {t("header.title")}
           </h1>
           <p className="mt-2 max-w-2xl font-body text-sm text-muted-foreground">
-            Manage VND to Aura Coin top-up packages shown on the viewer wallet checkout flow.
+            {t("header.description")}
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <span className="inline-flex items-center justify-center rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground">
-            Live API
+            {t("header.liveApi")}
           </span>
           <button
             type="button"
             onClick={openCreateForm}
             className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-5 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:-translate-y-0.5 hover:opacity-90"
           >
-            Tao goi nap
+            {t("actions.createPackage")}
           </button>
         </div>
       </header>
@@ -391,7 +410,7 @@ export function AdminFinanceFeature() {
             onClick={() => void loadPackages()}
             className="rounded-sm border border-primary/40 px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-primary/20"
           >
-            Retry
+            {t("actions.retry")}
           </button>
         </div>
       ) : null}
@@ -424,9 +443,9 @@ export function AdminFinanceFeature() {
         <section className="rounded-lg border border-secondary/20 bg-secondary/5 p-5">
           <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="font-headline text-lg font-bold text-foreground">Tao nhanh goi nap</h2>
+              <h2 className="font-headline text-lg font-bold text-foreground">{t("quickCreate.title")}</h2>
               <p className="font-body text-sm text-muted-foreground">
-                Chon preset de tu dien form, sau do kiem tra va bam tao goi nap.
+                {t("quickCreate.description")}
               </p>
             </div>
             <button
@@ -434,7 +453,7 @@ export function AdminFinanceFeature() {
               onClick={openCreateForm}
               className="inline-flex min-h-10 items-center justify-center rounded-sm border border-secondary/40 px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-secondary transition-colors hover:bg-secondary/10"
             >
-              Nhap thu cong
+              {t("actions.manualEntry")}
             </button>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -450,7 +469,7 @@ export function AdminFinanceFeature() {
                   {currencyFormatter.format(preset.moneyAmount)}
                 </span>
                 <span className="mt-1 block font-body text-xs text-muted-foreground">
-                  {numberFormatter.format(preset.baseCoinAmount + preset.bonusCoinAmount)} AC total
+                  {t("quickCreate.totalCoins", { amount: numberFormatter.format(preset.baseCoinAmount + preset.bonusCoinAmount) })}
                 </span>
               </button>
             ))}
@@ -463,10 +482,10 @@ export function AdminFinanceFeature() {
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <h2 className="font-headline text-xl font-bold text-foreground">
-                {editingPackage ? "Chinh sua goi nap" : "Tao goi nap moi"}
+                {editingPackage ? t("form.editTitle") : t("form.createTitle")}
               </h2>
               <p className="mt-1 font-body text-sm text-muted-foreground">
-                Only send fields accepted by finance-service DTO. Total coins are derived by the backend response.
+                {t("form.description")}
               </p>
             </div>
             <button
@@ -474,7 +493,7 @@ export function AdminFinanceFeature() {
               onClick={closeForm}
               className="rounded-sm border border-border/40 px-3 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              Close
+              {t("actions.close")}
             </button>
           </div>
 
@@ -486,7 +505,7 @@ export function AdminFinanceFeature() {
 
           <form className="grid grid-cols-1 gap-5 lg:grid-cols-2" onSubmit={handleSubmit}>
             <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Code</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.code")}</span>
               <input
                 value={form.code}
                 onChange={event => updateFormValue("code", event.target.value)}
@@ -498,18 +517,18 @@ export function AdminFinanceFeature() {
             </label>
 
             <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Name</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.name")}</span>
               <input
                 value={form.name}
                 onChange={event => updateFormValue("name", event.target.value)}
-                placeholder="Goi 500.000 VND"
+                placeholder={t("fields.namePlaceholder")}
                 className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
               />
               {formErrors.name ? <p className="text-xs text-primary">{formErrors.name}</p> : null}
             </label>
 
             <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Money Amount</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.moneyAmount")}</span>
               <input
                 type="number"
                 min={0}
@@ -521,7 +540,7 @@ export function AdminFinanceFeature() {
             </label>
 
             <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Base Coins</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.baseCoins")}</span>
               <input
                 type="number"
                 min={0}
@@ -533,7 +552,7 @@ export function AdminFinanceFeature() {
             </label>
 
             <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Bonus Coins</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.bonusCoins")}</span>
               <input
                 type="number"
                 min={0}
@@ -545,7 +564,7 @@ export function AdminFinanceFeature() {
             </label>
 
             <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Sort Order</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.sortOrder")}</span>
               <input
                 type="number"
                 min={0}
@@ -557,12 +576,12 @@ export function AdminFinanceFeature() {
             </label>
 
             <label className="space-y-2 lg:col-span-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">Description</span>
+              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.description")}</span>
               <textarea
                 value={form.description}
                 onChange={event => updateFormValue("description", event.target.value)}
                 rows={3}
-                placeholder="Tang them coin cho nguoi dung nap lon"
+                placeholder={t("fields.descriptionPlaceholder")}
                 className="w-full resize-none rounded-sm border border-border/40 bg-background px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
               />
             </label>
@@ -574,7 +593,7 @@ export function AdminFinanceFeature() {
                 onChange={event => updateFormValue("isActive", event.target.checked)}
                 className="h-4 w-4 accent-primary"
               />
-              <span className="font-body text-sm text-foreground">Package is active and visible to viewer top-up flow.</span>
+              <span className="font-body text-sm text-foreground">{t("fields.activeHint")}</span>
             </label>
 
             <div className="flex flex-col gap-3 sm:flex-row lg:col-span-2">
@@ -583,7 +602,7 @@ export function AdminFinanceFeature() {
                 disabled={isSaving}
                 className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "Saving..." : editingPackage ? "Save Changes" : "Create Package"}
+                {isSaving ? t("actions.saving") : editingPackage ? t("actions.saveChanges") : t("actions.createPackage")}
               </button>
               <button
                 type="button"
@@ -591,7 +610,7 @@ export function AdminFinanceFeature() {
                 disabled={isSaving}
                 className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border/40 px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Cancel
+                {t("actions.cancel")}
               </button>
             </div>
           </form>
@@ -604,10 +623,10 @@ export function AdminFinanceFeature() {
             <span className="material-symbols-outlined text-secondary" aria-hidden="true">
               payments
             </span>
-            <h2 className="font-headline text-lg font-bold text-foreground">Deposit Packages</h2>
+            <h2 className="font-headline text-lg font-bold text-foreground">{t("table.title")}</h2>
           </div>
           <span className="font-mono text-xs text-muted-foreground">
-            {isLoading ? "Loading..." : `${packages.length} packages returned by finance-service`}
+            {isLoading ? t("table.loading") : t("table.returnedCount", { count: packages.length })}
           </span>
         </div>
 
@@ -615,13 +634,13 @@ export function AdminFinanceFeature() {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                <th className="px-6 py-4">Package</th>
-                <th className="px-6 py-4">Money</th>
-                <th className="px-6 py-4">Coins</th>
-                <th className="px-6 py-4">Sort</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4">Updated</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4">{t("table.columns.package")}</th>
+                <th className="px-6 py-4">{t("table.columns.money")}</th>
+                <th className="px-6 py-4">{t("table.columns.coins")}</th>
+                <th className="px-6 py-4">{t("table.columns.sort")}</th>
+                <th className="px-6 py-4 text-center">{t("table.columns.status")}</th>
+                <th className="px-6 py-4">{t("table.columns.updated")}</th>
+                <th className="px-6 py-4 text-right">{t("table.columns.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -638,60 +657,71 @@ export function AdminFinanceFeature() {
                   <td className="px-6 py-12 text-center" colSpan={7}>
                     <div className="mx-auto max-w-md space-y-4">
                       <p className="font-body text-sm text-muted-foreground">
-                        Chua co goi nap nao. Tao goi dau tien de hien thi trong wallet checkout.
+                        {t("empty.description")}
                       </p>
                       <button
                         type="button"
                         onClick={openCreateForm}
                         className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-5 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:opacity-90"
                       >
-                        Tao goi nap dau tien
+                        {t("empty.cta")}
                       </button>
                     </div>
                   </td>
                 </tr>
               ) : (
-                packages.map(pkg => (
-                  <tr key={pkg.id} className="group transition-colors hover:bg-muted/40">
-                    <td className="px-6 py-4">
-                      <p className="font-headline text-sm font-bold text-foreground">{pkg.name}</p>
-                      <p className="font-mono text-[10px] uppercase tracking-widest text-secondary">{pkg.code}</p>
-                      <p className="mt-1 max-w-xs truncate font-body text-xs text-muted-foreground">{pkg.description}</p>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm text-foreground">
-                      {currencyFormatter.format(pkg.moneyAmount)}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs text-muted-foreground">
-                      <span className="block text-sm font-bold text-foreground">{numberFormatter.format(pkg.totalCoinAmount)} AC</span>
-                      Base {numberFormatter.format(pkg.baseCoinAmount)} + Bonus {numberFormatter.format(pkg.bonusCoinAmount)}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-sm text-foreground">{pkg.sortOrder}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex rounded-sm border px-3 py-1 font-headline text-[10px] font-bold uppercase tracking-widest ${getStatusClass(pkg.isActive)}`}>
-                        {pkg.isActive ?? true ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{formatDate(pkg.updatedAt)}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEditForm(pkg)}
-                          className="rounded-sm border border-border/40 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void togglePackageStatus(pkg)}
-                          className="rounded-sm border border-primary/30 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
-                        >
-                          {pkg.isActive ?? true ? "Disable" : "Enable"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                packages.map(pkg => {
+                  const isActive = pkg.isActive ?? true;
+
+                  return (
+                    <tr key={pkg.id} className="group transition-colors hover:bg-muted/40">
+                      <td className="px-6 py-4">
+                        <p className="font-headline text-sm font-bold text-foreground">{pkg.name}</p>
+                        <p className="font-mono text-[10px] uppercase tracking-widest text-secondary">{pkg.code}</p>
+                        <p className="mt-1 max-w-xs truncate font-body text-xs text-muted-foreground">{pkg.description}</p>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-sm text-foreground">
+                        {currencyFormatter.format(pkg.moneyAmount)}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-muted-foreground">
+                        <span className="block text-sm font-bold text-foreground">
+                          {t("common.coinAmount", { amount: numberFormatter.format(pkg.totalCoinAmount) })}
+                        </span>
+                        {t("table.coinBreakdown", {
+                          base: numberFormatter.format(pkg.baseCoinAmount),
+                          bonus: numberFormatter.format(pkg.bonusCoinAmount),
+                        })}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-sm text-foreground">{pkg.sortOrder}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`inline-flex rounded-sm border px-3 py-1 font-headline text-[10px] font-bold uppercase tracking-widest ${getStatusClass(isActive)}`}>
+                          {isActive ? t("status.active") : t("status.inactive")}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-muted-foreground">
+                        {formatDate(pkg.updatedAt, locale, t("common.notAvailable"))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEditForm(pkg)}
+                            className="rounded-sm border border-border/40 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted"
+                          >
+                            {t("actions.edit")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void togglePackageStatus(pkg)}
+                            className="rounded-sm border border-primary/30 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
+                          >
+                            {isActive ? t("actions.disable") : t("actions.enable")}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

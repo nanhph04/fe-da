@@ -2,32 +2,26 @@
 
 import { Link } from "@/i18n/routing";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getErrorMessage } from "@/shared/api/client";
 import type { Withdrawal } from "@/features/wallet/types/wallet.types";
 
 import { AdminWithdrawalService } from "../services/adminWithdrawalService";
 
-const currencyFormatter = new Intl.NumberFormat("vi-VN", {
-  maximumFractionDigits: 0,
-  style: "currency",
-  currency: "VND",
-});
-const numberFormatter = new Intl.NumberFormat("en-US");
+type Translator = ReturnType<typeof useTranslations>;
 
-const riskChecks = [
-  { label: "Admin route access", value: "Verified", status: "passed" },
-  { label: "Server ownership bypass", value: "Admin scoped", status: "passed" },
-  { label: "Bank detail source", value: "Finance API", status: "passed" },
-];
+function getIntlLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
+}
 
-function formatDate(value: string | null | undefined) {
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
   if (!value) {
-    return "N/A";
+    return fallback;
   }
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
@@ -48,9 +42,48 @@ function getStatusClass(status: string) {
   return "border-primary/30 bg-primary/10 text-primary";
 }
 
+function getStatusLabel(status: string, t: Translator) {
+  switch (status.toLowerCase()) {
+    case "approved":
+      return t("statuses.approved");
+    case "cancelled":
+      return t("statuses.cancelled");
+    case "completed":
+      return t("statuses.completed");
+    case "pending":
+      return t("statuses.pending");
+    case "processing":
+      return t("statuses.processing");
+    case "rejected":
+      return t("statuses.rejected");
+    default:
+      return status;
+  }
+}
+
 export function PayoutDetailFeature() {
   const params = useParams();
   const id = params.id as string;
+  const t = useTranslations("Admin.payouts");
+  const locale = useLocale();
+  const dateFallback = t("fallbacks.notAvailable");
+  const currencyFormatter = useMemo(
+    () => new Intl.NumberFormat(getIntlLocale(locale), {
+      maximumFractionDigits: 0,
+      style: "currency",
+      currency: "VND",
+    }),
+    [locale]
+  );
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
+  const riskChecks = useMemo(
+    () => [
+      { label: t("detail.risk.adminRouteAccess"), value: t("detail.risk.verified") },
+      { label: t("detail.risk.serverOwnershipBypass"), value: t("detail.risk.adminScoped") },
+      { label: t("detail.risk.bankDetailSource"), value: t("detail.risk.financeApi") },
+    ],
+    [t]
+  );
   const [withdrawal, setWithdrawal] = useState<Withdrawal | null>(null);
   const [adminNote, setAdminNote] = useState("");
   const [rejectReason, setRejectReason] = useState("");
@@ -68,12 +101,12 @@ export function PayoutDetailFeature() {
       setWithdrawal(data);
       setAdminNote(data.adminNote ?? "");
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the tai chi tiet payout."));
+      setError(getErrorMessage(err, t("errors.loadDetailFailed")));
       setWithdrawal(null);
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     void loadWithdrawal();
@@ -93,28 +126,28 @@ export function PayoutDetailFeature() {
       let updated: Withdrawal;
 
       if (action === "approve") {
-        updated = await AdminWithdrawalService.approveWithdrawal(withdrawal.id, note || "Approved by admin");
-        setActionMessage("Payout approved successfully.");
+        updated = await AdminWithdrawalService.approveWithdrawal(withdrawal.id, note || t("defaults.approvedNote"));
+        setActionMessage(t("messages.approved"));
       } else if (action === "reject") {
         updated = await AdminWithdrawalService.rejectWithdrawal(
           withdrawal.id,
-          rejectReason.trim() || "Rejected by admin",
-          note || "Rejected by admin"
+          rejectReason.trim() || t("defaults.rejectedReason"),
+          note || t("defaults.rejectedNote")
         );
-        setActionMessage("Payout rejected successfully.");
+        setActionMessage(t("messages.rejected"));
       } else {
         updated = await AdminWithdrawalService.completeWithdrawal(
           withdrawal.id,
           transferReference.trim() || `BANK-${withdrawal.id}`,
-          note || "Transfer completed by admin"
+          note || t("defaults.completedNote")
         );
-        setActionMessage("Payout completed successfully.");
+        setActionMessage(t("messages.completed"));
       }
 
       setWithdrawal(updated);
       setAdminNote(updated.adminNote ?? note);
     } catch (err) {
-      setError(getErrorMessage(err, "Khong the cap nhat payout."));
+      setError(getErrorMessage(err, t("errors.updateFailed")));
     } finally {
       setIsActionLoading(false);
     }
@@ -131,7 +164,7 @@ export function PayoutDetailFeature() {
           <Link
             href="/admin/payouts"
             className="flex h-10 w-10 items-center justify-center rounded border border-border/30 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Back to payout queue"
+            aria-label={t("detail.backAria")}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
               arrow_back
@@ -139,7 +172,7 @@ export function PayoutDetailFeature() {
           </Link>
           <div>
             <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-secondary">
-              Payout Request
+              {t("detail.header.eyebrow")}
             </p>
             <h1 className="font-headline text-3xl font-extrabold tracking-tight text-foreground">
               {id}
@@ -147,7 +180,7 @@ export function PayoutDetailFeature() {
           </div>
         </div>
         <span className={`w-fit rounded-sm border px-3 py-1 font-label text-xs font-bold uppercase tracking-widest ${getStatusClass(withdrawal?.status ?? "pending")}`}>
-          {withdrawal?.status ?? "Loading"}
+          {withdrawal ? getStatusLabel(withdrawal.status, t) : t("queue.loading")}
         </span>
       </header>
 
@@ -160,73 +193,73 @@ export function PayoutDetailFeature() {
       ) : null}
 
       {isLoading ? (
-        <div className="rounded-lg border border-border/30 bg-card p-8 font-body text-sm text-muted-foreground">Loading payout detail...</div>
+        <div className="rounded-lg border border-border/30 bg-card p-8 font-body text-sm text-muted-foreground">{t("detail.loading")}</div>
       ) : !withdrawal ? (
-        <div className="rounded-lg border border-border/30 bg-card p-8 font-body text-sm text-muted-foreground">Payout not found.</div>
+        <div className="rounded-lg border border-border/30 bg-card p-8 font-body text-sm text-muted-foreground">{t("detail.notFound")}</div>
       ) : (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="space-y-6 lg:col-span-8">
             <article className="rounded-lg border border-border/30 bg-card p-6">
               <h2 className="mb-6 border-b border-border/30 pb-4 font-headline text-lg font-bold uppercase tracking-widest text-foreground">
-                Transaction Details
+                {t("detail.transaction.title")}
               </h2>
 
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                 <div>
-                  <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Creator / User</p>
+                  <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("detail.transaction.creator")}</p>
                   <p className="mt-1 font-headline text-sm font-bold text-foreground">{withdrawal.userId}</p>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">Wallet: {withdrawal.walletId}</p>
+                  <p className="mt-1 font-mono text-xs text-muted-foreground">{t("detail.transaction.wallet", { walletId: withdrawal.walletId })}</p>
                 </div>
 
                 <div>
                   <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Amount Requested
+                    {t("detail.transaction.amountRequested")}
                   </p>
                   <p className="mt-1 font-headline text-3xl font-black text-secondary">{numberFormatter.format(withdrawal.coinAmount)} AC</p>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">Exchange Rate: {numberFormatter.format(withdrawal.exchangeRate)} VND/AC</p>
+                  <p className="mt-1 font-mono text-xs text-muted-foreground">{t("detail.transaction.exchangeRate", { rate: numberFormatter.format(withdrawal.exchangeRate) })}</p>
                 </div>
 
                 <div>
                   <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Bank Details
+                    {t("detail.transaction.bankDetails")}
                   </p>
                   <div className="mt-3 space-y-1 rounded-sm border border-border/30 bg-background p-4 font-mono text-xs">
-                    <p className="text-foreground">Bank: {withdrawal.bankInfo.bankName} ({withdrawal.bankInfo.bankCode})</p>
-                    <p className="text-muted-foreground">Account: {withdrawal.bankInfo.accountNumber}</p>
-                    <p className="text-muted-foreground">Name: {withdrawal.bankInfo.accountHolderName}</p>
-                    {withdrawal.bankInfo.qrCode ? <p className="text-muted-foreground">QR: Available</p> : null}
+                    <p className="text-foreground">{t("detail.transaction.bank", { bankName: withdrawal.bankInfo.bankName, bankCode: withdrawal.bankInfo.bankCode })}</p>
+                    <p className="text-muted-foreground">{t("detail.transaction.account", { accountNumber: withdrawal.bankInfo.accountNumber })}</p>
+                    <p className="text-muted-foreground">{t("detail.transaction.accountHolder", { accountHolderName: withdrawal.bankInfo.accountHolderName })}</p>
+                    {withdrawal.bankInfo.qrCode ? <p className="text-muted-foreground">{t("detail.transaction.qrAvailable")}</p> : null}
                   </div>
                 </div>
 
                 <div>
                   <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Final Payout Amount
+                    {t("detail.transaction.finalPayoutAmount")}
                   </p>
                   <p className="mt-1 font-headline text-3xl font-black text-emerald-400">{currencyFormatter.format(withdrawal.moneyAmount)}</p>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">Requested: {formatDate(withdrawal.requestedAt)}</p>
+                  <p className="mt-1 font-mono text-xs text-muted-foreground">{t("detail.transaction.requested", { date: formatDate(withdrawal.requestedAt, locale, dateFallback) })}</p>
                 </div>
               </div>
             </article>
 
             <article className="rounded-lg border border-border/30 bg-card p-6">
               <h2 className="mb-4 border-b border-border/30 pb-4 font-headline text-lg font-bold uppercase tracking-widest text-foreground">
-                Audit Metadata
+                {t("detail.audit.title")}
               </h2>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Info label="Approved At" value={formatDate(withdrawal.approvedAt)} />
-                <Info label="Completed At" value={formatDate(withdrawal.completedAt)} />
-                <Info label="Rejected At" value={formatDate(withdrawal.rejectedAt)} />
-                <Info label="Cancelled At" value={formatDate(withdrawal.cancelledAt)} />
-                <Info label="Processed By" value={withdrawal.processedByAdminId ?? "N/A"} />
-                <Info label="Transfer Ref" value={withdrawal.transferReference ?? "N/A"} />
-                <Info label="Description" value={withdrawal.description ?? "N/A"} />
-                <Info label="Rejection Reason" value={withdrawal.rejectionReason ?? "N/A"} />
+                <Info label={t("detail.audit.approvedAt")} value={formatDate(withdrawal.approvedAt, locale, dateFallback)} />
+                <Info label={t("detail.audit.completedAt")} value={formatDate(withdrawal.completedAt, locale, dateFallback)} />
+                <Info label={t("detail.audit.rejectedAt")} value={formatDate(withdrawal.rejectedAt, locale, dateFallback)} />
+                <Info label={t("detail.audit.cancelledAt")} value={formatDate(withdrawal.cancelledAt, locale, dateFallback)} />
+                <Info label={t("detail.audit.processedBy")} value={withdrawal.processedByAdminId ?? dateFallback} />
+                <Info label={t("detail.audit.transferRef")} value={withdrawal.transferReference ?? dateFallback} />
+                <Info label={t("detail.audit.description")} value={withdrawal.description ?? dateFallback} />
+                <Info label={t("detail.audit.rejectionReason")} value={withdrawal.rejectionReason ?? dateFallback} />
               </div>
             </article>
 
             <article className="rounded-lg border border-border/30 bg-card p-6">
               <h2 className="mb-4 border-b border-border/30 pb-4 font-headline text-lg font-bold uppercase tracking-widest text-foreground">
-                Risk & Fraud Analysis
+                {t("detail.risk.title")}
               </h2>
               <ul className="space-y-3 font-mono text-xs">
                 {riskChecks.map((check) => (
@@ -246,16 +279,16 @@ export function PayoutDetailFeature() {
 
           <aside className="space-y-6 lg:col-span-4">
             <div className="sticky top-24 rounded-lg border border-border/30 bg-card p-6">
-              <h2 className="mb-6 font-headline text-xl font-bold uppercase tracking-widest text-foreground">Action</h2>
+              <h2 className="mb-6 font-headline text-xl font-bold uppercase tracking-widest text-foreground">{t("detail.action.title")}</h2>
 
               <div className="space-y-6">
                 <div>
                   <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Transaction Notes
+                    {t("detail.action.transactionNotes")}
                   </label>
                   <textarea
                     className="min-h-[100px] w-full rounded-sm border border-border/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-secondary"
-                    placeholder="Admin notes..."
+                    placeholder={t("detail.action.notesPlaceholder")}
                     value={adminNote}
                     onChange={(event) => setAdminNote(event.target.value)}
                   />
@@ -263,7 +296,7 @@ export function PayoutDetailFeature() {
 
                 <div>
                   <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Transfer Reference
+                    {t("detail.action.transferReference")}
                   </label>
                   <input
                     className="w-full rounded-sm border border-border/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-secondary"
@@ -275,11 +308,11 @@ export function PayoutDetailFeature() {
 
                 <div>
                   <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Reject Reason
+                    {t("detail.action.rejectReason")}
                   </label>
                   <input
                     className="w-full rounded-sm border border-border/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                    placeholder="Thong tin tai khoan khong hop le"
+                    placeholder={t("detail.action.rejectPlaceholder")}
                     value={rejectReason}
                     onChange={(event) => setRejectReason(event.target.value)}
                   />
@@ -292,7 +325,7 @@ export function PayoutDetailFeature() {
                     onClick={() => void runAction("approve")}
                     className="flex w-full items-center justify-center gap-2 rounded-sm bg-secondary py-3 font-headline text-xs font-black uppercase tracking-widest text-black shadow-lg shadow-secondary/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Approve Payout
+                    {t("actions.approve")}
                   </button>
                   <button
                     type="button"
@@ -300,7 +333,7 @@ export function PayoutDetailFeature() {
                     onClick={() => void runAction("complete")}
                     className="flex w-full items-center justify-center gap-2 rounded-sm border border-emerald-500/40 bg-emerald-500/10 py-3 font-headline text-xs font-bold uppercase tracking-widest text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Complete Transfer
+                    {t("actions.complete")}
                   </button>
                   <button
                     type="button"
@@ -308,7 +341,7 @@ export function PayoutDetailFeature() {
                     onClick={() => void runAction("reject")}
                     className="w-full rounded-sm border border-primary/40 bg-transparent py-3 font-headline text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Reject Payout
+                    {t("actions.reject")}
                   </button>
                 </div>
               </div>

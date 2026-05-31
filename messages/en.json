@@ -1881,6 +1881,345 @@
           "rejectFailed": "Unable to reject video.",
           "rejectReasonRequired": "Enter a rejection reason before rejecting this video."
         }
+      },
+      "taxonomy": {
+        "metadata": {
+          "title": "Taxonomy - Admin Console",
+          "description": "Manage content categories and tags for Velvet Gallery"
+        },
+        "header": {
+          "eyebrow": "Media Taxonomy",
+          "title": "Taxonomy Management",
+          "description": "Organize discovery categories and searchable tags from the media service in one admin registry."
+        },
+        "tabs": {
+          "categories": "Categories",
+          "tags": "Tags"
+        },
+        "stats": {
+          "categories": "Categories",
+          "activeOnPage": "Active on Page",
+          "tags": "Tags",
+          "pendingOnPage": "Pending on Page"
+        },
+        "filters": {
+          "searchCategories": "Search categories...",
+          "searchTags": "Search tags..."
+        },
+        "registry": {
+          "categoryTitle": "Category Registry",
+          "tagTitle": "Tag Registry",
+          "loading": "Loading taxonomy records...",
+          "summary": "{count, plural, =0 {No records match the current view.} one {# record matches the current view.} other {# records match the current view.}}"
+        },
+        "table": {
+          "category": "Category",
+          "tag": "Tag",
+          "slug": "Slug",
+          "description": "Description",
+          "order": "Order",
+          "parent": "Parent",
+          "status": "Status",
+          "active": "Active",
+          "created": "Created",
+          "updated": "Updated"
+        },
+        "statuses": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "pending": "Pending",
+          "deleted": "Deleted"
+        },
+        "empty": {
+          "categories": "No categories found. Create a category from the editor panel.",
+          "tags": "No tags found. Create a tag from the editor panel.",
+          "noDescription": "No description.",
+          "none": "None"
+        },
+        "editor": {
+          "eyebrow": "Editor",
+          "createCategory": "Create Category",
+          "editCategory": "Edit Category",
+          "createTag": "Create Tag",
+          "editTag": "Edit Tag",
+          "categoryDescription": "Shape discovery shelves with ordered categories.",
+          "tagDescription": "Maintain searchable tags used by uploads and discovery."
+        },
+        "form": {
+          "name": "Name",
+          "categoryNamePlaceholder": "Category name",
+          "tagNamePlaceholder": "Tag name",
+          "description": "Description",
+          "descriptionPlaceholder": "Discovery description",
+          "displayOrder": "Display Order",
+          "status": "Status"
+        },
+        "actions": {
+          "refresh": "Refresh",
+          "create": "Create",
+          "update": "Update",
+          "cancel": "Cancel",
+          "editCategory": "Edit {name}",
+          "editTag": "Edit {name}",
+          "activateCategory": "Activate {name}",
+          "deactivateCategory": "Deactivate {name}",
+          "activateTag": "Activate {name}",
+          "deactivateTag": "Deactivate {name}"
+        },
+        "pagination": {
+          "summary": "Page <strong>{page}</strong> / {totalPages} - {total, plural, one {# record} other {# records}}",
+          "previous": "Previous",
+          "next": "Next"
+        },
+        "notices": {
+          "categoryCreated": "Category created.",
+          "categoryUpdated": "Category updated.",
+          "tagCreated": "Tag created.",
+          "tagUpdated": "Tag updated.",
+          "categoryActivated": "Category {name} activated.",
+          "categoryInactivated": "Category {name} set to inactive.",
+          "tagActivated": "Tag {name} activated.",
+          "tagInactivated": "Tag {name} set to inactive."
+        },
+        "errors": {
+          "loadFailed": "Unable to load taxonomy.",
+          "loadCategoriesFailed": "Unable to load categories.",
+          "loadTagsFailed": "Unable to load tags.",
+          "categoryNameRequired": "Category name is required.",
+          "tagNameRequired": "Tag name is required.",
+          "saveCategoryFailed": "Unable to save category.",
+          "saveTagFailed": "Unable to save tag.",
+          "updateCategoryStatusFailed": "Unable to update category status.",
+          "updateTagStatusFailed": "Unable to update tag status."
+        }
+      }
+    },
+    "payouts": {
+      "header": {
+        "eyebrow": "Finance Control",
+        "title": "Payout Management",
+        "description": "Review Aura Coin withdrawals before funds leave the platform treasury.",
+        "liveApi": "Live API"
+      },
+      "summary": {
+        "pendingRequests": {
+          "label": "Pending Requests"
+        },
+        "completed30d": {
+          "label": "Completed (30 Days)",
+          "detail": "Real finance-service contract"
+        },
+        "unavailable": "Finance service unavailable"
+      },
+      "queue": {
+        "title": "Withdrawal Queue",
+        "loading": "Loading...",
+        "pendingCount": "{count, plural, =0 {No pending requests} one {# pending request} other {# pending requests}}",
+        "empty": "No withdrawal requests are waiting for review."
+      },
+      "table": {
+        "requestId": "Request ID",
+        "creator": "Creator",
+        "amount": "Amount",
+        "bank": "Bank",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "review": "Review",
+        "receipt": "Receipt",
+        "approve": "Approve Payout",
+        "complete": "Complete Transfer",
+        "reject": "Reject Payout"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "processing": "Processing",
+        "completed": "Completed",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "fallbacks": {
+        "notAvailable": "N/A"
+      },
+      "errors": {
+        "loadFailed": "Unable to load payouts.",
+        "loadDetailFailed": "Unable to load payout details.",
+        "updateFailed": "Unable to update payout."
+      },
+      "messages": {
+        "approved": "Payout approved successfully.",
+        "rejected": "Payout rejected successfully.",
+        "completed": "Payout completed successfully."
+      },
+      "defaults": {
+        "approvedNote": "Approved by admin",
+        "rejectedReason": "Rejected by admin",
+        "rejectedNote": "Rejected by admin",
+        "completedNote": "Transfer completed by admin"
+      },
+      "detail": {
+        "backAria": "Back to payout queue",
+        "loading": "Loading payout detail...",
+        "notFound": "Payout not found.",
+        "header": {
+          "eyebrow": "Payout Request"
+        },
+        "transaction": {
+          "title": "Transaction Details",
+          "creator": "Creator / User",
+          "wallet": "Wallet: {walletId}",
+          "amountRequested": "Amount Requested",
+          "exchangeRate": "Exchange Rate: {rate} VND/AC",
+          "bankDetails": "Bank Details",
+          "bank": "Bank: {bankName} ({bankCode})",
+          "account": "Account: {accountNumber}",
+          "accountHolder": "Name: {accountHolderName}",
+          "qrAvailable": "QR: Available",
+          "finalPayoutAmount": "Final Payout Amount",
+          "requested": "Requested: {date}"
+        },
+        "audit": {
+          "title": "Audit Metadata",
+          "approvedAt": "Approved At",
+          "completedAt": "Completed At",
+          "rejectedAt": "Rejected At",
+          "cancelledAt": "Cancelled At",
+          "processedBy": "Processed By",
+          "transferRef": "Transfer Ref",
+          "description": "Description",
+          "rejectionReason": "Rejection Reason"
+        },
+        "risk": {
+          "title": "Risk & Fraud Analysis",
+          "adminRouteAccess": "Admin route access",
+          "serverOwnershipBypass": "Server ownership bypass",
+          "bankDetailSource": "Bank detail source",
+          "verified": "Verified",
+          "adminScoped": "Admin scoped",
+          "financeApi": "Finance API"
+        },
+        "action": {
+          "title": "Action",
+          "transactionNotes": "Transaction Notes",
+          "notesPlaceholder": "Admin notes...",
+          "transferReference": "Transfer Reference",
+          "rejectReason": "Reject Reason",
+          "rejectPlaceholder": "Invalid account information"
+        }
+      }
+    },
+    "finance": {
+      "common": {
+        "coinAmount": "{amount} AC",
+        "notAvailable": "N/A"
+      },
+      "header": {
+        "eyebrow": "Finance Control",
+        "title": "Deposit Package Management",
+        "description": "Manage VND to Aura Coin top-up packages shown in the viewer wallet checkout flow.",
+        "liveApi": "Live API"
+      },
+      "summary": {
+        "activePackages": "Active Packages",
+        "totalPackages": "{count, plural, =0 {0 total packages} one {# total package} other {# total packages}}",
+        "bonusPool": "Bonus Pool",
+        "bonusPoolDetail": "Bonus coins across active packages",
+        "highestTopUp": "Highest Top-up",
+        "noPackageConfigured": "No package configured"
+      },
+      "quickCreate": {
+        "title": "Quick-create top-up package",
+        "description": "Choose a preset to fill the form, then review it and create the package.",
+        "totalCoins": "{amount} AC total"
+      },
+      "presets": {
+        "50k": {
+          "name": "50,000 VND Package",
+          "description": "A popular top-up package for new viewers."
+        },
+        "100k": {
+          "name": "100,000 VND Package",
+          "description": "Adds extra Aura Coins for frequent top-up users."
+        },
+        "200k": {
+          "name": "200,000 VND Package",
+          "description": "A higher-value package with better bonus coins."
+        },
+        "500k": {
+          "name": "500,000 VND Package",
+          "description": "A large top-up package for viewers who support creators often."
+        }
+      },
+      "form": {
+        "createTitle": "Create new package",
+        "editTitle": "Edit package",
+        "description": "Only send fields accepted by the finance-service DTO. Total coins are derived by the backend response."
+      },
+      "fields": {
+        "code": "Code",
+        "name": "Name",
+        "namePlaceholder": "500,000 VND Package",
+        "moneyAmount": "Money Amount",
+        "baseCoins": "Base Coins",
+        "bonusCoins": "Bonus Coins",
+        "sortOrder": "Sort Order",
+        "description": "Description",
+        "descriptionPlaceholder": "Add bonus coins for large top-ups",
+        "activeHint": "Package is active and visible to the viewer top-up flow."
+      },
+      "validation": {
+        "codeRequired": "Package code is required.",
+        "nameRequired": "Package name is required.",
+        "moneyPositive": "Money amount must be greater than 0.",
+        "baseCoinsPositive": "Base coin amount must be greater than 0.",
+        "bonusCoinsNonNegative": "Bonus coin amount cannot be negative.",
+        "sortOrderNonNegative": "Sort order cannot be negative."
+      },
+      "success": {
+        "created": "Package created successfully.",
+        "updated": "Package updated successfully."
+      },
+      "errors": {
+        "loadPackages": "Unable to load deposit packages.",
+        "savePackage": "Unable to save package.",
+        "updateStatus": "Unable to update package status."
+      },
+      "actions": {
+        "createPackage": "Create Package",
+        "manualEntry": "Manual Entry",
+        "retry": "Retry",
+        "close": "Close",
+        "saving": "Saving...",
+        "saveChanges": "Save Changes",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "disable": "Disable",
+        "enable": "Enable"
+      },
+      "table": {
+        "title": "Deposit Packages",
+        "loading": "Loading...",
+        "returnedCount": "{count, plural, =0 {0 packages returned by finance-service} one {# package returned by finance-service} other {# packages returned by finance-service}}",
+        "coinBreakdown": "Base {base} + Bonus {bonus}",
+        "columns": {
+          "package": "Package",
+          "money": "Money",
+          "coins": "Coins",
+          "sort": "Sort",
+          "status": "Status",
+          "updated": "Updated",
+          "actions": "Actions"
+        }
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "empty": {
+        "description": "No deposit packages yet. Create the first package to show it in wallet checkout.",
+        "cta": "Create first package"
       }
     },
     "dashboard": {
