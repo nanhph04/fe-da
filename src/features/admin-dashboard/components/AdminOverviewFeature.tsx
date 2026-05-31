@@ -204,17 +204,14 @@ export function AdminOverviewFeature() {
     try {
       const data = await getAdminDashboardData();
       setDashboardData(data);
-      await Promise.all([
-        loadFinanceOverview(computedDateRange.start, computedDateRange.end),
-        checkAllServicesHealth(),
-      ]);
+      await checkAllServicesHealth();
     } catch (err) {
       setDashboardData(null);
       setError(getErrorMessage(err, t("error.loadFailed")));
     } finally {
       setIsLoading(false);
     }
-  }, [computedDateRange, loadFinanceOverview, checkAllServicesHealth, t]);
+  }, [checkAllServicesHealth, t]);
 
   useEffect(() => {
     void loadDashboard();

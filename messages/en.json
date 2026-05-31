@@ -1537,6 +1537,114 @@
       "empty": "No users match the current filters.",
       "avatarAlt": "{user} avatar"
     },
+    "channels": {
+      "header": {
+        "eyebrow": "Creator Control",
+        "title": "Channel Management",
+        "loading": "Loading creator ecosystem...",
+        "summary": "{count} channels from media-service admin registry."
+      },
+      "summary": {
+        "totalChannels": "Total channels",
+        "activeIn30Days": "{count} active in 30 days",
+        "mediaServiceUnavailable": "Media service unavailable",
+        "membershipReady": "Membership ready",
+        "approvedToSellTiers": "{count} approved to sell tiers",
+        "waiting": "Waiting for summary",
+        "reviewQueue": "Review queue",
+        "rejectedHistorically": "{count} rejected historically",
+        "adminApprovalQueue": "Admin approval queue",
+        "membershipClosed": "Membership closed",
+        "uploadingNow": "{count} videos uploading now",
+        "noChannelMetrics": "No channel metrics"
+      },
+      "directory": {
+        "title": "Channel Directory",
+        "description": "Search by channel name or bio, filter lifecycle status, or inspect a creator owner id."
+      },
+      "filters": {
+        "searchLabel": "Search channels",
+        "searchPlaceholder": "Search channel name or bio",
+        "ownerLabel": "Owner id",
+        "ownerPlaceholder": "Owner id",
+        "statuses": {
+          "all": "All channels",
+          "active": "Active",
+          "inactive": "Inactive",
+          "suspended": "Suspended"
+        }
+      },
+      "table": {
+        "channel": "Channel",
+        "owner": "Owner",
+        "membership": "Membership",
+        "status": "Status",
+        "updated": "Updated",
+        "actions": "Actions",
+        "created": "Created {date}",
+        "reviewed": "Review {date}"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "search": "Search",
+        "retry": "Retry",
+        "approve": "Approve",
+        "reject": "Reject",
+        "confirmReject": "Confirm reject",
+        "cancel": "Cancel",
+        "openMembership": "Open membership",
+        "closeMembership": "Close membership",
+        "unlock": "Unlock",
+        "lock": "Lock"
+      },
+      "statuses": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "suspended": "Suspended"
+      },
+      "reviewStatuses": {
+        "not_requested": "Not requested",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "membership": {
+        "eligible": "Eligible",
+        "notEligible": "Not eligible",
+        "adminClosed": "Admin closed",
+        "open": "Open"
+      },
+      "reject": {
+        "reasonLabel": "Reject reason",
+        "reasonPlaceholder": "Reason required by media service"
+      },
+      "pagination": {
+        "summary": "Showing {from}-{to} of {total} channels",
+        "previous": "Previous channel page",
+        "next": "Next channel page"
+      },
+      "fallbacks": {
+        "notRecorded": "Not recorded",
+        "noBio": "No channel bio"
+      },
+      "errors": {
+        "title": "Unable to load channels",
+        "summaryFailed": "Unable to load channel summary.",
+        "loadFailed": "Unable to load admin channel list.",
+        "lockFailed": "Unable to lock channel.",
+        "unlockFailed": "Unable to unlock channel.",
+        "closeMembershipFailed": "Unable to close membership.",
+        "openMembershipFailed": "Unable to open membership.",
+        "approveReviewFailed": "Unable to approve membership review.",
+        "rejectReviewFailed": "Unable to reject membership review.",
+        "rejectReasonRequired": "Please enter a reason before rejecting the membership review."
+      },
+      "empty": {
+        "title": "No channels found",
+        "description": "No channels match the current filters."
+      },
+      "avatarAlt": "{channel} channel avatar"
+    },
     "content": {
       "statuses": {
         "draft": "Draft",

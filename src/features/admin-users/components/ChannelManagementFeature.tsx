@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { getErrorMessage } from "@/shared/api/client";
 import type { ApiPagination } from "@/shared/api/types";
@@ -15,18 +16,20 @@ import type {
 } from "../types/admin-user.types";
 
 const initialPagination: ApiPagination = { page: 1, limit: 20, total: 0, totalPages: 0 };
-const numberFormatter = new Intl.NumberFormat("en-US");
-
-const statusFilters: Array<{ label: string; value: AdminChannelStatus | "all" }> = [
-  { label: "All channels", value: "all" },
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
-  { label: "Suspended", value: "suspended" },
+const statusFilters: Array<{ translationKey: "all" | AdminChannelStatus; value: AdminChannelStatus | "all" }> = [
+  { translationKey: "all", value: "all" },
+  { translationKey: "active", value: "active" },
+  { translationKey: "inactive", value: "inactive" },
+  { translationKey: "suspended", value: "suspended" },
 ];
 
 type SummaryTone = "default" | "secondary" | "success" | "danger" | "muted";
 
-function formatCount(value: number | null | undefined) {
+function getIntlLocale(locale: string) {
+  return locale === "en" ? "en-US" : "vi-VN";
+}
+
+function formatCount(value: number | null | undefined, numberFormatter: Intl.NumberFormat) {
   if (typeof value !== "number") {
     return "-";
   }
@@ -34,20 +37,28 @@ function formatCount(value: number | null | undefined) {
   return numberFormatter.format(value);
 }
 
-function formatDate(value: string | null | undefined) {
+function formatDate(value: string | null | undefined, locale: string, fallback: string) {
   if (!value) {
-    return "Not recorded";
+    return fallback;
   }
 
-  return new Intl.DateTimeFormat("vi-VN", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   }).format(new Date(value));
 }
 
-function formatLabel(value: string) {
-  return value.replace(/_/g, " ");
+function getChannelStatusLabel(status: string, t: ReturnType<typeof useTranslations>) {
+  if (status === "active" || status === "inactive" || status === "suspended") {
+    return t(`statuses.${status}`);
+  }
+
+  return status.replace(/_/g, " ");
+}
+
+function getMembershipReviewLabel(status: AdminMembershipReviewStatus, t: ReturnType<typeof useTranslations>) {
+  return t(`reviewStatuses.${status}`);
 }
 
 function getInitials(name: string) {
@@ -95,33 +106,33 @@ function getReviewTone(status: AdminMembershipReviewStatus) {
   return "border-border/30 bg-muted text-muted-foreground";
 }
 
-function buildSummaryCards(summary: AdminChannelsSummary | null) {
+function buildSummaryCards(summary: AdminChannelsSummary | null, t: ReturnType<typeof useTranslations>, numberFormatter: Intl.NumberFormat) {
   return [
     {
-      label: "Total channels",
-      value: formatCount(summary?.totalChannels),
-      detail: summary ? `${formatCount(summary.activeCreators30d)} active in 30 days` : "Media service unavailable",
+      label: t("summary.totalChannels"),
+      value: formatCount(summary?.totalChannels, numberFormatter),
+      detail: summary ? t("summary.activeIn30Days", { count: formatCount(summary.activeCreators30d, numberFormatter) }) : t("summary.mediaServiceUnavailable"),
       icon: "tv",
       tone: "default",
     },
     {
-      label: "Membership ready",
-      value: formatCount(summary?.eligibleForMembership),
-      detail: summary ? `${formatCount(summary?.membershipApproved)} approved to sell tiers` : "Waiting for summary",
+      label: t("summary.membershipReady"),
+      value: formatCount(summary?.eligibleForMembership, numberFormatter),
+      detail: summary ? t("summary.approvedToSellTiers", { count: formatCount(summary?.membershipApproved, numberFormatter) }) : t("summary.waiting"),
       icon: "workspace_premium",
       tone: "secondary",
     },
     {
-      label: "Review queue",
-      value: formatCount(summary?.membershipPendingReview),
-      detail: summary ? `${formatCount(summary?.membershipRejected)} rejected historically` : "Admin approval queue",
+      label: t("summary.reviewQueue"),
+      value: formatCount(summary?.membershipPendingReview, numberFormatter),
+      detail: summary ? t("summary.rejectedHistorically", { count: formatCount(summary?.membershipRejected, numberFormatter) }) : t("summary.adminApprovalQueue"),
       icon: "pending_actions",
       tone: "danger",
     },
     {
-      label: "Membership closed",
-      value: formatCount(summary?.membershipClosedByAdmin),
-      detail: summary ? `${formatCount(summary.uploadingNow)} videos uploading now` : "No channel metrics",
+      label: t("summary.membershipClosed"),
+      value: formatCount(summary?.membershipClosedByAdmin, numberFormatter),
+      detail: summary ? t("summary.uploadingNow", { count: formatCount(summary.uploadingNow, numberFormatter) }) : t("summary.noChannelMetrics"),
       icon: "admin_panel_settings",
       tone: "muted",
     },
@@ -155,6 +166,11 @@ function getSummaryToneClass(tone: SummaryTone) {
 }
 
 export function ChannelManagementFeature() {
+  const t = useTranslations("Admin.channels");
+  const locale = useLocale();
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(getIntlLocale(locale)), [locale]);
+  const dateFallback = t("fallbacks.notRecorded");
+
   const [summary, setSummary] = useState<AdminChannelsSummary | null>(null);
   const [channels, setChannels] = useState<AdminChannelListItem[]>([]);
   const [pagination, setPagination] = useState<ApiPagination>(initialPagination);
@@ -193,11 +209,11 @@ export function ChannelManagementFeature() {
       setSummary(data);
     } catch (err) {
       setSummary(null);
-      setSummaryError(getErrorMessage(err, "Khong the tai tong quan channel."));
+      setSummaryError(getErrorMessage(err, t("errors.summaryFailed")));
     } finally {
       setIsSummaryLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadChannels = useCallback(async (params: AdminChannelListParams) => {
     setIsLoading(true);
@@ -210,11 +226,11 @@ export function ChannelManagementFeature() {
     } catch (err) {
       setChannels([]);
       setPagination(initialPagination);
-      setError(getErrorMessage(err, "Khong the tai danh sach channel admin."));
+      setError(getErrorMessage(err, t("errors.loadFailed")));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,7 +247,7 @@ export function ChannelManagementFeature() {
       } catch (err) {
         if (!cancelled) {
           setSummary(null);
-          setSummaryError(getErrorMessage(err, "Khong the tai tong quan channel."));
+          setSummaryError(getErrorMessage(err, t("errors.summaryFailed")));
         }
       } finally {
         if (!cancelled) {
@@ -245,7 +261,7 @@ export function ChannelManagementFeature() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -264,7 +280,7 @@ export function ChannelManagementFeature() {
         if (!cancelled) {
           setChannels([]);
           setPagination(initialPagination);
-          setError(getErrorMessage(err, "Khong the tai danh sach channel admin."));
+          setError(getErrorMessage(err, t("errors.loadFailed")));
         }
       } finally {
         if (!cancelled) {
@@ -278,7 +294,7 @@ export function ChannelManagementFeature() {
     return () => {
       cancelled = true;
     };
-  }, [queryParams]);
+  }, [queryParams, t]);
 
   const refreshData = useCallback(async () => {
     await Promise.all([loadSummary(), loadChannels(queryParams)]);
@@ -300,7 +316,7 @@ export function ChannelManagementFeature() {
       await adminChannelService.updateStatus(channel.id, { action });
       await refreshData();
     } catch (err) {
-      setActionError(getErrorMessage(err, action === "lock" ? "Khong the khoa channel." : "Khong the mo khoa channel."));
+      setActionError(getErrorMessage(err, action === "lock" ? t("errors.lockFailed") : t("errors.unlockFailed")));
     } finally {
       setActingChannelId(null);
     }
@@ -315,7 +331,7 @@ export function ChannelManagementFeature() {
       await adminChannelService.updateMembershipAvailability(channel.id, { action });
       await refreshData();
     } catch (err) {
-      setActionError(getErrorMessage(err, action === "close" ? "Khong the dong membership." : "Khong the mo membership."));
+      setActionError(getErrorMessage(err, action === "close" ? t("errors.closeMembershipFailed") : t("errors.openMembershipFailed")));
     } finally {
       setActingChannelId(null);
     }
@@ -329,7 +345,7 @@ export function ChannelManagementFeature() {
       await adminChannelService.decideMembershipReview(channelId, { action: "approve" });
       await refreshData();
     } catch (err) {
-      setActionError(getErrorMessage(err, "Khong the approve membership review."));
+      setActionError(getErrorMessage(err, t("errors.approveReviewFailed")));
     } finally {
       setActingChannelId(null);
     }
@@ -338,7 +354,7 @@ export function ChannelManagementFeature() {
   const handleRejectReview = async (channelId: string) => {
     const reason = rejectReason.trim();
     if (!reason) {
-      setActionError("Vui long nhap ly do tu choi membership review.");
+      setActionError(t("errors.rejectReasonRequired"));
       return;
     }
 
@@ -351,13 +367,13 @@ export function ChannelManagementFeature() {
       setRejectReason("");
       await refreshData();
     } catch (err) {
-      setActionError(getErrorMessage(err, "Khong the reject membership review."));
+      setActionError(getErrorMessage(err, t("errors.rejectReviewFailed")));
     } finally {
       setActingChannelId(null);
     }
   };
 
-  const summaryCards = buildSummaryCards(summary);
+  const summaryCards = buildSummaryCards(summary, t, numberFormatter);
   const showingFrom = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
   const showingTo = Math.min(pagination.page * pagination.limit, pagination.total);
 
@@ -365,10 +381,10 @@ export function ChannelManagementFeature() {
     <section className="space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">Creator Control</p>
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">Channel Management</h1>
+          <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("header.eyebrow")}</p>
+          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground">{t("header.title")}</h1>
           <p className="mt-2 max-w-2xl font-body text-sm text-muted-foreground">
-            {isLoading ? "Loading creator ecosystem..." : `${formatCount(pagination.total)} channels from media-service admin registry.`}
+            {isLoading ? t("header.loading") : t("header.summary", { count: formatCount(pagination.total, numberFormatter) })}
           </p>
         </div>
         <button
@@ -378,7 +394,7 @@ export function ChannelManagementFeature() {
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">refresh</span>
-          Refresh
+          {t("actions.refresh")}
         </button>
       </header>
 
@@ -415,30 +431,30 @@ export function ChannelManagementFeature() {
         <div className="space-y-4 border-b border-border/30 bg-background px-6 py-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="font-headline text-lg font-bold text-foreground">Channel Directory</h2>
+              <h2 className="font-headline text-lg font-bold text-foreground">{t("directory.title")}</h2>
               <p className="mt-1 font-body text-xs text-muted-foreground">
-                Search by channel name or bio, filter lifecycle status, or inspect a creator owner id.
+                {t("directory.description")}
               </p>
             </div>
             <form className="grid w-full gap-2 sm:grid-cols-[1fr_1fr_auto] lg:w-[42rem]" onSubmit={handleSearchSubmit}>
-              <label className="sr-only" htmlFor="admin-channel-search">Search channels</label>
+              <label className="sr-only" htmlFor="admin-channel-search">{t("filters.searchLabel")}</label>
               <input
                 id="admin-channel-search"
                 className="min-h-11 rounded-sm border border-border/30 bg-input px-3 py-2 font-body text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                placeholder="Search channel name or bio"
+                placeholder={t("filters.searchPlaceholder")}
                 value={searchInput}
                 onChange={event => setSearchInput(event.target.value)}
               />
-              <label className="sr-only" htmlFor="admin-channel-owner">Owner id</label>
+              <label className="sr-only" htmlFor="admin-channel-owner">{t("filters.ownerLabel")}</label>
               <input
                 id="admin-channel-owner"
                 className="min-h-11 rounded-sm border border-border/30 bg-input px-3 py-2 font-body text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-                placeholder="Owner id"
+                placeholder={t("filters.ownerPlaceholder")}
                 value={ownerInput}
                 onChange={event => setOwnerInput(event.target.value)}
               />
               <button className="min-h-11 rounded-sm bg-primary px-4 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90" type="submit">
-                Search
+                {t("actions.search")}
               </button>
             </form>
           </div>
@@ -459,7 +475,7 @@ export function ChannelManagementFeature() {
                       : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                   }`}
                 >
-                  {item.label}
+                  {t(`filters.statuses.${item.translationKey}`)}
                 </button>
               );
             })}
@@ -467,19 +483,19 @@ export function ChannelManagementFeature() {
         </div>
 
         {error ? (
-          <ErrorState message={error} onRetry={() => void loadChannels(queryParams)} />
+          <ErrorState message={error} onRetry={() => void loadChannels(queryParams)} t={t} />
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-border/30 bg-background text-[10px] uppercase tracking-widest text-muted-foreground">
-                    <th className="px-6 py-4 font-semibold">Channel</th>
-                    <th className="px-6 py-4 font-semibold">Owner</th>
-                    <th className="px-6 py-4 font-semibold">Membership</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 text-right font-semibold">Updated</th>
-                    <th className="px-6 py-4 text-right font-semibold">Actions</th>
+                    <th className="px-6 py-4 font-semibold">{t("table.channel")}</th>
+                    <th className="px-6 py-4 font-semibold">{t("table.owner")}</th>
+                    <th className="px-6 py-4 font-semibold">{t("table.membership")}</th>
+                    <th className="px-6 py-4 font-semibold">{t("table.status")}</th>
+                    <th className="px-6 py-4 text-right font-semibold">{t("table.updated")}</th>
+                    <th className="px-6 py-4 text-right font-semibold">{t("table.actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/30">
@@ -488,7 +504,7 @@ export function ChannelManagementFeature() {
                   ) : channels.length === 0 ? (
                     <tr>
                       <td className="px-6 py-14" colSpan={6}>
-                        <EmptyState />
+                        <EmptyState t={t} />
                       </td>
                     </tr>
                   ) : (
@@ -499,6 +515,9 @@ export function ChannelManagementFeature() {
                         actingChannelId={actingChannelId}
                         rejectChannelId={rejectChannelId}
                         rejectReason={rejectReason}
+                        locale={locale}
+                        dateFallback={dateFallback}
+                        t={t}
                         onRejectReasonChange={setRejectReason}
                         onStartReject={channelId => {
                           setActionError(null);
@@ -522,7 +541,7 @@ export function ChannelManagementFeature() {
 
             <div className="flex flex-col gap-4 border-t border-border/30 bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                Showing {showingFrom}-{showingTo} of {formatCount(pagination.total)} channels
+                {t("pagination.summary", { from: showingFrom, to: showingTo, total: formatCount(pagination.total, numberFormatter) })}
               </p>
               <div className="flex items-center gap-2">
                 <button
@@ -530,7 +549,7 @@ export function ChannelManagementFeature() {
                   onClick={() => setPage(current => Math.max(1, current - 1))}
                   disabled={isLoading || pagination.page <= 1}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-border/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Previous channel page"
+                  aria-label={t("pagination.previous")}
                 >
                   <span className="material-symbols-outlined text-lg" aria-hidden="true">chevron_left</span>
                 </button>
@@ -542,7 +561,7 @@ export function ChannelManagementFeature() {
                   onClick={() => setPage(current => Math.min(Math.max(1, pagination.totalPages), current + 1))}
                   disabled={isLoading || pagination.page >= pagination.totalPages}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-sm border border-border/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Next channel page"
+                  aria-label={t("pagination.next")}
                 >
                   <span className="material-symbols-outlined text-lg" aria-hidden="true">chevron_right</span>
                 </button>
@@ -560,6 +579,9 @@ function ChannelRow({
   actingChannelId,
   rejectChannelId,
   rejectReason,
+  locale,
+  dateFallback,
+  t,
   onRejectReasonChange,
   onStartReject,
   onCancelReject,
@@ -572,6 +594,9 @@ function ChannelRow({
   actingChannelId: string | null;
   rejectChannelId: string | null;
   rejectReason: string;
+  locale: string;
+  dateFallback: string;
+  t: ReturnType<typeof useTranslations>;
   onRejectReasonChange: (value: string) => void;
   onStartReject: (channelId: string) => void;
   onCancelReject: () => void;
@@ -592,14 +617,14 @@ function ChannelRow({
           <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.22),transparent_35%),linear-gradient(135deg,hsl(var(--muted)),hsl(var(--background)))] font-headline text-xs font-bold text-primary">
             {channel.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={channel.avatarUrl} alt={`${channel.name} avatar`} className="h-full w-full object-cover" />
+              <img src={channel.avatarUrl} alt={t("avatarAlt", { channel: channel.name })} className="h-full w-full object-cover" />
             ) : (
               getInitials(channel.name)
             )}
           </div>
           <div className="min-w-0">
             <p className="max-w-[260px] truncate font-headline text-sm font-bold text-foreground">{channel.name}</p>
-            <p className="mt-1 max-w-[280px] truncate font-body text-xs text-muted-foreground">{channel.bio || "No channel bio"}</p>
+            <p className="mt-1 max-w-[280px] truncate font-body text-xs text-muted-foreground">{channel.bio || t("fallbacks.noBio")}</p>
             <p className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{channel.id}</p>
           </div>
         </div>
@@ -607,20 +632,20 @@ function ChannelRow({
       <td className="px-6 py-4">
         <div className="space-y-1 font-mono text-[10px] text-muted-foreground">
           <p className="max-w-[180px] break-all text-xs text-foreground/80">{channel.userId}</p>
-          <p>Created {formatDate(channel.createdAt)}</p>
+          <p>{t("table.created", { date: formatDate(channel.createdAt, locale, dateFallback) })}</p>
         </div>
       </td>
       <td className="px-6 py-4">
         <div className="space-y-2">
           <span className={`inline-flex rounded-sm border px-2 py-1 font-label text-[10px] font-bold uppercase tracking-widest ${getReviewTone(channel.membershipReviewStatus)}`}>
-            {formatLabel(channel.membershipReviewStatus)}
+            {getMembershipReviewLabel(channel.membershipReviewStatus, t)}
           </span>
           <div className="flex flex-wrap gap-2">
             <span className={`rounded-sm border px-2 py-0.5 font-label text-[10px] font-bold uppercase tracking-widest ${channel.isEligibleForMembership ? "border-emerald-500/30 text-emerald-400" : "border-border/30 text-muted-foreground"}`}>
-              {channel.isEligibleForMembership ? "Eligible" : "Not eligible"}
+              {channel.isEligibleForMembership ? t("membership.eligible") : t("membership.notEligible")}
             </span>
             <span className={`rounded-sm border px-2 py-0.5 font-label text-[10px] font-bold uppercase tracking-widest ${channel.isMembershipClosedByAdmin ? "border-primary/30 text-primary" : "border-border/30 text-muted-foreground"}`}>
-              {channel.isMembershipClosedByAdmin ? "Admin closed" : "Open"}
+              {channel.isMembershipClosedByAdmin ? t("membership.adminClosed") : t("membership.open")}
             </span>
           </div>
           {channel.membershipRejectionReason ? (
@@ -628,11 +653,11 @@ function ChannelRow({
           ) : null}
           {isRejecting ? (
             <div className="space-y-2 pt-2">
-              <label className="sr-only" htmlFor={`reject-channel-${channel.id}`}>Reject reason</label>
+              <label className="sr-only" htmlFor={`reject-channel-${channel.id}`}>{t("reject.reasonLabel")}</label>
               <textarea
                 id={`reject-channel-${channel.id}`}
                 className="min-h-20 w-64 rounded-sm border border-border/30 bg-input px-3 py-2 font-body text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
-                placeholder="Reason required by media service"
+                placeholder={t("reject.reasonPlaceholder")}
                 value={rejectReason}
                 onChange={event => onRejectReasonChange(event.target.value)}
               />
@@ -643,7 +668,7 @@ function ChannelRow({
                   disabled={isActing}
                   className="rounded-sm bg-primary px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Confirm reject
+                  {t("actions.confirmReject")}
                 </button>
                 <button
                   type="button"
@@ -651,7 +676,7 @@ function ChannelRow({
                   disabled={isActing}
                   className="rounded-sm border border-border/30 px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Cancel
+                  {t("actions.cancel")}
                 </button>
               </div>
             </div>
@@ -661,12 +686,12 @@ function ChannelRow({
       <td className="px-6 py-4">
         <span className={`flex items-center gap-1.5 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusTone(channel.status)}`}>
           <span className="material-symbols-outlined text-[14px]" aria-hidden="true">{getStatusIcon(channel.status)}</span>
-          {formatLabel(channel.status)}
+          {getChannelStatusLabel(channel.status, t)}
         </span>
       </td>
       <td className="px-6 py-4 text-right">
-        <p className="font-mono text-xs text-muted-foreground">{formatDate(channel.updatedAt)}</p>
-        <p className="mt-1 font-mono text-[10px] text-muted-foreground">Review {formatDate(channel.membershipReviewedAt || channel.membershipRequestedAt)}</p>
+        <p className="font-mono text-xs text-muted-foreground">{formatDate(channel.updatedAt, locale, dateFallback)}</p>
+        <p className="mt-1 font-mono text-[10px] text-muted-foreground">{t("table.reviewed", { date: formatDate(channel.membershipReviewedAt || channel.membershipRequestedAt, locale, dateFallback) })}</p>
       </td>
       <td className="px-6 py-4 text-right">
         <div className="flex min-w-[280px] flex-wrap justify-end gap-2">
@@ -679,7 +704,7 @@ function ChannelRow({
                 className="inline-flex items-center gap-1 rounded-sm bg-primary px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-sm" aria-hidden="true">check</span>
-                Approve
+                {t("actions.approve")}
               </button>
               <button
                 type="button"
@@ -688,7 +713,7 @@ function ChannelRow({
                 className="inline-flex items-center gap-1 rounded-sm border border-border/30 px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
-                Reject
+                {t("actions.reject")}
               </button>
             </>
           ) : null}
@@ -699,7 +724,7 @@ function ChannelRow({
             className="inline-flex items-center gap-1 rounded-sm border border-border/30 px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-secondary hover:text-secondary disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="material-symbols-outlined text-sm" aria-hidden="true">card_membership</span>
-            {channel.isMembershipClosedByAdmin ? "Open membership" : "Close membership"}
+            {channel.isMembershipClosedByAdmin ? t("actions.openMembership") : t("actions.closeMembership")}
           </button>
           <button
             type="button"
@@ -708,7 +733,7 @@ function ChannelRow({
             className="inline-flex items-center gap-1 rounded-sm border border-border/30 px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-sm" aria-hidden="true">lock</span>
-            {channel.status === "suspended" ? "Unlock" : "Lock"}
+            {channel.status === "suspended" ? t("actions.unlock") : t("actions.lock")}
           </button>
         </div>
       </td>
@@ -726,28 +751,28 @@ function ChannelSkeletonRows() {
   ));
 }
 
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+function ErrorState({ message, onRetry, t }: { message: string; onRetry: () => void; t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 p-10 text-center">
       <span className="material-symbols-outlined text-4xl text-primary" aria-hidden="true">error</span>
       <div>
-        <h2 className="font-headline text-lg font-bold text-foreground">Khong the tai channel</h2>
+        <h2 className="font-headline text-lg font-bold text-foreground">{t("errors.title")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{message}</p>
       </div>
       <button className="rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-wider text-primary-foreground hover:opacity-90" type="button" onClick={onRetry}>
-        Thu lai
+        {t("actions.retry")}
       </button>
     </div>
   );
 }
 
-function EmptyState() {
+function EmptyState({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 text-center">
       <span className="material-symbols-outlined text-4xl text-muted-foreground" aria-hidden="true">tv_off</span>
       <div>
-        <h2 className="font-headline text-lg font-bold text-foreground">Khong co channel nao</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Khong co channel nao khop bo loc hien tai.</p>
+        <h2 className="font-headline text-lg font-bold text-foreground">{t("empty.title")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("empty.description")}</p>
       </div>
     </div>
   );

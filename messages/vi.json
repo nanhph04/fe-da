@@ -1489,6 +1489,114 @@
       "empty": "Không có người dùng nào khớp bộ lọc hiện tại.",
       "avatarAlt": "Ảnh đại diện của {user}"
     },
+    "channels": {
+      "header": {
+        "eyebrow": "Kiểm soát nhà sáng tạo",
+        "title": "Quản lý kênh",
+        "loading": "Đang tải hệ sinh thái nhà sáng tạo...",
+        "summary": "{count} kênh từ sổ đăng ký admin của media-service."
+      },
+      "summary": {
+        "totalChannels": "Tổng kênh",
+        "activeIn30Days": "{count} hoạt động trong 30 ngày",
+        "mediaServiceUnavailable": "Media service chưa khả dụng",
+        "membershipReady": "Sẵn sàng hội viên",
+        "approvedToSellTiers": "{count} đã được duyệt để bán gói",
+        "waiting": "Đang chờ dữ liệu tổng quan",
+        "reviewQueue": "Hàng đợi duyệt",
+        "rejectedHistorically": "{count} từng bị từ chối",
+        "adminApprovalQueue": "Hàng đợi phê duyệt admin",
+        "membershipClosed": "Hội viên đã đóng",
+        "uploadingNow": "{count} video đang tải lên",
+        "noChannelMetrics": "Chưa có chỉ số kênh"
+      },
+      "directory": {
+        "title": "Danh bạ kênh",
+        "description": "Tìm theo tên kênh hoặc tiểu sử, lọc trạng thái vòng đời, hoặc kiểm tra mã chủ sở hữu nhà sáng tạo."
+      },
+      "filters": {
+        "searchLabel": "Tìm kênh",
+        "searchPlaceholder": "Tìm tên kênh hoặc tiểu sử",
+        "ownerLabel": "Mã chủ sở hữu",
+        "ownerPlaceholder": "Mã chủ sở hữu",
+        "statuses": {
+          "all": "Tất cả kênh",
+          "active": "Đang hoạt động",
+          "inactive": "Không hoạt động",
+          "suspended": "Đã khóa"
+        }
+      },
+      "table": {
+        "channel": "Kênh",
+        "owner": "Chủ sở hữu",
+        "membership": "Hội viên",
+        "status": "Trạng thái",
+        "updated": "Cập nhật",
+        "actions": "Thao tác",
+        "created": "Đã tạo {date}",
+        "reviewed": "Duyệt {date}"
+      },
+      "actions": {
+        "refresh": "Làm mới",
+        "search": "Tìm kiếm",
+        "retry": "Thử lại",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "confirmReject": "Xác nhận từ chối",
+        "cancel": "Hủy",
+        "openMembership": "Mở hội viên",
+        "closeMembership": "Đóng hội viên",
+        "unlock": "Mở khóa",
+        "lock": "Khóa"
+      },
+      "statuses": {
+        "active": "Đang hoạt động",
+        "inactive": "Không hoạt động",
+        "suspended": "Đã khóa"
+      },
+      "reviewStatuses": {
+        "not_requested": "Chưa yêu cầu",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Bị từ chối"
+      },
+      "membership": {
+        "eligible": "Đủ điều kiện",
+        "notEligible": "Chưa đủ điều kiện",
+        "adminClosed": "Admin đã đóng",
+        "open": "Đang mở"
+      },
+      "reject": {
+        "reasonLabel": "Lý do từ chối",
+        "reasonPlaceholder": "Lý do bắt buộc theo media service"
+      },
+      "pagination": {
+        "summary": "Hiển thị {from}-{to} trong tổng số {total} kênh",
+        "previous": "Trang kênh trước",
+        "next": "Trang kênh sau"
+      },
+      "fallbacks": {
+        "notRecorded": "Chưa ghi nhận",
+        "noBio": "Chưa có tiểu sử kênh"
+      },
+      "errors": {
+        "title": "Không thể tải kênh",
+        "summaryFailed": "Không thể tải tổng quan kênh.",
+        "loadFailed": "Không thể tải danh sách kênh admin.",
+        "lockFailed": "Không thể khóa kênh.",
+        "unlockFailed": "Không thể mở khóa kênh.",
+        "closeMembershipFailed": "Không thể đóng hội viên.",
+        "openMembershipFailed": "Không thể mở hội viên.",
+        "approveReviewFailed": "Không thể duyệt yêu cầu hội viên.",
+        "rejectReviewFailed": "Không thể từ chối yêu cầu hội viên.",
+        "rejectReasonRequired": "Vui lòng nhập lý do từ chối yêu cầu hội viên."
+      },
+      "empty": {
+        "title": "Không có kênh nào",
+        "description": "Không có kênh nào khớp bộ lọc hiện tại."
+      },
+      "avatarAlt": "Ảnh đại diện của kênh {channel}"
+    },
     "content": {
       "statuses": {
         "draft": "Bản nháp",
