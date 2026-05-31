@@ -6,8 +6,6 @@ import type {
   AdminChannelsSummary,
   AdminDashboardData,
   AdminDashboardDataSource,
-  AdminReportListResponse,
-  AdminReportsSummary,
   AdminUsersSummary,
   AdminVideoSummary,
   AdminWithdrawalListResponse,
@@ -15,6 +13,8 @@ import type {
   FinanceOverviewData,
   ServiceHealthStatus,
 } from "../types/admin-dashboard.types";
+import type { AdminVideoItem } from "@/features/admin-content/types/admin-content.types";
+import type { ApiPagination } from "@/shared/api/types";
 
 type SettledSource<T> = {
   data: T;
@@ -66,10 +66,7 @@ async function getChannelsSummary() {
   return response.data;
 }
 
-async function getReportsSummary() {
-  const response = await api.get<AdminReportsSummary>("/api/media/admin/reports/summary", { requireAuth: true });
-  return response.data;
-}
+
 
 export async function getVideoSummary(period: string = "all") {
   const response = await api.get<AdminVideoSummary>(`/api/media/admin/videos/summary?period=${period}`, {
@@ -78,12 +75,7 @@ export async function getVideoSummary(period: string = "all") {
   return response.data;
 }
 
-async function getReports() {
-  const response = await api.get<AdminReportListResponse>("/api/media/admin/reports?status=pending&page=1&limit=5", {
-    requireAuth: true,
-  });
-  return response.data;
-}
+
 
 async function getWithdrawalSummary() {
   const response = await api.get<AdminWithdrawalSummary>("/api/withdrawals/admin/summary", { requireAuth: true });
@@ -97,29 +89,35 @@ async function getWithdrawals() {
   return response.data;
 }
 
+async function getPendingManualReviewVideos() {
+  const response = await api.get<{ items: AdminVideoItem[]; pagination: ApiPagination }>(
+    "/api/media/admin/videos?status=pending_manual_review&page=1&limit=5",
+    { requireAuth: true }
+  );
+  return response.data;
+}
+
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   const [
     usersResult,
     channelsResult,
-    reportsSummaryResult,
     videoSummaryResult,
-    reportsResult,
     withdrawalSummaryResult,
     withdrawalsResult,
     packagesResult,
     categoriesResult,
     tagsResult,
+    pendingVideosResult,
   ] = await Promise.allSettled([
     getUsersSummary(),
     getChannelsSummary(),
-    getReportsSummary(),
     getVideoSummary(),
-    getReports(),
     getWithdrawalSummary(),
     getWithdrawals(),
     AdminDepositService.getAdminPackages(),
     mediaService.getAllCategoriesAdmin({ page: 1, limit: 50 }).then(response => response.data.items),
     mediaService.getAllTagsAdmin({ page: 1, limit: 50 }).then(response => response.data.items),
+    getPendingManualReviewVideos(),
   ]);
 
   const users = buildSource(
@@ -138,14 +136,6 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     "Không thể tải tổng quan creator/channel.",
     null
   );
-  const reportsSummary = buildSource(
-    "moderation",
-    "Moderation Summary",
-    reportsSummaryResult,
-    "Moderation queue summary loaded from media service.",
-    "Không thể tải tổng quan moderation.",
-    null
-  );
   const videosSummary = buildSource(
     "videos",
     "Video Summary",
@@ -153,14 +143,6 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     "Video summary loaded from media service.",
     "Không thể tải tổng quan video.",
     null
-  );
-  const reports = buildSource(
-    "moderation",
-    "Moderation Queue",
-    reportsResult,
-    "Pending moderation queue loaded from media service.",
-    "Không thể tải danh sách report cần duyệt.",
-    { items: [], pagination: { page: 1, limit: 5, total: 0, totalPages: 0 } }
   );
   const withdrawalSummary = buildSource(
     "payouts",
@@ -202,29 +184,35 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     "Không thể tải tag nội dung.",
     []
   );
+  const pendingVideos = buildSource(
+    "moderation",
+    "Moderation Queue",
+    pendingVideosResult,
+    "Pending manual review videos loaded from media service.",
+    "Không thể tải hàng đợi kiểm duyệt.",
+    { items: [], pagination: { page: 1, limit: 5, total: 0, totalPages: 0 } }
+  );
 
   return {
     usersSummary: users.data,
     channelsSummary: channels.data,
-    reportsSummary: reportsSummary.data,
     videoSummary: videosSummary.data,
-    reports: reports.data.items,
     withdrawalSummary: withdrawalSummary.data,
     withdrawals: withdrawals.data.items,
     depositPackages: packages.data,
     categories: categories.data,
     tags: tags.data,
+    pendingVideos: pendingVideos.data.items,
     dataSources: [
       users.source,
       channels.source,
-      reportsSummary.source,
       videosSummary.source,
-      reports.source,
       withdrawalSummary.source,
       withdrawals.source,
       packages.source,
       categories.source,
       tags.source,
+      pendingVideos.source,
     ],
     loadedAt: new Date().toISOString(),
   };

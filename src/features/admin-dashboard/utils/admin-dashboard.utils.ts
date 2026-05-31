@@ -78,14 +78,14 @@ export function buildAdminStatCards(data: AdminDashboardData, t: TFunction): Adm
           href: "/admin/channels",
           unavailable: true,
         },
-    data.reportsSummary
+    data.videoSummary
       ? {
           id: "moderation",
           label: t("stats.moderation.label"),
-          value: formatCount(data.reportsSummary.pendingReports),
+          value: formatCount(data.videoSummary.pendingManualReviewVideos),
           detail: t("stats.moderation.detail", {
-            manual: formatCount(data.reportsSummary.pendingManualReviewVideos),
-            flagged: formatCount(data.reportsSummary.autoFlaggedVideos),
+            manual: formatCount(data.videoSummary.pendingManualReviewVideos),
+            flagged: 0,
           }),
           icon: "warning",
           tone: "warning",
@@ -175,8 +175,16 @@ export function buildAdminStatCards(data: AdminDashboardData, t: TFunction): Adm
 export function buildAdminPriorityActions(data: AdminDashboardData, t: TFunction): AdminPriorityAction[] {
   const pendingTags = data.tags.filter(item => item.status === "pending").length;
   const inactiveCategories = data.categories.filter(item => item.status !== "active").length;
-  const latestReport = data.reports[0];
   const latestWithdrawal = data.withdrawals[0];
+  const latestPendingVideo = data.pendingVideos?.[0];
+  let videoDescription = "";
+  if (latestPendingVideo) {
+    const moderationDetails = latestPendingVideo.moderationDetails as Record<string, unknown> | null;
+    const reason = (moderationDetails?.reason as string) || latestPendingVideo.errorMessage || "Cần duyệt thủ công";
+    videoDescription = `${latestPendingVideo.title} - ${reason}`;
+  } else {
+    videoDescription = t("actions.reviewQueue.emptyDescription");
+  }
 
   return [
     data.channelsSummary
@@ -202,17 +210,15 @@ export function buildAdminPriorityActions(data: AdminDashboardData, t: TFunction
           countLabel: t("common.unavailable"),
           unavailable: true,
         },
-    data.reportsSummary
+    data.videoSummary
       ? {
           id: "review-queue",
           label: t("actions.reviewQueue.label"),
-          description: latestReport
-            ? `${latestReport.title} - ${latestReport.reason}`
-            : t("actions.reviewQueue.emptyDescription"),
+          description: videoDescription,
           href: "/admin/content/review",
           icon: "gavel",
           tone: "primary",
-          countLabel: t("actions.counts.pending", { count: formatCount(data.reportsSummary.pendingReports) }),
+          countLabel: t("actions.counts.pending", { count: formatCount(data.videoSummary.pendingManualReviewVideos) }),
         }
       : {
           id: "review-queue",
@@ -224,6 +230,7 @@ export function buildAdminPriorityActions(data: AdminDashboardData, t: TFunction
           countLabel: t("common.unavailable"),
           unavailable: true,
         },
+
     data.withdrawalSummary
       ? {
           id: "payouts",

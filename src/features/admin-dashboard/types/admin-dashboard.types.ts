@@ -1,6 +1,7 @@
 import type { DepositPackage, Withdrawal } from "@/features/wallet/types/wallet.types";
 import type { CategoryResponse, TagResponse } from "@/features/watch/services/mediaService";
 import type { ApiPagination } from "@/shared/api/types";
+import type { AdminVideoItem } from "@/features/admin-content/types/admin-content.types";
 
 export type AdminDashboardSourceStatus = "ready" | "unavailable";
 
@@ -31,13 +32,7 @@ export interface AdminChannelsSummary {
   uploadingNow: number;
 }
 
-export interface AdminReportsSummary {
-  pendingReports: number;
-  pendingManualReviewVideos: number;
-  autoFlaggedVideos: number;
-  rejectedLast30d: number;
-  averageResolutionHours: number | null;
-}
+
 
 export interface AdminVideoSummary {
   period: "day" | "week" | "month" | "all";
@@ -54,21 +49,7 @@ export interface AdminVideoSummary {
   newPurchases: number;
 }
 
-export interface AdminReportItem {
-  id: string;
-  targetVideoId: string;
-  title: string;
-  reporterLabel: string;
-  reason: string;
-  confidencePercent: number | null;
-  createdAt: string;
-  priority: "low" | "medium" | "high" | "critical";
-}
 
-export interface AdminReportListResponse {
-  items: AdminReportItem[];
-  pagination: ApiPagination;
-}
 
 export interface AdminWithdrawalSummary {
   pendingCount: number;
@@ -87,14 +68,13 @@ export interface AdminWithdrawalListResponse {
 export interface AdminDashboardData {
   usersSummary: AdminUsersSummary | null;
   channelsSummary: AdminChannelsSummary | null;
-  reportsSummary: AdminReportsSummary | null;
   videoSummary: AdminVideoSummary | null;
-  reports: AdminReportItem[];
   withdrawalSummary: AdminWithdrawalSummary | null;
   withdrawals: Withdrawal[];
   depositPackages: DepositPackage[];
   categories: CategoryResponse[];
   tags: TagResponse[];
+  pendingVideos: AdminVideoItem[];
   dataSources: AdminDashboardDataSource[];
   loadedAt: string;
 }

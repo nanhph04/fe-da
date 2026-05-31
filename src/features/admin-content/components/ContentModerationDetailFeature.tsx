@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
 import { useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
@@ -46,6 +46,7 @@ export function ContentModerationDetailFeature() {
   const t = useTranslations("Admin.content.detail");
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = params.id as string;
   const isReviewMode = searchParams.get("mode") === "review";
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -125,6 +126,11 @@ export function ContentModerationDetailFeature() {
       });
       setVideo(updated);
       setActionMessage(t("actions.approvedMessage"));
+      if (isReviewMode) {
+        setTimeout(() => {
+          router.push("/admin/content/review");
+        }, 1500);
+      }
     } catch (err) {
       setError(getErrorMessage(err, t("errors.approveFailed")));
     } finally {
@@ -148,6 +154,11 @@ export function ContentModerationDetailFeature() {
       });
       setVideo(updated);
       setActionMessage(t("actions.rejectedMessage"));
+      if (isReviewMode) {
+        setTimeout(() => {
+          router.push("/admin/content/review");
+        }, 1500);
+      }
     } catch (err) {
       setError(getErrorMessage(err, t("errors.rejectFailed")));
     } finally {

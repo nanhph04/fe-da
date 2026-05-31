@@ -3,10 +3,11 @@
 import { Link } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-
 import { getErrorMessage } from "@/shared/api/client";
-
-import { adminModerationService, type AdminReportItem } from "../services/adminModerationService";
+import { adminContentService } from "../services/adminContentService";
+import type { AdminVideoItem } from "../types/admin-content.types";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
+import { formatDuration } from "@/features/home/utils/format";
 
 const initialPagination = { page: 1, limit: 10, total: 0, totalPages: 0 };
 
@@ -24,26 +25,14 @@ function formatDate(value: string, locale: string) {
   }).format(new Date(value));
 }
 
-function getConfidenceLabel(value: number | null) {
-  return value === null ? "N/A" : `${value}%`;
-}
-
-function getPriorityClass(priority: AdminReportItem["priority"]) {
-  if (priority === "critical" || priority === "high") {
-    return "border-primary/30 bg-primary/10 text-primary";
-  }
-
-  if (priority === "medium") {
-    return "border-secondary/30 bg-secondary/10 text-secondary";
-  }
-
-  return "border-border/40 bg-muted text-muted-foreground";
+function formatCompactNumber(value: number, locale: string) {
+  return new Intl.NumberFormat(getIntlLocale(locale), { notation: "compact", maximumFractionDigits: 1 }).format(value);
 }
 
 export function ContentReviewQueueFeature() {
   const t = useTranslations("Admin.content.reviewQueue");
   const locale = useLocale();
-  const [reports, setReports] = useState<AdminReportItem[]>([]);
+  const [videos, setVideos] = useState<AdminVideoItem[]>([]);
   const [pagination, setPagination] = useState(initialPagination);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,21 +40,25 @@ export function ContentReviewQueueFeature() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadReports = async () => {
+    const loadVideos = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        const data = await adminModerationService.getReports({ status: "pending", page: 1, limit: 10 });
+        const data = await adminContentService.getVideos({
+          status: "pending_manual_review",
+          page: 1,
+          limit: 10,
+        });
 
         if (!cancelled) {
-          setReports(data.items);
+          setVideos(data.items);
           setPagination(data.pagination);
         }
       } catch (err) {
         if (!cancelled) {
           setError(getErrorMessage(err, t("errors.loadFailed")));
-          setReports([]);
+          setVideos([]);
           setPagination(initialPagination);
         }
       } finally {
@@ -75,7 +68,7 @@ export function ContentReviewQueueFeature() {
       }
     };
 
-    void loadReports();
+    void loadVideos();
 
     return () => {
       cancelled = true;
@@ -119,10 +112,10 @@ export function ContentReviewQueueFeature() {
             <thead>
               <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 <th className="px-6 py-4">{t("table.flaggedMedia")}</th>
-                <th className="px-6 py-4">{t("table.reporter")}</th>
+                <th className="px-6 py-4">Kênh</th>
                 <th className="px-6 py-4">{t("table.reason")}</th>
-                <th className="px-6 py-4">{t("table.priority")}</th>
-                <th className="px-6 py-4">{t("table.confidence")}</th>
+                <th className="px-6 py-4">Thể loại</th>
+                <th className="px-6 py-4">Ngày yêu cầu</th>
                 <th className="px-6 py-4 text-right">{t("table.actions")}</th>
               </tr>
             </thead>
@@ -135,43 +128,68 @@ export function ContentReviewQueueFeature() {
                     </td>
                   </tr>
                 ))
-              ) : reports.length === 0 ? (
+              ) : videos.length === 0 ? (
                 <tr>
                   <td className="px-6 py-12 text-center font-body text-sm text-muted-foreground" colSpan={6}>
-                    {t("empty")}
+                    Không có video nào đang chờ duyệt thủ công.
                   </td>
                 </tr>
               ) : (
-                reports.map((report) => (
-                  <tr key={report.id} className="group transition-colors hover:bg-muted/40">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative h-14 w-24 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]" />
-                        <div>
-                          <p className="font-headline text-sm font-bold text-foreground">{report.title}</p>
-                          <p className="font-mono text-[10px] text-muted-foreground">{report.targetVideoId} - {formatDate(report.createdAt, locale)}</p>
+                videos.map((video) => {
+                  const moderationDetails = video.moderationDetails;
+                  const label = (moderationDetails?.label as string) || null;
+                  const reason = (moderationDetails?.reason as string) || video.errorMessage || "Cần duyệt thủ công";
+
+                  return (
+                    <tr key={video.id} className="group transition-colors hover:bg-muted/40">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-14 w-24 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]">
+                            <VideoThumbnail
+                              src={video.thumbnailUrl || null}
+                              alt=""
+                              className="absolute inset-0 h-full w-full object-cover opacity-85 transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
+                          <div>
+                            <p className="max-w-[200px] truncate font-headline text-sm font-bold text-foreground">{video.title}</p>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5 font-body text-[10px] text-muted-foreground">
+                              {video.durationSeconds !== null && (
+                                <span className="font-mono">{formatDuration(video.durationSeconds)}</span>
+                              )}
+                              <span className="text-muted-foreground/50">•</span>
+                              <span>{formatCompactNumber(video.viewCount, locale)} lượt xem</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs text-foreground/80">{report.reporterLabel}</td>
-                    <td className="px-6 py-4">
-                      <span className="font-label text-[10px] font-bold uppercase tracking-widest text-primary">{report.reason}</span>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs">
-                      <span className={`rounded-sm border px-2 py-0.5 uppercase ${getPriorityClass(report.priority)}`}>{report.priority}</span>
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs">
-                      <span className={`rounded-sm border px-2 py-0.5 ${report.confidencePercent !== null ? "border-primary/30 bg-primary/10 text-primary" : "border-border/40 bg-muted text-muted-foreground"}`}>
-                        {getConfidenceLabel(report.confidencePercent)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link href={`/admin/content/${report.targetVideoId}?mode=review`} className="inline-flex rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
-                        {t("actions.review")}
-                      </Link>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-foreground/80">
+                        {video.channelName || video.channel?.name || "Velvet Gallery"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-0.5">
+                          {label && (
+                            <span className="w-fit rounded bg-primary/10 border border-primary/20 px-1 py-0.25 text-[9px] font-extrabold uppercase tracking-wider text-primary">
+                              {label}
+                            </span>
+                          )}
+                          <span className="text-xs text-foreground/90 max-w-[220px] truncate block" title={reason}>{reason}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-label text-[10px] font-bold uppercase tracking-widest text-secondary">{video.categoryTitle || video.category || "N/A"}</span>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs">
+                        {formatDate(video.createdAt, locale)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Link href={`/admin/content/${video.id}?mode=review`} className="inline-flex rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
+                          {t("actions.review")}
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
