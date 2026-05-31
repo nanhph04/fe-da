@@ -11,6 +11,7 @@ import { authService } from "@/features/auth/services/authService";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
+import { buildLocalizedHref } from "@/shared/utils/locale-path";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
@@ -198,7 +199,8 @@ export function VerifyOTPForm() {
           const redirectTo = profile && !profile.displayName
             ? "/onboarding/profile"
             : "/library";
-          router.push(redirectTo);
+          const localizedPath = buildLocalizedHref(redirectTo, window.location.pathname);
+          window.location.href = localizedPath;
         } else {
           router.push("/login"); // Lỡ login lỗi thì ném ra ngoài để user tự login
         }

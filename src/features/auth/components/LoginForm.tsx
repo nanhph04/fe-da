@@ -11,7 +11,7 @@ import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
-import { getSafeInternalRedirectPath } from "@/shared/utils/locale-path";
+import { getSafeInternalRedirectPath, buildLocalizedHref } from "@/shared/utils/locale-path";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
@@ -98,7 +98,8 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
           setServerError(t("login.errors.loadProfileFailed"));
           return;
         }
-        router.push(nextPath);
+        const localizedPath = buildLocalizedHref(nextPath, window.location.pathname);
+        window.location.href = localizedPath;
         return;
       }
 
