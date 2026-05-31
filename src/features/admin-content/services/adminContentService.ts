@@ -5,6 +5,7 @@ import type {
   AdminVideoItem,
   AdminVideoListParams,
   AdminVideoPreview,
+  AdminVideoSummary,
 } from "../types/admin-content.types";
 
 export interface AdminVideoListResponse {
@@ -92,6 +93,17 @@ export const adminContentService = {
     const response = await api.patch<AdminVideoItem>(
       `/api/media/admin/videos/${id}/moderation`,
       payload,
+      {
+        requireAuth: true,
+      },
+    );
+
+    return response.data;
+  },
+
+  async getVideoSummary(period: string = "all") {
+    const response = await api.get<AdminVideoSummary>(
+      `/api/media/admin/videos/summary?period=${period}`,
       {
         requireAuth: true,
       },

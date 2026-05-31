@@ -17,6 +17,7 @@ import type {
   AdminVideoListParams,
   AdminVideoStatus,
   AdminVideoVisibility,
+  AdminVideoSummary,
 } from "../types/admin-content.types";
 
 const initialPagination: ApiPagination = { page: 1, limit: 20, total: 0, totalPages: 0 };
@@ -137,6 +138,23 @@ export function ContentLibraryFeature() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Video Summary Stats State
+  const [videoSummary, setVideoSummary] = useState<AdminVideoSummary | null>(null);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(true);
+  const [summaryPeriod, setSummaryPeriod] = useState<string>("all");
+
+  const loadVideoSummary = async (period = summaryPeriod) => {
+    try {
+      setIsSummaryLoading(true);
+      const summary = await adminContentService.getVideoSummary(period);
+      setVideoSummary(summary);
+    } catch (err) {
+      console.error("Failed to load video summary stats:", err);
+    } finally {
+      setIsSummaryLoading(false);
+    }
+  };
+
   // Categories list
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
 
@@ -241,6 +259,7 @@ export function ContentLibraryFeature() {
 
     void fetchCategories();
     void loadVideos(1, 20);
+    void loadVideoSummary("all");
 
     return () => {
       cancelled = true;
@@ -317,6 +336,118 @@ export function ContentLibraryFeature() {
           </button>
         </div>
       </header>
+
+      {/* Video Statistics Dashboard */}
+      <div className="rounded-lg border border-border/30 bg-card/45 p-6 backdrop-blur-md space-y-5 shadow-sm animate-in fade-in duration-300">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/10 pb-4 gap-4">
+          <div>
+            <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg text-primary">analytics</span>
+              {t("library.stats.title")}
+            </h2>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Hệ thống lọc theo chu kỳ thời gian được áp dụng cho các dữ liệu mới
+            </p>
+          </div>
+          <div className="flex rounded-sm bg-background p-1 border border-border/40 shrink-0">
+            {["all", "day", "week", "month"].map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => {
+                  setSummaryPeriod(preset);
+                  void loadVideoSummary(preset);
+                }}
+                className={`rounded-sm px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-200 ${
+                  summaryPeriod === preset
+                    ? "bg-primary text-primary-foreground font-extrabold shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t(`library.stats.period.${preset}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {isSummaryLoading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8 py-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-[72px] rounded border border-border/10 bg-muted/10 animate-pulse" />
+            ))}
+          </div>
+        ) : videoSummary ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
+            {/* Total Videos */}
+            <div className="rounded border border-border/20 bg-background/20 p-4 space-y-1.5 transition-all hover:border-border/40 hover:bg-background/30">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-none">{t("library.stats.totalVideos")}</p>
+              <p className="font-headline text-2xl font-black text-foreground leading-none select-all">{formatCompactNumber(videoSummary.totalVideos, locale)}</p>
+            </div>
+
+            {/* Ready Videos */}
+            <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-1.5 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 leading-none">{t("library.stats.readyVideos")}</p>
+              <div className="flex items-baseline gap-1.5 leading-none">
+                <span className="font-headline text-2xl font-black text-emerald-400 select-all">{formatCompactNumber(videoSummary.readyVideos, locale)}</span>
+                <span className="font-mono text-[9px] text-emerald-500/80 font-bold">
+                  {videoSummary.totalVideos > 0 ? `${((videoSummary.readyVideos / videoSummary.totalVideos) * 100).toFixed(0)}%` : "0%"}
+                </span>
+              </div>
+            </div>
+
+            {/* Uploading Videos */}
+            <div className="rounded border border-secondary/20 bg-secondary/5 p-4 space-y-1.5 transition-all hover:border-secondary/40 hover:bg-secondary/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-secondary leading-none">{t("library.stats.uploadingVideos")}</p>
+              <p className="font-headline text-2xl font-black text-secondary leading-none select-all">{formatCompactNumber(videoSummary.uploadingVideos, locale)}</p>
+            </div>
+
+            {/* Pending Review */}
+            <div className="rounded border border-primary/20 bg-primary/5 p-4 space-y-1.5 transition-all hover:border-primary/40 hover:bg-primary/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-primary leading-none">{t("library.stats.pendingManualReviewVideos")}</p>
+              <p className="font-headline text-2xl font-black text-primary leading-none select-all">{formatCompactNumber(videoSummary.pendingManualReviewVideos, locale)}</p>
+            </div>
+
+            {/* Rejected */}
+            <div className="rounded border border-red-500/20 bg-red-500/5 p-4 space-y-1.5 transition-all hover:border-red-500/40 hover:bg-red-500/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-red-400 leading-none">{t("library.stats.rejectedVideos")}</p>
+              <p className="font-headline text-2xl font-black text-red-400 leading-none select-all">{formatCompactNumber(videoSummary.rejectedVideos, locale)}</p>
+            </div>
+
+            {/* Failed */}
+            <div className="rounded border border-zinc-700/30 bg-muted/5 p-4 space-y-1.5 transition-all hover:border-zinc-500/40 hover:bg-muted/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 leading-none">{t("library.stats.failedVideos")}</p>
+              <p className="font-headline text-2xl font-black text-zinc-400 leading-none select-all">{formatCompactNumber(videoSummary.failedVideos, locale)}</p>
+            </div>
+
+            {/* Total Views */}
+            <div className="rounded border border-border/20 bg-background/20 p-4 space-y-1.5 transition-all hover:border-border/40 hover:bg-background/30">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-none">{t("library.stats.totalViews")}</p>
+              <p className="font-headline text-2xl font-black text-foreground leading-none select-all">{formatCompactNumber(videoSummary.totalViews, locale)}</p>
+            </div>
+
+            {/* Period Statistics */}
+            <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-1.5 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10 col-span-2 sm:col-span-1 lg:col-span-1">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 leading-none flex items-center justify-between">
+                <span>{summaryPeriod === "all" ? t("library.stats.newVideos") : `+${formatCompactNumber(videoSummary.newVideos, locale)} Video`}</span>
+              </p>
+              <div className="font-mono text-[9px] text-zinc-400 space-y-0.5 leading-none">
+                <div className="flex justify-between gap-2 border-b border-border/10 pb-0.5">
+                  <span>Views:</span>
+                  <span className="font-bold text-foreground">+{formatCompactNumber(videoSummary.newViews, locale)}</span>
+                </div>
+                <div className="flex justify-between gap-2 pt-0.5">
+                  <span>Purchases:</span>
+                  <span className="font-bold text-secondary">+{formatCompactNumber(videoSummary.newPurchases, locale)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-4 font-body text-xs text-muted-foreground">
+            {t("library.errors.loadFailed")}
+          </div>
+        )}
+      </div>
 
       {showFilters ? (
         <form

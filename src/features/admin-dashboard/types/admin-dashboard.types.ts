@@ -5,7 +5,7 @@ import type { ApiPagination } from "@/shared/api/types";
 export type AdminDashboardSourceStatus = "ready" | "unavailable";
 
 export interface AdminDashboardDataSource {
-  key: "finance" | "taxonomy" | "users" | "creators" | "moderation" | "payouts" | "verifications" | "activity";
+  key: "finance" | "taxonomy" | "users" | "creators" | "moderation" | "payouts" | "verifications" | "activity" | "videos";
   label: string;
   status: AdminDashboardSourceStatus;
   message: string;
@@ -37,6 +37,21 @@ export interface AdminReportsSummary {
   autoFlaggedVideos: number;
   rejectedLast30d: number;
   averageResolutionHours: number | null;
+}
+
+export interface AdminVideoSummary {
+  period: "day" | "week" | "month" | "all";
+  totalVideos: number;
+  readyVideos: number;
+  uploadingVideos: number;
+  pendingManualReviewVideos: number;
+  rejectedVideos: number;
+  failedVideos: number;
+  bannedVideos: number;
+  totalViews: number;
+  newVideos: number;
+  newViews: number;
+  newPurchases: number;
 }
 
 export interface AdminReportItem {
@@ -73,6 +88,7 @@ export interface AdminDashboardData {
   usersSummary: AdminUsersSummary | null;
   channelsSummary: AdminChannelsSummary | null;
   reportsSummary: AdminReportsSummary | null;
+  videoSummary: AdminVideoSummary | null;
   reports: AdminReportItem[];
   withdrawalSummary: AdminWithdrawalSummary | null;
   withdrawals: Withdrawal[];

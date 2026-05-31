@@ -124,6 +124,37 @@ export function buildAdminStatCards(data: AdminDashboardData, t: TFunction): Adm
           href: "/admin/payouts",
           unavailable: true,
         },
+    data.videoSummary
+      ? {
+          id: "videos",
+          label: t("stats.videos.label"),
+          value: formatCount(data.videoSummary.totalVideos),
+          detail: t("stats.videos.detail", {
+            total: formatCount(data.videoSummary.totalVideos),
+            views: formatCount(data.videoSummary.totalViews),
+            newViews: formatCount(data.videoSummary.newViews),
+            period: data.videoSummary.period === "day"
+              ? t("utils.periodDay")
+              : data.videoSummary.period === "week"
+              ? t("utils.periodWeek")
+              : data.videoSummary.period === "month"
+              ? t("utils.periodMonth")
+              : t("utils.periodAll"),
+          }),
+          icon: "movie",
+          tone: "default",
+          href: "/admin/content",
+        }
+      : {
+          id: "videos",
+          label: t("stats.videos.label"),
+          value: t("common.unavailable"),
+          detail: t("stats.videos.unavailableDetail"),
+          icon: "movie",
+          tone: "default",
+          href: "/admin/content",
+          unavailable: true,
+        },
     {
       id: "taxonomy",
       label: t("stats.taxonomy.label"),

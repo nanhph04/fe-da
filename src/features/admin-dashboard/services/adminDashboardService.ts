@@ -9,6 +9,7 @@ import type {
   AdminReportListResponse,
   AdminReportsSummary,
   AdminUsersSummary,
+  AdminVideoSummary,
   AdminWithdrawalListResponse,
   AdminWithdrawalSummary,
   FinanceOverviewData,
@@ -70,6 +71,13 @@ async function getReportsSummary() {
   return response.data;
 }
 
+export async function getVideoSummary(period: string = "all") {
+  const response = await api.get<AdminVideoSummary>(`/api/media/admin/videos/summary?period=${period}`, {
+    requireAuth: true,
+  });
+  return response.data;
+}
+
 async function getReports() {
   const response = await api.get<AdminReportListResponse>("/api/media/admin/reports?status=pending&page=1&limit=5", {
     requireAuth: true,
@@ -94,6 +102,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     usersResult,
     channelsResult,
     reportsSummaryResult,
+    videoSummaryResult,
     reportsResult,
     withdrawalSummaryResult,
     withdrawalsResult,
@@ -104,6 +113,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     getUsersSummary(),
     getChannelsSummary(),
     getReportsSummary(),
+    getVideoSummary(),
     getReports(),
     getWithdrawalSummary(),
     getWithdrawals(),
@@ -134,6 +144,14 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     reportsSummaryResult,
     "Moderation queue summary loaded from media service.",
     "Không thể tải tổng quan moderation.",
+    null
+  );
+  const videosSummary = buildSource(
+    "videos",
+    "Video Summary",
+    videoSummaryResult,
+    "Video summary loaded from media service.",
+    "Không thể tải tổng quan video.",
     null
   );
   const reports = buildSource(
@@ -189,6 +207,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     usersSummary: users.data,
     channelsSummary: channels.data,
     reportsSummary: reportsSummary.data,
+    videoSummary: videosSummary.data,
     reports: reports.data.items,
     withdrawalSummary: withdrawalSummary.data,
     withdrawals: withdrawals.data.items,
@@ -199,6 +218,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       users.source,
       channels.source,
       reportsSummary.source,
+      videosSummary.source,
       reports.source,
       withdrawalSummary.source,
       withdrawals.source,

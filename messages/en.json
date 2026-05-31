@@ -1780,6 +1780,27 @@
           "views": "{count} views",
           "purchases": "{count} purchases"
         },
+        "stats": {
+          "title": "Network Metrics",
+          "totalVideos": "Total Videos",
+          "readyVideos": "Ready Videos",
+          "uploadingVideos": "Uploading / Processing",
+          "pendingManualReviewVideos": "Pending Manual Review",
+          "rejectedVideos": "Rejected Videos",
+          "failedVideos": "Failed Processing",
+          "bannedVideos": "Banned Videos",
+          "totalViews": "Total Views",
+          "newVideos": "New Videos",
+          "newViews": "New Views",
+          "newPurchases": "New Purchases",
+          "rate": "Rate",
+          "period": {
+            "day": "today",
+            "week": "this week",
+            "month": "this month",
+            "all": "all time"
+          }
+        },
         "empty": "No videos are currently in the management list.",
         "pagination": {
           "range": "Showing <strong>{from}</strong> to <strong>{to}</strong> of <strong>{total}</strong> videos",
@@ -2262,7 +2283,11 @@
       },
       "utils": {
         "growthUnavailable": "growth unavailable",
-        "percent30Days": "{value}% / 30 days"
+        "percent30Days": "{value}% / 30 days",
+        "periodDay": "today",
+        "periodWeek": "this week",
+        "periodMonth": "this month",
+        "periodAll": "all time"
       },
       "stats": {
         "users": {
@@ -2288,6 +2313,11 @@
         "taxonomy": {
           "label": "Active Categories",
           "detail": "{tags} tags loaded, {pendingTags} pending - {packages} coin packages / {coins} coins"
+        },
+        "videos": {
+          "label": "Total Network Videos",
+          "detail": "{total} videos - {views} views (+{newViews} {period})",
+          "unavailableDetail": "Video summary did not load"
         }
       },
       "actions": {
@@ -2344,6 +2374,17 @@
         "description": "System-wide transaction, wallet, and revenue-flow statistics.",
         "empty": "Unable to load finance data or no transactions are available yet.",
         "to": "to",
+        "chart": {
+          "trendTitle": "Financial Trends",
+          "trendDescription": "Deposits flow (AC) and system net revenue.",
+          "donutTitle": "Revenue Structure",
+          "depositsLabel": "Deposits Flow",
+          "revenueLabel": "System Revenue",
+          "tooltipAt": "At:",
+          "donutVideo": "Video Revenue",
+          "donutMembership": "Membership Revenue",
+          "donutPending": "Pending Revenue"
+        },
         "presets": {
           "all": "All",
           "today": "Today",
@@ -2413,7 +2454,8 @@
           "moderation": "Moderation",
           "payouts": "Payouts",
           "verifications": "Verifications",
-          "activity": "Activity"
+          "activity": "Activity",
+          "videos": "Videos"
         }
       },
       "priorityActions": {

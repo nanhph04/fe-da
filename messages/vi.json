@@ -1732,6 +1732,27 @@
           "views": "{count} lượt xem",
           "purchases": "{count} lượt mua"
         },
+        "stats": {
+          "title": "Chỉ số hệ thống",
+          "totalVideos": "Tổng số video",
+          "readyVideos": "Video sẵn sàng",
+          "uploadingVideos": "Đang tải / xử lý",
+          "pendingManualReviewVideos": "Chờ duyệt thủ công",
+          "rejectedVideos": "Bị từ chối",
+          "failedVideos": "Xử lý thất bại",
+          "bannedVideos": "Bị cấm",
+          "totalViews": "Tổng lượt xem",
+          "newVideos": "Video mới",
+          "newViews": "Lượt xem mới",
+          "newPurchases": "Lượt mua mới",
+          "rate": "Tỷ lệ",
+          "period": {
+            "day": "hôm nay",
+            "week": "tuần này",
+            "month": "tháng này",
+            "all": "tất cả"
+          }
+        },
         "empty": "Chưa có video nào trong danh sách quản lý.",
         "pagination": {
           "range": "Hiển thị từ <strong>{from}</strong> đến <strong>{to}</strong> trong tổng số <strong>{total}</strong> video",
@@ -2214,7 +2235,11 @@
       },
       "utils": {
         "growthUnavailable": "chưa có dữ liệu tăng trưởng",
-        "percent30Days": "{value}% / 30 ngày"
+        "percent30Days": "{value}% / 30 ngày",
+        "periodDay": "hôm nay",
+        "periodWeek": "tuần này",
+        "periodMonth": "tháng này",
+        "periodAll": "tất cả"
       },
       "stats": {
         "users": {
@@ -2240,6 +2265,11 @@
         "taxonomy": {
           "label": "Danh mục đang hoạt động",
           "detail": "{tags} tag đã tải, {pendingTags} đang chờ - {packages} gói coin / {coins} coin"
+        },
+        "videos": {
+          "label": "Tổng video hệ thống",
+          "detail": "{total} video - {views} lượt xem (+{newViews} {period})",
+          "unavailableDetail": "Không tải được tổng quan video"
         }
       },
       "actions": {
@@ -2296,6 +2326,17 @@
         "description": "Thống kê giao dịch, ví và dòng tiền doanh thu toàn hệ thống.",
         "empty": "Không thể tải dữ liệu tài chính hoặc chưa có giao dịch nào.",
         "to": "đến",
+        "chart": {
+          "trendTitle": "Xu hướng tài chính",
+          "trendDescription": "Dòng tiền nạp (AC) và doanh thu thực nhận hệ thống.",
+          "donutTitle": "Cơ cấu doanh thu",
+          "depositsLabel": "Dòng xu nạp",
+          "revenueLabel": "Doanh thu hệ thống",
+          "tooltipAt": "Thời điểm:",
+          "donutVideo": "Doanh thu Video",
+          "donutMembership": "Doanh thu Membership",
+          "donutPending": "Chờ ghi nhận"
+        },
         "presets": {
           "all": "Tất cả",
           "today": "Hôm nay",
@@ -2365,7 +2406,8 @@
           "moderation": "Moderation",
           "payouts": "Thanh toán",
           "verifications": "Xác minh",
-          "activity": "Hoạt động"
+          "activity": "Hoạt động",
+          "videos": "Tổng quan video"
         }
       },
       "priorityActions": {

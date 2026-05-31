@@ -72,3 +72,19 @@ export interface AdminVideoListParams {
   q?: string;
   category?: string;
 }
+
+export interface AdminVideoSummary {
+  period: "day" | "week" | "month" | "all";
+  totalVideos: number;
+  readyVideos: number;
+  uploadingVideos: number;
+  pendingManualReviewVideos: number;
+  rejectedVideos: number;
+  failedVideos: number;
+  bannedVideos: number;
+  totalViews: number;
+  newVideos: number;
+  newViews: number;
+  newPurchases: number;
+}
+
