@@ -86,8 +86,17 @@ export function ContentReviewQueueFeature() {
             {isLoading ? "Loading moderation reports..." : `${pagination.total} pending flags require administrator review.`}
           </p>
         </div>
-        <div className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 font-label text-xs font-bold uppercase tracking-widest text-primary">
-          Live API
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/content"
+            className="inline-flex items-center gap-2 rounded-sm border border-border/40 bg-muted/30 px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-muted/60"
+          >
+            <span className="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
+            Quản lý video
+          </Link>
+          <div className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 font-label text-xs font-bold uppercase tracking-widest text-primary">
+            Live API
+          </div>
         </div>
       </header>
 
@@ -150,7 +159,7 @@ export function ContentReviewQueueFeature() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/admin/content/${report.targetVideoId}`} className="inline-flex rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
+                      <Link href={`/admin/content/${report.targetVideoId}?mode=review`} className="inline-flex rounded-sm bg-primary px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90">
                         Review
                       </Link>
                     </td>

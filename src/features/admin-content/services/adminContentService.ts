@@ -43,6 +43,10 @@ const buildQueryString = (params: AdminVideoListParams = {}) => {
     searchParams.set("q", params.q.trim());
   }
 
+  if (params.category?.trim()) {
+    searchParams.set("category", params.category.trim());
+  }
+
   const query = searchParams.toString();
   return query ? `?${query}` : "";
 };

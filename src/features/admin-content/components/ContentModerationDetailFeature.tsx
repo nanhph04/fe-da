@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import { getErrorMessage } from "@/shared/api/client";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { adminContentService } from "../services/adminContentService";
@@ -43,7 +43,9 @@ function formatPercent(value: number | null) {
 
 export function ContentModerationDetailFeature() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const isReviewMode = searchParams.get("mode") === "review";
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [video, setVideo] = useState<AdminVideoItem | null>(null);
   const [preview, setPreview] = useState<AdminVideoPreview | null>(null);
@@ -194,7 +196,7 @@ export function ContentModerationDetailFeature() {
       ) : null}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
+        <div className={`space-y-6 ${isReviewMode ? "lg:col-span-8" : "lg:col-span-12"}`}>
           <div className="overflow-hidden rounded-sm border border-border/30 bg-background">
             {isLoading ? (
               <div className="flex aspect-video items-center justify-center font-body text-sm text-muted-foreground">
@@ -255,59 +257,61 @@ export function ContentModerationDetailFeature() {
           </article>
         </div>
 
-        <aside className="space-y-6 lg:col-span-4">
-          <div className="sticky top-28 rounded-lg border border-primary/30 bg-primary/10 p-6">
-            <h2 className="mb-6 font-headline text-xl font-bold uppercase tracking-widest text-primary">
-              Review Judgement
-            </h2>
-            <div className="space-y-6">
-              <div className="border-l-2 border-primary pl-3 font-mono text-xs leading-5 text-primary">
-                <p>Reason: {reason}</p>
-                <p>Label: {label}</p>
-                <p>Confidence: {formatPercent(confidence)}</p>
-                <p>NSFW: {formatPercent(nsfwScore)}</p>
-                <p>Safe: {formatPercent(safeScore)}</p>
-                <p>Sampled frames: {sampledFrameCount ?? "N/A"}</p>
-              </div>
-              <div>
-                <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Mod Notes
-                </label>
-                <textarea
-                  className="min-h-[120px] w-full rounded-sm border border-primary/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
-                  placeholder="Required for rejection..."
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  disabled={!canModerate || isSubmitting}
-                />
-              </div>
-              <div className="space-y-3 pt-2">
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-secondary py-3 font-headline text-xs font-bold uppercase tracking-widest text-secondary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={!canModerate || isSubmitting}
-                  onClick={handleApprove}
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    check_circle
-                  </span>
-                  Approve and Process
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-3 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={!canModerate || isSubmitting}
-                  onClick={handleReject}
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    block
-                  </span>
-                  Reject Video
-                </button>
+        {isReviewMode && (
+          <aside className="space-y-6 lg:col-span-4">
+            <div className="sticky top-28 rounded-lg border border-primary/30 bg-primary/10 p-6">
+              <h2 className="mb-6 font-headline text-xl font-bold uppercase tracking-widest text-primary">
+                Review Judgement
+              </h2>
+              <div className="space-y-6">
+                <div className="border-l-2 border-primary pl-3 font-mono text-xs leading-5 text-primary">
+                  <p>Reason: {reason}</p>
+                  <p>Label: {label}</p>
+                  <p>Confidence: {formatPercent(confidence)}</p>
+                  <p>NSFW: {formatPercent(nsfwScore)}</p>
+                  <p>Safe: {formatPercent(safeScore)}</p>
+                  <p>Sampled frames: {sampledFrameCount ?? "N/A"}</p>
+                </div>
+                <div>
+                  <label className="mb-3 block font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Mod Notes
+                  </label>
+                  <textarea
+                    className="min-h-[120px] w-full rounded-sm border border-primary/30 bg-background p-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
+                    placeholder="Required for rejection..."
+                    value={notes}
+                    onChange={(event) => setNotes(event.target.value)}
+                    disabled={!canModerate || isSubmitting}
+                  />
+                </div>
+                <div className="space-y-3 pt-2">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-center gap-2 rounded-sm bg-secondary py-3 font-headline text-xs font-bold uppercase tracking-widest text-secondary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!canModerate || isSubmitting}
+                    onClick={handleApprove}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">
+                      check_circle
+                    </span>
+                    Approve and Process
+                  </button>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-3 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!canModerate || isSubmitting}
+                    onClick={handleReject}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">
+                      block
+                    </span>
+                    Reject Video
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        )}
       </div>
     </section>
   );

@@ -1390,7 +1390,7 @@
   "Admin": {
     "navigation": {
       "dashboard": "Overview",
-      "contentReview": "Content Review",
+      "contentReview": "Video Management",
       "users": "Users",
       "channels": "Channels",
       "membershipReview": "Membership Review",

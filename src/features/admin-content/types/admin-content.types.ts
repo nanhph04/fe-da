@@ -31,8 +31,11 @@ export interface AdminVideoItem {
   channelId: string;
   ownerId: string;
   title: string;
+  channelName?: string | null;
+  channel?: { name: string } | null;
   description: string;
   category: string;
+  categoryTitle?: string | null;
   tags: string[];
   status: AdminVideoStatus | string;
   visibility: AdminVideoVisibility | string;
@@ -49,6 +52,7 @@ export interface AdminVideoItem {
   failureReason: string | null;
   moderationDetails: AdminVideoModerationDetails;
   viewCount: number;
+  purchaseCount?: number;
   publishedAt: string | null;
   isDeleted: boolean;
   deletedAt: string | null;
@@ -66,4 +70,5 @@ export interface AdminVideoListParams {
   channelId?: string;
   ownerId?: string;
   q?: string;
+  category?: string;
 }

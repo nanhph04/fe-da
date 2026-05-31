@@ -1342,7 +1342,7 @@
   "Admin": {
     "navigation": {
       "dashboard": "Tổng quan",
-      "contentReview": "Duyệt nội dung",
+      "contentReview": "Quản lý video",
       "users": "Người dùng",
       "channels": "Kênh",
       "membershipReview": "Duyệt hội viên",
