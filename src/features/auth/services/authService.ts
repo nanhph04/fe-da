@@ -55,31 +55,7 @@ export interface UpdateProfileRequest {
   birthday?: string;
 }
 
-export type AvatarContentType = "image/jpeg" | "image/png" | "image/webp";
 
-export interface CreateAvatarUploadUrlRequest {
-  fileName: string;
-  contentType: AvatarContentType;
-  contentLength: number;
-}
-
-export interface CreateAvatarUploadUrlResponse {
-  uploadUrl: string;
-  objectKey: string;
-  expiresIn: number;
-  publicUrl: string;
-  requiredHeaders: Record<string, string>;
-}
-
-export interface CompleteAvatarUploadRequest {
-  objectKey: string;
-}
-
-export interface UploadAvatarFileRequest {
-  uploadUrl: string;
-  file: Blob;
-  requiredHeaders?: Record<string, string>;
-}
 
 export const authService = {
   // 1.1) Register
@@ -140,36 +116,13 @@ export const authService = {
     return api.patch<UserProfileResponse>("/api/user/users/profile", data, { requireAuth: true });
   },
 
-  createAvatarUploadUrl: async (data: CreateAvatarUploadUrlRequest) => {
-    return api.post<CreateAvatarUploadUrlResponse>(
-      "/api/user/users/profile/avatar/upload-url",
-      data,
-      { requireAuth: true }
-    );
-  },
+  uploadAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
 
-  uploadAvatarFile: async ({ uploadUrl, file, requiredHeaders }: UploadAvatarFileRequest) => {
-    const headers = new Headers(requiredHeaders);
-
-    if (file.type && !headers.has("Content-Type")) {
-      headers.set("Content-Type", file.type);
-    }
-
-    const response = await fetch(uploadUrl, {
-      method: "PUT",
-      headers,
-      body: file,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Avatar upload failed: ${response.status}`);
-    }
-  },
-
-  completeAvatarUpload: async (data: CompleteAvatarUploadRequest) => {
     return api.post<UserProfileResponse>(
-      "/api/user/users/profile/avatar/complete",
-      data,
+      "/api/user/users/profile/avatar/upload-url",
+      formData,
       { requireAuth: true }
     );
   },

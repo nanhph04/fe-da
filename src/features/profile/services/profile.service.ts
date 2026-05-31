@@ -69,7 +69,5 @@ export const profileService = {
 
   updateProfile: (data: UpdateProfileRequest) => authService.updateProfile(data),
   changePassword: (data: ChangePasswordRequest) => authService.changePassword(data),
-  createAvatarUploadUrl: authService.createAvatarUploadUrl,
-  uploadAvatarFile: authService.uploadAvatarFile,
-  completeAvatarUpload: authService.completeAvatarUpload,
+  uploadAvatar: authService.uploadAvatar,
 };

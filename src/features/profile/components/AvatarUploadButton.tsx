@@ -38,21 +38,13 @@ export function AvatarUploadButton() {
     setMessage(null);
 
     try {
-      const uploadResponse = await profileService.createAvatarUploadUrl({
-        fileName: file.name,
-        contentType: file.type as (typeof ALLOWED_AVATAR_TYPES)[number],
-        contentLength: file.size,
-      });
-
-      await profileService.uploadAvatarFile({
-        uploadUrl: uploadResponse.data.uploadUrl,
-        file,
-        requiredHeaders: uploadResponse.data.requiredHeaders,
-      });
-
-      await profileService.completeAvatarUpload({ objectKey: uploadResponse.data.objectKey });
-      await fetchProfile();
-      setMessage(t("success"));
+      const res = await profileService.uploadAvatar(file);
+      if (res.success) {
+        await fetchProfile();
+        setMessage(t("success"));
+      } else {
+        setMessage(res.message || t("errors.uploadFailed"));
+      }
     } catch (error) {
       setMessage(getErrorMessage(error, t("errors.uploadFailed")));
     } finally {
