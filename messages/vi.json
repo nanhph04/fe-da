@@ -2377,9 +2377,9 @@
           "unavailableDescription": "Không tải được tổng quan rút tiền."
         },
         "taxonomy": {
-          "label": "Sức khỏe taxonomy",
+          "label": "Duyệt danh mục",
           "description": "Dữ liệu thực từ Media Service cho tag và danh mục.",
-          "countLabel": "{pendingTags} tag chờ / {inactiveCategories} danh mục không hoạt động"
+          "countLabel": "{pendingTags} tag chờ duyệt"
         }
       },
       "health": {
