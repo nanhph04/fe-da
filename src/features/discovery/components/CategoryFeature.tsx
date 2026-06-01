@@ -20,7 +20,7 @@ import {
   type CategoryPublic,
   type PublicDiscoveryVideo,
   type TagPublic,
-} from "@/features/watch/services/publicMediaService";
+} from "@/features/watch/services/publicMedia.types";
 import type { ApiPagination } from "@/shared/api/types";
 
 const FALLBACK_THUMBNAIL = "/images/thumbnail.png";

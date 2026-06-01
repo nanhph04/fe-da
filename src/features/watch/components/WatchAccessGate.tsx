@@ -14,7 +14,7 @@ import {
   setPersistedSession,
   clearPersistedSession,
 } from "@/shared/utils/idempotency";
-import type { PublicMembershipTier } from "../services/publicMediaService";
+import type { PublicMembershipTier } from "../services/publicMedia.types";
 import { mediaService } from "../services/mediaService";
 
 export interface WatchAccessData {

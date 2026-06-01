@@ -1,4 +1,4 @@
-import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
+import type { PublicChannelDetail } from "@/features/watch/services/publicMedia.types";
 import { CreatorHero } from "./CreatorHero";
 import { MembershipCheckoutClient } from "./MembershipCheckoutClient";
 import { MembershipFAQ } from "./MembershipFAQ";

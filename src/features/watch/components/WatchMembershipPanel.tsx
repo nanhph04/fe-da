@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import { useEffect, useId, useRef } from "react";
-import type { PublicMembershipTier } from "../services/publicMediaService";
+import type { PublicMembershipTier } from "../services/publicMedia.types";
 
 interface WatchMembershipPanelProps {
   channelId: string;

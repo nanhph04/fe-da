@@ -1,7 +1,13 @@
 export const READY_THUMBNAIL_STATUS = "ready";
 
 export function getReadyThumbnailUrl(thumbnailUrl?: string | null, thumbnailStatus?: string | null) {
-  return thumbnailUrl && thumbnailStatus === READY_THUMBNAIL_STATUS ? thumbnailUrl : null;
+  if (!thumbnailUrl) {
+    return null;
+  }
+  if (thumbnailStatus === null || thumbnailStatus === undefined || thumbnailStatus === "") {
+    return thumbnailUrl;
+  }
+  return thumbnailStatus === READY_THUMBNAIL_STATUS ? thumbnailUrl : null;
 }
 
 export function getReadyPublicVideoThumbnailUrl(

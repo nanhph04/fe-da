@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
-import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
+import type { PublicChannelDetail } from "@/features/watch/services/publicMedia.types";
 
 interface EditChannelDialogProps {
   channel: PublicChannelDetail;

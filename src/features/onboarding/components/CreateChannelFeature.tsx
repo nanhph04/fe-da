@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { type FormEvent, useEffect, useState } from "react";
 import { useRouter } from "@/i18n/routing";
-import { Loader2 } from "lucide-react";
+import { Loader2, Camera, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mediaService } from "@/features/watch/services/mediaService";
@@ -11,6 +11,19 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { authService, type UserProfileResponse } from "@/features/auth/services/authService";
 import { getErrorMessage } from "@/shared/api/client";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function validateImageFile(file: File, maxSizeMB: number): string | null {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return "Định dạng tệp không hợp lệ. Vui lòng chọn ảnh dạng JPEG, PNG hoặc WebP.";
+  }
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    return `Dung lượng tệp vượt quá giới hạn cho phép (${maxSizeMB}MB).`;
+  }
+  return null;
+}
 
 function isChannelConflict(error: unknown) {
   if (!error || typeof error !== "object") {
@@ -31,10 +44,58 @@ function canAccessStudio(profile: UserProfileResponse | null) {
 export function CreateChannelFeature() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { user, isLoading: isAuthLoading, fetchProfile } = useAuth();
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validationError = validateImageFile(file, 5);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setAvatarFile(file);
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    setAvatarPreview(URL.createObjectURL(file));
+    setError(null);
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validationError = validateImageFile(file, 10);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setBannerFile(file);
+    if (bannerPreview) {
+      URL.revokeObjectURL(bannerPreview);
+    }
+    setBannerPreview(URL.createObjectURL(file));
+    setError(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+      if (bannerPreview) URL.revokeObjectURL(bannerPreview);
+    };
+  }, [avatarPreview, bannerPreview]);
 
   useEffect(() => {
     if (isAuthLoading) {
@@ -99,22 +160,43 @@ export function CreateChannelFeature() {
     const trimmedBio = bio.trim();
 
     if (!trimmedName || !trimmedBio) {
-      setError("Vui long nhap day du ten kenh va mo ta kenh.");
+      setError("Vui lòng nhập đầy đủ tên kênh và mô tả kênh.");
       return;
     }
 
     setIsLoading(true);
     setError(null);
+    setLoadingMessage("Đang tạo kênh của bạn...");
 
     try {
       const res = await mediaService.createChannel({ name: trimmedName, bio: trimmedBio });
       if (res.success || res.statusCode === 201) {
+        if (avatarFile) {
+          setLoadingMessage("Đang tải lên ảnh đại diện...");
+          try {
+            await mediaService.uploadAvatarChannel(avatarFile);
+          } catch (uploadErr) {
+            console.error("Failed to upload avatar:", uploadErr);
+          }
+        }
+
+        if (bannerFile) {
+          setLoadingMessage("Đang tải lên ảnh bìa...");
+          try {
+            await mediaService.uploadBannerChannel(bannerFile);
+          } catch (uploadErr) {
+            console.error("Failed to upload banner:", uploadErr);
+          }
+        }
+
+        setLoadingMessage("Đang đồng bộ quyền nhà sáng tạo...");
         await goToStudioWhenReady();
       } else {
         setError(res.message || "Không thể tạo kênh.");
       }
     } catch (err: unknown) {
       if (isChannelConflict(err)) {
+        setLoadingMessage("Đang đồng bộ quyền nhà sáng tạo...");
         await goToStudioWhenReady();
         return;
       }
@@ -122,6 +204,7 @@ export function CreateChannelFeature() {
       setError(getErrorMessage(err, "Không thể tạo kênh. Vui lòng thử lại."));
     } finally {
       setIsLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -159,6 +242,83 @@ export function CreateChannelFeature() {
           </header>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Premium Channel Design Preview Area */}
+            <div className="relative mb-8 rounded-lg overflow-hidden border border-border/30 bg-black/40 shadow-inner">
+              {/* Banner Slot */}
+              <div 
+                onClick={() => document.getElementById("banner-input")?.click()}
+                className="group relative flex h-32 w-full cursor-pointer items-center justify-center overflow-hidden bg-zinc-900/60 transition-all hover:bg-zinc-900/80"
+              >
+                {bannerPreview ? (
+                  <img 
+                    src={bannerPreview} 
+                    alt="Banner preview" 
+                    className="h-full w-full object-cover opacity-85 transition-opacity" 
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-1.5 text-zinc-500 transition-colors group-hover:text-zinc-300">
+                    <Upload className="h-5 w-5" />
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-widest">Chọn ảnh bìa (Max 10MB)</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/45 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-white flex items-center gap-1.5">
+                    <Upload className="h-4 w-4" /> Thay đổi ảnh bìa
+                  </span>
+                </div>
+              </div>
+
+              {/* Profile Bar below Banner */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 px-6 py-4 bg-muted/20 border-t border-border/10">
+                {/* Avatar Slot */}
+                <div 
+                  onClick={() => document.getElementById("avatar-input")?.click()}
+                  className="group relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-primary/30 bg-zinc-950 transition-all hover:border-primary -mt-10 sm:-mt-12 shadow-md z-10"
+                >
+                  {avatarPreview ? (
+                    <img 
+                      src={avatarPreview} 
+                      alt="Avatar preview" 
+                      className="h-full w-full object-cover" 
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-zinc-500 transition-colors group-hover:text-zinc-300">
+                      <Camera className="h-4 w-4" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
+                    <Camera className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+                
+                {/* Channel Details preview */}
+                <div className="flex-1 text-center sm:text-left min-w-0">
+                  <h3 className="font-headline text-base font-extrabold text-foreground truncate">
+                    {name || "Tên kênh của bạn"}
+                  </h3>
+                  <p className="mt-0.5 font-mono text-[10px] text-zinc-400 truncate">
+                    {bio || "Chưa có mô tả kênh..."}
+                  </p>
+                </div>
+              </div>
+
+              {/* Hidden Inputs */}
+              <input 
+                type="file" 
+                id="banner-input" 
+                accept="image/jpeg,image/png,image/webp" 
+                className="hidden" 
+                onChange={handleBannerChange}
+              />
+              <input 
+                type="file" 
+                id="avatar-input" 
+                accept="image/jpeg,image/png,image/webp" 
+                className="hidden" 
+                onChange={handleAvatarChange}
+              />
+            </div>
+
             <div className="flex flex-col gap-2">
               <label className="px-1 font-headline text-xs font-bold uppercase tracking-widest text-zinc-200">Tên kênh *</label>
               <Input 
@@ -196,7 +356,7 @@ export function CreateChannelFeature() {
                 className="h-14 w-full bg-primary font-black uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 {isLoading ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : null}
-                {isLoading ? "Đang tạo kênh..." : "Tạo kênh"}
+                {isLoading ? (loadingMessage || "Đang xử lý...") : "Tạo kênh"}
               </Button>
             </div>
           </form>

@@ -7,7 +7,7 @@ import {
   getReadyPublicThumbnailUrl,
   type CategoryPublic,
   type PublicDiscoveryVideo,
-} from "@/features/watch/services/publicMediaService";
+} from "@/features/watch/services/publicMedia.types";
 
 const FALLBACK_THUMBNAIL = "/images/thumbnail.png";
 

@@ -8,6 +8,7 @@ export interface StudioNavItem {
 
 export const studioSidebarItems: StudioNavItem[] = [
   { label: "dashboard", path: "/studio", icon: "dashboard" },
+  { label: "channel", path: "/studio/channel", icon: "tv", matchStartsWith: true },
   { label: "content", path: "/studio/content", icon: "video_library", matchStartsWith: true },
   { label: "upload", path: "/studio/upload", icon: "add_circle", matchStartsWith: true },
   { label: "studioWallet", path: "/studio/wallet", icon: "account_balance_wallet", matchStartsWith: true },

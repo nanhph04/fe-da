@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/routing";
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
-import { getReadyPublicThumbnailUrl, type PublicChannelVideo } from "@/features/watch/services/publicMediaService";
+import { getReadyPublicThumbnailUrl, type PublicChannelVideo } from "@/features/watch/services/publicMedia.types";
 
 interface ChannelVideoGridProps {
   videos: PublicChannelVideo[];

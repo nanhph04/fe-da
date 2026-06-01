@@ -1,4 +1,4 @@
-import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
+import type { PublicChannelDetail } from "@/features/watch/services/publicMedia.types";
 
 interface CreatorHeroProps {
   channel: PublicChannelDetail;

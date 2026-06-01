@@ -205,10 +205,12 @@
       "cancel": "Cancel",
       "continueToPayOS": "Continue to PayOS",
       "continueDescription": "We will create a deposit request and load the secure PayOS payment form.",
+      "expiresIn": "Order expires in:",
       "errors": {
         "createPaymentFailed": "Unable to create PayOS payment. Please try again.",
         "missingCheckoutUrl": "The backend did not return a checkout URL for this PayOS transaction.",
-        "invalidCheckoutUrl": "The backend returned an invalid checkout URL."
+        "invalidCheckoutUrl": "The backend returned an invalid checkout URL.",
+        "paymentExpired": "The payment request has expired (15 minutes). Please try a new deposit."
       }
     }
   },
@@ -606,7 +608,8 @@
       "memberships": "Memberships",
       "wallet": "Wallet",
       "earnings": "Earnings",
-      "payouts": "Payouts"
+      "payouts": "Payouts",
+      "channel": "My Channel"
     },
     "layout": {
       "creatorStudio": "Creator Studio",
@@ -1384,6 +1387,86 @@
           "confirmed": "Confirmed earnings",
           "paid": "Paid earnings"
         }
+      }
+    },
+    "channel": {
+      "pageLabel": "Channel profile",
+      "pageTitle": "My Channel",
+      "pageSubtitle": "Overview of your channel info, published videos, membership, and activity status.",
+      "loading": "Loading channel info...",
+      "verified": "Verified channel",
+      "editChannel": "Customize channel",
+      "viewPublic": "View public",
+      "noBio": "Channel bio has not been updated yet.",
+      "stats": {
+        "totalVideos": "Total videos",
+        "totalViews": "Total views",
+        "membershipTiers": "Membership tiers",
+        "membershipStatus": "Status",
+        "membershipActive": "Active",
+        "membershipPending": "Pending review",
+        "membershipRejected": "Rejected",
+        "membershipClosed": "Closed by Admin",
+        "membershipNotRequested": "Not requested"
+      },
+      "tabs": {
+        "videos": "Public videos",
+        "membership": "Membership",
+        "about": "About"
+      },
+      "videosEmpty": {
+        "title": "No public videos yet",
+        "description": "Once your channel publishes videos, content will appear here.",
+        "cta": "Upload video"
+      },
+      "videosPublished": "{count} videos published by {channel}.",
+      "membershipEligibility": {
+        "label": "Membership eligibility",
+        "eligible": "Eligible",
+        "notEligible": "Not eligible",
+        "readyVideos": "Ready videos",
+        "totalViews": "Total views",
+        "missingLabel": "Missing requirements"
+      },
+      "membershipReview": {
+        "label": "Review status",
+        "notRequested": "Not requested",
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "tiers": {
+        "label": "Membership tiers",
+        "title": "Tier list",
+        "empty": "No membership tiers yet.",
+        "createCta": "Create tier",
+        "manageCta": "Manage tiers",
+        "month": "month",
+        "accepting": "Open",
+        "closed": "Closed"
+      },
+      "about": {
+        "channelInfo": "Channel info",
+        "statusInfo": "System status",
+        "channelName": "Channel name",
+        "bio": "Bio",
+        "channelId": "Channel ID",
+        "userId": "User ID",
+        "createdAt": "Created at",
+        "updatedAt": "Last updated",
+        "channelStatus": "Channel status",
+        "eligibleForMembership": "Eligible for membership",
+        "membershipClosedByAdmin": "Membership closed by admin",
+        "reviewStatus": "Review status",
+        "requestedAt": "Review requested at",
+        "reviewedAt": "Reviewed at",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "errors": {
+        "title": "Unable to load channel",
+        "noChannel": "You don't have a channel yet. Create one before accessing this page.",
+        "loadFailed": "Unable to load channel info at this time."
       }
     }
   },

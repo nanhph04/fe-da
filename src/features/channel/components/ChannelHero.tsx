@@ -5,7 +5,7 @@ import { Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { EditChannelDialog } from "./EditChannelDialog";
-import type { PublicChannelDetail } from "@/features/watch/services/publicMediaService";
+import type { PublicChannelDetail } from "@/features/watch/services/publicMedia.types";
 
 interface ChannelHeroProps {
   channel: PublicChannelDetail;

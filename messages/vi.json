@@ -205,10 +205,12 @@
       "cancel": "Hủy",
       "continueToPayOS": "Tiếp tục với PayOS",
       "continueDescription": "Hệ thống sẽ tạo yêu cầu nạp và tải trang thanh toán an toàn của PayOS.",
+      "expiresIn": "Đơn hàng hết hạn sau:",
       "errors": {
         "createPaymentFailed": "Không thể tạo thanh toán PayOS. Vui lòng thử lại.",
         "missingCheckoutUrl": "Backend chưa trả checkoutUrl cho giao dịch PayOS.",
-        "invalidCheckoutUrl": "Backend trả checkoutUrl không hợp lệ."
+        "invalidCheckoutUrl": "Backend trả checkoutUrl không hợp lệ.",
+        "paymentExpired": "Đơn thanh toán đã hết hạn (15 phút). Vui lòng nạp lại gói mới."
       }
     }
   },
@@ -558,7 +560,8 @@
       "memberships": "Hội viên",
       "wallet": "Ví",
       "earnings": "Doanh thu",
-      "payouts": "Thanh toán"
+      "payouts": "Thanh toán",
+      "channel": "Kênh của tôi"
     },
     "layout": {
       "creatorStudio": "Creator Studio",
@@ -1336,6 +1339,86 @@
           "confirmed": "Doanh thu đã xác nhận",
           "paid": "Doanh thu đã trả"
         }
+      }
+    },
+    "channel": {
+      "pageLabel": "Channel profile",
+      "pageTitle": "Kênh của tôi",
+      "pageSubtitle": "Xem tổng quan thông tin kênh, video đã xuất bản, membership và trạng thái hoạt động.",
+      "loading": "Đang tải thông tin kênh...",
+      "verified": "Kênh đã xác minh",
+      "editChannel": "Tùy chỉnh kênh",
+      "viewPublic": "Xem công khai",
+      "noBio": "Kênh chưa cập nhật phần giới thiệu.",
+      "stats": {
+        "totalVideos": "Tổng video",
+        "totalViews": "Tổng lượt xem",
+        "membershipTiers": "Gói hội viên",
+        "membershipStatus": "Trạng thái",
+        "membershipActive": "Đang hoạt động",
+        "membershipPending": "Chờ duyệt",
+        "membershipRejected": "Bị từ chối",
+        "membershipClosed": "Đóng bởi Admin",
+        "membershipNotRequested": "Chưa yêu cầu"
+      },
+      "tabs": {
+        "videos": "Video công khai",
+        "membership": "Membership",
+        "about": "Giới thiệu"
+      },
+      "videosEmpty": {
+        "title": "Chưa có video công khai",
+        "description": "Khi kênh xuất bản video, nội dung sẽ xuất hiện tại đây.",
+        "cta": "Tải video lên"
+      },
+      "videosPublished": "{count} video đang phát hành bởi {channel}.",
+      "membershipEligibility": {
+        "label": "Điều kiện membership",
+        "eligible": "Đủ điều kiện",
+        "notEligible": "Chưa đủ điều kiện",
+        "readyVideos": "Video sẵn sàng",
+        "totalViews": "Tổng lượt xem",
+        "missingLabel": "Yêu cầu chưa đạt"
+      },
+      "membershipReview": {
+        "label": "Trạng thái duyệt",
+        "notRequested": "Chưa yêu cầu",
+        "pending": "Đang chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Bị từ chối"
+      },
+      "tiers": {
+        "label": "Gói hội viên",
+        "title": "Danh sách gói",
+        "empty": "Chưa có gói hội viên nào.",
+        "createCta": "Tạo gói mới",
+        "manageCta": "Quản lý gói hội viên",
+        "month": "tháng",
+        "accepting": "Đang mở",
+        "closed": "Tạm đóng"
+      },
+      "about": {
+        "channelInfo": "Thông tin kênh",
+        "statusInfo": "Trạng thái hệ thống",
+        "channelName": "Tên kênh",
+        "bio": "Giới thiệu",
+        "channelId": "Channel ID",
+        "userId": "User ID",
+        "createdAt": "Ngày tạo",
+        "updatedAt": "Cập nhật lần cuối",
+        "channelStatus": "Trạng thái kênh",
+        "eligibleForMembership": "Đủ điều kiện mở membership",
+        "membershipClosedByAdmin": "Bị admin đóng membership",
+        "reviewStatus": "Trạng thái duyệt",
+        "requestedAt": "Ngày yêu cầu duyệt",
+        "reviewedAt": "Ngày duyệt",
+        "yes": "Có",
+        "no": "Không"
+      },
+      "errors": {
+        "title": "Không thể tải thông tin kênh",
+        "noChannel": "Bạn chưa có kênh. Hãy tạo kênh trước khi truy cập trang này.",
+        "loadFailed": "Không thể tải thông tin kênh lúc này."
       }
     }
   },

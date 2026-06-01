@@ -4,7 +4,7 @@ import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService, type UserMembershipResponse } from "../services/mediaService";
-import type { PublicMembershipTier } from "../services/publicMediaService";
+import type { PublicMembershipTier } from "../services/publicMedia.types";
 import { WatchMembershipPanel } from "./WatchMembershipPanel";
 
 interface WatchChannelCardProps {

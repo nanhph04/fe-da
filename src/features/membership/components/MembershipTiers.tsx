@@ -1,6 +1,6 @@
 "use client";
 
-import type { PublicMembershipTier } from "@/features/watch/services/publicMediaService";
+import type { PublicMembershipTier } from "@/features/watch/services/publicMedia.types";
 
 interface MembershipTiersProps {
   tiers: PublicMembershipTier[];

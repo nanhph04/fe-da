@@ -19,7 +19,7 @@ import {
   type PublicDiscoveryVideo,
   type PublicSearchChannel,
   type TagPublic,
-} from "@/features/watch/services/publicMediaService";
+} from "@/features/watch/services/publicMedia.types";
 
 const FALLBACK_THUMBNAIL = "/images/thumbnail.png";
 const DEFAULT_LIMIT = 20;

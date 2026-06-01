@@ -7,7 +7,7 @@ import {
   mediaService,
   type UserMembershipResponse,
 } from "@/features/watch/services/mediaService";
-import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";
+import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMedia.types";
 
 interface ChannelMembershipTiersProps {
   channel: PublicChannelDetail;

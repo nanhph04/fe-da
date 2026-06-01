@@ -8,7 +8,7 @@ import {
   mediaService,
   type UserMembershipResponse,
 } from "@/features/watch/services/mediaService";
-import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMediaService";
+import type { PublicChannelDetail, PublicMembershipTier } from "@/features/watch/services/publicMedia.types";
 import { CheckoutOverlay, type MembershipPaymentState } from "./CheckoutOverlay";
 import { MembershipTiers } from "./MembershipTiers";
 import { createMembershipPayment } from "../services/membershipPaymentService";

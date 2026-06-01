@@ -72,6 +72,12 @@ function getValidCheckoutUrl(checkoutUrl: string, invalidUrlMessage: string) {
   return paymentUrl.toString();
 }
 
+function formatTime(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
 export function EmbeddedPayOsCheckout({
   selectedPackage,
   onClose,
@@ -81,6 +87,7 @@ export function EmbeddedPayOsCheckout({
   const [deposit, setDeposit] = useState<Deposit | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const t = useTranslations("Wallet.EmbeddedCheckout");
   const locale = useLocale();
   const walletNumberFormatter = useMemo(
@@ -110,6 +117,29 @@ export function EmbeddedPayOsCheckout({
     setIsProcessing(false);
     setError(null);
   }, [selectedPackage.id]);
+
+  useEffect(() => {
+    if (!checkoutUrl) {
+      setTimeLeft(null);
+      return;
+    }
+
+    setTimeLeft(900); // 15 minutes in seconds
+
+    const intervalId = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(intervalId);
+          resetPayment();
+          setError(t("errors.paymentExpired"));
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [checkoutUrl]);
 
   const { open, exit } = usePayOS({
     RETURN_URL: typeof window !== "undefined" ? `${window.location.origin}/wallet/success` : "",
@@ -281,6 +311,16 @@ export function EmbeddedPayOsCheckout({
                 {formatWalletNumber(selectedPackage.moneyAmount)} VND
               </p>
             </div>
+            {timeLeft !== null && timeLeft > 0 && (
+              <div className="mt-5 border-t border-border/30 pt-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-destructive">
+                  {t("expiresIn")}
+                </p>
+                <p className="mt-2 font-mono text-2xl font-black text-destructive animate-pulse">
+                  {formatTime(timeLeft)}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-3 rounded-lg bg-background/40 p-4 sm:gap-4 sm:p-5 md:grid-cols-2 xl:grid-cols-1">
