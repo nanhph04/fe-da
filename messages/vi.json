@@ -1630,7 +1630,8 @@
         "openMembership": "Mở hội viên",
         "closeMembership": "Đóng hội viên",
         "unlock": "Mở khóa",
-        "lock": "Khóa"
+        "lock": "Khóa",
+        "transactions": "Giao dịch"
       },
       "statuses": {
         "active": "Đang hoạt động",
@@ -1678,7 +1679,109 @@
         "title": "Không có kênh nào",
         "description": "Không có kênh nào khớp bộ lọc hiện tại."
       },
-      "avatarAlt": "Ảnh đại diện của kênh {channel}"
+      "avatarAlt": "Ảnh đại diện của kênh {channel}",
+      "transactions": {
+        "header": {
+          "back": "Quay lại kênh",
+          "eyebrow": "Sổ cái tài chính",
+          "title": "Lịch sử giao dịch kênh",
+          "description": "Kiểm tra hoạt động ví và tỷ lệ chia coin creator/hệ thống cho kênh {channelId}.",
+          "liveApi": "Finance API"
+        },
+        "summary": {
+          "totalTransactions": "Tổng giao dịch",
+          "totalAmount": "Tổng số {amount}",
+          "completed": "Số tiền hoàn tất",
+          "pending": "Đang chờ {amount}",
+          "failed": "Số tiền thất bại",
+          "riskWindow": "Sự kiện tài chính thất bại hoặc đã hủy",
+          "split": "Phần creator",
+          "systemCoins": "Hệ thống giữ {amount}"
+        },
+        "list": {
+          "title": "Sổ cái giao dịch",
+          "description": "Tìm theo mô tả, tham chiếu, ví hoặc người dùng và lọc theo trạng thái hoặc loại giao dịch."
+        },
+        "filters": {
+          "searchLabel": "Tìm giao dịch",
+          "searchPlaceholder": "Tìm mô tả, tham chiếu, ví...",
+          "statusLabel": "Trạng thái",
+          "typeLabel": "Loại",
+          "statuses": {
+            "all": "Mọi trạng thái",
+            "completed": "Hoàn tất",
+            "pending": "Đang chờ",
+            "failed": "Thất bại",
+            "cancelled": "Đã hủy"
+          },
+          "types": {
+            "all": "Mọi loại",
+            "video_purchase": "Mua video",
+            "membership_purchase": "Mua hội viên",
+            "member_subscription": "Đăng ký hội viên",
+            "channel_revenue": "Doanh thu kênh",
+            "system_revenue": "Doanh thu hệ thống",
+            "refund": "Hoàn tiền"
+          }
+        },
+        "table": {
+          "transaction": "Giao dịch",
+          "service": "Dịch vụ",
+          "amount": "Số tiền",
+          "wallets": "Ví",
+          "status": "Trạng thái",
+          "updated": "Cập nhật",
+          "created": "Đã tạo {date}",
+          "ledgerEntry": "Bút toán sổ cái",
+          "transactionId": "Mã giao dịch",
+          "serviceId": "Mã dịch vụ",
+          "channelId": "Mã kênh",
+          "payerWallet": "Ví người trả",
+          "receiverWallet": "Ví nhận",
+          "channelWallet": "Ví kênh",
+          "systemWallet": "Ví hệ thống",
+          "user": "Người dùng",
+          "noId": "Không có mã",
+          "videoService": "Video",
+          "membershipService": "Hội viên",
+          "splitPercent": "Chia {percent}%",
+          "splitCoins": "Creator {creator} / Hệ thống {system} AC"
+        },
+        "statuses": {
+          "completed": "Hoàn tất",
+          "pending": "Đang chờ",
+          "failed": "Thất bại",
+          "cancelled": "Đã hủy"
+        },
+        "types": {
+          "video_purchase": "Mua video",
+          "membership_purchase": "Mua hội viên",
+          "member_subscription": "Đăng ký hội viên",
+          "channel_revenue": "Doanh thu kênh",
+          "system_revenue": "Doanh thu hệ thống",
+          "refund": "Hoàn tiền"
+        },
+        "pagination": {
+          "summary": "Hiển thị {from}-{to} trong tổng số {total} giao dịch",
+          "previous": "Trang giao dịch trước",
+          "next": "Trang giao dịch sau"
+        },
+        "fallbacks": {
+          "notAvailable": "Không có dữ liệu",
+          "noDescription": "Không có mô tả",
+          "unknownChannel": "Không rõ kênh",
+          "noSplit": "Không có metadata chia doanh thu"
+        },
+        "errors": {
+          "title": "Không thể tải giao dịch",
+          "loadFailed": "Không thể tải giao dịch của kênh.",
+          "missingChannel": "Thiếu mã kênh cho lịch sử giao dịch."
+        },
+        "empty": {
+          "title": "Không có giao dịch nào",
+          "description": "Không có giao dịch kênh nào khớp bộ lọc hiện tại."
+        }
+      }
     },
     "verifications": {
       "header": {

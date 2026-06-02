@@ -1678,7 +1678,8 @@
         "openMembership": "Open membership",
         "closeMembership": "Close membership",
         "unlock": "Unlock",
-        "lock": "Lock"
+        "lock": "Lock",
+        "transactions": "Transactions"
       },
       "statuses": {
         "active": "Active",
@@ -1726,7 +1727,109 @@
         "title": "No channels found",
         "description": "No channels match the current filters."
       },
-      "avatarAlt": "{channel} channel avatar"
+      "avatarAlt": "{channel} channel avatar",
+      "transactions": {
+        "header": {
+          "back": "Back to channels",
+          "eyebrow": "Finance Ledger",
+          "title": "Channel Transaction History",
+          "description": "Audit wallet activity and creator/system coin splits for channel {channelId}.",
+          "liveApi": "Finance API"
+        },
+        "summary": {
+          "totalTransactions": "Total transactions",
+          "totalAmount": "Total amount {amount}",
+          "completed": "Completed amount",
+          "pending": "Pending {amount}",
+          "failed": "Failed amount",
+          "riskWindow": "Failed or cancelled finance events",
+          "split": "Creator split",
+          "systemCoins": "System retained {amount}"
+        },
+        "list": {
+          "title": "Transaction ledger",
+          "description": "Search descriptions, references, wallets, or users and filter by status or transaction type."
+        },
+        "filters": {
+          "searchLabel": "Search transactions",
+          "searchPlaceholder": "Search description, reference, wallet...",
+          "statusLabel": "Status",
+          "typeLabel": "Type",
+          "statuses": {
+            "all": "All statuses",
+            "completed": "Completed",
+            "pending": "Pending",
+            "failed": "Failed",
+            "cancelled": "Cancelled"
+          },
+          "types": {
+            "all": "All types",
+            "video_purchase": "Video purchase",
+            "membership_purchase": "Membership purchase",
+            "member_subscription": "Member subscription",
+            "channel_revenue": "Channel revenue",
+            "system_revenue": "System revenue",
+            "refund": "Refund"
+          }
+        },
+        "table": {
+          "transaction": "Transaction",
+          "service": "Service",
+          "amount": "Amount",
+          "wallets": "Wallets",
+          "status": "Status",
+          "updated": "Updated",
+          "created": "Created {date}",
+          "ledgerEntry": "Ledger entry",
+          "transactionId": "Transaction ID",
+          "serviceId": "Service ID",
+          "channelId": "Channel ID",
+          "payerWallet": "Payer wallet",
+          "receiverWallet": "Receiver wallet",
+          "channelWallet": "Channel wallet",
+          "systemWallet": "System wallet",
+          "user": "User",
+          "noId": "No ID",
+          "videoService": "Video",
+          "membershipService": "Membership",
+          "splitPercent": "Split {percent}%",
+          "splitCoins": "Creator {creator} / System {system} AC"
+        },
+        "statuses": {
+          "completed": "Completed",
+          "pending": "Pending",
+          "failed": "Failed",
+          "cancelled": "Cancelled"
+        },
+        "types": {
+          "video_purchase": "Video purchase",
+          "membership_purchase": "Membership purchase",
+          "member_subscription": "Member subscription",
+          "channel_revenue": "Channel revenue",
+          "system_revenue": "System revenue",
+          "refund": "Refund"
+        },
+        "pagination": {
+          "summary": "Showing {from}-{to} of {total} transactions",
+          "previous": "Previous transaction page",
+          "next": "Next transaction page"
+        },
+        "fallbacks": {
+          "notAvailable": "Not available",
+          "noDescription": "No description",
+          "unknownChannel": "Unknown channel",
+          "noSplit": "No split metadata"
+        },
+        "errors": {
+          "title": "Unable to load transactions",
+          "loadFailed": "Unable to load channel transactions.",
+          "missingChannel": "Missing channel id for transaction history."
+        },
+        "empty": {
+          "title": "No transactions found",
+          "description": "No channel transactions match the current filters."
+        }
+      }
     },
     "verifications": {
       "header": {

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const apiGatewayUrl =
+  process.env.GATEWAY_INTERNAL_URL ??
   process.env.NEXT_PUBLIC_GATEWAY_URL ??
   "http://localhost:4000";
 

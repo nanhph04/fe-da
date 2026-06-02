@@ -22,6 +22,7 @@
     "@fontsource/material-symbols-outlined": "^5.2.43",
     "@hookform/resolvers": "^5.2.2",
     "@payos/payos-checkout": "^1.0.8",
+    "@swc/helpers": "^0.5.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",

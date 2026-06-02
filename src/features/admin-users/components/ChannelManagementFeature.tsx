@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -717,6 +718,13 @@ function ChannelRow({
               </button>
             </>
           ) : null}
+          <Link
+            href={`/admin/channels/${channel.id}/transactions`}
+            className="inline-flex items-center gap-1 rounded-sm border border-border/30 px-3 py-2 font-label text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
+          >
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">receipt_long</span>
+            {t("actions.transactions")}
+          </Link>
           <button
             type="button"
             onClick={() => void onMembershipAvailability(channel)}

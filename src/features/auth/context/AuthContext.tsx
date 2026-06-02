@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
-import { api, fetchSSE, getHttpStatus } from "@/shared/api/client";
+import { api, fetchSSE, getHttpStatus, refreshAccessToken } from "@/shared/api/client";
 import { authService } from "../services/authService";
 import { useRouter } from "@/i18n/routing";
 import { normalizeInternalPath } from "@/shared/utils/locale-path";
@@ -71,14 +71,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = api.getToken();
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
+      try {
+        const token = api.getToken();
+        if (!token) {
+          const newToken = await refreshAccessToken();
+          api.setToken(newToken);
+        }
 
-      await fetchProfile();
-      setIsLoading(false);
+        await fetchProfile();
+      } catch {
+        api.clearToken();
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     void initAuth();
