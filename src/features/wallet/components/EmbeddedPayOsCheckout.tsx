@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, Loader2, ShieldCheck, X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/shared/api/client";
@@ -118,29 +118,6 @@ export function EmbeddedPayOsCheckout({
     setError(null);
   }, [selectedPackage.id]);
 
-  useEffect(() => {
-    if (!checkoutUrl) {
-      setTimeLeft(null);
-      return;
-    }
-
-    setTimeLeft(900); // 15 minutes in seconds
-
-    const intervalId = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(intervalId);
-          resetPayment();
-          setError(t("errors.paymentExpired"));
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [checkoutUrl]);
-
   const { open, exit } = usePayOS({
     RETURN_URL: typeof window !== "undefined" ? `${window.location.origin}/wallet/success` : "",
     ELEMENT_ID: PAYOS_CHECKOUT_CONTAINER_ID,
@@ -229,7 +206,7 @@ export function EmbeddedPayOsCheckout({
     }
   };
 
-  const resetPayment = () => {
+  const resetPayment = useCallback(() => {
     if (getPayOsIframe()) {
       try {
         exitRef.current();
@@ -244,7 +221,30 @@ export function EmbeddedPayOsCheckout({
     setDeposit(null);
     setIsProcessing(false);
     setError(null);
-  };
+  }, [selectedPackage.id, userId]);
+
+  useEffect(() => {
+    if (!checkoutUrl) {
+      setTimeLeft(null);
+      return;
+    }
+
+    setTimeLeft(900); // 15 minutes in seconds
+
+    const intervalId = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(intervalId);
+          resetPayment();
+          setError(t("errors.paymentExpired"));
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [checkoutUrl, resetPayment, t]);
 
   const handleClose = () => {
     resetPayment();

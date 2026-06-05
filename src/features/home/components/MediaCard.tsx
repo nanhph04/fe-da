@@ -3,6 +3,7 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 export interface MediaCardProps {
+  id: string;
   title: string;
   creator: string;
   channelId?: string;

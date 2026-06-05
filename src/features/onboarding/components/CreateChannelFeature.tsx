@@ -250,10 +250,13 @@ export function CreateChannelFeature() {
                 className="group relative flex h-32 w-full cursor-pointer items-center justify-center overflow-hidden bg-zinc-900/60 transition-all hover:bg-zinc-900/80"
               >
                 {bannerPreview ? (
-                  <img 
-                    src={bannerPreview} 
-                    alt="Banner preview" 
-                    className="h-full w-full object-cover opacity-85 transition-opacity" 
+                  <Image
+                    src={bannerPreview}
+                    alt="Banner preview"
+                    fill
+                    sizes="(min-width: 640px) 640px, 100vw"
+                    className="object-cover opacity-85 transition-opacity"
+                    unoptimized
                   />
                 ) : (
                   <div className="flex flex-col items-center gap-1.5 text-zinc-500 transition-colors group-hover:text-zinc-300">
@@ -276,10 +279,13 @@ export function CreateChannelFeature() {
                   className="group relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-primary/30 bg-zinc-950 transition-all hover:border-primary -mt-10 sm:-mt-12 shadow-md z-10"
                 >
                   {avatarPreview ? (
-                    <img 
-                      src={avatarPreview} 
-                      alt="Avatar preview" 
-                      className="h-full w-full object-cover" 
+                    <Image
+                      src={avatarPreview}
+                      alt="Avatar preview"
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <div className="flex flex-col items-center gap-1 text-zinc-500 transition-colors group-hover:text-zinc-300">

@@ -571,57 +571,81 @@ interface FinanceTrendChartProps {
 function FinanceTrendChart({ data, datePreset, startDate, endDate, locale }: FinanceTrendChartProps) {
   const t = useTranslations("Admin.dashboard");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [referenceTimestamp, setReferenceTimestamp] = useState<number | null>(null);
+
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      setReferenceTimestamp(Date.now());
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, []);
 
   const chartConfig = useMemo(() => {
     let count = 7;
     let labels: string[] = [];
+    const referenceDate = referenceTimestamp === null ? null : new Date(referenceTimestamp);
 
     if (datePreset === "today") {
       count = 24;
       labels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
     } else if (datePreset === "7d") {
       count = 7;
-      labels = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-      });
+      labels = referenceDate
+        ? Array.from({ length: count }, (_, i) => {
+          const d = new Date(referenceDate.getTime());
+          d.setDate(d.getDate() - (6 - i));
+          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
+        })
+        : Array.from({ length: count }, () => "");
     } else if (datePreset === "30d") {
       count = 15;
-      labels = Array.from({ length: 15 }, (_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (14 - i) * 2);
-        return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-      });
+      labels = referenceDate
+        ? Array.from({ length: count }, (_, i) => {
+          const d = new Date(referenceDate.getTime());
+          d.setDate(d.getDate() - (14 - i) * 2);
+          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
+        })
+        : Array.from({ length: count }, () => "");
     } else if (datePreset === "month") {
-      const now = new Date();
-      const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const now = referenceDate;
+      const days = now ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : 31;
       count = Math.min(days, 16);
-      labels = Array.from({ length: count }, (_, i) => {
-        const dayIdx = Math.round((i / (count - 1)) * (days - 1)) + 1;
-        const d = new Date(now.getFullYear(), now.getMonth(), dayIdx);
-        return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-      });
+      labels = now
+        ? Array.from({ length: count }, (_, i) => {
+          const dayIdx = Math.round((i / (count - 1)) * (days - 1)) + 1;
+          const d = new Date(now.getFullYear(), now.getMonth(), dayIdx);
+          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
+        })
+        : Array.from({ length: count }, () => "");
     } else if (datePreset === "all") {
       count = 12;
-      labels = Array.from({ length: 12 }, (_, i) => {
-        const d = new Date();
-        d.setMonth(d.getMonth() - (11 - i));
-        return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short" });
-      });
+      labels = referenceDate
+        ? Array.from({ length: count }, (_, i) => {
+          const d = new Date(referenceDate.getTime());
+          d.setMonth(d.getMonth() - (11 - i));
+          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short" });
+        })
+        : Array.from({ length: count }, () => "");
     } else {
       count = 10;
-      const start = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const end = endDate ? new Date(endDate) : new Date();
-      const diffMs = end.getTime() - start.getTime();
-      labels = Array.from({ length: count }, (_, i) => {
-        const d = new Date(start.getTime() + (i / (count - 1)) * diffMs);
-        return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-      });
+      if (referenceDate || (startDate && endDate)) {
+        const end = endDate ? new Date(endDate) : referenceDate;
+        const start = startDate
+          ? new Date(startDate)
+          : new Date((end?.getTime() ?? 0) - 30 * 24 * 60 * 60 * 1000);
+        const diffMs = (end?.getTime() ?? start.getTime()) - start.getTime();
+        labels = Array.from({ length: count }, (_, i) => {
+          const d = new Date(start.getTime() + (i / (count - 1)) * diffMs);
+          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
+        });
+      } else {
+        labels = Array.from({ length: count }, () => "");
+      }
     }
 
     return { count, labels };
-  }, [datePreset, startDate, endDate, locale]);
+  }, [datePreset, startDate, endDate, locale, referenceTimestamp]);
 
   const { depositsPoints, revenuePoints } = useMemo(() => {
     const totalDeposits = data.deposits.completedCoinAmount;
@@ -644,7 +668,7 @@ function FinanceTrendChart({ data, datePreset, startDate, endDate, locale }: Fin
     return [3, 2, 1, 0].map((idx) => step * idx);
   }, [maxVal]);
 
-  const getCoordinates = (points: number[]) => {
+  const getCoordinates = useCallback((points: number[]) => {
     const usableHeight = trendChartBaseline - trendChartTopPadding;
     return points.map((val, index) => {
       const x = points.length === 1 ? 50 : (index / (points.length - 1)) * 100;
@@ -652,10 +676,10 @@ function FinanceTrendChart({ data, datePreset, startDate, endDate, locale }: Fin
       const y = trendChartBaseline - normalizedValue * usableHeight;
       return { x, y, value: val, label: chartConfig.labels[index] };
     });
-  };
+  }, [maxVal, chartConfig.labels]);
 
-  const depositsCoords = useMemo(() => getCoordinates(depositsPoints), [depositsPoints, maxVal, chartConfig.labels]);
-  const revenueCoords = useMemo(() => getCoordinates(revenuePoints), [revenuePoints, maxVal, chartConfig.labels]);
+  const depositsCoords = useMemo(() => getCoordinates(depositsPoints), [depositsPoints, getCoordinates]);
+  const revenueCoords = useMemo(() => getCoordinates(revenuePoints), [revenuePoints, getCoordinates]);
 
   const depositsLinePath = useMemo(() => buildLinePath(depositsCoords), [depositsCoords]);
   const depositsFillPath = useMemo(() => depositsLinePath ? `${depositsLinePath} L100,${trendChartBaseline} L0,${trendChartBaseline} Z` : "", [depositsLinePath]);

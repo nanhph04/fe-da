@@ -50,6 +50,7 @@ interface HomeDiscoverySectionProps {
 
 function toMediaCard(video: PublicDiscoveryVideo): MediaCardProps {
   return {
+    id: video.id,
     title: video.title,
     creator: video.channelName ?? video.channel?.name ?? "Velvet Gallery",
     channelId: video.channelId,

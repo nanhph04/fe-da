@@ -2,7 +2,6 @@ import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
 import { fetchPublicApi, fetchServerApi } from "@/shared/api/server";
-import { getReadyPublicVideoThumbnailUrl } from "./mediaService.helpers";
 import type {
   ApiError as PublicApiError,
   ApiResponse as PublicApiResponse,
