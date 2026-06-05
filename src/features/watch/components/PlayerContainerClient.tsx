@@ -1,15 +1,33 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import type { ApiError } from "@/shared/api/types";
-import { CinematicPlayer } from "./CinematicPlayer";
 import { WatchAccessGate, type WatchAccessData } from "./WatchAccessGate";
 
 const DEFAULT_METADATA_RESOLUTIONS: string[] = [];
+
+const CinematicPlayer = dynamic(
+  () => import("./CinematicPlayer").then((module) => module.CinematicPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="relative aspect-video animate-pulse overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted shadow-lg">
+            <span className="material-symbols-outlined text-3xl text-muted-foreground">
+              play_arrow
+            </span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+);
 
 interface PlayerContainerClientProps {
   videoId: string;

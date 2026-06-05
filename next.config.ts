@@ -22,6 +22,7 @@ const mediaStorageRemotePattern = new URL(mediaStorageUrl);
 const mediaStorageLanRemotePattern = appHostIp
   ? new URL(`http://${appHostIp}:9000`)
   : null;
+const localMediaStorageRemotePattern = new URL("http://localhost:19000");
 
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -71,6 +72,22 @@ const nextConfig: NextConfig = {
         port: mediaStorageRemotePattern.port,
         pathname: "/media-processed/**",
       },
+      {
+        protocol: mediaStorageRemotePattern.protocol.replace(":", "") as
+          | "http"
+          | "https",
+        hostname: mediaStorageRemotePattern.hostname,
+        port: mediaStorageRemotePattern.port,
+        pathname: "/media-public/**",
+      },
+      {
+        protocol: localMediaStorageRemotePattern.protocol.replace(":", "") as
+          | "http"
+          | "https",
+        hostname: localMediaStorageRemotePattern.hostname,
+        port: localMediaStorageRemotePattern.port,
+        pathname: "/media-public/**",
+      },
       ...(mediaStorageLanRemotePattern
         ? [
             {
@@ -81,6 +98,15 @@ const nextConfig: NextConfig = {
               hostname: mediaStorageLanRemotePattern.hostname,
               port: mediaStorageLanRemotePattern.port,
               pathname: "/media-processed/**",
+            },
+            {
+              protocol: mediaStorageLanRemotePattern.protocol.replace(
+                ":",
+                "",
+              ) as "http" | "https",
+              hostname: mediaStorageLanRemotePattern.hostname,
+              port: mediaStorageLanRemotePattern.port,
+              pathname: "/media-public/**",
             },
           ]
         : []),

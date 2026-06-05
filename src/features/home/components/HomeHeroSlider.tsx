@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
+import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
 import type { MouseEvent, PointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -156,12 +157,23 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
 
   return (
     <section
-      className="relative isolate h-[760px] overflow-hidden bg-background bg-cover bg-center bg-no-repeat pt-24 text-foreground md:h-[820px]"
-      style={{ backgroundImage: `url(${activeSlide.imageUrl})` }}
+      className="relative isolate h-[760px] overflow-hidden bg-background pt-24 text-foreground md:h-[820px]"
       aria-label={t("ariaFeaturedMovies")}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
+      <VideoThumbnail
+        key={activeSlide.imageUrl}
+        src={activeSlide.imageUrl}
+        alt=""
+        preload
+        loading="eager"
+        fetchPriority="high"
+        sizes="100vw"
+        wrapperClassName="absolute inset-0 block overflow-hidden"
+        className="h-full w-full object-cover"
+        aria-hidden="true"
+      />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_74%_32%,rgba(229,9,20,0.2),transparent_32%),linear-gradient(90deg,rgba(14,14,16,0.94)_0%,rgba(14,14,16,0.76)_48%,rgba(14,14,16,0.4)_100%)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-background via-background/86 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background/70 to-transparent" />
@@ -247,9 +259,11 @@ export function HomeHeroSlider({ slides }: HomeHeroSliderProps) {
                     aria-label={`Chuyển sang ${slide.title}`}
                     aria-current={isActivePreview ? "true" : undefined}
                   >
-                    <div
-                      className="absolute inset-0 bg-cover bg-center opacity-78 transition-transform duration-500 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${slide.imageUrl})` }}
+                    <VideoThumbnail
+                      src={slide.imageUrl}
+                      alt=""
+                      sizes="240px"
+                      className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
                       aria-hidden="true"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/28 to-transparent" />
