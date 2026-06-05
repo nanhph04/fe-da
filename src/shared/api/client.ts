@@ -1,4 +1,5 @@
 import { buildLocalizedHref, normalizeInternalPath } from "@/shared/utils/locale-path";
+import { translateBackendErrorMessage } from "./error-message-translations";
 import type { ApiError, ApiRequestInit, ApiResponse, ApiResponseType } from "./types";
 
 export const API_BASE_URL =
@@ -103,12 +104,23 @@ export const getApiErrorCode = (error: unknown) => {
   return null;
 };
 
+const getCurrentLocale = () => {
+  if (typeof window === "undefined") {
+    return "vi";
+  }
+
+  return window.location.pathname.match(/^\/(vi|en)(?=\/|$)/)?.[1] ?? "vi";
+};
+
+const localizeErrorMessage = (message: string) =>
+  translateBackendErrorMessage(message, getCurrentLocale());
+
 export const getErrorMessage = (
   error: unknown,
   fallback = "An unexpected error occurred"
 ) => {
   if (typeof error === "string" && error.trim()) {
-    return error;
+    return localizeErrorMessage(error);
   }
 
   const payload = error && typeof error === "object" && "payload" in error
@@ -118,21 +130,21 @@ export const getErrorMessage = (
   if (payload && typeof payload === "object") {
     const apiError = payload as ApiError;
     if (typeof apiError.message === "string" && apiError.message.trim()) {
-      return apiError.message;
+      return localizeErrorMessage(apiError.message);
     }
     if (typeof apiError.mess === "string" && apiError.mess.trim()) {
-      return apiError.mess;
+      return localizeErrorMessage(apiError.mess);
     }
     if (Array.isArray(apiError.errors) && apiError.errors.length > 0) {
-      return apiError.errors.join(", ");
+      return apiError.errors.map(localizeErrorMessage).join(", ");
     }
   }
 
   if (error instanceof Error && error.message.trim()) {
-    return error.message;
+    return localizeErrorMessage(error.message);
   }
 
-  return fallback;
+  return localizeErrorMessage(fallback);
 };
 
 const normalizeApiPayload = (payload: unknown, statusCode: number) => {
