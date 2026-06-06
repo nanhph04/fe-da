@@ -30,19 +30,6 @@ export function PublishActions({ canPublish, isPublishing, onPublish }: PublishA
         )}
         {t("step3.actions.confirmPublish")}
       </button>
-
-      <button
-        type="button"
-        disabled
-        className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-sm border border-outline-variant/30 bg-transparent py-3.5 font-headline text-sm font-semibold text-on-surface-variant/60"
-        aria-describedby="save-draft-note"
-      >
-        <span className="material-symbols-outlined text-lg">save</span>
-        {t("step3.actions.saveDraft")}
-      </button>
-      <p id="save-draft-note" className="text-center font-body text-xs text-on-surface-variant">
-        {t("step3.actions.draftBarHint")}
-      </p>
     </div>
   );
 }

@@ -1065,7 +1065,16 @@
         "declarations": {
           "title": "Terms & Declarations",
           "guidelines": "I confirm compliance with <link>Aura Cinematic Community Guidelines</link>",
-          "drm": "I understand Aura DRM will be applied to prevent unauthorized redistribution"
+          "drm": "I understand <link>Aura DRM</link> will be applied to prevent unauthorized redistribution",
+          "guidelinesDialog": {
+            "title": "Aura Cinematic Community Guidelines",
+            "body": "Uploaded content must belong to you or you must have the required rights to use it.\n\nDo not upload content that breaks the law, promotes hate, harassment, extreme violence, scams, or invades another person's privacy.\n\nVideos may be moderated before or after publishing. Violations can lead to removal, visibility limits, or channel status changes."
+          },
+          "drmDialog": {
+            "title": "Aura DRM Terms",
+            "body": "Aura DRM is a content protection layer that helps limit unauthorized copying, downloading, or redistribution.\n\nWhen you publish, your video may be processed and delivered through Aura Cinematic's copyright protection system. This does not replace your responsibility to ensure you have the right to upload the content.\n\nYou agree not to intentionally disable, bypass, or assist others in bypassing these content protection measures."
+          },
+          "closeDialog": "Got it"
         },
         "actions": {
           "confirmPublish": "Confirm & Publish",

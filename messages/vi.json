@@ -1017,7 +1017,16 @@
         "declarations": {
           "title": "Điều khoản & Tuyên bố",
           "guidelines": "Tôi xác nhận tuân thủ <link>Nguyên tắc cộng đồng Aura Cinematic</link>",
-          "drm": "Tôi hiểu rằng Aura DRM sẽ được áp dụng để ngăn chặn việc phân phối lại trái phép"
+          "drm": "Tôi hiểu rằng <link>Aura DRM</link> sẽ được áp dụng để ngăn chặn việc phân phối lại trái phép",
+          "guidelinesDialog": {
+            "title": "Nguyên tắc cộng đồng Aura Cinematic",
+            "body": "Nội dung đăng tải cần thuộc quyền sở hữu của bạn hoặc bạn có đầy đủ quyền sử dụng.\n\nKhông đăng nội dung vi phạm pháp luật, kích động thù ghét, quấy rối, bạo lực cực đoan, lừa đảo hoặc xâm phạm quyền riêng tư của người khác.\n\nVideo có thể được kiểm duyệt trước hoặc sau khi xuất bản. Nội dung vi phạm có thể bị gỡ bỏ, hạn chế hiển thị hoặc ảnh hưởng đến trạng thái kênh."
+          },
+          "drmDialog": {
+            "title": "Điều khoản Aura DRM",
+            "body": "Aura DRM là lớp bảo vệ nội dung giúp hạn chế sao chép, tải xuống hoặc phân phối lại video trái phép.\n\nKhi xuất bản, video có thể được xử lý và phát qua hệ thống bảo vệ bản quyền của Aura Cinematic. Việc này không thay thế trách nhiệm bảo đảm bạn có quyền đăng tải nội dung.\n\nBạn đồng ý không cố ý vô hiệu hóa, né tránh hoặc hỗ trợ hành vi vượt qua các biện pháp bảo vệ nội dung."
+          },
+          "closeDialog": "Đã hiểu"
         },
         "actions": {
           "confirmPublish": "Xác nhận & Xuất bản",

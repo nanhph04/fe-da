@@ -20,17 +20,31 @@ interface UploadStep3ReviewProps {
   onPrev: () => void;
 }
 
+type DeclarationDialog = "guidelines" | "drm";
+
 export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadStep3ReviewProps) {
   const t = useTranslations("Studio.upload");
   const router = useRouter();
   const [isChecked1, setIsChecked1] = useState(false);
   const [isChecked2, setIsChecked2] = useState(false);
+  const [activeDeclarationDialog, setActiveDeclarationDialog] = useState<DeclarationDialog | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [publishStage, setPublishStage] = useState<"idle" | "metadata" | "thumbnail" | "confirming">("idle");
 
   const canPublish = isChecked1 && isChecked2 && !!formData.draftUpload && formData.rawUploadCompleted;
+  const activeDeclarationContent = activeDeclarationDialog === "guidelines"
+    ? {
+        title: t("step3.declarations.guidelinesDialog.title"),
+        body: t("step3.declarations.guidelinesDialog.body"),
+      }
+    : activeDeclarationDialog === "drm"
+      ? {
+          title: t("step3.declarations.drmDialog.title"),
+          body: t("step3.declarations.drmDialog.body"),
+        }
+      : null;
 
   const handlePublish = async () => {
     if (!canPublish || !formData.draftUpload) return;
@@ -160,7 +174,20 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
                   </div>
                 </div>
                 <p className="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">
-                  {t.rich("step3.declarations.guidelines", { link: (chunks) => <span className="text-primary">{chunks}</span> })}
+                  {t.rich("step3.declarations.guidelines", {
+                    link: (chunks) => (
+                      <button
+                        type="button"
+                        className="text-left text-primary underline underline-offset-4 transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          setActiveDeclarationDialog("guidelines");
+                        }}
+                      >
+                        {chunks}
+                      </button>
+                    ),
+                  })}
                 </p>
               </label>
 
@@ -177,7 +204,20 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
                   </div>
                 </div>
                 <p className="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors">
-                  {t("step3.declarations.drm")}
+                  {t.rich("step3.declarations.drm", {
+                    link: (chunks) => (
+                      <button
+                        type="button"
+                        className="text-left text-primary underline underline-offset-4 transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          setActiveDeclarationDialog("drm");
+                        }}
+                      >
+                        {chunks}
+                      </button>
+                    ),
+                  })}
                 </p>
               </label>
             </div>
@@ -211,6 +251,41 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
               {publishStage === "thumbnail" && t("step3.overlay.thumbnail")}
               {publishStage === "confirming" && t("step3.overlay.confirming")}
             </p>
+          </div>
+        </div>
+      )}
+
+      {activeDeclarationContent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="declaration-dialog-title"
+        >
+          <div className="w-full max-w-md rounded-xl border border-border/40 bg-card p-6 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <h3 id="declaration-dialog-title" className="font-headline text-xl font-bold text-on-surface">
+                {activeDeclarationContent.title}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setActiveDeclarationDialog(null)}
+                className="rounded-full p-1 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={t("step3.declarations.closeDialog")}
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+            <p className="whitespace-pre-line text-sm leading-6 text-on-surface-variant">
+              {activeDeclarationContent.body}
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveDeclarationDialog(null)}
+              className="mt-6 w-full rounded-sm bg-primary py-3 font-headline text-sm font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              {t("step3.declarations.closeDialog")}
+            </button>
           </div>
         </div>
       )}
