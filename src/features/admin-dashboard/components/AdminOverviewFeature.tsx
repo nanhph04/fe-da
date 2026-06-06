@@ -232,7 +232,7 @@ export function AdminOverviewFeature() {
   );
 
   return (
-    <section className="space-y-8 animate-in fade-in duration-500">
+    <section className="mx-auto w-full max-w-screen-2xl space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-6 border-b border-border/30 pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-1 font-label text-[10px] font-bold uppercase tracking-[0.3em] text-primary">{t("header.eyebrow")}</p>
@@ -336,7 +336,7 @@ export function AdminOverviewFeature() {
                   return <ServicesHealthWidget key="health" statuses={healthStatuses} onPing={checkAllServicesHealth} locale={locale} />;
                 case "stats":
                   return (
-                    <div key="stats" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                    <div key="stats" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                       {statCards.map(card => <StatCard key={card.id} card={card} />)}
                     </div>
                   );
@@ -403,9 +403,9 @@ function AdminDashboardSkeleton() {
           <div className="h-6 w-full rounded-sm bg-muted animate-pulse" />
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="h-36 rounded-lg border border-border/30 bg-card p-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="h-40 rounded-lg border border-border/30 bg-card p-6">
             <div className="h-3 w-2/3 rounded-sm bg-muted" />
             <div className="mt-5 h-8 w-1/2 rounded-sm bg-muted" />
             <div className="mt-4 h-3 w-3/4 rounded-sm bg-muted" />
@@ -419,15 +419,15 @@ function AdminDashboardSkeleton() {
 function StatCard({ card }: { card: AdminStatCard }) {
   const t = useTranslations("Admin.dashboard");
   const content = (
-    <article className={`group relative min-h-36 overflow-hidden rounded-lg border p-5 transition-colors ${statToneClasses[card.tone]}`}>
-      <div className="absolute right-4 top-4 opacity-10 transition-opacity group-hover:opacity-20">
+    <article className={`group relative min-h-40 overflow-hidden rounded-lg border p-5 pr-12 transition-colors lg:p-6 lg:pr-14 ${statToneClasses[card.tone]}`}>
+      <div className="absolute right-4 top-5 opacity-10 transition-opacity group-hover:opacity-20">
         <span className="material-symbols-outlined text-5xl" aria-hidden="true">{card.icon}</span>
       </div>
-      <p className="mb-2 font-label text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{card.label}</p>
-      <h3 className={`font-headline text-2xl font-black ${card.unavailable ? "text-zinc-500" : "text-current"}`}>
+      <p className="mb-3 font-label text-[9px] font-bold uppercase leading-tight tracking-[0.16em] text-muted-foreground break-words">{card.label}</p>
+      <h3 className={`font-headline text-3xl font-black leading-none ${card.unavailable ? "text-zinc-500" : "text-current"}`}>
         {card.value}
       </h3>
-      <p className="mt-3 max-w-[15rem] font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{card.detail}</p>
+      <p className="mt-4 font-mono text-[9px] uppercase leading-relaxed tracking-wider text-muted-foreground break-words">{card.detail}</p>
       {card.unavailable ? (
         <span className="mt-3 inline-flex rounded-sm border border-border/30 bg-background px-2 py-0.5 font-label text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
           {t("common.apiNeeded")}

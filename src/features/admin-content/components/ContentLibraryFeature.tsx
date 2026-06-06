@@ -123,7 +123,7 @@ function getStatusIcon(video: AdminVideoItem) {
 function ContentSkeletonRows() {
   return Array.from({ length: 5 }).map((_, index) => (
     <tr key={index} className="animate-pulse">
-      <td className="px-6 py-4" colSpan={6}>
+      <td className="px-4 py-4" colSpan={6}>
         <div className="h-14 rounded-sm bg-muted/60" />
       </td>
     </tr>
@@ -308,7 +308,7 @@ export function ContentLibraryFeature() {
   };
 
   return (
-    <section className="space-y-8 animate-in fade-in duration-500">
+    <section className="mx-auto w-full max-w-screen-2xl space-y-8 animate-in fade-in duration-500">
       <header className="flex flex-col gap-4 border-b border-border/30 pb-8 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="mb-2 font-label text-xs font-bold uppercase tracking-[0.24em] text-primary">{t("library.header.eyebrow")}</p>
@@ -338,8 +338,8 @@ export function ContentLibraryFeature() {
       </header>
 
       {/* Video Statistics Dashboard */}
-      <div className="rounded-lg border border-border/30 bg-card/45 p-6 backdrop-blur-md space-y-5 shadow-sm animate-in fade-in duration-300">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/10 pb-4 gap-4">
+      <div className="space-y-5 rounded-lg border border-border/30 bg-card/45 p-6 shadow-sm backdrop-blur-md animate-in fade-in duration-300">
+        <div className="flex flex-col gap-4 border-b border-border/10 pb-4 xl:flex-row xl:items-center xl:gap-8">
           <div>
             <h2 className="font-headline text-sm font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-2">
               <span className="material-symbols-outlined text-lg text-primary">analytics</span>
@@ -349,7 +349,7 @@ export function ContentLibraryFeature() {
               Hệ thống lọc theo chu kỳ thời gian được áp dụng cho các dữ liệu mới
             </p>
           </div>
-          <div className="flex rounded-sm bg-background p-1 border border-border/40 shrink-0">
+          <div className="flex w-full max-w-full overflow-x-auto rounded-sm border border-border/40 bg-background p-1 xl:w-auto xl:shrink-0">
             {["all", "day", "week", "month"].map((preset) => (
               <button
                 key={preset}
@@ -358,7 +358,7 @@ export function ContentLibraryFeature() {
                   setSummaryPeriod(preset);
                   void loadVideoSummary(preset);
                 }}
-                className={`rounded-sm px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-200 ${
+                  className={`shrink-0 rounded-sm px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-200 ${
                   summaryPeriod === preset
                     ? "bg-primary text-primary-foreground font-extrabold shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -371,22 +371,22 @@ export function ContentLibraryFeature() {
         </div>
 
         {isSummaryLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8 py-2">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 2xl:grid-cols-8 py-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-[72px] rounded border border-border/10 bg-muted/10 animate-pulse" />
             ))}
           </div>
         ) : videoSummary ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 2xl:grid-cols-8">
             {/* Total Videos */}
-            <div className="rounded border border-border/20 bg-background/20 p-4 space-y-1.5 transition-all hover:border-border/40 hover:bg-background/30">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-none">{t("library.stats.totalVideos")}</p>
+            <div className="rounded border border-border/20 bg-background/20 min-h-24 space-y-2 p-4 transition-all hover:border-border/40 hover:bg-background/30">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">{t("library.stats.totalVideos")}</p>
               <p className="font-headline text-2xl font-black text-foreground leading-none select-all">{formatCompactNumber(videoSummary.totalVideos, locale)}</p>
             </div>
 
             {/* Ready Videos */}
-            <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-1.5 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 leading-none">{t("library.stats.readyVideos")}</p>
+            <div className="rounded border border-emerald-500/20 bg-emerald-500/5 min-h-24 space-y-2 p-4 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 leading-tight">{t("library.stats.readyVideos")}</p>
               <div className="flex items-baseline gap-1.5 leading-none">
                 <span className="font-headline text-2xl font-black text-emerald-400 select-all">{formatCompactNumber(videoSummary.readyVideos, locale)}</span>
                 <span className="font-mono text-[9px] text-emerald-500/80 font-bold">
@@ -396,38 +396,38 @@ export function ContentLibraryFeature() {
             </div>
 
             {/* Uploading Videos */}
-            <div className="rounded border border-secondary/20 bg-secondary/5 p-4 space-y-1.5 transition-all hover:border-secondary/40 hover:bg-secondary/10">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-secondary leading-none">{t("library.stats.uploadingVideos")}</p>
+            <div className="rounded border border-secondary/20 bg-secondary/5 min-h-24 space-y-2 p-4 transition-all hover:border-secondary/40 hover:bg-secondary/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-secondary leading-tight">{t("library.stats.uploadingVideos")}</p>
               <p className="font-headline text-2xl font-black text-secondary leading-none select-all">{formatCompactNumber(videoSummary.uploadingVideos, locale)}</p>
             </div>
 
             {/* Pending Review */}
-            <div className="rounded border border-primary/20 bg-primary/5 p-4 space-y-1.5 transition-all hover:border-primary/40 hover:bg-primary/10">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-primary leading-none">{t("library.stats.pendingManualReviewVideos")}</p>
+            <div className="rounded border border-primary/20 bg-primary/5 min-h-24 space-y-2 p-4 transition-all hover:border-primary/40 hover:bg-primary/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-primary leading-tight">{t("library.stats.pendingManualReviewVideos")}</p>
               <p className="font-headline text-2xl font-black text-primary leading-none select-all">{formatCompactNumber(videoSummary.pendingManualReviewVideos, locale)}</p>
             </div>
 
             {/* Rejected */}
-            <div className="rounded border border-red-500/20 bg-red-500/5 p-4 space-y-1.5 transition-all hover:border-red-500/40 hover:bg-red-500/10">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-red-400 leading-none">{t("library.stats.rejectedVideos")}</p>
+            <div className="rounded border border-red-500/20 bg-red-500/5 min-h-24 space-y-2 p-4 transition-all hover:border-red-500/40 hover:bg-red-500/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-red-400 leading-tight">{t("library.stats.rejectedVideos")}</p>
               <p className="font-headline text-2xl font-black text-red-400 leading-none select-all">{formatCompactNumber(videoSummary.rejectedVideos, locale)}</p>
             </div>
 
             {/* Failed */}
-            <div className="rounded border border-zinc-700/30 bg-muted/5 p-4 space-y-1.5 transition-all hover:border-zinc-500/40 hover:bg-muted/10">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 leading-none">{t("library.stats.failedVideos")}</p>
+            <div className="rounded border border-zinc-700/30 bg-muted/5 min-h-24 space-y-2 p-4 transition-all hover:border-zinc-500/40 hover:bg-muted/10">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 leading-tight">{t("library.stats.failedVideos")}</p>
               <p className="font-headline text-2xl font-black text-zinc-400 leading-none select-all">{formatCompactNumber(videoSummary.failedVideos, locale)}</p>
             </div>
 
             {/* Total Views */}
-            <div className="rounded border border-border/20 bg-background/20 p-4 space-y-1.5 transition-all hover:border-border/40 hover:bg-background/30">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-none">{t("library.stats.totalViews")}</p>
+            <div className="rounded border border-border/20 bg-background/20 min-h-24 space-y-2 p-4 transition-all hover:border-border/40 hover:bg-background/30">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground leading-tight">{t("library.stats.totalViews")}</p>
               <p className="font-headline text-2xl font-black text-foreground leading-none select-all">{formatCompactNumber(videoSummary.totalViews, locale)}</p>
             </div>
 
             {/* Period Statistics */}
-            <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-1.5 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10 col-span-2 sm:col-span-1 lg:col-span-1">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 leading-none flex items-center justify-between">
+            <div className="col-span-2 min-h-24 space-y-2 rounded border border-emerald-500/20 bg-emerald-500/5 p-4 transition-all hover:border-emerald-500/40 hover:bg-emerald-500/10 sm:col-span-1 2xl:col-span-1">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-400 leading-tight flex items-center justify-between">
                 <span>{summaryPeriod === "all" ? t("library.stats.newVideos") : `+${formatCompactNumber(videoSummary.newVideos, locale)} Video`}</span>
               </p>
               <div className="font-mono text-[9px] text-zinc-400 space-y-0.5 leading-none">
@@ -566,15 +566,23 @@ export function ContentLibraryFeature() {
 
       <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="min-w-[1040px] table-fixed border-collapse text-left xl:min-w-full">
+            <colgroup>
+              <col className="w-[36%]" />
+              <col className="w-[18%]" />
+              <col className="w-[11%]" />
+              <col className="w-[11%]" />
+              <col className="w-[16%]" />
+              <col className="w-[8%]" />
+            </colgroup>
             <thead>
               <tr className="border-b border-border/30 bg-background text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                <th className="px-6 py-4">{t("library.table.videoAsset")}</th>
-                <th className="px-6 py-4">{t("library.table.channel")}</th>
-                <th className="px-6 py-4">{t("library.table.privacy")}</th>
-                <th className="px-6 py-4">{t("library.table.access")}</th>
-                <th className="px-6 py-4">{t("library.table.status")}</th>
-                <th className="px-6 py-4 text-right">{t("library.table.actions")}</th>
+                <th className="px-4 py-4 pl-5">{t("library.table.videoAsset")}</th>
+                <th className="px-4 py-4">{t("library.table.channel")}</th>
+                <th className="px-4 py-4">{t("library.table.privacy")}</th>
+                <th className="px-4 py-4">{t("library.table.access")}</th>
+                <th className="px-4 py-4">{t("library.table.status")}</th>
+                <th className="px-4 py-4 text-right pr-5">{t("library.table.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -582,24 +590,24 @@ export function ContentLibraryFeature() {
                 <ContentSkeletonRows />
               ) : videos.length === 0 ? (
                 <tr>
-                  <td className="px-6 py-12 text-center font-body text-sm text-muted-foreground" colSpan={6}>
+                  <td className="px-4 py-12 text-center font-body text-sm text-muted-foreground" colSpan={6}>
                     {t("library.empty")}
                   </td>
                 </tr>
               ) : (
                 videos.map((video) => (
                   <tr key={video.id} className="group transition-colors hover:bg-muted/40">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative h-14 w-24 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]">
+                    <td className="px-4 py-4 pl-5">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-sm border border-border/30 bg-[radial-gradient(circle_at_30%_20%,rgba(229,9,20,0.22),transparent_35%),linear-gradient(135deg,rgba(31,31,34,0.95),rgba(14,14,16,1))]">
                           <VideoThumbnail
                             src={getReadyThumbnailUrl(video)}
                             alt=""
                             className="absolute inset-0 h-full w-full object-cover opacity-85 transition-transform duration-300 group-hover:scale-105"
                           />
                         </div>
-                        <div>
-                          <p className="max-w-[260px] truncate font-headline text-sm font-bold text-foreground">{video.title}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-headline text-sm font-bold text-foreground">{video.title}</p>
                           <div className="mt-1 flex flex-wrap items-center gap-1.5 font-body text-[10px] text-muted-foreground">
                             {video.category && (
                               <span className="rounded bg-muted/80 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-foreground">
@@ -620,31 +628,31 @@ export function ContentLibraryFeature() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4" title={t("library.table.channelId", { id: video.channelId })}>
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px] text-muted-foreground/80" aria-hidden="true">
+                    <td className="px-4 py-4" title={t("library.table.channelId", { id: video.channelId })}>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="material-symbols-outlined shrink-0 text-[16px] text-muted-foreground/80" aria-hidden="true">
                           storefront
                         </span>
-                        <span className="max-w-[150px] truncate font-headline text-sm font-semibold text-foreground/90">
+                        <span className="min-w-0 truncate font-headline text-sm font-semibold text-foreground/90">
                           {video.channelName || video.channel?.name || "Velvet Gallery"}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-sm border border-secondary/30 px-2 py-0.5 font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
+                    <td className="px-4 py-4">
+                      <span className="inline-flex whitespace-nowrap rounded-sm border border-secondary/30 px-2 py-0.5 font-label text-[10px] font-bold uppercase tracking-widest text-secondary">
                         {getVisibilityLabel(video.visibility, t)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-sm border border-border/30 bg-muted px-2 py-0.5 font-label text-[10px] font-bold text-foreground">{getAccessLabel(video, t)}</span>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex whitespace-nowrap rounded-sm border border-border/30 bg-muted px-2 py-0.5 font-label text-[10px] font-bold text-foreground">{getAccessLabel(video, t)}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`flex items-center gap-1 font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(video)}`}>
+                    <td className="px-4 py-4">
+                      <span className={`inline-flex items-center gap-1 whitespace-nowrap font-label text-[10px] font-bold uppercase tracking-widest ${getStatusClass(video)}`}>
                         <span className="material-symbols-outlined text-[14px]" aria-hidden="true">{getStatusIcon(video)}</span>
                         {getStatusDisplayLabel(video, t)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-4 pr-5 text-right">
                       <button
                         type="button"
                         onClick={() => handleOpenDetail(video.id)}
