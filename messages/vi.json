@@ -2517,16 +2517,17 @@
         "empty": "Không thể tải dữ liệu tài chính hoặc chưa có giao dịch nào.",
         "to": "đến",
         "chart": {
-          "trendTitle": "Tổng quan tài chính kỳ này",
-          "trendDescription": "Các chỉ số tổng hợp lấy trực tiếp từ API, không mô phỏng xu hướng.",
-          "donutTitle": "Cơ cấu chia doanh thu",
+          "trendTitle": "Dòng xu phát sinh trong kỳ",
+          "trendDescription": "Tổng hợp theo API. Xu rút được tách riêng thành đã rút thành công và đang chờ duyệt.",
+          "donutTitle": "Cơ cấu phân bổ doanh thu",
           "depositsLabel": "Xu nạp thành công",
-          "creatorShareLabel": "Chia sẻ creator",
-          "revenueLabel": "Hệ thống thực nhận",
-          "withdrawalsLabel": "Xu đã rút",
+          "creatorShareLabel": "Doanh thu trả creator",
+          "revenueLabel": "Hoa hồng nền tảng",
+          "completedWithdrawalsLabel": "Xu rút thành công",
+          "pendingWithdrawalsLabel": "Xu rút chờ duyệt",
           "realDataBadge": "Dữ liệu thật",
-          "donutCreatorShare": "Chia sẻ creator",
-          "donutSystemRevenue": "Hệ thống thực nhận"
+          "donutCreatorShare": "Trả creator",
+          "donutSystemRevenue": "Hoa hồng nền tảng"
         },
         "presets": {
           "all": "Tất cả",
@@ -2537,14 +2538,14 @@
           "custom": "Tự chọn"
         },
         "revenue": {
-          "title": "Doanh thu",
-          "totalPaymentCoins": "Tổng nạp AC:",
-          "creatorShare": "Chia sẻ creator:",
-          "systemRevenue": "Hệ thống thực nhận:",
-          "fromVideo": "Từ video:",
-          "fromMembership": "Từ membership:",
-          "pending": "Đang xử lý:",
-          "released": "Đã ghi nhận:"
+          "title": "Doanh thu nội dung",
+          "totalPaymentCoins": "Xu user thanh toán:",
+          "creatorShare": "Trả creator:",
+          "systemRevenue": "Hoa hồng nền tảng:",
+          "fromVideo": "Hoa hồng video:",
+          "fromMembership": "Hoa hồng membership:",
+          "pending": "Hoa hồng chờ release:",
+          "released": "Hoa hồng đã release:"
         },
         "deposits": {
           "title": "Nạp tiền",
@@ -2561,6 +2562,8 @@
           "completed": "Đã rút thành công:",
           "pending": "Lệnh chờ duyệt:",
           "completedMoney": "Tiền rút thành công:",
+          "completedCoins": "Xu rút thành công:",
+          "pendingCoins": "Xu chờ duyệt:",
           "totalFee": "Tổng phí rút thu được:",
           "completedFee": "Đã thu:",
           "pendingFee": "Chờ thu:"

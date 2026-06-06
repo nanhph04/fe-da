@@ -1097,6 +1097,8 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
     "cancelledCount": 1,
     "pendingMoneyAmount": 1200000,
     "completedMoneyAmount": 8400000,
+    "pendingCoinAmount": 4000,
+    "completedCoinAmount": 28000,
     "totalFeeAmount": 500000,
     "pendingFeeAmount": 60000,
     "completedFeeAmount": 420000
@@ -1134,7 +1136,7 @@ Neu FE goi thong qua API Gateway/BFF thi gateway thuong se tu gan `x-internal-se
 
 - Y nghia cac nhom data:
   - `deposits`: tong hop lenh nap theo `requestedAt`; so tien/coin chi cong vao cac deposit `completed`.
-  - `withdrawals`: tong hop lenh rut theo `requestedAt`; `totalFeeAmount` la tong phi rut tien backend da tinh tren cac lenh rut trong range.
+  - `withdrawals`: tong hop lenh rut theo `requestedAt`; `pendingCoinAmount`/`completedCoinAmount` la tong coin rut theo trang thai; `totalFeeAmount` la tong phi rut tien backend da tinh tren cac lenh rut trong range.
   - `revenue.systemRevenueCoins`: tong coin hoa hong web thu duoc tu transaction `system_revenue`.
   - `revenue.creatorRevenueCoins`: tong coin chia cho creator tu transaction `channel_revenue`.
   - `revenue.pendingSystemRevenueCoins`: hoa hong web dang nam trong settlement `pending`, chua release ve available balance.

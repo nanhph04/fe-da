@@ -529,8 +529,9 @@ function FinanceTrendChart({ data, locale }: FinanceTrendChartProps) {
   const depositCoins = data.deposits.completedCoinAmount;
   const systemRevenueCoins = data.revenue.systemRevenueCoins;
   const creatorShareCoins = data.revenue.creatorRevenueCoins;
-  const withdrawalCoins = data.transactions.withdrawalCoinAmount;
-  const maxValue = Math.max(depositCoins, systemRevenueCoins, creatorShareCoins, withdrawalCoins, 1);
+  const completedWithdrawalCoins = data.withdrawals.completedCoinAmount ?? 0;
+  const pendingWithdrawalCoins = data.withdrawals.pendingCoinAmount ?? 0;
+  const maxValue = Math.max(depositCoins, systemRevenueCoins, creatorShareCoins, completedWithdrawalCoins, pendingWithdrawalCoins, 1);
   const bars = [
     {
       label: t("finance.chart.depositsLabel"),
@@ -551,10 +552,16 @@ function FinanceTrendChart({ data, locale }: FinanceTrendChartProps) {
       textClass: "text-emerald-400",
     },
     {
-      label: t("finance.chart.withdrawalsLabel"),
-      value: withdrawalCoins,
+      label: t("finance.chart.completedWithdrawalsLabel"),
+      value: completedWithdrawalCoins,
       colorClass: "bg-zinc-500",
       textClass: "text-zinc-400",
+    },
+    {
+      label: t("finance.chart.pendingWithdrawalsLabel"),
+      value: pendingWithdrawalCoins,
+      colorClass: "bg-sky-400",
+      textClass: "text-sky-300",
     },
   ];
 
@@ -588,7 +595,7 @@ function FinanceTrendChart({ data, locale }: FinanceTrendChartProps) {
   );
 }
 
-// Revenue breakdown circular donut chart using pure SVG
+// Revenue allocation donut chart using two contiguous conic-gradient segments.
 interface RevenueDonutChartProps {
   revenue: FinanceOverviewData["revenue"];
   locale: string;
@@ -608,49 +615,31 @@ function RevenueDonutChart({ revenue, locale }: RevenueDonutChartProps) {
 
   if (total === 0) {
     return (
-      <svg viewBox="0 0 40 40" className="h-full w-full">
-        <circle cx="20" cy="20" r="15.9155" fill="transparent" stroke="var(--border)" strokeOpacity="0.2" strokeWidth="5.5" />
-        <text x="20" y="22" textAnchor="middle" className="fill-zinc-500 font-mono text-[6px]">0 AC</text>
-      </svg>
+      <div className="relative flex h-full w-full items-center justify-center rounded-full border-[6px] border-border/20">
+        <div className="flex flex-col items-center justify-center font-mono text-[8px] text-zinc-400">
+          <span className="text-[7px] uppercase tracking-wider text-zinc-500">{locale === "vi" ? "Tổng" : "Total"}</span>
+          <span className="mt-0.5 font-headline text-[9px] font-bold text-foreground">0 AC</span>
+        </div>
+      </div>
     );
   }
 
-  const segments = [
-    { value: creatorShare, pct: (creatorShare / total) * 100, color: "#f59e0b", label: t("finance.chart.donutCreatorShare") },
-    { value: systemRevenue, pct: (systemRevenue / total) * 100, color: "#34d399", label: t("finance.chart.donutSystemRevenue") },
-  ];
-
-  let currentOffset = 25;
+  const creatorPct = (creatorShare / total) * 100;
+  const systemPct = 100 - creatorPct;
+  const creatorAngle = creatorPct * 3.6;
+  const chartTitle = `${t("finance.chart.donutCreatorShare")}: ${formatCoins(creatorShare, locale)} (${creatorPct.toFixed(1)}%) • ${t("finance.chart.donutSystemRevenue")}: ${formatCoins(systemRevenue, locale)} (${systemPct.toFixed(1)}%)`;
 
   return (
-    <div className="group relative flex h-full w-full items-center justify-center">
-      <svg viewBox="0 0 40 40" className="h-full w-full -rotate-90 transform">
-        {segments.map((seg) => {
-          if (seg.pct <= 0) return null;
-          const strokeDashoffset = currentOffset;
-          currentOffset -= seg.pct;
-
-          return (
-            <circle
-              key={seg.label}
-              cx="20"
-              cy="20"
-              r="15.9155"
-              fill="transparent"
-              stroke={seg.color}
-              strokeWidth="5.5"
-              strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
-              strokeDashoffset={strokeDashoffset}
-              className="cursor-pointer transition-all duration-300 hover:stroke-[6.5]"
-              vectorEffect="non-scaling-stroke"
-            >
-              <title>{`${seg.label}: ${formatCoins(seg.value, locale)} (${seg.pct.toFixed(1)}%)`}</title>
-            </circle>
-          );
-        })}
-      </svg>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center font-mono text-[8px] text-zinc-400">
-        <span className="text-[7px] uppercase tracking-wider text-zinc-500">Total</span>
+    <div
+      className="relative flex h-full w-full items-center justify-center rounded-full"
+      title={chartTitle}
+      style={{
+        background: `conic-gradient(from -90deg, #f59e0b 0deg ${creatorAngle}deg, #34d399 ${creatorAngle}deg 360deg)`,
+      }}
+    >
+      <div className="absolute inset-[11%] rounded-full border border-background/70 bg-card" />
+      <div className="pointer-events-none relative flex flex-col items-center justify-center font-mono text-[8px] text-zinc-400">
+        <span className="text-[7px] uppercase tracking-wider text-zinc-500">{locale === "vi" ? "Tổng" : "Total"}</span>
         <span className="mt-0.5 font-headline text-[9px] font-bold text-foreground">{formatCoinsCompact(total)}</span>
       </div>
     </div>
@@ -843,6 +832,14 @@ function FinanceOverviewWidget({
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("finance.withdrawals.pending")}</span>
                 <span className="text-amber-400 font-bold">{formatNumber(data.withdrawals.pendingCount)}</span>
+              </div>
+              <div className="flex justify-between border-t border-border/10 pt-2">
+                <span className="text-muted-foreground">{t("finance.withdrawals.completedCoins")}</span>
+                <span className="font-bold text-zinc-300">{formatCoins(data.withdrawals.completedCoinAmount ?? 0, locale)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("finance.withdrawals.pendingCoins")}</span>
+                <span className="font-bold text-sky-300">{formatCoins(data.withdrawals.pendingCoinAmount ?? 0, locale)}</span>
               </div>
               <div className="flex justify-between border-t border-border/10 pt-2">
                 <span className="text-muted-foreground">{t("finance.withdrawals.completedMoney")}</span>

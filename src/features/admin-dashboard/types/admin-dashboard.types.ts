@@ -125,6 +125,8 @@ export interface FinanceOverviewData {
     cancelledCount: number;
     pendingMoneyAmount: number;
     completedMoneyAmount: number;
+    pendingCoinAmount: number;
+    completedCoinAmount: number;
     totalFeeAmount: number;
     pendingFeeAmount: number;
     completedFeeAmount: number;

@@ -2565,16 +2565,17 @@
         "empty": "Unable to load finance data or no transactions are available yet.",
         "to": "to",
         "chart": {
-          "trendTitle": "Current-period Finance Summary",
-          "trendDescription": "Aggregated metrics loaded directly from the API, with no simulated trend line.",
-          "donutTitle": "Revenue Split Structure",
+          "trendTitle": "Coin Movements in Period",
+          "trendDescription": "Aggregated from the API. Withdrawal coins are split into completed payouts and pending review requests.",
+          "donutTitle": "Revenue Allocation Structure",
           "depositsLabel": "Completed deposit coins",
-          "creatorShareLabel": "Creator share",
-          "revenueLabel": "System net revenue",
-          "withdrawalsLabel": "Withdrawn coins",
+          "creatorShareLabel": "Creator revenue payout",
+          "revenueLabel": "Platform commission",
+          "completedWithdrawalsLabel": "Completed withdrawal coins",
+          "pendingWithdrawalsLabel": "Pending withdrawal coins",
           "realDataBadge": "Real data",
-          "donutCreatorShare": "Creator share",
-          "donutSystemRevenue": "System net revenue"
+          "donutCreatorShare": "Creator payout",
+          "donutSystemRevenue": "Platform commission"
         },
         "presets": {
           "all": "All",
@@ -2585,14 +2586,14 @@
           "custom": "Custom"
         },
         "revenue": {
-          "title": "Revenue",
-          "totalPaymentCoins": "Total AC deposited:",
-          "creatorShare": "Creator share:",
-          "systemRevenue": "System net revenue:",
-          "fromVideo": "From video:",
-          "fromMembership": "From membership:",
-          "pending": "Pending:",
-          "released": "Released:"
+          "title": "Content Revenue",
+          "totalPaymentCoins": "User payment coins:",
+          "creatorShare": "Paid to creators:",
+          "systemRevenue": "Platform commission:",
+          "fromVideo": "Video commission:",
+          "fromMembership": "Membership commission:",
+          "pending": "Commission pending release:",
+          "released": "Commission released:"
         },
         "deposits": {
           "title": "Deposits",
@@ -2609,6 +2610,8 @@
           "completed": "Completed withdrawals:",
           "pending": "Pending requests:",
           "completedMoney": "Completed withdrawal money:",
+          "completedCoins": "Completed withdrawal coins:",
+          "pendingCoins": "Pending withdrawal coins:",
           "totalFee": "Total withdrawal fees:",
           "completedFee": "Collected:",
           "pendingFee": "Pending fee:"
