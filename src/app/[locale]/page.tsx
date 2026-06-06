@@ -1,4 +1,6 @@
 import { HomePage } from "@/features/home/components/HomePage";
+import { getServerUserProfile } from "@/shared/auth/server";
+import { buildLocalizedHref } from "@/shared/utils/locale-path";
 import {
   getCategoriesCached,
   getLatestVideosCached,
@@ -9,6 +11,7 @@ import {
 } from "@/features/watch/services/publicMediaService";
 
 import { setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 const HOME_CATEGORY_SECTION_LIMIT = 2;
 const HOME_CATEGORY_CANDIDATE_LIMIT = 8;
@@ -57,6 +60,12 @@ function getRandomHomeCategories(
 export default async function Home(props: { params: Promise<{ locale: string }> }) {
   const { locale } = await props.params;
   setRequestLocale(locale);
+
+  const profile = await getServerUserProfile().catch(() => null);
+
+  if (profile?.role === "admin") {
+    redirect(buildLocalizedHref("/admin", `/${locale}`));
+  }
 
   const [latestRes, categoriesRes, topViewsRes, topPurchasesRes] = await Promise.all([
     getLatestVideosCached(13).catch(() => null),

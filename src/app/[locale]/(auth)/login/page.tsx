@@ -23,13 +23,17 @@ const getDefaultAuthenticatedRedirectPath = (profile: ServerUserProfile) => {
 };
 
 const getAuthenticatedRedirectPath = (profile: ServerUserProfile, redirectTo?: string) => {
+  if (profile.role === "admin") {
+    return "/admin";
+  }
+
   const safeRedirectPath = getSafeInternalRedirectPath(redirectTo);
 
   if (!safeRedirectPath) {
     return getDefaultAuthenticatedRedirectPath(profile);
   }
 
-  if (safeRedirectPath.startsWith("/admin") && profile.role !== "admin") {
+  if (safeRedirectPath.startsWith("/admin")) {
     return "/library";
   }
 

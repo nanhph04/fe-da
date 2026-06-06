@@ -41,18 +41,18 @@ const getRedirectAfterLogin = (profile: UserProfile | null, redirectTo?: string)
     return null;
   }
 
+  if (profile.role === "admin") {
+    return "/admin";
+  }
+
   const safeRedirectPath = getSafeInternalRedirectPath(redirectTo);
 
   if (safeRedirectPath) {
     if (safeRedirectPath.startsWith("/admin")) {
-      return profile.role === "admin" ? safeRedirectPath : "/library";
+      return "/library";
     }
 
     return safeRedirectPath;
-  }
-
-  if (profile.role === "admin") {
-    return "/admin";
   }
 
   return !profile.displayName ? "/onboarding/profile" : "/library";
