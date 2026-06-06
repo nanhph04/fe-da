@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link } from "@/i18n/routing";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { type UserProfile, useAuth } from "@/features/auth/context/AuthContext";
 import { authService } from "@/features/auth/services/authService";
@@ -84,7 +84,25 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
     resolver: zodResolver(loginSchema),
   });
 
-  const { setAuthData } = useAuth();
+  const {
+    setAuthData,
+    user,
+    isAuthenticated,
+    isLoading: isAuthLoading,
+  } = useAuth();
+
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated) {
+      return;
+    }
+
+    const nextPath = getRedirectAfterLogin(user, redirectTo);
+    if (!nextPath) {
+      return;
+    }
+
+    window.location.replace(buildLocalizedHref(nextPath, window.location.pathname));
+  }, [isAuthLoading, isAuthenticated, redirectTo, user]);
 
   const onSubmit = async (data: LoginValues) => {
     setIsLoading(true);
@@ -144,6 +162,14 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
       setIsLoading(false);
     }
   };
+
+  if (isAuthLoading || isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" aria-label={t("login.signingIn")} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
