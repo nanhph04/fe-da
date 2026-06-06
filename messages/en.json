@@ -570,19 +570,42 @@
     },
     "forgotPassword": {
       "title": "Forgot Password?",
-      "subtitle": "Enter the email address associated with your Velvet Gallery account and we'll send you a link to reset your password.",
+      "subtitle": "Enter your Velvet Gallery account email to receive a password reset OTP.",
+      "resetSubtitle": "Enter your email, OTP, and new password to complete recovery.",
+      "completeTitle": "Password Reset Complete",
+      "completeDesc": "You can now sign in with your new password.",
       "emailLabel": "Email Address",
       "emailPlaceholder": "name@example.com",
+      "otpLabel": "OTP Code",
+      "newPasswordLabel": "New Password",
+      "confirmNewPasswordLabel": "Confirm New Password",
+      "newPasswordPlaceholder": "••••••••",
       "sendLink": "Send Reset Link",
+      "sendOtp": "Send OTP",
       "sending": "Sending...",
+      "resendOtp": "Resend OTP",
+      "resending": "Resending...",
+      "resetPassword": "Reset Password",
+      "resetting": "Resetting...",
+      "signInNow": "Sign In Now",
       "successTitle": "Email Sent",
       "successDesc": "We've sent an email with password recovery instructions. Please check your inbox.",
+      "otpSent": "OTP has been sent to your email.",
+      "otpResent": "A new OTP has been sent to your email.",
       "tryAnotherEmail": "Try another email",
       "backToSignIn": "Back to Sign In",
       "secureAuth": "Secure Authentication • Velvet Gallery Encryption",
       "errors": {
         "failed": "Failed to send recovery email.",
-        "generic": "An error occurred."
+        "generic": "An error occurred.",
+        "resetFailed": "Failed to reset password.",
+        "resetGeneric": "An error occurred while resetting your password."
+      },
+      "aria": {
+        "showNewPassword": "Show new password",
+        "hideNewPassword": "Hide new password",
+        "showConfirmPassword": "Show confirm new password",
+        "hideConfirmPassword": "Hide confirm new password"
       }
     },
     "footer": {

@@ -522,19 +522,42 @@
     },
     "forgotPassword": {
       "title": "Quên mật khẩu?",
-      "subtitle": "Nhập địa chỉ email được liên kết với tài khoản Velvet Gallery của bạn và chúng tôi sẽ gửi cho bạn liên kết để đặt lại mật khẩu.",
+      "subtitle": "Nhập email tài khoản Velvet Gallery để nhận mã OTP đặt lại mật khẩu.",
+      "resetSubtitle": "Nhập email, mã OTP vừa nhận và mật khẩu mới để hoàn tất khôi phục.",
+      "completeTitle": "Mật khẩu đã được đặt lại",
+      "completeDesc": "Bạn có thể đăng nhập lại bằng mật khẩu mới.",
       "emailLabel": "Địa chỉ Email",
       "emailPlaceholder": "ten@vidu.com",
+      "otpLabel": "Mã OTP",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmNewPasswordLabel": "Xác nhận mật khẩu mới",
+      "newPasswordPlaceholder": "••••••••",
       "sendLink": "Gửi liên kết đặt lại",
+      "sendOtp": "Gửi mã OTP",
       "sending": "Đang gửi...",
+      "resendOtp": "Gửi lại mã OTP",
+      "resending": "Đang gửi lại...",
+      "resetPassword": "Đặt lại mật khẩu",
+      "resetting": "Đang đặt lại...",
+      "signInNow": "Đăng nhập ngay",
       "successTitle": "Đã gửi Email",
       "successDesc": "Chúng tôi đã gửi email hướng dẫn khôi phục mật khẩu. Vui lòng kiểm tra hộp thư đến của bạn.",
+      "otpSent": "Mã OTP đã được gửi đến email của bạn.",
+      "otpResent": "Mã OTP mới đã được gửi đến email của bạn.",
       "tryAnotherEmail": "Thử email khác",
       "backToSignIn": "Quay lại Đăng nhập",
       "secureAuth": "Xác thực an toàn • Mã hóa Velvet Gallery",
       "errors": {
         "failed": "Không thể gửi email khôi phục.",
-        "generic": "Đã xảy ra lỗi."
+        "generic": "Đã xảy ra lỗi.",
+        "resetFailed": "Không thể đặt lại mật khẩu.",
+        "resetGeneric": "Đã xảy ra lỗi trong quá trình đặt lại mật khẩu."
+      },
+      "aria": {
+        "showNewPassword": "Hiển thị mật khẩu mới",
+        "hideNewPassword": "Ẩn mật khẩu mới",
+        "showConfirmPassword": "Hiển thị xác nhận mật khẩu mới",
+        "hideConfirmPassword": "Ẩn xác nhận mật khẩu mới"
       }
     },
     "footer": {
