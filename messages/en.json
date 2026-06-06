@@ -2111,7 +2111,13 @@
         },
         "filters": {
           "searchCategories": "Search categories...",
-          "searchTags": "Search tags..."
+          "searchTags": "Search tags...",
+          "statusLabel": "Filter category status",
+          "limitLabel": "Records per page",
+          "all": "All",
+          "active": "Active",
+          "inactive": "Inactive",
+          "limitOption": "{count} / page"
         },
         "registry": {
           "categoryTitle": "Category Registry",
@@ -2166,6 +2172,9 @@
           "create": "Create",
           "update": "Update",
           "cancel": "Cancel",
+          "newCategory": "New category",
+          "newTag": "New tag",
+          "closeEditor": "Close editor",
           "editCategory": "Edit {name}",
           "editTag": "Edit {name}",
           "activateCategory": "Activate {name}",

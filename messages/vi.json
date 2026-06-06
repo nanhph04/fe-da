@@ -2063,7 +2063,13 @@
         },
         "filters": {
           "searchCategories": "Tìm danh mục...",
-          "searchTags": "Tìm thẻ..."
+          "searchTags": "Tìm thẻ...",
+          "statusLabel": "Lọc trạng thái danh mục",
+          "limitLabel": "Số bản ghi mỗi trang",
+          "all": "Tất cả",
+          "active": "Đang bật",
+          "inactive": "Đã tắt",
+          "limitOption": "{count} / trang"
         },
         "registry": {
           "categoryTitle": "Sổ đăng ký danh mục",
@@ -2118,6 +2124,9 @@
           "create": "Tạo",
           "update": "Cập nhật",
           "cancel": "Hủy",
+          "newCategory": "Thêm danh mục",
+          "newTag": "Thêm thẻ",
+          "closeEditor": "Đóng trình chỉnh sửa",
           "editCategory": "Sửa {name}",
           "editTag": "Sửa {name}",
           "activateCategory": "Bật {name}",
