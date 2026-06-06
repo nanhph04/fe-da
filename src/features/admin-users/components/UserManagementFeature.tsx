@@ -341,8 +341,7 @@ export function UserManagementFeature() {
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 overflow-hidden rounded-lg border border-border/30 bg-card xl:col-span-9">
+      <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
           <div className="space-y-4 border-b border-border/30 bg-background px-6 py-4">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -496,7 +495,8 @@ export function UserManagementFeature() {
           </div>
         </div>
 
-        <UserDetailPanel
+      {selectedUserId ? (
+        <UserDetailModal
           userId={selectedUserId}
           user={selectedUser}
           isLoading={isDetailLoading}
@@ -510,7 +510,7 @@ export function UserManagementFeature() {
             setDetailError(null);
           }}
         />
-      </div>
+      ) : null}
 
       {suspendUser ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
@@ -665,7 +665,7 @@ function UserSkeletonRows() {
   ));
 }
 
-function UserDetailPanel({
+function UserDetailModal({
   userId,
   user,
   isLoading,
@@ -675,7 +675,7 @@ function UserDetailPanel({
   t,
   onClose,
 }: {
-  userId: string | null;
+  userId: string;
   user: AdminUserDetail | null;
   isLoading: boolean;
   error: string | null;
@@ -685,24 +685,31 @@ function UserDetailPanel({
   onClose: () => void;
 }) {
   return (
-    <aside className="col-span-12 rounded-lg border border-border/30 bg-card p-6 xl:col-span-3">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="font-label text-[10px] font-bold uppercase tracking-widest text-primary">{t("detail.eyebrow")}</p>
-          <h2 className="mt-1 font-headline text-lg font-bold text-foreground">{t("detail.title")}</h2>
-        </div>
-        {userId ? (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button
+        aria-label={t("actions.closeDetail")}
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        type="button"
+        onClick={onClose}
+      />
+      <aside
+        aria-labelledby="user-detail-modal-title"
+        aria-modal="true"
+        className="relative z-10 max-h-[calc(100vh-4rem)] w-full max-w-5xl overflow-y-auto rounded-lg border border-border/40 bg-card p-6 shadow-2xl shadow-black/40"
+        data-user-id={userId}
+        role="dialog"
+      >
+        <div className="flex items-center justify-between gap-4 border-b border-border/30 pb-5">
+          <div>
+            <p className="font-label text-[10px] font-bold uppercase tracking-widest text-primary">{t("detail.eyebrow")}</p>
+            <h2 id="user-detail-modal-title" className="mt-1 font-headline text-xl font-bold text-foreground">{t("detail.title")}</h2>
+          </div>
           <button className="min-h-11 min-w-11 rounded-sm p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" type="button" aria-label={t("actions.closeDetail")} onClick={onClose}>
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
-        ) : null}
-      </div>
-
-      {!userId ? (
-        <div className="mt-8 rounded-sm border border-border/30 bg-background p-5 text-sm text-muted-foreground">
-          {t("detail.empty")}
         </div>
-      ) : isLoading ? (
+
+        {isLoading ? (
         <div className="mt-8 space-y-3 animate-pulse">
           <div className="h-16 rounded-sm bg-muted/60" />
           <div className="h-24 rounded-sm bg-muted/60" />
@@ -711,8 +718,8 @@ function UserDetailPanel({
       ) : error ? (
         <div className="mt-8 rounded-sm border border-primary/30 bg-primary/10 p-5 text-sm text-primary">{error}</div>
       ) : user ? (
-        <div className="mt-8 space-y-5">
-          <div className="rounded-sm border border-border/30 bg-background p-5">
+        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <div className="rounded-sm border border-border/30 bg-background p-5 lg:col-span-2">
             <p className="font-headline text-base font-bold text-foreground">{user.profile?.displayName || user.email}</p>
             <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{user.email}</p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -742,8 +749,9 @@ function UserDetailPanel({
             <DetailLine label={t("detail.updated")} value={formatDate(user.updatedAt, locale, t("fallbacks.notAvailable"))} />
           </DetailBlock>
         </div>
-      ) : null}
-    </aside>
+        ) : null}
+      </aside>
+    </div>
   );
 }
 
