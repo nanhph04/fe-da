@@ -475,143 +475,164 @@ export function AdminFinanceFeature() {
       ) : null}
 
       {isFormOpen ? (
-        <section className="rounded-lg border border-border/30 bg-card p-6">
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="font-headline text-xl font-bold text-foreground">
-                {editingPackage ? t("form.editTitle") : t("form.createTitle")}
-              </h2>
-              <p className="mt-1 font-body text-sm text-muted-foreground">
-                {t("form.description")}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={closeForm}
-              className="rounded-sm border border-border/40 px-3 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              {t("actions.close")}
-            </button>
-          </div>
-
-          {formError ? (
-            <div className="mb-5 rounded-lg border border-primary/30 bg-primary/10 p-4 font-body text-sm text-primary">
-              {formError}
-            </div>
-          ) : null}
-
-          <form className="grid grid-cols-1 gap-5 lg:grid-cols-2" onSubmit={handleSubmit}>
-            <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.code")}</span>
-              <input
-                value={form.code}
-                onChange={event => updateFormValue("code", event.target.value)}
-                disabled={Boolean(editingPackage)}
-                placeholder="TOPUP_500K"
-                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-              />
-              {formErrors.code ? <p className="text-xs text-primary">{formErrors.code}</p> : null}
-            </label>
-
-            <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.name")}</span>
-              <input
-                value={form.name}
-                onChange={event => updateFormValue("name", event.target.value)}
-                placeholder={t("fields.namePlaceholder")}
-                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
-              />
-              {formErrors.name ? <p className="text-xs text-primary">{formErrors.name}</p> : null}
-            </label>
-
-            <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.moneyAmount")}</span>
-              <input
-                type="number"
-                min={0}
-                value={form.moneyAmount}
-                onChange={event => updateFormValue("moneyAmount", Number(event.target.value))}
-                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
-              />
-              {formErrors.moneyAmount ? <p className="text-xs text-primary">{formErrors.moneyAmount}</p> : null}
-            </label>
-
-            <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.baseCoins")}</span>
-              <input
-                type="number"
-                min={0}
-                value={form.baseCoinAmount}
-                onChange={event => updateFormValue("baseCoinAmount", Number(event.target.value))}
-                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
-              />
-              {formErrors.baseCoinAmount ? <p className="text-xs text-primary">{formErrors.baseCoinAmount}</p> : null}
-            </label>
-
-            <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.bonusCoins")}</span>
-              <input
-                type="number"
-                min={0}
-                value={form.bonusCoinAmount}
-                onChange={event => updateFormValue("bonusCoinAmount", Number(event.target.value))}
-                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
-              />
-              {formErrors.bonusCoinAmount ? <p className="text-xs text-primary">{formErrors.bonusCoinAmount}</p> : null}
-            </label>
-
-            <label className="space-y-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.sortOrder")}</span>
-              <input
-                type="number"
-                min={0}
-                value={form.sortOrder}
-                onChange={event => updateFormValue("sortOrder", Number(event.target.value))}
-                className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
-              />
-              {formErrors.sortOrder ? <p className="text-xs text-primary">{formErrors.sortOrder}</p> : null}
-            </label>
-
-            <label className="space-y-2 lg:col-span-2">
-              <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.description")}</span>
-              <textarea
-                value={form.description}
-                onChange={event => updateFormValue("description", event.target.value)}
-                rows={3}
-                placeholder={t("fields.descriptionPlaceholder")}
-                className="w-full resize-none rounded-sm border border-border/40 bg-background px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
-              />
-            </label>
-
-            <label className="flex min-h-11 items-center gap-3 rounded-sm border border-border/40 bg-background px-4 lg:col-span-2">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={event => updateFormValue("isActive", event.target.checked)}
-                className="h-4 w-4 accent-primary"
-              />
-              <span className="font-body text-sm text-foreground">{t("fields.activeHint")}</span>
-            </label>
-
-            <div className="flex flex-col gap-3 sm:flex-row lg:col-span-2">
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSaving ? t("actions.saving") : editingPackage ? t("actions.saveChanges") : t("actions.createPackage")}
-              </button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 py-8 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="finance-package-form-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            onClick={closeForm}
+            aria-label={t("actions.close")}
+            disabled={isSaving}
+          />
+          <div className="relative max-h-[calc(100vh-4rem)] w-full max-w-4xl overflow-y-auto rounded-lg border border-border/40 bg-card shadow-2xl shadow-black/40">
+            <div className="flex items-start justify-between gap-4 border-b border-border/30 bg-background px-6 py-5">
+              <div>
+                <p className="mb-2 font-label text-[10px] font-bold uppercase tracking-[0.22em] text-secondary">
+                  {editingPackage ? t("actions.edit") : t("actions.createPackage")}
+                </p>
+                <h2 id="finance-package-form-title" className="font-headline text-2xl font-extrabold tracking-tight text-foreground">
+                  {editingPackage ? t("form.editTitle") : t("form.createTitle")}
+                </h2>
+                <p className="mt-1 font-body text-sm text-muted-foreground">
+                  {t("form.description")}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={closeForm}
                 disabled={isSaving}
-                className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border/40 px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-sm p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label={t("actions.close")}
               >
-                {t("actions.cancel")}
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
               </button>
             </div>
-          </form>
-        </section>
+
+            <div className="px-6 py-6">
+              {formError ? (
+                <div className="mb-5 rounded-lg border border-primary/30 bg-primary/10 p-4 font-body text-sm text-primary">
+                  {formError}
+                </div>
+              ) : null}
+
+              <form className="grid grid-cols-1 gap-5 lg:grid-cols-2" onSubmit={handleSubmit}>
+                <label className="space-y-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.code")}</span>
+                  <input
+                    value={form.code}
+                    onChange={event => updateFormValue("code", event.target.value)}
+                    disabled={Boolean(editingPackage)}
+                    placeholder="TOPUP_500K"
+                    className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+                  />
+                  {formErrors.code ? <p className="text-xs text-primary">{formErrors.code}</p> : null}
+                </label>
+
+                <label className="space-y-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.name")}</span>
+                  <input
+                    value={form.name}
+                    onChange={event => updateFormValue("name", event.target.value)}
+                    placeholder={t("fields.namePlaceholder")}
+                    className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  />
+                  {formErrors.name ? <p className="text-xs text-primary">{formErrors.name}</p> : null}
+                </label>
+
+                <label className="space-y-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.moneyAmount")}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.moneyAmount}
+                    onChange={event => updateFormValue("moneyAmount", Number(event.target.value))}
+                    className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  />
+                  {formErrors.moneyAmount ? <p className="text-xs text-primary">{formErrors.moneyAmount}</p> : null}
+                </label>
+
+                <label className="space-y-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.baseCoins")}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.baseCoinAmount}
+                    onChange={event => updateFormValue("baseCoinAmount", Number(event.target.value))}
+                    className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  />
+                  {formErrors.baseCoinAmount ? <p className="text-xs text-primary">{formErrors.baseCoinAmount}</p> : null}
+                </label>
+
+                <label className="space-y-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.bonusCoins")}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.bonusCoinAmount}
+                    onChange={event => updateFormValue("bonusCoinAmount", Number(event.target.value))}
+                    className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  />
+                  {formErrors.bonusCoinAmount ? <p className="text-xs text-primary">{formErrors.bonusCoinAmount}</p> : null}
+                </label>
+
+                <label className="space-y-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.sortOrder")}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.sortOrder}
+                    onChange={event => updateFormValue("sortOrder", Number(event.target.value))}
+                    className="min-h-11 w-full rounded-sm border border-border/40 bg-background px-4 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  />
+                  {formErrors.sortOrder ? <p className="text-xs text-primary">{formErrors.sortOrder}</p> : null}
+                </label>
+
+                <label className="space-y-2 lg:col-span-2">
+                  <span className="font-label text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("fields.description")}</span>
+                  <textarea
+                    value={form.description}
+                    onChange={event => updateFormValue("description", event.target.value)}
+                    rows={4}
+                    placeholder={t("fields.descriptionPlaceholder")}
+                    className="min-h-28 w-full resize-y rounded-sm border border-border/40 bg-background px-4 py-3 font-body text-sm text-foreground outline-none transition-colors focus:border-primary"
+                  />
+                </label>
+
+                <label className="flex min-h-11 items-center gap-3 rounded-sm border border-border/40 bg-background px-4 lg:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={form.isActive}
+                    onChange={event => updateFormValue("isActive", event.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  <span className="font-body text-sm text-foreground">{t("fields.activeHint")}</span>
+                </label>
+
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:col-span-2">
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    disabled={isSaving}
+                    className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border/40 px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {t("actions.cancel")}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-6 py-2 font-headline text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSaving ? t("actions.saving") : editingPackage ? t("actions.saveChanges") : t("actions.createPackage")}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       <div className="overflow-hidden rounded-lg border border-border/30 bg-card">
