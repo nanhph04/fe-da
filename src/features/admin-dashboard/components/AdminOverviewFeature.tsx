@@ -514,363 +514,75 @@ function ServicesHealthWidget({ statuses, onPing, locale }: { statuses: ServiceH
   );
 }
 
-// Helper functions for SVG Trend Chart
-function generateSeededPoints(total: number, count: number, preset: string): number[] {
-  if (total <= 0) return Array(count).fill(0);
-  let seed = 0;
-  for (let i = 0; i < preset.length; i++) {
-    seed += preset.charCodeAt(i);
-  }
-  seed += Math.floor(total);
-
-  const weights: number[] = [];
-  let sum = 0;
-  for (let i = 0; i < count; i++) {
-    const base = Math.sin((i / (count - 1)) * Math.PI * 1.8 + 0.3) * 0.25 + 0.75;
-    const rand = Math.sin(seed + i) * 10000;
-    const noise = (rand - Math.floor(rand)) * 0.35;
-    const w = Math.max(0.1, base + noise);
-    weights.push(w);
-    sum += w;
-  }
-  return weights.map((w) => Math.round((w / sum) * total));
+function getFinanceBarWidth(value: number, maxValue: number) {
+  if (value <= 0 || maxValue <= 0) return "0%";
+  return `${Math.max((value / maxValue) * 100, 4).toFixed(2)}%`;
 }
-
-function buildLinePath(points: { x: number; y: number }[]) {
-  if (points.length === 0) return "";
-  if (points.length === 1) return `M0,${points[0].y.toFixed(2)} L100,${points[0].y.toFixed(2)}`;
-  return points
-    .map((p, idx) => `${idx === 0 ? "M" : "L"}${p.x.toFixed(2)},${p.y.toFixed(2)}`)
-    .join(" ");
-}
-
-function getVisibleLabels(labels: string[]) {
-  if (labels.length <= 6) return labels;
-  const step = Math.ceil((labels.length - 1) / 5);
-  return labels.filter((_, idx) => idx === 0 || idx === labels.length - 1 || idx % step === 0);
-}
-
-function formatCoinsShort(val: number) {
-  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-  if (val >= 1000) return `${(val / 1000).toFixed(1)}k`;
-  return String(Math.round(val));
-}
-
-const trendChartHeight = 80;
-const trendChartBaseline = 72;
-const trendChartTopPadding = 8;
 
 interface FinanceTrendChartProps {
   data: FinanceOverviewData;
-  datePreset: string;
-  startDate: string;
-  endDate: string;
   locale: string;
 }
 
-function FinanceTrendChart({ data, datePreset, startDate, endDate, locale }: FinanceTrendChartProps) {
+function FinanceTrendChart({ data, locale }: FinanceTrendChartProps) {
   const t = useTranslations("Admin.dashboard");
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [referenceTimestamp, setReferenceTimestamp] = useState<number | null>(null);
-
-  useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setReferenceTimestamp(Date.now());
-    }, 0);
-
-    return () => window.clearTimeout(timerId);
-  }, []);
-
-  const chartConfig = useMemo(() => {
-    let count = 7;
-    let labels: string[] = [];
-    const referenceDate = referenceTimestamp === null ? null : new Date(referenceTimestamp);
-
-    if (datePreset === "today") {
-      count = 24;
-      labels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
-    } else if (datePreset === "7d") {
-      count = 7;
-      labels = referenceDate
-        ? Array.from({ length: count }, (_, i) => {
-          const d = new Date(referenceDate.getTime());
-          d.setDate(d.getDate() - (6 - i));
-          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-        })
-        : Array.from({ length: count }, () => "");
-    } else if (datePreset === "30d") {
-      count = 15;
-      labels = referenceDate
-        ? Array.from({ length: count }, (_, i) => {
-          const d = new Date(referenceDate.getTime());
-          d.setDate(d.getDate() - (14 - i) * 2);
-          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-        })
-        : Array.from({ length: count }, () => "");
-    } else if (datePreset === "month") {
-      const now = referenceDate;
-      const days = now ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : 31;
-      count = Math.min(days, 16);
-      labels = now
-        ? Array.from({ length: count }, (_, i) => {
-          const dayIdx = Math.round((i / (count - 1)) * (days - 1)) + 1;
-          const d = new Date(now.getFullYear(), now.getMonth(), dayIdx);
-          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-        })
-        : Array.from({ length: count }, () => "");
-    } else if (datePreset === "all") {
-      count = 12;
-      labels = referenceDate
-        ? Array.from({ length: count }, (_, i) => {
-          const d = new Date(referenceDate.getTime());
-          d.setMonth(d.getMonth() - (11 - i));
-          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short" });
-        })
-        : Array.from({ length: count }, () => "");
-    } else {
-      count = 10;
-      if (referenceDate || (startDate && endDate)) {
-        const end = endDate ? new Date(endDate) : referenceDate;
-        const start = startDate
-          ? new Date(startDate)
-          : new Date((end?.getTime() ?? 0) - 30 * 24 * 60 * 60 * 1000);
-        const diffMs = (end?.getTime() ?? start.getTime()) - start.getTime();
-        labels = Array.from({ length: count }, (_, i) => {
-          const d = new Date(start.getTime() + (i / (count - 1)) * diffMs);
-          return d.toLocaleDateString(locale === "vi" ? "vi-VN" : "en-US", { month: "short", day: "numeric" });
-        });
-      } else {
-        labels = Array.from({ length: count }, () => "");
-      }
-    }
-
-    return { count, labels };
-  }, [datePreset, startDate, endDate, locale, referenceTimestamp]);
-
-  const { depositsPoints, revenuePoints } = useMemo(() => {
-    const totalDeposits = data.deposits.completedCoinAmount;
-    const totalRevenue = data.revenue.systemRevenueCoins;
-    const count = chartConfig.count;
-    
-    return {
-      depositsPoints: generateSeededPoints(totalDeposits, count, datePreset + "dep"),
-      revenuePoints: generateSeededPoints(totalRevenue, count, datePreset + "rev")
-    };
-  }, [data, chartConfig.count, datePreset]);
-
-  const maxVal = useMemo(() => {
-    const max = Math.max(...depositsPoints, ...revenuePoints);
-    return max <= 0 ? 1000 : max;
-  }, [depositsPoints, revenuePoints]);
-
-  const scaleMarkers = useMemo(() => {
-    const step = maxVal / 3;
-    return [3, 2, 1, 0].map((idx) => step * idx);
-  }, [maxVal]);
-
-  const getCoordinates = useCallback((points: number[]) => {
-    const usableHeight = trendChartBaseline - trendChartTopPadding;
-    return points.map((val, index) => {
-      const x = points.length === 1 ? 50 : (index / (points.length - 1)) * 100;
-      const normalizedValue = val / maxVal;
-      const y = trendChartBaseline - normalizedValue * usableHeight;
-      return { x, y, value: val, label: chartConfig.labels[index] };
-    });
-  }, [maxVal, chartConfig.labels]);
-
-  const depositsCoords = useMemo(() => getCoordinates(depositsPoints), [depositsPoints, getCoordinates]);
-  const revenueCoords = useMemo(() => getCoordinates(revenuePoints), [revenuePoints, getCoordinates]);
-
-  const depositsLinePath = useMemo(() => buildLinePath(depositsCoords), [depositsCoords]);
-  const depositsFillPath = useMemo(() => depositsLinePath ? `${depositsLinePath} L100,${trendChartBaseline} L0,${trendChartBaseline} Z` : "", [depositsLinePath]);
-
-  const revenueLinePath = useMemo(() => buildLinePath(revenueCoords), [revenueCoords]);
-  const revenueFillPath = useMemo(() => revenueLinePath ? `${revenueLinePath} L100,${trendChartBaseline} L0,${trendChartBaseline} Z` : "", [revenueLinePath]);
-
-  const hoveredPoint = hoveredIndex !== null ? {
-    x: depositsCoords[hoveredIndex].x,
-    label: depositsCoords[hoveredIndex].label,
-    depositVal: depositsCoords[hoveredIndex].value,
-    revenueVal: revenueCoords[hoveredIndex].value
-  } : null;
+  const depositCoins = data.deposits.completedCoinAmount;
+  const systemRevenueCoins = data.revenue.systemRevenueCoins;
+  const creatorShareCoins = data.revenue.creatorRevenueCoins;
+  const withdrawalCoins = data.transactions.withdrawalCoinAmount;
+  const maxValue = Math.max(depositCoins, systemRevenueCoins, creatorShareCoins, withdrawalCoins, 1);
+  const bars = [
+    {
+      label: t("finance.chart.depositsLabel"),
+      value: depositCoins,
+      colorClass: "bg-amber-400",
+      textClass: "text-amber-400",
+    },
+    {
+      label: t("finance.chart.creatorShareLabel"),
+      value: creatorShareCoins,
+      colorClass: "bg-secondary",
+      textClass: "text-secondary",
+    },
+    {
+      label: t("finance.chart.revenueLabel"),
+      value: systemRevenueCoins,
+      colorClass: "bg-emerald-400",
+      textClass: "text-emerald-400",
+    },
+    {
+      label: t("finance.chart.withdrawalsLabel"),
+      value: withdrawalCoins,
+      colorClass: "bg-zinc-500",
+      textClass: "text-zinc-400",
+    },
+  ];
 
   return (
-    <div className="rounded-lg border border-border/20 bg-background/30 p-6 relative overflow-hidden transition-all duration-300">
-      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+    <div className="relative overflow-hidden rounded-lg border border-border/20 bg-background/30 p-6 transition-all duration-300">
+      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
           <h4 className="font-headline text-xs font-bold uppercase tracking-widest text-zinc-300">{t("finance.chart.trendTitle")}</h4>
           <p className="font-body text-[11px] text-muted-foreground">{t("finance.chart.trendDescription")}</p>
         </div>
-        <div className="flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest font-bold">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-amber-400" />
-            <span className="text-zinc-300">{t("finance.chart.depositsLabel")}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-[#E50914]" />
-            <span className="text-zinc-300">{t("finance.chart.revenueLabel")}</span>
-          </div>
-        </div>
+        <span className="inline-flex w-fit rounded-sm border border-border/30 bg-card px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+          {t("finance.chart.realDataBadge")}
+        </span>
       </div>
 
-      <div className="relative h-44 w-full pl-12 pr-2">
-        {/* Y Axis scale markers */}
-        <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-right font-mono text-[9px] text-muted-foreground w-10">
-          {scaleMarkers.map((marker, i) => (
-            <span key={i}>{formatCoinsShort(marker)}</span>
-          ))}
-        </div>
-
-        {/* SVG Container */}
-        <div className="relative h-[calc(100%-1.25rem)]">
-          {/* Hover vertical line and tooltip */}
-          {hoveredPoint && (
-            <>
-              <div 
-                className="absolute top-0 bottom-0 pointer-events-none border-l border-dashed border-zinc-500/40 z-0 transition-all duration-75"
-                style={{ left: `${hoveredPoint.x}%` }}
-              />
-              <div 
-                className="absolute z-10 pointer-events-none bg-[#131313] border border-border/50 rounded-sm p-3 shadow-xl transition-all duration-75 font-mono text-[10px] space-y-1.5 w-48"
-                style={{
-                  left: hoveredPoint.x > 70 ? `calc(${hoveredPoint.x}% - 13rem)` : `calc(${hoveredPoint.x}% + 1rem)`,
-                  top: `5%`
-                }}
-              >
-                <div className="text-[9px] font-bold text-zinc-500 border-b border-border/10 pb-1 flex justify-between">
-                  <span>{t("finance.chart.tooltipAt")}</span>
-                  <span className="text-zinc-300">{hoveredPoint.label}</span>
-                </div>
-                <div className="flex justify-between items-center pt-1">
-                  <span className="text-amber-400 font-semibold">{t("finance.chart.depositsLabel")}:</span>
-                  <span className="font-bold text-foreground">{formatCoins(hoveredPoint.depositVal, locale)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[#E50914] font-semibold">{t("finance.chart.revenueLabel")}:</span>
-                  <span className="font-bold text-foreground">{formatCoins(hoveredPoint.revenueVal, locale)}</span>
-                </div>
-              </div>
-            </>
-          )}
-
-          <svg
-            className="h-full w-full overflow-visible"
-            preserveAspectRatio="none"
-            viewBox={`0 0 100 ${trendChartHeight}`}
-            onPointerLeave={() => setHoveredIndex(null)}
-          >
-            <defs>
-              <linearGradient id="goldTrendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient id="crimsonTrendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#E50914" stopOpacity="0.15" />
-                <stop offset="100%" stopColor="#E50914" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-
-            {/* Horizontal Grid lines */}
-            {scaleMarkers.map((marker, i) => {
-              const usableHeight = trendChartBaseline - trendChartTopPadding;
-              const normalizedValue = marker / maxVal;
-              const markerY = trendChartBaseline - normalizedValue * usableHeight;
-              return (
-                <line
-                  key={i}
-                  x1="0"
-                  x2="100"
-                  y1={markerY}
-                  y2={markerY}
-                  stroke="var(--border)"
-                  strokeOpacity="0.12"
-                  strokeWidth="0.5"
-                  vectorEffect="non-scaling-stroke"
-                />
-              );
-            })}
-
-            {/* Area Fills */}
-            {depositsFillPath && <path d={depositsFillPath} fill="url(#goldTrendGradient)" vectorEffect="non-scaling-stroke" />}
-            {revenueFillPath && <path d={revenueFillPath} fill="url(#crimsonTrendGradient)" vectorEffect="non-scaling-stroke" />}
-
-            {/* Lines */}
-            {depositsLinePath && (
-              <path
-                d={depositsLinePath}
-                fill="none"
-                stroke="#fbbf24"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-            )}
-            {revenueLinePath && (
-              <path
-                d={revenueLinePath}
-                fill="none"
-                stroke="#E50914"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-            )}
-
-            {/* Circle points on hover */}
-            {hoveredIndex !== null && (
-              <>
-                <circle
-                  cx={depositsCoords[hoveredIndex].x}
-                  cy={depositsCoords[hoveredIndex].y}
-                  r="3.5"
-                  fill="#fbbf24"
-                  stroke="var(--card)"
-                  strokeWidth="1.2"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <circle
-                  cx={revenueCoords[hoveredIndex].x}
-                  cy={revenueCoords[hoveredIndex].y}
-                  r="3.5"
-                  fill="#E50914"
-                  stroke="var(--card)"
-                  strokeWidth="1.2"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </>
-            )}
-
-            {/* Hover trigger rectangles */}
-            {depositsCoords.map((_, index) => {
-              const segmentWidth = 100 / depositsCoords.length;
-              const x = depositsCoords.length === 1 ? 50 : (index / (depositsCoords.length - 1)) * 100;
-              return (
-                <rect
-                  key={index}
-                  x={Math.max(0, x - segmentWidth / 2)}
-                  y={0}
-                  width={segmentWidth}
-                  height={trendChartHeight}
-                  fill="transparent"
-                  className="cursor-crosshair focus:outline-none"
-                  onPointerEnter={() => setHoveredIndex(index)}
-                  onFocus={() => setHoveredIndex(index)}
-                  tabIndex={0}
-                  vectorEffect="non-scaling-stroke"
-                />
-              );
-            })}
-          </svg>
-        </div>
-
-        {/* X Axis Labels */}
-        <div className="mt-2 flex justify-between font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
-          {getVisibleLabels(chartConfig.labels).map((label, i) => (
-            <span key={i}>{label}</span>
-          ))}
-        </div>
+      <div className="space-y-4">
+        {bars.map((bar) => (
+          <div key={bar.label} className="grid gap-2 md:grid-cols-[10rem_1fr_7rem] md:items-center">
+            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+              <span className={`h-2.5 w-2.5 rounded-sm ${bar.colorClass}`} />
+              <span>{bar.label}</span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full border border-border/20 bg-muted/30">
+              <div className={`h-full rounded-full ${bar.colorClass}`} style={{ width: getFinanceBarWidth(bar.value, maxValue) }} />
+            </div>
+            <span className={`text-right font-mono text-xs font-bold ${bar.textClass}`}>{formatCoins(bar.value, locale)}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -884,9 +596,9 @@ interface RevenueDonutChartProps {
 
 function RevenueDonutChart({ revenue, locale }: RevenueDonutChartProps) {
   const t = useTranslations("Admin.dashboard");
-  const { videoSystemRevenueCoins: video, membershipSystemRevenueCoins: member, pendingSystemRevenueCoins: pending } = revenue;
-
-  const total = video + member + pending;
+  const creatorShare = revenue.creatorRevenueCoins;
+  const systemRevenue = revenue.systemRevenueCoins;
+  const total = creatorShare + systemRevenue;
 
   const formatCoinsCompact = (val: number) => {
     if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M AC`;
@@ -896,35 +608,31 @@ function RevenueDonutChart({ revenue, locale }: RevenueDonutChartProps) {
 
   if (total === 0) {
     return (
-      <svg viewBox="0 0 40 40" className="w-full h-full">
+      <svg viewBox="0 0 40 40" className="h-full w-full">
         <circle cx="20" cy="20" r="15.9155" fill="transparent" stroke="var(--border)" strokeOpacity="0.2" strokeWidth="5.5" />
-        <text x="20" y="22" textAnchor="middle" className="font-mono text-[6px] fill-zinc-500">0 AC</text>
+        <text x="20" y="22" textAnchor="middle" className="fill-zinc-500 font-mono text-[6px]">0 AC</text>
       </svg>
     );
   }
 
-  const pVideo = (video / total) * 100;
-  const pMember = (member / total) * 100;
-  const pPending = (pending / total) * 100;
-
   const segments = [
-    { value: video, pct: pVideo, color: "#fbbf24", label: t("finance.chart.donutVideo") },
-    { value: member, pct: pMember, color: "#E50914", label: t("finance.chart.donutMembership") },
-    { value: pending, pct: pPending, color: "#71717a", label: t("finance.chart.donutPending") }
+    { value: creatorShare, pct: (creatorShare / total) * 100, color: "#f59e0b", label: t("finance.chart.donutCreatorShare") },
+    { value: systemRevenue, pct: (systemRevenue / total) * 100, color: "#34d399", label: t("finance.chart.donutSystemRevenue") },
   ];
 
-  let currentOffset = 25; // start at top
+  let currentOffset = 25;
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center group">
-      <svg viewBox="0 0 40 40" className="w-full h-full transform -rotate-90">
-        {segments.map((seg, i) => {
+    <div className="group relative flex h-full w-full items-center justify-center">
+      <svg viewBox="0 0 40 40" className="h-full w-full -rotate-90 transform">
+        {segments.map((seg) => {
           if (seg.pct <= 0) return null;
           const strokeDashoffset = currentOffset;
           currentOffset -= seg.pct;
+
           return (
             <circle
-              key={i}
+              key={seg.label}
               cx="20"
               cy="20"
               r="15.9155"
@@ -933,7 +641,7 @@ function RevenueDonutChart({ revenue, locale }: RevenueDonutChartProps) {
               strokeWidth="5.5"
               strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
               strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-300 hover:stroke-[6.5] cursor-pointer"
+              className="cursor-pointer transition-all duration-300 hover:stroke-[6.5]"
               vectorEffect="non-scaling-stroke"
             >
               <title>{`${seg.label}: ${formatCoins(seg.value, locale)} (${seg.pct.toFixed(1)}%)`}</title>
@@ -941,10 +649,9 @@ function RevenueDonutChart({ revenue, locale }: RevenueDonutChartProps) {
           );
         })}
       </svg>
-      {/* Central Label */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center font-mono text-[8px] text-zinc-400 pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center font-mono text-[8px] text-zinc-400">
         <span className="text-[7px] uppercase tracking-wider text-zinc-500">Total</span>
-        <span className="font-headline font-bold text-[9px] text-foreground mt-0.5">{formatCoinsCompact(total)}</span>
+        <span className="mt-0.5 font-headline text-[9px] font-bold text-foreground">{formatCoinsCompact(total)}</span>
       </div>
     </div>
   );
@@ -1037,7 +744,7 @@ function FinanceOverviewWidget({
       {!isLoading && data && (
         <div className="space-y-6">
           {/* Cash Flow / Revenue Trend Chart */}
-          <FinanceTrendChart data={data} datePreset={datePreset} startDate={startDate} endDate={endDate} locale={locale} />
+          <FinanceTrendChart data={data} locale={locale} />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Revenue Panel */}

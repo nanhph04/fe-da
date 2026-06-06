@@ -2565,15 +2565,16 @@
         "empty": "Unable to load finance data or no transactions are available yet.",
         "to": "to",
         "chart": {
-          "trendTitle": "Financial Trends",
-          "trendDescription": "Deposits flow (AC) and system net revenue.",
-          "donutTitle": "Revenue Structure",
-          "depositsLabel": "Deposits Flow",
-          "revenueLabel": "System Revenue",
-          "tooltipAt": "At:",
-          "donutVideo": "Video Revenue",
-          "donutMembership": "Membership Revenue",
-          "donutPending": "Pending Revenue"
+          "trendTitle": "Current-period Finance Summary",
+          "trendDescription": "Aggregated metrics loaded directly from the API, with no simulated trend line.",
+          "donutTitle": "Revenue Split Structure",
+          "depositsLabel": "Completed deposit coins",
+          "creatorShareLabel": "Creator share",
+          "revenueLabel": "System net revenue",
+          "withdrawalsLabel": "Withdrawn coins",
+          "realDataBadge": "Real data",
+          "donutCreatorShare": "Creator share",
+          "donutSystemRevenue": "System net revenue"
         },
         "presets": {
           "all": "All",

@@ -2517,15 +2517,16 @@
         "empty": "Không thể tải dữ liệu tài chính hoặc chưa có giao dịch nào.",
         "to": "đến",
         "chart": {
-          "trendTitle": "Xu hướng tài chính",
-          "trendDescription": "Dòng tiền nạp (AC) và doanh thu thực nhận hệ thống.",
-          "donutTitle": "Cơ cấu doanh thu",
-          "depositsLabel": "Dòng xu nạp",
-          "revenueLabel": "Doanh thu hệ thống",
-          "tooltipAt": "Thời điểm:",
-          "donutVideo": "Doanh thu Video",
-          "donutMembership": "Doanh thu Membership",
-          "donutPending": "Chờ ghi nhận"
+          "trendTitle": "Tổng quan tài chính kỳ này",
+          "trendDescription": "Các chỉ số tổng hợp lấy trực tiếp từ API, không mô phỏng xu hướng.",
+          "donutTitle": "Cơ cấu chia doanh thu",
+          "depositsLabel": "Xu nạp thành công",
+          "creatorShareLabel": "Chia sẻ creator",
+          "revenueLabel": "Hệ thống thực nhận",
+          "withdrawalsLabel": "Xu đã rút",
+          "realDataBadge": "Dữ liệu thật",
+          "donutCreatorShare": "Chia sẻ creator",
+          "donutSystemRevenue": "Hệ thống thực nhận"
         },
         "presets": {
           "all": "Tất cả",
