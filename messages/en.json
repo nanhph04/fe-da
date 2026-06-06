@@ -1508,8 +1508,7 @@
         "eyebrow": "Identity Control",
         "title": "User Management",
         "loading": "Loading identity directory...",
-        "summary": "{count} platform users from identity-service.",
-        "liveApi": "Live API"
+        "summary": "{count} platform users from identity-service."
       },
       "summary": {
         "totalUsers": "Total Users",
@@ -1733,8 +1732,7 @@
           "back": "Back to channels",
           "eyebrow": "Finance Ledger",
           "title": "Channel Transaction History",
-          "description": "Audit wallet activity and creator/system coin splits for channel {channelId}.",
-          "liveApi": "Finance API"
+          "description": "Audit wallet activity and creator/system coin splits for channel {channelId}."
         },
         "summary": {
           "totalTransactions": "Total transactions",
@@ -2028,8 +2026,7 @@
           "eyebrow": "Moderation Queue",
           "title": "Content Review",
           "loading": "Loading moderation reports...",
-          "summary": "{count, plural, =0 {No pending flags require administrator review.} one {# pending flag requires administrator review.} other {# pending flags require administrator review.}}",
-          "liveApi": "Live API"
+          "summary": "{count, plural, =0 {No pending flags require administrator review.} one {# pending flag requires administrator review.} other {# pending flags require administrator review.}}"
         },
         "actions": {
           "backToContent": "Video Management",
@@ -2214,8 +2211,7 @@
       "header": {
         "eyebrow": "Finance Control",
         "title": "Payout Management",
-        "description": "Review Aura Coin withdrawals before funds leave the platform treasury.",
-        "liveApi": "Live API"
+        "description": "Review Aura Coin withdrawals before funds leave the platform treasury."
       },
       "summary": {
         "pendingRequests": {
@@ -2334,8 +2330,7 @@
       "header": {
         "eyebrow": "Finance Control",
         "title": "Deposit Package Management",
-        "description": "Manage VND to Aura Coin top-up packages shown in the viewer wallet checkout flow.",
-        "liveApi": "Live API"
+        "description": "Manage VND to Aura Coin top-up packages shown in the viewer wallet checkout flow."
       },
       "summary": {
         "activePackages": "Active Packages",

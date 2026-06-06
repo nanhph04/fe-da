@@ -1460,8 +1460,7 @@
         "eyebrow": "Kiểm soát định danh",
         "title": "Quản lý người dùng",
         "loading": "Đang tải danh bạ định danh...",
-        "summary": "{count} người dùng nền tảng từ identity-service.",
-        "liveApi": "API trực tiếp"
+        "summary": "{count} người dùng nền tảng từ identity-service."
       },
       "summary": {
         "totalUsers": "Tổng người dùng",
@@ -1685,8 +1684,7 @@
           "back": "Quay lại kênh",
           "eyebrow": "Sổ cái tài chính",
           "title": "Lịch sử giao dịch kênh",
-          "description": "Kiểm tra hoạt động ví và tỷ lệ chia coin creator/hệ thống cho kênh {channelId}.",
-          "liveApi": "Finance API"
+          "description": "Kiểm tra hoạt động ví và tỷ lệ chia coin creator/hệ thống cho kênh {channelId}."
         },
         "summary": {
           "totalTransactions": "Tổng giao dịch",
@@ -1980,8 +1978,7 @@
           "eyebrow": "Hàng đợi kiểm duyệt",
           "title": "Duyệt nội dung",
           "loading": "Đang tải báo cáo kiểm duyệt...",
-          "summary": "{count, plural, =0 {Không có cờ nào đang chờ quản trị viên duyệt.} one {# cờ đang chờ quản trị viên duyệt.} other {# cờ đang chờ quản trị viên duyệt.}}",
-          "liveApi": "Live API"
+          "summary": "{count, plural, =0 {Không có cờ nào đang chờ quản trị viên duyệt.} one {# cờ đang chờ quản trị viên duyệt.} other {# cờ đang chờ quản trị viên duyệt.}}"
         },
         "actions": {
           "backToContent": "Quản lý video",
@@ -2166,8 +2163,7 @@
       "header": {
         "eyebrow": "Kiểm soát tài chính",
         "title": "Quản lý thanh toán",
-        "description": "Duyệt các yêu cầu rút Aura Coin trước khi tiền rời khỏi quỹ nền tảng.",
-        "liveApi": "API trực tiếp"
+        "description": "Duyệt các yêu cầu rút Aura Coin trước khi tiền rời khỏi quỹ nền tảng."
       },
       "summary": {
         "pendingRequests": {
@@ -2286,8 +2282,7 @@
       "header": {
         "eyebrow": "Kiểm soát tài chính",
         "title": "Quản lý gói nạp",
-        "description": "Quản lý các gói nạp VNĐ sang Aura Coin hiển thị trong luồng thanh toán ví của người xem.",
-        "liveApi": "API trực tiếp"
+        "description": "Quản lý các gói nạp VNĐ sang Aura Coin hiển thị trong luồng thanh toán ví của người xem."
       },
       "summary": {
         "activePackages": "Gói đang hoạt động",

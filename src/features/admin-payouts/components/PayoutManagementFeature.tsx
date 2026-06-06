@@ -165,9 +165,6 @@ export function PayoutManagementFeature() {
             {t("header.description")}
           </p>
         </div>
-        <span className="inline-flex items-center justify-center rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground">
-          {t("header.liveApi")}
-        </span>
       </header>
 
       {error ? (

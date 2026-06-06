@@ -291,9 +291,6 @@ export function AdminChannelTransactionsFeature() {
             {t("transactions.header.description", { channelId: channelId || "-" })}
           </p>
         </div>
-        <span className="inline-flex items-center justify-center rounded-sm border border-border/40 bg-muted px-4 py-2 font-headline text-xs font-bold uppercase tracking-widest text-foreground">
-          {t("transactions.header.liveApi")}
-        </span>
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">

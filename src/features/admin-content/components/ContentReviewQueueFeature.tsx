@@ -94,9 +94,6 @@ export function ContentReviewQueueFeature() {
             <span className="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
             {t("actions.backToContent")}
           </Link>
-          <div className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 font-label text-xs font-bold uppercase tracking-widest text-primary">
-            {t("header.liveApi")}
-          </div>
         </div>
       </header>
 
