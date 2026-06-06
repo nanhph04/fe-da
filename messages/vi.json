@@ -40,6 +40,17 @@
       "admin": "quản trị viên"
     }
   },
+  "SiteFooter": {
+    "brandAriaLabel": "Về trang chủ Velvet Gallery",
+    "description": "Không gian điện ảnh nền tối để khám phá video cao cấp, ủng hộ nhà sáng tạo và quản lý quyền xem bằng Aura Coins.",
+    "legalTitle": "Pháp lý",
+    "legalAriaLabel": "Liên kết pháp lý của website",
+    "privacyPolicy": "Chính sách bảo mật",
+    "termsOfService": "Điều khoản dịch vụ",
+    "cookiePreferences": "Tùy chọn Cookie",
+    "copyright": "© {year} Velvet Gallery. Bảo lưu mọi quyền.",
+    "tagline": "The Cinematic Canvas"
+  },
   "Library": {
     "SubscriptionsPage": {
       "backToLibrary": "Thư viện",
@@ -563,7 +574,8 @@
     "footer": {
       "privacyPolicy": "Chính sách bảo mật",
       "termsOfService": "Điều khoản dịch vụ",
-      "cookiePreferences": "Tùy chọn Cookie"
+      "cookiePreferences": "Tùy chọn Cookie",
+      "ariaLabel": "Liên kết pháp lý công khai"
     },
     "validation": {
       "invalidEmail": "Địa chỉ email không hợp lệ.",
@@ -572,6 +584,76 @@
       "confirmPasswordMinLength": "Mật khẩu xác nhận phải có ít nhất 6 ký tự.",
       "passwordsMismatch": "Mật khẩu không khớp.",
       "otpMinLength": "Mã OTP phải có 6 chữ số."
+    }
+  },
+  "Legal": {
+    "shared": {
+      "updatedLabel": "Cập nhật",
+      "updatedAt": "06/06/2026",
+      "backHome": "Về trang chủ"
+    },
+    "privacyPolicy": {
+      "metadataTitle": "Chính sách bảo mật - Velvet Gallery",
+      "metadataDescription": "Cách Velvet Gallery thu thập, sử dụng và bảo vệ dữ liệu tài khoản của bạn.",
+      "eyebrow": "Quyền riêng tư",
+      "title": "Chính sách bảo mật",
+      "description": "Bản tóm tắt này giải thích những dữ liệu chúng tôi cần để vận hành trải nghiệm xem nội dung, thanh toán và bảo mật tài khoản trong Velvet Gallery.",
+      "sections": {
+        "dataWeCollect": {
+          "title": "Dữ liệu chúng tôi thu thập",
+          "body": "Chúng tôi có thể lưu thông tin tài khoản như email, hồ sơ hiển thị, trạng thái đăng nhập, lịch sử truy cập nội dung và giao dịch Aura Coins cần thiết để cung cấp dịch vụ. Chúng tôi không yêu cầu dữ liệu nhạy cảm ngoài phạm vi trải nghiệm nền tảng."
+        },
+        "howWeUseData": {
+          "title": "Cách dữ liệu được sử dụng",
+          "body": "Dữ liệu được dùng để xác thực, cá nhân hóa thư viện, ghi nhận quyền xem, xử lý thanh toán, phát hiện lạm dụng và cải thiện độ ổn định hệ thống. Các thông tin quan trọng được giới hạn theo quyền truy cập nội bộ."
+        },
+        "yourChoices": {
+          "title": "Lựa chọn của bạn",
+          "body": "Bạn có thể cập nhật hồ sơ, đăng xuất khỏi thiết bị, thay đổi tùy chọn cookie và liên hệ hỗ trợ nếu cần xem xét hoặc xóa thông tin tài khoản theo quy định áp dụng."
+        }
+      }
+    },
+    "termsOfService": {
+      "metadataTitle": "Điều khoản dịch vụ - Velvet Gallery",
+      "metadataDescription": "Các điều khoản cơ bản khi sử dụng Velvet Gallery và dịch vụ nội dung số.",
+      "eyebrow": "Thỏa thuận sử dụng",
+      "title": "Điều khoản dịch vụ",
+      "description": "Khi sử dụng Velvet Gallery, bạn đồng ý tuân thủ các nguyên tắc giúp bảo vệ người xem, nhà sáng tạo và chất lượng thư viện nội dung.",
+      "sections": {
+        "accounts": {
+          "title": "Tài khoản và bảo mật",
+          "body": "Bạn chịu trách nhiệm bảo mật thông tin đăng nhập, sử dụng email chính xác và thông báo cho chúng tôi khi phát hiện truy cập bất thường. Nền tảng có thể tạm khóa tài khoản khi có dấu hiệu rủi ro hoặc vi phạm."
+        },
+        "contentAccess": {
+          "title": "Quyền truy cập nội dung",
+          "body": "Một số nội dung có thể yêu cầu mua lẻ, Aura Coins hoặc gói hội viên. Quyền xem được cấp theo điều kiện hiển thị tại thời điểm giao dịch và có thể phụ thuộc trạng thái kênh, gói hoặc tài khoản."
+        },
+        "responsibilities": {
+          "title": "Trách nhiệm sử dụng",
+          "body": "Bạn không được sao chép, phân phối trái phép, can thiệp hệ thống, gian lận thanh toán hoặc sử dụng nền tảng để gây hại cho người dùng khác. Vi phạm có thể dẫn đến hạn chế truy cập."
+        }
+      }
+    },
+    "cookiePreferences": {
+      "metadataTitle": "Tùy chọn Cookie - Velvet Gallery",
+      "metadataDescription": "Tìm hiểu các loại cookie được dùng để duy trì đăng nhập, ngôn ngữ và trải nghiệm nền tảng.",
+      "eyebrow": "Kiểm soát trình duyệt",
+      "title": "Tùy chọn Cookie",
+      "description": "Cookie giúp Velvet Gallery duy trì phiên đăng nhập an toàn, ghi nhớ lựa chọn cơ bản và cải thiện trải nghiệm trên nền tối điện ảnh.",
+      "sections": {
+        "essential": {
+          "title": "Cookie thiết yếu",
+          "body": "Các cookie cần thiết hỗ trợ đăng nhập, bảo mật phiên, điều hướng theo ngôn ngữ và các chức năng cốt lõi. Nếu tắt nhóm này, một số phần của nền tảng có thể không hoạt động đúng."
+        },
+        "preferences": {
+          "title": "Cookie tùy chọn",
+          "body": "Cookie tùy chọn có thể ghi nhớ lựa chọn giao diện, ngôn ngữ hoặc tín hiệu trải nghiệm để các lần truy cập sau mượt hơn. Chúng tôi ưu tiên thu thập tối thiểu và có mục đích rõ ràng."
+        },
+        "manage": {
+          "title": "Cách quản lý",
+          "body": "Bạn có thể xóa hoặc chặn cookie trong cài đặt trình duyệt. Khi nền tảng bổ sung bảng quản lý chi tiết, tùy chọn của bạn sẽ được lưu và áp dụng cho các lần truy cập tiếp theo."
+        }
+      }
     }
   },
   "Studio": {

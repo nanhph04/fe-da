@@ -12,6 +12,7 @@ import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { PublicLegalFooter } from "./PublicLegalFooter";
 
 const getForgotPasswordSchema = (t: (key: string) => string) =>
   z.object({
@@ -172,7 +173,7 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-background/35 px-6 py-6 backdrop-blur-xl md:px-8">
         <PublicBrand href="/" />
         <div className="flex items-center gap-4">
@@ -188,7 +189,7 @@ export function ForgotPasswordForm() {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
       </div>
 
-      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-24 pb-16">
+      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-24 pb-36 sm:pb-32">
         <div className="w-full max-w-[480px]">
           <div className="relative overflow-hidden rounded-lg bg-card p-8 shadow-2xl md:p-12">
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-40" />
@@ -404,11 +405,7 @@ export function ForgotPasswordForm() {
         </div>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.privacyPolicy")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.termsOfService")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.cookiePreferences")}</span>
-      </footer>
+      <PublicLegalFooter />
     </div>
   );
 }

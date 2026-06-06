@@ -4,6 +4,7 @@ import { SideNav } from "@/components/layout/main/SideNav";
 import { MobileNav } from "@/components/layout/main/MobileNav";
 import { ProfileGuard } from "@/components/guards/ProfileGuard";
 import { getCategoriesCached } from "@/features/watch/services/publicMediaService";
+import { PublicSiteFooter } from "@/shared/components/PublicSiteFooter";
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -31,6 +32,8 @@ export default async function MainLayout({ children, params }: MainLayoutProps) 
       <ProfileGuard>
         {children}
       </ProfileGuard>
+
+      <PublicSiteFooter className="pb-24 md:pl-64 md:pb-0" />
       
       <MobileNav />
     </div>

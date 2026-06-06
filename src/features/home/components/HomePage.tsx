@@ -1,4 +1,3 @@
-import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
 import { useTranslations } from "next-intl";
@@ -185,51 +184,6 @@ export function HomePage({
           <HomePageAccountCta />
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="w-full bg-neutral-950/80 px-8 py-16 shadow-inner shadow-black">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {/* Logo & Copyright */}
-          <div className="flex flex-col space-y-4 col-span-1 lg:col-span-2">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-white">
-                <span className="material-symbols-outlined text-black text-xl">play_arrow</span>
-              </div>
-              <span className="text-lg font-bold text-neutral-200 font-headline uppercase tracking-tighter">
-                Velvet Gallery
-              </span>
-            </div>
-            <p className="max-w-md text-sm leading-relaxed text-neutral-500">
-              {t("footerDesc")}
-            </p>
-          </div>
-
-          {/* Platform Links */}
-          <div className="flex flex-col space-y-3">
-            <span className="mb-2 font-semibold text-foreground">{t("footerNavPlatform")}</span>
-            <Link href="/" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              {t("footerNavAbout")}
-            </Link>
-            <Link href="/onboarding" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              {t("footerNavCreators")}
-            </Link>
-            <Link href="/login" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              {t("footerNavHelp")}
-            </Link>
-          </div>
-
-          {/* Account Links */}
-          <div className="flex flex-col space-y-3">
-            <span className="mb-2 font-semibold text-foreground">{t("footerNavAccount")}</span>
-            <Link href="/login" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              {t("footerNavPrivacy")}
-            </Link>
-            <Link href="/register" className="w-fit text-sm text-neutral-500 transition-colors hover:text-primary">
-              {t("footerNavTerms")}
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

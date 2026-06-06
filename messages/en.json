@@ -40,6 +40,17 @@
       "admin": "admin"
     }
   },
+  "SiteFooter": {
+    "brandAriaLabel": "Go to Velvet Gallery home",
+    "description": "A dark cinematic canvas for discovering premium video, supporting creators, and managing access with Aura Coins.",
+    "legalTitle": "Legal",
+    "legalAriaLabel": "Public site legal links",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePreferences": "Cookie Preferences",
+    "copyright": "© {year} Velvet Gallery. All rights reserved.",
+    "tagline": "The Cinematic Canvas"
+  },
   "Library": {
     "SubscriptionsPage": {
       "backToLibrary": "Library",
@@ -611,7 +622,8 @@
     "footer": {
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",
-      "cookiePreferences": "Cookie Preferences"
+      "cookiePreferences": "Cookie Preferences",
+      "ariaLabel": "Public legal links"
     },
     "validation": {
       "invalidEmail": "Invalid email address.",
@@ -620,6 +632,76 @@
       "confirmPasswordMinLength": "Confirm password must be at least 6 characters.",
       "passwordsMismatch": "Passwords do not match.",
       "otpMinLength": "OTP must be 6 digits."
+    }
+  },
+  "Legal": {
+    "shared": {
+      "updatedLabel": "Updated",
+      "updatedAt": "June 6, 2026",
+      "backHome": "Back home"
+    },
+    "privacyPolicy": {
+      "metadataTitle": "Privacy Policy - Velvet Gallery",
+      "metadataDescription": "How Velvet Gallery collects, uses, and protects your account data.",
+      "eyebrow": "Privacy",
+      "title": "Privacy Policy",
+      "description": "This summary explains the data we need to operate content viewing, payments, and account security across Velvet Gallery.",
+      "sections": {
+        "dataWeCollect": {
+          "title": "Data we collect",
+          "body": "We may store account details such as email, display profile, sign-in status, content access history, and Aura Coins transactions required to provide the service. We do not ask for sensitive data beyond the platform experience."
+        },
+        "howWeUseData": {
+          "title": "How data is used",
+          "body": "Data is used for authentication, library personalization, entitlement records, payment processing, abuse detection, and system reliability improvements. Sensitive operational access is limited internally."
+        },
+        "yourChoices": {
+          "title": "Your choices",
+          "body": "You can update your profile, sign out of devices, adjust cookie preferences, and contact support if you need account information reviewed or deleted under applicable rules."
+        }
+      }
+    },
+    "termsOfService": {
+      "metadataTitle": "Terms of Service - Velvet Gallery",
+      "metadataDescription": "The core terms for using Velvet Gallery and its digital content services.",
+      "eyebrow": "Usage agreement",
+      "title": "Terms of Service",
+      "description": "By using Velvet Gallery, you agree to follow principles that protect viewers, creators, and the quality of the content library.",
+      "sections": {
+        "accounts": {
+          "title": "Accounts and security",
+          "body": "You are responsible for protecting your credentials, using an accurate email, and notifying us if you detect unusual access. The platform may temporarily restrict accounts when risk or violations are detected."
+        },
+        "contentAccess": {
+          "title": "Content access",
+          "body": "Some content may require individual purchases, Aura Coins, or channel memberships. Access is granted according to the terms shown at transaction time and may depend on channel, plan, or account status."
+        },
+        "responsibilities": {
+          "title": "User responsibilities",
+          "body": "You may not copy, redistribute without permission, interfere with systems, commit payment fraud, or use the platform to harm other users. Violations may lead to access restrictions."
+        }
+      }
+    },
+    "cookiePreferences": {
+      "metadataTitle": "Cookie Preferences - Velvet Gallery",
+      "metadataDescription": "Learn which cookies support sign-in, language, and the platform experience.",
+      "eyebrow": "Browser control",
+      "title": "Cookie Preferences",
+      "description": "Cookies help Velvet Gallery maintain secure sessions, remember basic choices, and improve the cinematic dark experience.",
+      "sections": {
+        "essential": {
+          "title": "Essential cookies",
+          "body": "Essential cookies support sign-in, session security, localized routing, and core features. If this group is blocked, parts of the platform may not work correctly."
+        },
+        "preferences": {
+          "title": "Preference cookies",
+          "body": "Preference cookies may remember interface choices, language, or experience signals so future visits feel smoother. We prioritize minimal collection with a clear purpose."
+        },
+        "manage": {
+          "title": "How to manage",
+          "body": "You can delete or block cookies in your browser settings. When the platform adds a detailed preference panel, your choices will be saved and applied on future visits."
+        }
+      }
     }
   },
   "Studio": {

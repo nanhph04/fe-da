@@ -15,6 +15,7 @@ import { buildLocalizedHref } from "@/shared/utils/locale-path";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { PublicLegalFooter } from "./PublicLegalFooter";
 
 const getOtpSchema = (t: (key: string) => string) =>
   z.object({
@@ -224,7 +225,7 @@ export function VerifyOTPForm() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <header className="fixed inset-x-0 top-0 z-20 flex items-center justify-between bg-background/35 px-6 py-6 backdrop-blur-xl md:px-8">
         <PublicBrand href="/" />
         <div className="flex items-center gap-4">
@@ -241,7 +242,7 @@ export function VerifyOTPForm() {
         style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtbJ6IwTU70YSNcFbZH2Qdcc-AiOjAWpB9C3G_i0SN1NUDizxzF-ki7bRizssSjFyTPcqQv0j-nM5DP9kqKMZABSUfcwbe54nRl1ZqO6HHg1Vl6ZYgP1ZETfBJU49oaCDe6taBEP5jsUBYujTsGYG_0aHQEHDYW3SixlWE9rbqX3WJFwb8w9zozLwhf8bp0W_FOLyivNwDE9_wz0tjrC7__bOB-DjA62djnFFgurN2WW5KNkV4iexYztUWkK6usyl4_E-7PW8vadj4')", backgroundSize: "cover", backgroundPosition: "center" }}
       />
 
-      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 main-otp pt-24 pb-16">
+      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 main-otp pt-24 pb-36 sm:pb-32">
         <div className="w-full max-w-md">
           <div className="relative overflow-hidden rounded-lg bg-card p-10 shadow-2xl">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-transparent opacity-50" />
@@ -332,11 +333,7 @@ export function VerifyOTPForm() {
         </div>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.privacyPolicy")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.termsOfService")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.cookiePreferences")}</span>
-      </footer>
+      <PublicLegalFooter />
     </div>
   );
 }

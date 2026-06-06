@@ -1,5 +1,6 @@
 import { HomePage } from "@/features/home/components/HomePage";
 import { getServerUserProfile } from "@/shared/auth/server";
+import { PublicSiteFooter } from "@/shared/components/PublicSiteFooter";
 import { buildLocalizedHref } from "@/shared/utils/locale-path";
 import {
   getCategoriesCached,
@@ -105,12 +106,15 @@ export default async function Home(props: { params: Promise<{ locale: string }> 
     .slice(0, HOME_CATEGORY_SECTION_LIMIT);
 
   return (
-    <HomePage
-      latestVideos={latestVideos}
-      categories={categories}
-      categorySections={categorySections}
-      topViewsVideos={topViewsVideos}
-      topPurchasesVideos={topPurchasesVideos}
-    />
+    <>
+      <HomePage
+        latestVideos={latestVideos}
+        categories={categories}
+        categorySections={categorySections}
+        topViewsVideos={topViewsVideos}
+        topPurchasesVideos={topPurchasesVideos}
+      />
+      <PublicSiteFooter />
+    </>
   );
 }

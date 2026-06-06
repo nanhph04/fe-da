@@ -12,6 +12,7 @@ import { getErrorMessage } from "@/shared/api/client";
 import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { PublicLegalFooter } from "./PublicLegalFooter";
 
 const getRegisterSchema = (t: (key: string) => string) =>
   z.object({
@@ -81,7 +82,7 @@ export function RegisterForm() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <div
         className="absolute inset-0 bg-cover bg-center blur-md brightness-50"
         style={{ backgroundImage: "url(https://lh3.googleusercontent.com/aida-public/AB6AXuCr8QKxm6IY5Hhlg_8RKY_QHi4BkzTjZ-Ez185srdjNMIjE-2-O3d8Z9OaW5L-3mKBFw9DOnGU7VLGRudvUf52Gd487_neP-6FG4ROU5CkVHvN5iDKM-62UC7p5qrjzvstELv1Hxt4eu58K3uzTum_RiISzn2-eecEJDUjm8hdia67pOdDmDCgY4VCUj_gaMGTLN_Sy4hTfM7jr8VyQ2dZOutRsK_iTfYN-YFowp1or7i8BRcvQY0HRZ_wD87QxcUQ9IqqqNjCfrf4H)" }}
@@ -98,7 +99,7 @@ export function RegisterForm() {
         </div>
       </header>
 
-      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-24">
+      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-24 pb-36 sm:pb-32">
         <div className="w-full max-w-[480px] rounded-lg border border-white/5 bg-card/40 p-10 shadow-2xl backdrop-blur-2xl md:p-12">
           <div className="mb-10 space-y-2">
             <h1 className="font-headline text-4xl font-extrabold tracking-[-0.02em] text-foreground">
@@ -208,17 +209,13 @@ export function RegisterForm() {
             </p>
             <p className="text-[10px] leading-loose uppercase tracking-widest text-muted-foreground/50">
               {t("register.termsAgreement")} <br />
-              <span className="underline underline-offset-4">{t("register.termsOfService")}</span> & <span className="underline underline-offset-4">{t("register.privacyPolicy")}</span>
+              <Link href="/terms-of-service" className="underline underline-offset-4 transition-colors hover:text-foreground">{t("register.termsOfService")}</Link> & <Link href="/privacy-policy" className="underline underline-offset-4 transition-colors hover:text-foreground">{t("register.privacyPolicy")}</Link>
             </p>
           </div>
         </div>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.privacyPolicy")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.termsOfService")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.cookiePreferences")}</span>
-      </footer>
+      <PublicLegalFooter />
     </div>
   );
 }

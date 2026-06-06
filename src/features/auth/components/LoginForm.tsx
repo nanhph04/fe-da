@@ -14,6 +14,7 @@ import { PublicBrand } from "@/components/layout/public/PublicBrand";
 import { getSafeInternalRedirectPath, buildLocalizedHref } from "@/shared/utils/locale-path";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
+import { PublicLegalFooter } from "./PublicLegalFooter";
 
 const getLoginSchema = (t: (key: string) => string) =>
   z.object({
@@ -172,7 +173,7 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20 grayscale brightness-50"
         style={{ backgroundImage: "url(/images/login-bg.jpg)" }}
@@ -190,7 +191,7 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
         </div>
       </header>
 
-      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-28 pb-28">
+      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 pt-28 pb-36 sm:pb-32">
         <div className="w-full max-w-md">
           <div className="mb-12 text-center md:text-left">
             <h1 className="mb-2 font-headline text-5xl font-extrabold leading-none tracking-[-0.02em] text-foreground">
@@ -280,11 +281,7 @@ export function LoginForm({ redirectTo, reason }: LoginFormProps) {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center gap-8 bg-transparent py-8 opacity-50">
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.privacyPolicy")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.termsOfService")}</span>
-        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground/50 transition-colors hover:text-muted-foreground">{t("footer.cookiePreferences")}</span>
-      </div>
+      <PublicLegalFooter />
     </div>
   );
 }
