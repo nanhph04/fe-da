@@ -7,6 +7,12 @@ export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:4000";
 
+const SERVER_API_BASE_URL =
+  process.env.GATEWAY_INTERNAL_URL ||
+  process.env.NEXT_PUBLIC_GATEWAY_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:4000";
+
 let isRefreshing = false;
 let refreshSubscribers: Array<(token: string) => void> = [];
 
@@ -77,7 +83,7 @@ export const buildApiUrl = (endpoint: string) => {
     return endpoint;
   }
 
-  return `${API_BASE_URL}${endpoint}`;
+  return `${SERVER_API_BASE_URL}${endpoint}`;
 };
 
 const buildStreamingApiUrl = (endpoint: string) => {
@@ -85,7 +91,11 @@ const buildStreamingApiUrl = (endpoint: string) => {
     return endpoint;
   }
 
-  return `${API_BASE_URL}${endpoint}`;
+  if (typeof window !== "undefined") {
+    return endpoint;
+  }
+
+  return `${SERVER_API_BASE_URL}${endpoint}`;
 };
 
 export const getApiErrorCode = (error: unknown) => {

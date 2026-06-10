@@ -42,6 +42,16 @@ function normalizeUniqueSlugs(values?: string[]) {
   );
 }
 
+export async function getLatestVideosFresh(limit = 10) {
+  const normalizedLimit = normalizePublicVideoLimit(limit, 20);
+  const query = `?limit=${normalizedLimit}`;
+
+  return fetchPublicApi<PublicDiscoveryVideo[]>(
+    `/api/media/videos/latest${query}`,
+    { cache: "no-store" }
+  );
+}
+
 export async function getLatestVideosCached(limit = 10) {
   "use cache";
 
@@ -70,6 +80,24 @@ export async function getLatestVideosCached(limit = 10) {
       errors: apiError.errors,
     } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
   }
+}
+
+export async function getVideosRankingFresh(
+  metric: "views" | "purchases",
+  period: "day" | "week" | "month" = "week",
+  limit = 10
+) {
+  const normalizedLimit = normalizePublicVideoLimit(limit, 10);
+  const query = new URLSearchParams({
+    metric,
+    period,
+    limit: String(normalizedLimit),
+  });
+
+  return fetchPublicApi<PublicDiscoveryVideo[]>(
+    `/api/media/videos/ranking?${query.toString()}`,
+    { cache: "no-store" }
+  );
 }
 
 export async function getVideosRankingCached(
@@ -109,6 +137,12 @@ export async function getVideosRankingCached(
       errors: apiError.errors,
     } satisfies PublicApiResponse<PublicDiscoveryVideo[]>;
   }
+}
+
+export async function getCategoriesFresh() {
+  return fetchPublicApi<CategoryPublic[]>("/api/media/categories", {
+    cache: "no-store",
+  });
 }
 
 export async function getCategoriesCached() {
@@ -219,6 +253,20 @@ export async function searchPublicMediaCached(params: PublicMediaSearchQuery) {
 
   return fetchPublicApi<PublicMediaSearchResponse>(
     `/api/media/search?${query.toString()}`
+  );
+}
+
+export async function getVideosByCategoryFresh(categorySlug: string, limit = 6) {
+  const normalizedSlug = categorySlug.trim();
+  const normalizedLimit = normalizePublicVideoLimit(limit, 6);
+  const query = new URLSearchParams({
+    category: normalizedSlug,
+    limit: String(normalizedLimit),
+  });
+
+  return fetchPublicApi<PublicDiscoveryVideo[]>(
+    `/api/media/videos/by-category?${query.toString()}`,
+    { cache: "no-store" }
   );
 }
 

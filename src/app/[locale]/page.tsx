@@ -3,10 +3,10 @@ import { getServerUserProfile } from "@/shared/auth/server";
 import { PublicSiteFooter } from "@/shared/components/PublicSiteFooter";
 import { buildLocalizedHref } from "@/shared/utils/locale-path";
 import {
-  getCategoriesCached,
-  getLatestVideosCached,
-  getVideosByCategoryCached,
-  getVideosRankingCached,
+  getCategoriesFresh,
+  getLatestVideosFresh,
+  getVideosByCategoryFresh,
+  getVideosRankingFresh,
   type CategoryPublic,
   type PublicDiscoveryVideo,
 } from "@/features/watch/services/publicMediaService";
@@ -69,10 +69,10 @@ export default async function Home(props: { params: Promise<{ locale: string }> 
   }
 
   const [latestRes, categoriesRes, topViewsRes, topPurchasesRes] = await Promise.all([
-    getLatestVideosCached(13).catch(() => null),
-    getCategoriesCached().catch(() => null),
-    getVideosRankingCached("views", "week", 6).catch(() => null),
-    getVideosRankingCached("purchases", "week", 6).catch(() => null),
+    getLatestVideosFresh(13).catch(() => null),
+    getCategoriesFresh().catch(() => null),
+    getVideosRankingFresh("views", "week", 6).catch(() => null),
+    getVideosRankingFresh("purchases", "week", 6).catch(() => null),
   ]);
 
   const latestVideos = latestRes?.success ? latestRes.data ?? [] : [];
@@ -88,7 +88,7 @@ export default async function Home(props: { params: Promise<{ locale: string }> 
 
   const categorySectionCandidates = await Promise.all(
     selectedCategories.map(async (category) => {
-      const categoryRes = await getVideosByCategoryCached(
+      const categoryRes = await getVideosByCategoryFresh(
         category.slug,
         HOME_CATEGORY_VIDEO_LIMIT,
       ).catch(() => null);
