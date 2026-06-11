@@ -71,8 +71,16 @@ function countVideosByStatus(videos: OwnerVideoResponse[], status: string) {
   return videos.filter(video => normalizeStatus(video.status) === status).length;
 }
 
+function getVideoViews(video?: OwnerVideoResponse | null) {
+  return video?.viewCount ?? video?.metrics?.viewsCount ?? 0;
+}
+
+function getVideoEarnings(earningVideo: VideoEarnings) {
+  return earningVideo.revenue || earningVideo.estimatedRevenue || 0;
+}
+
 function getTotalViews(videos: OwnerVideoResponse[]) {
-  return videos.reduce((total, video) => total + (video.viewCount ?? video.metrics?.viewsCount ?? 0), 0);
+  return videos.reduce((total, video) => total + getVideoViews(video), 0);
 }
 
 export function buildDashboardStats(
@@ -134,19 +142,33 @@ export function buildTopVideos(
   t: TFunction,
   locale: string
 ): DashboardTopVideo[] {
-  if (topEarningVideos.length > 0) {
-    return topEarningVideos.slice(0, 3).map((earningVideo, index) => {
-      const mediaVideo = videos.find(video => video.id === earningVideo.videoId);
-      const mediaViews = mediaVideo?.viewCount ?? mediaVideo?.metrics?.viewsCount;
+  const videosById = new Map(videos.map(video => [video.id, video]));
+  const earningRows = topEarningVideos
+    .filter(earningVideo => getVideoEarnings(earningVideo) > 0 || earningVideo.views > 0)
+    .map((earningVideo) => {
+      const mediaVideo = videosById.get(earningVideo.videoId);
+      const mediaViews = getVideoViews(mediaVideo);
+
+      return {
+        earningVideo,
+        mediaVideo,
+        views: mediaViews || earningVideo.views || 0,
+        earnings: getVideoEarnings(earningVideo),
+      };
+    })
+    .filter(row => row.earnings > 0 || row.views > 0);
+
+  if (earningRows.length > 0) {
+    return earningRows.slice(0, 3).map(({ earningVideo, mediaVideo, views, earnings }, index) => {
       const financeTitleIsPlaceholder = !earningVideo.videoTitle || earningVideo.videoTitle.toLowerCase() === "video";
 
       return {
         id: earningVideo.videoId,
         title: mediaVideo?.title || (financeTitleIsPlaceholder ? `Video ${earningVideo.videoId.slice(0, 8)}` : earningVideo.videoTitle),
         thumbnailUrl: getReadyOwnerVideoThumbnailUrl(mediaVideo?.id, mediaVideo?.thumbnailUrl, mediaVideo?.thumbnailStatus) || DEFAULT_THUMBNAIL,
-        views: compactNumber(mediaViews ?? earningVideo.views, locale),
+        views: compactNumber(views, locale),
         likes: t("dashboard.topVideos.noApi"),
-        earnings: formatCoins(earningVideo.revenue || earningVideo.estimatedRevenue, locale),
+        earnings: formatCoins(earnings, locale),
         badgeLabel: index === 0 ? t("dashboard.topVideos.topEarning") : translateStatus(t, earningVideo.status),
         badgeTone: index === 0 ? "secondary" : "muted",
       };
@@ -154,15 +176,16 @@ export function buildTopVideos(
   }
 
   return [...videos]
-    .sort((a, b) => (b.viewCount ?? b.metrics?.viewsCount ?? 0) - (a.viewCount ?? a.metrics?.viewsCount ?? 0))
+    .filter(video => getVideoViews(video) > 0)
+    .sort((a, b) => getVideoViews(b) - getVideoViews(a))
     .slice(0, 3)
     .map((video, index) => ({
       id: video.id,
       title: video.title,
       thumbnailUrl: getReadyOwnerVideoThumbnailUrl(video.id, video.thumbnailUrl, video.thumbnailStatus) || DEFAULT_THUMBNAIL,
-      views: compactNumber(video.viewCount ?? video.metrics?.viewsCount ?? 0, locale),
+      views: compactNumber(getVideoViews(video), locale),
       likes: t("dashboard.topVideos.noApi"),
-      earnings: video.price ? formatCoins(video.price, locale) : "0 AC",
+      earnings: "0 AC",
       badgeLabel: index === 0 ? t("dashboard.topVideos.mostViewed") : translateStatus(t, normalizeStatus(video.status)),
       badgeTone: index === 0 ? "primary" : "muted",
     }));

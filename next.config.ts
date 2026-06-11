@@ -23,6 +23,9 @@ const mediaStorageLanRemotePattern = appHostIp
   ? new URL(`http://${appHostIp}:9000`)
   : null;
 const localMediaStorageRemotePattern = new URL("http://localhost:19000");
+const hostDockerInternalMediaStorageRemotePattern = new URL(
+  "http://host.docker.internal:19000",
+);
 
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -86,6 +89,26 @@ const nextConfig: NextConfig = {
           | "https",
         hostname: localMediaStorageRemotePattern.hostname,
         port: localMediaStorageRemotePattern.port,
+        pathname: "/media-public/**",
+      },
+      {
+        protocol:
+          hostDockerInternalMediaStorageRemotePattern.protocol.replace(
+            ":",
+            "",
+          ) as "http" | "https",
+        hostname: hostDockerInternalMediaStorageRemotePattern.hostname,
+        port: hostDockerInternalMediaStorageRemotePattern.port,
+        pathname: "/media-processed/**",
+      },
+      {
+        protocol:
+          hostDockerInternalMediaStorageRemotePattern.protocol.replace(
+            ":",
+            "",
+          ) as "http" | "https",
+        hostname: hostDockerInternalMediaStorageRemotePattern.hostname,
+        port: hostDockerInternalMediaStorageRemotePattern.port,
         pathname: "/media-public/**",
       },
       ...(mediaStorageLanRemotePattern

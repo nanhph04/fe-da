@@ -7,11 +7,11 @@ services:
       dockerfile: Dockerfile
       args:
         GATEWAY_INTERNAL_URL: http://api-gateway:4000
-        NEXT_PUBLIC_APP_HOST_IP: localhost
+        NEXT_PUBLIC_APP_HOST_IP: ${PUBLIC_HOST:-localhost}
         NEXT_PUBLIC_GATEWAY_URL: http://localhost:4000
         NEXT_PUBLIC_API_URL: http://localhost:4000
-        NEXT_PUBLIC_AVATAR_STORAGE_URL: http://localhost:19000
-        NEXT_PUBLIC_MEDIA_STORAGE_URL: http://localhost:19000
+        NEXT_PUBLIC_AVATAR_STORAGE_URL: http://${PUBLIC_HOST:-localhost}:19000
+        NEXT_PUBLIC_MEDIA_STORAGE_URL: http://${PUBLIC_HOST:-localhost}:19000
     image: media-system-frontend:local
     container_name: frontend
     restart: unless-stopped
@@ -22,8 +22,8 @@ services:
       GATEWAY_INTERNAL_URL: http://api-gateway:4000
       NEXT_PUBLIC_GATEWAY_URL: http://localhost:4000
       NEXT_PUBLIC_API_URL: http://localhost:4000
-      NEXT_PUBLIC_AVATAR_STORAGE_URL: http://localhost:19000
-      NEXT_PUBLIC_MEDIA_STORAGE_URL: http://localhost:19000
+      NEXT_PUBLIC_AVATAR_STORAGE_URL: http://${PUBLIC_HOST:-localhost}:19000
+      NEXT_PUBLIC_MEDIA_STORAGE_URL: http://${PUBLIC_HOST:-localhost}:19000
     ports:
       - "3000:3000"
     networks:

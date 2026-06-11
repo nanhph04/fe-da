@@ -279,6 +279,10 @@ export interface VideoMetadataResponse {
   deleteReason: string | null;
   uploadId?: string | null;
   partSizeBytes?: number | null;
+  uploadSessionStatus?: string | null;
+  uploadExpiresAt?: string | null;
+  uploadFileName?: string | null;
+  uploadFileSize?: number | null;
   updatedAt: string;
 }
 
@@ -332,6 +336,10 @@ export interface OwnerVideoResponse extends DiscoveryVideoResponse {
   deleteReason: string | null;
   uploadId?: string | null;
   partSizeBytes?: number | null;
+  uploadSessionStatus?: string | null;
+  uploadExpiresAt?: string | null;
+  uploadFileName?: string | null;
+  uploadFileSize?: number | null;
 }
 
 export interface OwnerVideoDetailResponse extends OwnerVideoResponse {
