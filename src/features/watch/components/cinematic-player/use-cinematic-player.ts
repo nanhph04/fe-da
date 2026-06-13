@@ -8,10 +8,14 @@ import {
   buildMediaSource,
   buildPlaybackDiagnostic,
   createPlaybackErrorMessage,
+  getPlaybackTokenExpiryMs,
+  getPlaybackTokenFromSource,
   getQualityLevelResolutions,
   isTypingTarget,
   redactUrlForLogs,
+  replacePlaybackTokenInSource,
   SEEK_STEP_SECONDS,
+  shouldRefreshPlaybackToken,
   type MediaSourceDescriptor,
   type QualityLevelListLike,
 } from "./player-utils";
@@ -21,7 +25,26 @@ interface UseCinematicPlayerOptions {
   src: string;
   poster?: string;
   initialPositionSeconds: number;
+  onRefreshPlaybackSource?: () => Promise<string | null>;
 }
+
+type VhsRequestOptions = {
+  uri?: string;
+  url?: string;
+  [key: string]: unknown;
+};
+
+type VhsRequestHook = (options: VhsRequestOptions) => VhsRequestOptions;
+
+type VhsXhrHooks = {
+  onRequest?: (callback: VhsRequestHook) => void;
+  offRequest?: (callback: VhsRequestHook) => void;
+};
+
+type VhsTech = {
+  vhs?: { xhr?: VhsXhrHooks };
+  hls?: { xhr?: VhsXhrHooks };
+};
 
 function areResolutionListsEqual(left: string[], right: string[]) {
   return left.length === right.length && left.every((value, index) => value === right[index]);
@@ -45,11 +68,22 @@ function applyQualityResolution(
   }
 }
 
+function isPlaybackStreamUrl(value: string) {
+  return value.includes("/api/media/stream/") && /[?&]token=/i.test(value);
+}
+
+function getVhsXhrHooks(player: Player): VhsXhrHooks | null {
+  const tech = player.tech({ IWillNotUseThisInPlugins: true }) as VhsTech;
+
+  return tech.vhs?.xhr ?? tech.hls?.xhr ?? null;
+}
+
 export function useCinematicPlayer({
   videoId,
   src,
   poster,
   initialPositionSeconds,
+  onRefreshPlaybackSource,
 }: UseCinematicPlayerOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -61,6 +95,14 @@ export function useCinematicPlayer({
   const inFlightProgressKeyRef = useRef<string | null>(null);
   const lastForcedProgressKeyRef = useRef<string | null>(null);
   const selectedResolutionRef = useRef("auto");
+  const refreshSourceRef = useRef(onRefreshPlaybackSource);
+  const latestPlaybackTokenRef = useRef<string | null>(null);
+  const refreshPlaybackSourceRef = useRef<
+    (force?: boolean, reloadPlayer?: boolean) => Promise<boolean>
+  >(async () => false);
+  const scheduleTokenRefreshRef = useRef<() => void>(() => undefined);
+  const refreshInFlightRef = useRef(false);
+  const refreshTimerRef = useRef<number | null>(null);
   const [selectedResolution, setSelectedResolution] = useState("auto");
   const [detectedResolutions, setDetectedResolutions] = useState<string[]>([]);
   const [playerError, setPlayerError] = useState<string | null>(null);
@@ -74,10 +116,171 @@ export function useCinematicPlayer({
   }, [selectedResolution]);
 
   useEffect(() => {
+    refreshSourceRef.current = onRefreshPlaybackSource;
+  }, [onRefreshPlaybackSource]);
+
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current !== null) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     resumePositionRef.current = initialPositionSeconds;
     hasRestoredProgressRef.current = false;
     lastSavedPositionRef.current = initialPositionSeconds;
-  }, [initialPositionSeconds, src]);
+  }, [initialPositionSeconds, videoId]);
+
+  const updateHlsRequestToken: VhsRequestHook = (options) => {
+    const token = latestPlaybackTokenRef.current;
+    const requestUrl =
+      typeof options.uri === "string"
+        ? options.uri
+        : typeof options.url === "string"
+          ? options.url
+          : null;
+
+    if (!token || !requestUrl || !isPlaybackStreamUrl(requestUrl)) {
+      return options;
+    }
+
+    const nextUrl = replacePlaybackTokenInSource(requestUrl, token);
+
+    return {
+      ...options,
+      ...(typeof options.uri === "string" ? { uri: nextUrl } : null),
+      ...(typeof options.url === "string" ? { url: nextUrl } : null),
+    };
+  };
+
+  function scheduleTokenRefresh(): void {
+    if (refreshTimerRef.current !== null) {
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    const currentSource = sourceRef.current;
+    const currentToken = currentSource ? getPlaybackTokenFromSource(currentSource.src) : null;
+    const expiryMs = currentToken ? getPlaybackTokenExpiryMs(currentToken) : null;
+
+    if (!currentToken || expiryMs === null) {
+      return;
+    }
+
+    const delay = Math.max(expiryMs - Date.now() - 30_000, 5_000);
+
+    refreshTimerRef.current = window.setTimeout(() => {
+      void refreshPlaybackSourceRef.current(true);
+    }, delay);
+  }
+
+  async function refreshPlaybackSource(
+    force = false,
+    reloadPlayer = false
+  ): Promise<boolean> {
+    if (refreshInFlightRef.current) {
+      return false;
+    }
+
+    const player = playerRef.current;
+    const currentSource = sourceRef.current;
+    const refreshSource = refreshSourceRef.current;
+    const currentToken = currentSource ? getPlaybackTokenFromSource(currentSource.src) : null;
+
+    if (!currentSource || !refreshSource || !currentToken) {
+      return false;
+    }
+
+    if (!force && !shouldRefreshPlaybackToken(currentToken)) {
+      return false;
+    }
+
+    refreshInFlightRef.current = true;
+
+    try {
+      const nextSource = await refreshSource();
+
+      if (!nextSource) {
+        return false;
+      }
+
+      const nextMediaSource = buildMediaSource(nextSource);
+      const nextToken = getPlaybackTokenFromSource(nextMediaSource.src);
+
+      if (!nextToken) {
+        return false;
+      }
+
+      const safeCurrentTime =
+        player && !player.isDisposed()
+          ? (() => {
+              const currentTime = player.currentTime();
+              return typeof currentTime === "number" && Number.isFinite(currentTime)
+                ? currentTime
+                : null;
+            })()
+          : null;
+      const shouldResumePlayback = Boolean(player && !player.isDisposed() && !player.paused());
+
+      latestPlaybackTokenRef.current = nextToken;
+      sourceRef.current = nextMediaSource;
+      console.info("[watch] playback token refreshed", {
+        source: redactUrlForLogs(nextMediaSource.src),
+        type: nextMediaSource.type,
+        reloadPlayer,
+      });
+
+      if (!reloadPlayer) {
+        scheduleTokenRefreshRef.current();
+        return true;
+      }
+
+      hasRestoredProgressRef.current = false;
+      selectedResolutionRef.current = "auto";
+      setSelectedResolution("auto");
+
+      if (safeCurrentTime !== null) {
+        resumePositionRef.current = safeCurrentTime;
+        lastSavedPositionRef.current = safeCurrentTime;
+      }
+
+      if (player && !player.isDisposed()) {
+        player.one("loadedmetadata", () => {
+          const nextPlayer = playerRef.current;
+          if (!nextPlayer || nextPlayer.isDisposed()) {
+            return;
+          }
+
+          if (safeCurrentTime !== null) {
+            nextPlayer.currentTime(safeCurrentTime);
+          }
+
+          if (shouldResumePlayback) {
+            void nextPlayer.play()?.catch(() => undefined);
+          }
+        });
+        player.src(nextMediaSource);
+        player.load();
+        if (shouldResumePlayback) {
+          void player.play()?.catch(() => undefined);
+        }
+      }
+
+      scheduleTokenRefreshRef.current();
+      return true;
+    } catch (error) {
+      console.warn("[watch] failed to refresh playback source", { error });
+      return false;
+    } finally {
+      refreshInFlightRef.current = false;
+    }
+  }
+
+  scheduleTokenRefreshRef.current = scheduleTokenRefresh;
+  refreshPlaybackSourceRef.current = refreshPlaybackSource;
 
   useEffect(() => {
     if (!containerRef.current || playerRef.current) {
@@ -216,6 +419,7 @@ export function useCinematicPlayer({
       syncDetectedResolutions();
     };
 
+
     const handleLoadedMetadata = () => {
       const duration = player.duration();
       const safeDuration =
@@ -256,12 +460,22 @@ export function useCinematicPlayer({
         return;
       }
 
-      const message = createPlaybackErrorMessage(currentSource, error);
-      setPlayerError(message);
-      console.warn(
-        "[watch] player error",
-        buildPlaybackDiagnostic(currentSource, error)
-      );
+      void (async () => {
+        const refreshed = await refreshPlaybackSourceRef.current(true, true);
+
+        if (refreshed) {
+          player.error(undefined);
+          setPlayerError(null);
+          return;
+        }
+
+        const message = createPlaybackErrorMessage(currentSource, error);
+        setPlayerError(message);
+        console.warn(
+          "[watch] player error",
+          buildPlaybackDiagnostic(currentSource, error)
+        );
+      })();
     };
 
     const handleTimeUpdate = () => {
@@ -325,6 +539,15 @@ export function useCinematicPlayer({
     qualityLevels?.on?.("addqualitylevel", syncDetectedResolutions);
     qualityLevels?.on?.("change", syncDetectedResolutions);
 
+    const installHlsRequestHook = () => {
+      const xhrHooks = getVhsXhrHooks(player);
+      xhrHooks?.offRequest?.(updateHlsRequestToken);
+      xhrHooks?.onRequest?.(updateHlsRequestToken);
+    };
+
+    player.on("xhr-hooks-ready", installHlsRequestHook);
+    installHlsRequestHook();
+
     player.on("canplay", handleCanPlay);
     player.on("loadedmetadata", handleLoadedMetadata);
     player.on("error", handleError);
@@ -343,6 +566,8 @@ export function useCinematicPlayer({
       player.off("timeupdate", handleTimeUpdate);
       player.off("pause", handlePause);
       player.off("ended", handleEnded);
+      player.off("xhr-hooks-ready", installHlsRequestHook);
+      getVhsXhrHooks(player)?.offRequest?.(updateHlsRequestToken);
       qualityLevels?.off?.("addqualitylevel", syncDetectedResolutions);
       qualityLevels?.off?.("change", syncDetectedResolutions);
       window.removeEventListener("pagehide", handlePageHide);
@@ -375,6 +600,7 @@ export function useCinematicPlayer({
     }
 
     sourceRef.current = nextSource;
+    latestPlaybackTokenRef.current = getPlaybackTokenFromSource(nextSource.src);
     hasRestoredProgressRef.current = false;
     setDetectedResolutions([]);
     selectedResolutionRef.current = "auto";
@@ -385,6 +611,7 @@ export function useCinematicPlayer({
     });
     player.src(nextSource);
     player.load();
+    scheduleTokenRefreshRef.current();
   }, [src]);
 
   useEffect(() => {

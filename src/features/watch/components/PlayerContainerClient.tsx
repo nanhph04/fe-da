@@ -151,6 +151,30 @@ export function PlayerContainerClient({
     retryPlayback();
   }, [retryPlayback]);
 
+  const refreshPlaybackSource = useCallback(async () => {
+    const tokenRes = await mediaService.refreshPlaybackToken(videoId);
+
+    if (!tokenRes.success || !tokenRes.data) {
+      throw new Error(tokenRes.message || "Failed to refresh playback token.");
+    }
+
+    const rawStreamUrl = tokenRes.data.playbackUrl || "";
+
+    if (!rawStreamUrl) {
+      throw new Error("Playback URL was not returned by the media service.");
+    }
+
+    const finalUrl = buildPlaybackUrl(rawStreamUrl, tokenRes.data.playbackToken);
+
+    console.info("[watch] playback source refreshed", {
+      videoId,
+      source: redactUrlForLogs(finalUrl),
+      type: inferSourceType(finalUrl),
+    });
+
+    return finalUrl;
+  }, [videoId]);
+
   useEffect(() => {
     setHasCompletedPurchase(false);
   }, [videoId]);
@@ -364,6 +388,7 @@ export function PlayerContainerClient({
       title={title}
       initialPositionSeconds={initialPositionSeconds}
       availableResolutions={availableResolutions}
+      onRefreshPlaybackSource={refreshPlaybackSource}
     />
   );
 }

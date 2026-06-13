@@ -10,6 +10,7 @@ interface CinematicPlayerProps {
   title?: string;
   initialPositionSeconds?: number;
   availableResolutions?: string[];
+  onRefreshPlaybackSource?: () => Promise<string | null>;
 }
 
 function normalizeResolutionLabel(resolution: string) {
@@ -42,6 +43,7 @@ export function CinematicPlayer({
   title,
   initialPositionSeconds = 0,
   availableResolutions = [],
+  onRefreshPlaybackSource,
 }: CinematicPlayerProps) {
   const {
     containerRef,
@@ -54,6 +56,7 @@ export function CinematicPlayer({
     src,
     poster,
     initialPositionSeconds,
+    onRefreshPlaybackSource,
   });
   const resolutionOptions = getResolutionOptions(
     availableResolutions,
