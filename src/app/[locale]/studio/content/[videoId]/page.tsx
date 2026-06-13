@@ -1,4 +1,5 @@
 import { StudioVideoPreviewFeature } from "@/features/studio-content";
+import { requireStudioAccess } from "@/shared/auth/server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 interface StudioContentVideoPageProps {
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: StudioContentVideoPageProps) 
 export default async function StudioContentVideoPage({ params }: StudioContentVideoPageProps) {
   const { locale, videoId } = await params;
   setRequestLocale(locale);
+  await requireStudioAccess(`/studio/content/${videoId}`);
 
   return <StudioVideoPreviewFeature videoId={videoId} />;
 }

@@ -63,7 +63,9 @@ export async function requireStudioAccess(redirectPath: string) {
   }
 
   if (!canAccessStudio) {
-    redirect("/unauthorized");
+    // Creator access can lag briefly after channel creation while auth state syncs.
+    // Send users back to onboarding so the client-side sync flow can recover them.
+    redirect("/onboarding?studioAccess=pending");
   }
 
   return profile;

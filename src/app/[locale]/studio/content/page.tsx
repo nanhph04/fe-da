@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { StudioContentFeature } from "@/features/studio-content";
+import { requireStudioAccess } from "@/shared/auth/server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type Props = {
@@ -17,6 +18,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function StudioContentPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
+  await requireStudioAccess("/studio/content");
 
   const t = await getTranslations({ locale, namespace: "Studio.content" });
 

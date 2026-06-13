@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { Loader2, Camera, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,13 @@ function canAccessStudio(profile: UserProfileResponse | null) {
   return !!profile && (profile.isCreator || profile.role === "creator");
 }
 
+const CREATOR_SYNC_MAX_ATTEMPTS = 10;
+const CREATOR_SYNC_RETRY_DELAY_MS = 500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function CreateChannelFeature() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -52,7 +60,9 @@ export function CreateChannelFeature() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoading: isAuthLoading, fetchProfile } = useAuth();
+  const shouldSyncStudioAccess = searchParams.get("studioAccess") === "pending";
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,40 +117,75 @@ export function CreateChannelFeature() {
       return;
     }
 
-    if (user.isCreator || user.role === "creator") {
+    if (!shouldSyncStudioAccess && (user.isCreator || user.role === "creator")) {
       router.replace("/studio");
     }
-  }, [isAuthLoading, router, user]);
+  }, [isAuthLoading, router, shouldSyncStudioAccess, user]);
 
-  const syncCreatorAccess = async () => {
-    await fetchProfile();
+  const syncCreatorAccess = useCallback(async () => {
+    for (let attempt = 1; attempt <= CREATOR_SYNC_MAX_ATTEMPTS; attempt += 1) {
+      await fetchProfile();
 
-    try {
-      const sessionProfile = await authService.getSessionProfile();
-      if (canAccessStudio(sessionProfile.data ?? null)) {
-        await fetchProfile();
-        return true;
+      try {
+        const sessionProfile = await authService.getSessionProfile();
+        if (canAccessStudio(sessionProfile.data ?? null)) {
+          await fetchProfile();
+          return true;
+        }
+      } catch (err) {
+        console.error("Failed to resolve session profile while syncing creator access:", err);
       }
-    } catch {
-      return false;
-    }
 
-    try {
-      const channel = await mediaService.getMyChannel();
-      if (channel.success && channel.data?.channelId) {
-        await fetchProfile();
+      try {
+        const channel = await mediaService.getMyChannel();
+        if (channel.success && channel.data?.channelId) {
+          await fetchProfile();
+        }
+      } catch (err) {
+        console.error("Failed to verify channel while syncing creator access:", err);
       }
-    } catch {
-      return false;
+
+      if (attempt < CREATOR_SYNC_MAX_ATTEMPTS) {
+        await sleep(CREATOR_SYNC_RETRY_DELAY_MS);
+      }
     }
 
-    try {
-      const refreshedSessionProfile = await authService.getSessionProfile();
-      return canAccessStudio(refreshedSessionProfile.data ?? null);
-    } catch {
-      return false;
+    return false;
+  }, [fetchProfile]);
+
+  useEffect(() => {
+    if (isAuthLoading || !shouldSyncStudioAccess || !user) {
+      return;
     }
-  };
+
+    let isCancelled = false;
+
+    const recoverStudioAccess = async () => {
+      setIsLoading(true);
+      setError(null);
+      setLoadingMessage("Đang kiểm tra quyền Studio...");
+
+      const canEnterStudio = await syncCreatorAccess();
+      if (isCancelled) {
+        return;
+      }
+
+      if (canEnterStudio) {
+        router.refresh();
+        router.replace("/studio");
+        return;
+      }
+
+      setIsLoading(false);
+      setLoadingMessage("");
+    };
+
+    void recoverStudioAccess();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthLoading, router, shouldSyncStudioAccess, syncCreatorAccess, user]);
 
   const goToStudioWhenReady = async () => {
     const canEnterStudio = await syncCreatorAccess();
