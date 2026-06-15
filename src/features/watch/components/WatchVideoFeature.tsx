@@ -48,6 +48,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let channelName = "Velvet Gallery";
   let channelOwnerId: string | null = null;
   let avatarUrlChannel: string | null = null;
+  let isMembershipClosedByAdmin = false;
   let priceCoin = 0;
   let requiredTierLevel: number | null = null;
   let membershipTiers: PublicMembershipTier[] = [];
@@ -91,6 +92,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
       const channelRes = await getChannelDetailCached(channelId);
       if (channelRes.success && channelRes.data) {
         channelOwnerId = channelRes.data.userId;
+        isMembershipClosedByAdmin = channelRes.data.isMembershipClosedByAdmin;
         membershipTiers = channelRes.data.membershipTiers?.length
           ? channelRes.data.membershipTiers
           : membershipTiers;
@@ -117,6 +119,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
             channelName,
             channelOwnerId,
             membershipTiers,
+            isMembershipClosedByAdmin,
             priceCoin,
             requiredTierLevel,
           }}
@@ -133,6 +136,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
           channelName={channelName}
           avatarUrl={avatarUrlChannel}
           description={description}
+          isMembershipClosedByAdmin={isMembershipClosedByAdmin}
           membershipTiers={membershipTiers}
         />
       </div>

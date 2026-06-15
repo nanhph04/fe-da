@@ -14,14 +14,19 @@ import {
   setPersistedSession,
   clearPersistedSession,
 } from "@/shared/utils/idempotency";
-import type { PublicMembershipTier } from "../services/publicMedia.types";
 import { mediaService } from "../services/mediaService";
+import type { PublicMembershipTier } from "../services/publicMedia.types";
+import {
+  findRecommendedMembershipTier,
+  getMembershipJoinHref,
+} from "./watchMembershipAccess";
 
 export interface WatchAccessData {
   channelId: string;
   channelName: string;
   channelOwnerId: string | null;
   membershipTiers: PublicMembershipTier[];
+  isMembershipClosedByAdmin: boolean;
   priceCoin: number;
   requiredTierLevel: number | null;
 }
@@ -54,23 +59,8 @@ function formatCoins(value: number) {
   return `${value.toLocaleString("vi-VN")} AC`;
 }
 
-function findRecommendedMembershipTier(
-  tiers: PublicMembershipTier[],
-  requiredTierLevel: number | null,
-) {
-  const acceptingTiers = [...tiers]
-    .filter((tier) => tier.isAcceptingNew)
-    .sort((a, b) => a.level - b.level || a.priceCoin - b.priceCoin);
-
-  if (!requiredTierLevel) {
-    return null;
-  }
-
-  return acceptingTiers.find((tier) => tier.level >= requiredTierLevel) ?? null;
-}
-
 function getAccessDescription(access: WatchAccessData) {
-  if (access.priceCoin > 0 && access.requiredTierLevel) {
+  if (access.priceCoin > 0 && access.requiredTierLevel != null) {
     return `Video này cần mua lẻ hoặc membership từ Lv${access.requiredTierLevel} của kênh.`;
   }
 
@@ -78,7 +68,7 @@ function getAccessDescription(access: WatchAccessData) {
     return "Video này đang khóa theo lượt mua. Mở khóa một lần để xem lại trong thư viện đã mua.";
   }
 
-  if (access.requiredTierLevel) {
+  if (access.requiredTierLevel != null) {
     return `Video này dành cho thành viên từ Lv${access.requiredTierLevel} của kênh.`;
   }
 
@@ -101,15 +91,16 @@ export function WatchAccessGate({
   const [purchaseSession, setPurchaseSession] = useState<VideoPurchaseSession | null>(null);
 
   const recommendedTier = useMemo(
-    () => findRecommendedMembershipTier(access.membershipTiers, access.requiredTierLevel),
-    [access.membershipTiers, access.requiredTierLevel],
+    () =>
+      findRecommendedMembershipTier(
+        access.membershipTiers,
+        access.requiredTierLevel,
+        access.isMembershipClosedByAdmin,
+      ),
+    [access.isMembershipClosedByAdmin, access.membershipTiers, access.requiredTierLevel],
   );
 
-  const membershipHref = access.channelId
-    ? recommendedTier
-      ? `/creator/${access.channelId}/join?tier=${recommendedTier.id}`
-      : `/creator/${access.channelId}/join`
-    : null;
+  const membershipHref = getMembershipJoinHref(access.channelId, recommendedTier?.id);
 
   const loadWallet = useCallback(async () => {
     if (!isAuthenticated) {
@@ -224,14 +215,13 @@ export function WatchAccessGate({
     void loadWallet();
   }, [access.priceCoin, isAuthenticated, loadWallet, wallet, walletLoading]);
 
-  const canBuyVideo = access.priceCoin > 0 && Boolean(access.channelId);
   const hasPurchaseOption = access.priceCoin > 0;
   const hasMembershipOption = Boolean(membershipHref);
   const hasInsufficientBalance = Boolean(wallet && wallet.balance < access.priceCoin);
   const isPurchaseProcessing = purchaseStatus === "processing";
   const purchaseAlreadyCompleted = purchaseCompleted || purchaseStatus === "success";
   const isPurchaseDisabled =
-    purchaseAlreadyCompleted || isPurchaseProcessing || walletLoading || !canBuyVideo || hasInsufficientBalance;
+    purchaseAlreadyCompleted || isPurchaseProcessing || walletLoading || hasInsufficientBalance;
 
   return (
     <div className="relative min-h-[760px] overflow-hidden rounded-lg border border-border bg-card shadow-2xl sm:min-h-[680px] md:aspect-video md:min-h-0">
@@ -273,12 +263,6 @@ export function WatchAccessGate({
                   toll
                 </span>
               </div>
-
-              {!canBuyVideo ? (
-                <p className="mb-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                  Thiếu thông tin thanh toán video từ API.
-                </p>
-              ) : null}
 
               <div className="mt-5">
                 {purchaseAlreadyCompleted ? (

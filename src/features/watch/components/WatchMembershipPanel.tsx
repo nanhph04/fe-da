@@ -3,10 +3,12 @@
 import { Link } from "@/i18n/routing";
 import { useEffect, useId, useRef } from "react";
 import type { PublicMembershipTier } from "../services/publicMedia.types";
+import { isJoinableMembershipTier } from "./watchMembershipAccess";
 
 interface WatchMembershipPanelProps {
   channelId: string;
   tiers: PublicMembershipTier[];
+  isMembershipClosedByAdmin: boolean;
   onClose: () => void;
 }
 
@@ -17,7 +19,12 @@ function getTierLabel(level: number) {
   return `Level ${level}`;
 }
 
-export function WatchMembershipPanel({ channelId, tiers, onClose }: WatchMembershipPanelProps) {
+export function WatchMembershipPanel({
+  channelId,
+  tiers,
+  isMembershipClosedByAdmin,
+  onClose,
+}: WatchMembershipPanelProps) {
   const sortedTiers = [...tiers].sort((a, b) => a.level - b.level || a.priceCoin - b.priceCoin);
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -94,7 +101,9 @@ export function WatchMembershipPanel({ channelId, tiers, onClose }: WatchMembers
               Mở khóa nội dung của kênh
             </h3>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Giá hiển thị bằng Aura Coins. Chọn gói còn nhận thành viên mới để tiếp tục thanh toán.
+              {isMembershipClosedByAdmin
+                ? "Kênh đang tạm đóng đăng ký membership mới. Bạn vẫn có thể xem các gói hiện có."
+                : "Giá hiển thị bằng Aura Coins. Chọn gói còn nhận thành viên mới để tiếp tục thanh toán."}
             </p>
           </div>
 
@@ -175,7 +184,7 @@ export function WatchMembershipPanel({ channelId, tiers, onClose }: WatchMembers
                       </div>
                     </div>
 
-                    {tier.isAcceptingNew && channelId ? (
+                    {isJoinableMembershipTier(tier, isMembershipClosedByAdmin) && channelId ? (
                       <Link
                         href={`/creator/${channelId}/join?tier=${tier.id}`}
                         className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-4 py-3 text-xs font-black uppercase tracking-widest text-primary-foreground transition-all duration-300 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/60 active:scale-95"

@@ -6,12 +6,14 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { mediaService, type UserMembershipResponse } from "../services/mediaService";
 import type { PublicMembershipTier } from "../services/publicMedia.types";
 import { WatchMembershipPanel } from "./WatchMembershipPanel";
+import { hasJoinableMembershipTier } from "./watchMembershipAccess";
 
 interface WatchChannelCardProps {
   channelId: string;
   channelName: string;
   avatarUrl: string | null;
   description: string;
+  isMembershipClosedByAdmin: boolean;
   membershipTiers: PublicMembershipTier[];
 }
 
@@ -54,6 +56,7 @@ export function WatchChannelCard({
   channelName,
   avatarUrl,
   description,
+  isMembershipClosedByAdmin,
   membershipTiers,
 }: WatchChannelCardProps) {
   const { isAuthenticated } = useAuth();
@@ -67,7 +70,7 @@ export function WatchChannelCard({
     () => getViewerVisibleTiers(membershipTiers, activeMembershipTiers),
     [activeMembershipTiers, membershipTiers]
   );
-  const hasJoinableTier = visibleTiers.some((tier) => tier.isAcceptingNew);
+  const hasJoinableTier = hasJoinableMembershipTier(visibleTiers, isMembershipClosedByAdmin);
   const canShowAvatar = Boolean(avatarUrl && !avatarFailed);
   const openMembershipPanel = useCallback(() => setIsMembershipOpen(true), []);
   const closeMembershipPanel = useCallback(() => setIsMembershipOpen(false), []);
@@ -174,7 +177,12 @@ export function WatchChannelCard({
       </div>
 
       {isMembershipOpen ? (
-        <WatchMembershipPanel channelId={channelId} tiers={visibleTiers} onClose={closeMembershipPanel} />
+        <WatchMembershipPanel
+          channelId={channelId}
+          tiers={visibleTiers}
+          isMembershipClosedByAdmin={isMembershipClosedByAdmin}
+          onClose={closeMembershipPanel}
+        />
       ) : null}
 
       <div className="rounded-lg border border-border/20 bg-background/30 p-6 md:p-8">
