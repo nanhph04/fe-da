@@ -80,6 +80,14 @@ export interface MembershipStatusResponse {
   isMembershipClosedByAdmin: boolean;
 }
 
+export interface ViewerVideoMetadataAccessResponse {
+  isOwner: boolean;
+  hasPurchased: boolean;
+  activeMembershipTierLevel: number | null;
+  canWatch: boolean;
+  needsMembershipUpgrade: boolean;
+}
+
 export interface MembershipTierResponse {
   id: string;
   channelId: string;
@@ -255,11 +263,13 @@ export interface VideoMetadataResponse {
   thumbnailUrl: string | null;
   thumbnailSource: ThumbnailSource;
   thumbnailStatus: ThumbnailStatus;
+  resolutions?: string[];
   thumbnailObjectKey?: string | null;
   thumbnailBucket?: string | null;
   viewCount: number;
   status: string;
   visibility: string;
+  viewerAccess?: ViewerVideoMetadataAccessResponse;
   price: number;
   priceCoin?: number | null;
   coinAmount?: number | null;

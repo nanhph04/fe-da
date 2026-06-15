@@ -75,6 +75,13 @@ export interface PublicVideoMetadata {
   viewCount: number;
   status: string;
   visibility: string;
+  viewerAccess?: {
+    isOwner: boolean;
+    hasPurchased: boolean;
+    activeMembershipTierLevel: number | null;
+    canWatch: boolean;
+    needsMembershipUpgrade: boolean;
+  };
   price: number;
   priceCoin?: number | null;
   coinAmount?: number | null;

@@ -307,6 +307,12 @@ export const mediaService = {
   getVideoMetadata: async (id: string) => {
     return api.get<VideoMetadataResponse>(`/api/media/videos/${encodeURIComponent(id)}/metadata`);
   },
+  getViewerVideoMetadata: async (id: string) => {
+    return api.get<VideoMetadataResponse>(
+      `/api/media/videos/${encodeURIComponent(id)}/metadata`,
+      { requireAuth: true }
+    );
+  },
   updateVideoMetadata: async (id: string, data: UpdateVideoMetadataBody) => {
     return api.patch<VideoMetadataResponse>(
       `/api/media/studio/videos/${encodeURIComponent(id)}/metadata`,

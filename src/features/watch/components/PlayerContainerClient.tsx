@@ -8,6 +8,7 @@ import { mediaService } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
 import type { ApiError } from "@/shared/api/types";
 import { WatchAccessGate, type WatchAccessData } from "./WatchAccessGate";
+import { getReadyPublicThumbnailUrl } from "../services/publicMedia.types";
 
 const DEFAULT_METADATA_RESOLUTIONS: string[] = [];
 
@@ -131,6 +132,9 @@ export function PlayerContainerClient({
 }: PlayerContainerClientProps) {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [resolvedPoster, setResolvedPoster] = useState<string | undefined>(poster);
+  const [resolvedTitle, setResolvedTitle] = useState<string | undefined>(title);
+  const [resolvedAccess, setResolvedAccess] = useState<WatchAccessData | undefined>(access);
   const [initialPositionSeconds, setInitialPositionSeconds] = useState(0);
   const [availableResolutions, setAvailableResolutions] = useState<string[]>(metadataResolutions);
   const [error, setError] = useState<string | null>(null);
@@ -180,6 +184,12 @@ export function PlayerContainerClient({
   }, [videoId]);
 
   useEffect(() => {
+    setResolvedPoster(poster);
+    setResolvedTitle(title);
+    setResolvedAccess(access);
+  }, [access, poster, title, videoId]);
+
+  useEffect(() => {
     let isActive = true;
 
     if (isAuthLoading) {
@@ -206,6 +216,48 @@ export function PlayerContainerClient({
         setIsLoading(true);
         setError(null);
         setAccessDeniedMessage(null);
+
+        let nextAccess = access;
+        try {
+          const metadataRes = await mediaService.getViewerVideoMetadata(videoId);
+          if (metadataRes.success && metadataRes.data) {
+            const metadata = metadataRes.data;
+            const channelRes = await mediaService.getChannel(metadata.channelId).catch(() => null);
+            const channel = channelRes?.success ? channelRes.data : null;
+            nextAccess = {
+              channelId: metadata.channelId,
+              channelName: metadata.channelName,
+              channelOwnerId: channel?.userId ?? null,
+              membershipTiers: channel?.membershipTiers?.length
+                ? channel.membershipTiers
+                : metadata.membershipTiers ?? [],
+              isMembershipClosedByAdmin:
+                channel?.isMembershipClosedByAdmin ?? false,
+              priceCoin: metadata.priceCoin ?? metadata.coinAmount ?? metadata.price ?? 0,
+              requiredTierLevel:
+                metadata.requiredTierLevel ??
+                metadata.requiredTier ??
+                metadata.minTierLevel ??
+                metadata.requiredMembershipLevel ??
+                null,
+              activeMembershipTierLevel:
+                metadata.viewerAccess?.activeMembershipTierLevel ?? null,
+              hasPurchased: metadata.viewerAccess?.hasPurchased ?? false,
+            };
+            setResolvedAccess(nextAccess);
+            setResolvedTitle(metadata.title);
+            setResolvedPoster(
+              getReadyPublicThumbnailUrl(
+                metadata.thumbnailUrl,
+                metadata.thumbnailStatus,
+                metadata.id,
+              ) || poster,
+            );
+            setAvailableResolutions(metadata.resolutions?.length ? metadata.resolutions : metadataResolutions);
+          }
+        } catch {
+          // Playback request below is the source of truth for access errors.
+        }
 
         const tokenRes = await mediaService.getPlaybackInfo(videoId);
 
@@ -276,7 +328,7 @@ export function PlayerContainerClient({
     return () => {
       isActive = false;
     };
-  }, [videoId, isAuthenticated, isAuthLoading, metadataResolutions, playbackReloadKey]);
+  }, [videoId, isAuthenticated, isAuthLoading, metadataResolutions, playbackReloadKey, poster, access]);
 
   if (isLoading) {
     return (
@@ -297,10 +349,10 @@ export function PlayerContainerClient({
 
     return (
       <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
-        {poster ? (
+        {resolvedPoster ? (
           <div
             className="absolute inset-0 scale-105 bg-cover bg-center opacity-45 blur-sm"
-            style={{ backgroundImage: `url(${poster})` }}
+            style={{ backgroundImage: `url(${resolvedPoster})` }}
             aria-hidden="true"
           />
         ) : null}
@@ -328,12 +380,12 @@ export function PlayerContainerClient({
     );
   }
 
-  if (accessDeniedMessage && access) {
+  if (accessDeniedMessage && resolvedAccess) {
     return (
       <WatchAccessGate
         videoId={videoId}
-        poster={poster}
-        access={access}
+        poster={resolvedPoster}
+        access={resolvedAccess}
         purchaseCompleted={hasCompletedPurchase}
         onUnlocked={handleUnlocked}
       />
@@ -384,8 +436,8 @@ export function PlayerContainerClient({
     <CinematicPlayer
       videoId={videoId}
       src={videoUrl}
-      poster={poster}
-      title={title}
+      poster={resolvedPoster}
+      title={resolvedTitle}
       initialPositionSeconds={initialPositionSeconds}
       availableResolutions={availableResolutions}
       onRefreshPlaybackSource={refreshPlaybackSource}

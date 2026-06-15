@@ -12,6 +12,7 @@ import {
   type PublicMembershipTier,
   type PublicVideoMetadata,
 } from "../services/publicMediaService";
+import { getServerUserProfile } from "@/shared/auth/server";
 
 interface WatchVideoFeatureProps {
   videoId: string;
@@ -35,6 +36,15 @@ async function getVideoMetadataForWatch(videoId: string) {
   return getVideoMetadataFresh(videoId);
 }
 
+async function hasServerSession() {
+  try {
+    await getServerUserProfile();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let title = "Unknown Video";
   let poster: string | undefined;
@@ -56,28 +66,32 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   try {
     const infoRes = await getVideoMetadataForWatch(videoId);
     if (!infoRes.success || !infoRes.data) {
-      notFound();
+      if (!(await hasServerSession())) {
+        notFound();
+      }
+    } else {
+      title = infoRes.data.title;
+      poster = getReadyPublicThumbnailUrl(infoRes.data.thumbnailUrl, infoRes.data.thumbnailStatus, infoRes.data.id) || undefined;
+      viewCount = infoRes.data.viewCount;
+      publishedAt = infoRes.data.publishedAt;
+      description = infoRes.data.description;
+      category = infoRes.data.category;
+      tags = infoRes.data.tags;
+      videoResolutions = infoRes.data.resolutions ?? [];
+      channelId = infoRes.data.channelId;
+      channelName = infoRes.data.channelName;
+      avatarUrlChannel = infoRes.data.avatarUrlChannel;
+      priceCoin = resolveVideoPriceCoin(infoRes.data);
+      requiredTierLevel = resolveRequiredTierLevel(infoRes.data);
+      membershipTiers = infoRes.data.membershipTiers ?? [];
     }
-
-    title = infoRes.data.title;
-    poster = getReadyPublicThumbnailUrl(infoRes.data.thumbnailUrl, infoRes.data.thumbnailStatus, infoRes.data.id) || undefined;
-    viewCount = infoRes.data.viewCount;
-    publishedAt = infoRes.data.publishedAt;
-    description = infoRes.data.description;
-    category = infoRes.data.category;
-    tags = infoRes.data.tags;
-    videoResolutions = infoRes.data.resolutions ?? [];
-    channelId = infoRes.data.channelId;
-    channelName = infoRes.data.channelName;
-    avatarUrlChannel = infoRes.data.avatarUrlChannel;
-    priceCoin = resolveVideoPriceCoin(infoRes.data);
-    requiredTierLevel = resolveRequiredTierLevel(infoRes.data);
-    membershipTiers = infoRes.data.membershipTiers ?? [];
   } catch (err: unknown) {
     const apiError = err as PublicApiError;
     const statusCode = apiError.statusCode ?? apiError.status ?? apiError.code;
     if (statusCode === 403 || statusCode === 404) {
-      notFound();
+      if (!(await hasServerSession())) {
+        notFound();
+      }
     }
 
     console.warn("Failed to load video metadata SSR:", {

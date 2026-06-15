@@ -29,6 +29,8 @@ export interface WatchAccessData {
   isMembershipClosedByAdmin: boolean;
   priceCoin: number;
   requiredTierLevel: number | null;
+  activeMembershipTierLevel?: number | null;
+  hasPurchased?: boolean;
 }
 
 interface WatchAccessGateProps {
@@ -60,6 +62,14 @@ function formatCoins(value: number) {
 }
 
 function getAccessDescription(access: WatchAccessData) {
+  if (
+    access.activeMembershipTierLevel != null &&
+    access.requiredTierLevel != null &&
+    access.activeMembershipTierLevel < access.requiredTierLevel
+  ) {
+    return `Bạn đang có membership Lv${access.activeMembershipTierLevel}. Video này cần membership từ Lv${access.requiredTierLevel}, hãy nâng cấp để xem.`;
+  }
+
   if (access.priceCoin > 0 && access.requiredTierLevel != null) {
     return `Video này cần mua lẻ hoặc membership từ Lv${access.requiredTierLevel} của kênh.`;
   }
@@ -217,6 +227,10 @@ export function WatchAccessGate({
 
   const hasPurchaseOption = access.priceCoin > 0;
   const hasMembershipOption = Boolean(membershipHref);
+  const shouldShowUpgradeCopy =
+    access.activeMembershipTierLevel != null &&
+    access.requiredTierLevel != null &&
+    access.activeMembershipTierLevel < access.requiredTierLevel;
   const hasInsufficientBalance = Boolean(wallet && wallet.balance < access.priceCoin);
   const isPurchaseProcessing = purchaseStatus === "processing";
   const purchaseAlreadyCompleted = purchaseCompleted || purchaseStatus === "success";
@@ -315,7 +329,7 @@ export function WatchAccessGate({
                 href={membershipHref}
                 className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-sm border border-primary/50 bg-background px-4 py-3 text-xs font-black uppercase tracking-widest text-foreground transition-all duration-300 hover:border-primary hover:text-primary active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                Đăng ký membership
+                {shouldShowUpgradeCopy ? "Nâng cấp membership" : "Đăng ký membership"}
               </Link>
             </article>
           ) : null}

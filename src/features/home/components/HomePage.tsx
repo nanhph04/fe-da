@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { PublicHeader } from "@/components/layout/public/PublicHeader";
+import { publicMarketingLinks } from "@/shared/navigation/branding";
 import { useTranslations } from "next-intl";
-import { HomeDiscoverySection, type HomeCategorySection } from "./HomeDiscoverySection";
+import { HomeDiscoverySection } from "./HomeDiscoverySection";
 import { HomeHeroSlider, type HomeHeroSlide } from "./HomeHeroSlider";
 import { HomePageAccountCta } from "./HomePageAccountCta";
 import { formatDuration, formatViewCount } from "../utils/format";
@@ -36,30 +37,32 @@ function toHomeHeroSlide(video: PublicDiscoveryVideo): HomeHeroSlide {
 interface HomePageProps {
   latestVideos: PublicDiscoveryVideo[];
   categories: CategoryPublic[];
-  categorySections: HomeCategorySection[];
   topViewsVideos?: PublicDiscoveryVideo[];
   topPurchasesVideos?: PublicDiscoveryVideo[];
+  isAuthenticated?: boolean;
 }
 
 export function HomePage({
   latestVideos,
   categories,
-  categorySections,
   topViewsVideos = [],
   topPurchasesVideos = [],
+  isAuthenticated = false,
 }: HomePageProps) {
   const t = useTranslations("Home");
+  const headerLinks = isAuthenticated
+    ? publicMarketingLinks
+    : publicMarketingLinks.filter((link) => link.path !== "/library");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PublicHeader currentPath="/" />
+      <PublicHeader currentPath="/" links={headerLinks} />
 
       <HomeHeroSlider slides={latestVideos.map(toHomeHeroSlide)} />
 
       <HomeDiscoverySection
         latestVideos={latestVideos}
         categories={categories}
-        categorySections={categorySections}
         topViewsVideos={topViewsVideos}
         topPurchasesVideos={topPurchasesVideos}
       />
