@@ -300,7 +300,7 @@ const VIETNAMESE_BACKEND_ERROR_MESSAGE_ENTRIES = [
   ["Uploaded avatar has an invalid file size", "Ảnh đại diện đã tải lên có dung lượng không hợp lệ."],
   ["Avatar object key does not belong to the current user", "Khóa đối tượng ảnh đại diện không thuộc về người dùng hiện tại."],
   ["Unknown avatar cleanup error", "Lỗi dọn dẹp ảnh đại diện không xác định."],
-  ["Unable to connect to the API server. Check that the backend is running and reachable.", "Không thể kết nối đến máy chủ API. Vui lòng kiểm tra backend đang chạy và có thể truy cập."],
+  ["Unable to connect to the API server. Check that the backend is running and reachable.", "Không thể kết nối đến hệ thống. Vui lòng thử lại sau."],
   ["Refresh failed", "Làm mới phiên đăng nhập thất bại."],
 ] as const satisfies ReadonlyArray<readonly [string, string]>;
 

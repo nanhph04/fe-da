@@ -61,6 +61,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
   let isMembershipClosedByAdmin = false;
   let priceCoin = 0;
   let requiredTierLevel: number | null = null;
+  let visibility: string | null = null;
   let membershipTiers: PublicMembershipTier[] = [];
 
   try {
@@ -83,6 +84,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
       avatarUrlChannel = infoRes.data.avatarUrlChannel;
       priceCoin = resolveVideoPriceCoin(infoRes.data);
       requiredTierLevel = resolveRequiredTierLevel(infoRes.data);
+      visibility = infoRes.data.visibility;
       membershipTiers = infoRes.data.membershipTiers ?? [];
     }
   } catch (err: unknown) {
@@ -136,6 +138,7 @@ export async function WatchVideoFeature({ videoId }: WatchVideoFeatureProps) {
             isMembershipClosedByAdmin,
             priceCoin,
             requiredTierLevel,
+            visibility,
           }}
         />
         <VideoInfo

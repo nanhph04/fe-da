@@ -240,6 +240,7 @@ export function PlayerContainerClient({
                 metadata.minTierLevel ??
                 metadata.requiredMembershipLevel ??
                 null,
+              visibility: metadata.visibility,
               activeMembershipTierLevel:
                 metadata.viewerAccess?.activeMembershipTierLevel ?? null,
               hasPurchased: metadata.viewerAccess?.hasPurchased ?? false,

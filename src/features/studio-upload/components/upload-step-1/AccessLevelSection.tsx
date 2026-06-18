@@ -15,10 +15,12 @@ export function AccessLevelSection({
   return (
     <section className="space-y-6">
       <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-        <span className="material-symbols-outlined text-[#fdc003]">lock_open</span>
+        <span className="material-symbols-outlined text-[#fdc003]">
+          lock_open
+        </span>
         {t("step3.visibility.titleAccess")}
       </h3>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <label className="group relative cursor-pointer">
           <input
             type="radio"
@@ -36,7 +38,9 @@ export function AccessLevelSection({
                 <div className="h-1.5 w-1.5 rounded-full bg-input" />
               </div>
             </div>
-            <h4 className="mb-1 font-headline font-bold text-foreground">{t("step3.visibility.public.title")}</h4>
+            <h4 className="mb-1 font-headline font-bold text-foreground">
+              {t("step3.visibility.public.title")}
+            </h4>
             <p className="text-xs text-muted-foreground">
               {t("step3.visibility.public.descriptionShort")}
             </p>
@@ -63,7 +67,9 @@ export function AccessLevelSection({
                 <div className="hidden h-1.5 w-1.5 rounded-full bg-input peer-checked:block" />
               </div>
             </div>
-            <h4 className="mb-1 font-headline font-bold text-foreground">{t("step3.visibility.private.title")}</h4>
+            <h4 className="mb-1 font-headline font-bold text-foreground">
+              {t("step3.visibility.private.title")}
+            </h4>
             <p className="text-xs text-muted-foreground">
               {t("step3.visibility.private.descriptionShort")}
             </p>

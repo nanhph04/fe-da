@@ -29,6 +29,7 @@ export interface WatchAccessData {
   isMembershipClosedByAdmin: boolean;
   priceCoin: number;
   requiredTierLevel: number | null;
+  visibility?: string | null;
   activeMembershipTierLevel?: number | null;
   hasPurchased?: boolean;
 }
@@ -62,12 +63,26 @@ function formatCoins(value: number) {
 }
 
 function getAccessDescription(access: WatchAccessData) {
+  const isPrivateVideo = access.visibility === "private";
+
   if (
     access.activeMembershipTierLevel != null &&
     access.requiredTierLevel != null &&
     access.activeMembershipTierLevel < access.requiredTierLevel
   ) {
+    if (isPrivateVideo) {
+      return `Video này đang ở chế độ riêng tư. Bạn đang có membership Lv${access.activeMembershipTierLevel}, cần nâng lên Lv${access.requiredTierLevel} để xem.`;
+    }
+
     return `Bạn đang có membership Lv${access.activeMembershipTierLevel}. Video này cần membership từ Lv${access.requiredTierLevel}, hãy nâng cấp để xem.`;
+  }
+
+  if (isPrivateVideo && access.requiredTierLevel != null) {
+    return `Video này đang ở chế độ riêng tư. Bạn không thể mua lẻ bằng Aura Coins; hãy dùng video đã mua trước đó hoặc đăng ký/nâng cấp membership từ Lv${access.requiredTierLevel} để xem.`;
+  }
+
+  if (isPrivateVideo) {
+    return "Video này đang ở chế độ riêng tư. Bạn không thể mua lẻ bằng Aura Coins; hãy dùng video đã mua trước đó hoặc đăng ký membership của kênh để xem.";
   }
 
   if (access.priceCoin > 0 && access.requiredTierLevel != null) {
@@ -111,6 +126,7 @@ export function WatchAccessGate({
   );
 
   const membershipHref = getMembershipJoinHref(access.channelId, recommendedTier?.id);
+  const isPrivateVideo = access.visibility === "private";
 
   const loadWallet = useCallback(async () => {
     if (!isAuthenticated) {
@@ -138,9 +154,13 @@ export function WatchAccessGate({
       return;
     }
 
-    if (access.priceCoin <= 0) {
+    if (access.priceCoin <= 0 || isPrivateVideo) {
       setPurchaseStatus("error");
-      setPurchaseError("Video này chưa có giá mua lẻ từ API.");
+      setPurchaseError(
+        isPrivateVideo
+          ? "Video riêng tư không mở mua lẻ mới. Hãy dùng video đã mua trước đó hoặc membership đủ cấp để xem."
+          : "Video này hiện chưa mở mua lẻ.",
+      );
       return;
     }
 
@@ -207,7 +227,7 @@ export function WatchAccessGate({
       setPurchaseStatus("error");
       setPurchaseError(getErrorMessage(err, "Thanh toán video thất bại. Vui lòng thử lại."));
     }
-  }, [access, isAuthenticated, loadWallet, onUnlocked, purchaseSession, user, videoId, wallet]);
+  }, [access, isAuthenticated, isPrivateVideo, loadWallet, onUnlocked, purchaseSession, user, videoId, wallet]);
 
   useEffect(() => {
     setPurchaseSession(null);
@@ -218,14 +238,14 @@ export function WatchAccessGate({
   }, [videoId]);
 
   useEffect(() => {
-    if (!isAuthenticated || access.priceCoin <= 0 || wallet || walletLoading) {
+    if (!isAuthenticated || access.priceCoin <= 0 || isPrivateVideo || wallet || walletLoading) {
       return;
     }
 
     void loadWallet();
-  }, [access.priceCoin, isAuthenticated, loadWallet, wallet, walletLoading]);
+  }, [access.priceCoin, isAuthenticated, isPrivateVideo, loadWallet, wallet, walletLoading]);
 
-  const hasPurchaseOption = access.priceCoin > 0;
+  const hasPurchaseOption = access.priceCoin > 0 && !isPrivateVideo;
   const hasMembershipOption = Boolean(membershipHref);
   const shouldShowUpgradeCopy =
     access.activeMembershipTierLevel != null &&
@@ -337,7 +357,9 @@ export function WatchAccessGate({
 
         {!hasPurchaseOption && !hasMembershipOption ? (
           <div className="mx-auto mt-5 max-w-xl rounded-lg border border-border/30 bg-card p-5 text-sm leading-6 text-muted-foreground">
-            Chưa có lựa chọn mua lẻ hoặc gói membership phù hợp được trả về từ API. Bạn có thể thử lại sau hoặc quay về thư viện.
+            {isPrivateVideo
+              ? "Video riêng tư không mở mua lẻ bằng Aura Coins. Nếu bạn đã mua video trước đó, hãy mở lại từ thư viện video đã mua; nếu muốn xem bằng membership, hãy kiểm tra trạng thái membership của kênh."
+              : "Hiện chưa có lựa chọn mua lẻ hoặc gói membership phù hợp cho video này. Bạn có thể thử lại sau hoặc quay về thư viện."}
           </div>
         ) : null}
 
