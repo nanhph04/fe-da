@@ -522,18 +522,18 @@ export function CategoryFeature({
               </p>
             </div>
 
-            <dl className="grid w-full max-w-sm grid-cols-3 overflow-hidden rounded-lg border border-border bg-background/80 text-center text-sm sm:flex-shrink-0">
-              <div className="p-3">
-                <dt className="text-xs font-bold text-muted-foreground">Tổng</dt>
-                <dd className="mt-1 font-headline text-xl font-black text-foreground">{totalVideos}</dd>
+            <dl className="grid w-full max-w-[280px] grid-cols-3 overflow-hidden rounded-lg border border-border bg-background/80 text-center sm:flex-shrink-0">
+              <div className="p-2">
+                <dt className="text-[11px] font-bold text-muted-foreground">Tổng</dt>
+                <dd className="mt-0.5 font-headline text-base font-black text-foreground">{totalVideos}</dd>
               </div>
-              <div className="border-x border-border p-3">
-                <dt className="text-xs font-bold text-muted-foreground">Hiển thị</dt>
-                <dd className="mt-1 font-headline text-xl font-black text-foreground">{videos.length}</dd>
+              <div className="border-x border-border p-2">
+                <dt className="text-[11px] font-bold text-muted-foreground">Hiển thị</dt>
+                <dd className="mt-0.5 font-headline text-base font-black text-foreground">{videos.length}</dd>
               </div>
-              <div className="p-3">
-                <dt className="text-xs font-bold text-muted-foreground">Public</dt>
-                <dd className="mt-1 font-headline text-xl font-black text-secondary">Ready</dd>
+              <div className="p-2">
+                <dt className="text-[11px] font-bold text-muted-foreground">Public</dt>
+                <dd className="mt-0.5 font-headline text-base font-black text-secondary">Ready</dd>
               </div>
             </dl>
           </div>
