@@ -63,6 +63,11 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
       }
 
       setMessage(t("content.draftActions.messages.confirmSuccess"));
+      try {
+        localStorage.removeItem("studio-upload-draft-form");
+      } catch (e) {
+        // Ignore
+      }
       onChanged();
     } catch (err) {
       setError(getErrorMessage(err, t("content.draftActions.errors.confirmFailed")));
@@ -118,6 +123,11 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
       }
 
       setMessage(t("content.draftActions.messages.cancelSuccess"));
+      try {
+        localStorage.removeItem("studio-upload-draft-form");
+      } catch (e) {
+        // Ignore
+      }
       router.push("/studio/content");
     } catch (err) {
       setError(getErrorMessage(err, t("content.draftActions.errors.cancelFailed")));

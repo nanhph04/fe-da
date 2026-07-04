@@ -97,6 +97,11 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       }
 
       setIsSuccess(true);
+      try {
+        localStorage.removeItem("studio-upload-draft-form");
+      } catch (e) {
+        // Ignore errors if localStorage is disabled
+      }
       setTimeout(() => {
         router.push("/studio/content");
       }, 2000);

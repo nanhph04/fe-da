@@ -64,6 +64,66 @@ export function StudioUploadFeature() {
     };
   }, [formData.thumbnailPreviewUrl]);
 
+  // Khôi phục dữ liệu từ localStorage khi mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("studio-upload-draft-form");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData(prev => ({
+          ...prev,
+          title: parsed.title ?? prev.title,
+          description: parsed.description ?? prev.description,
+          categoryId: parsed.categoryId ?? prev.categoryId,
+          tagIds: parsed.tagIds ?? prev.tagIds,
+          resolutions: parsed.resolutions ?? prev.resolutions,
+          visibility: parsed.visibility ?? prev.visibility,
+          price: parsed.price ?? prev.price,
+          requiredTierLevel: parsed.requiredTierLevel ?? prev.requiredTierLevel,
+        }));
+      }
+    } catch (e) {
+      console.warn("Failed to restore upload draft form from localStorage", e);
+    }
+  }, []);
+
+  // Tự động lưu dữ liệu form vào localStorage khi có thay đổi
+  useEffect(() => {
+    const dataToSave = {
+      title: formData.title,
+      description: formData.description,
+      categoryId: formData.categoryId,
+      tagIds: formData.tagIds,
+      resolutions: formData.resolutions,
+      visibility: formData.visibility,
+      price: formData.price,
+      requiredTierLevel: formData.requiredTierLevel,
+    };
+    localStorage.setItem("studio-upload-draft-form", JSON.stringify(dataToSave));
+  }, [
+    formData.title,
+    formData.description,
+    formData.categoryId,
+    formData.tagIds,
+    formData.resolutions,
+    formData.visibility,
+    formData.price,
+    formData.requiredTierLevel,
+  ]);
+
+  // Cảnh báo khi người dùng f5 hoặc đóng tab nếu đang có file hoặc đang tải lên
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (formData.file || formData.draftUpload) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [formData.file, formData.draftUpload]);
+
   const updateFormData = useCallback((data: Partial<UploadFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
   }, []);
