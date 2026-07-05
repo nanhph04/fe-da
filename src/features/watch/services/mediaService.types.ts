@@ -173,6 +173,12 @@ export interface CompleteUploadResponse {
   completed: boolean;
 }
 
+export interface RenewUploadSessionResponse {
+  videoId: string;
+  uploadId: string;
+  expiresAt: string;
+}
+
 export interface SubmitUploadBody {
   resolutions: Array<"480p" | "720p" | "1080p">;
   thumbnailObjectKey?: string;
@@ -196,6 +202,7 @@ export interface UploadResumableParams {
   partSizeBytes: number;
   onProgress?: (progress: number) => void;
   signal?: AbortSignal;
+  renewBeforeExpiryMs?: number;
 }
 
 export interface PlaybackInfoResponse {

@@ -4,6 +4,7 @@ import type {
   CompletePartResponse,
   CompleteUploadResponse,
   GetPartUrlsResponse,
+  RenewUploadSessionResponse,
   UploadRawVideoFileRequest,
   UploadResumableParams,
   UploadStatusResponse,
@@ -23,7 +24,10 @@ interface ResumableUploadApi {
     data: CompletePartBody
   ) => Promise<ApiResponse<CompletePartResponse>>;
   completeUpload: (videoId: string, uploadId: string) => Promise<ApiResponse<CompleteUploadResponse>>;
+  renewUploadSession: (videoId: string, uploadId: string) => Promise<ApiResponse<RenewUploadSessionResponse>>;
 }
+
+const DEFAULT_RENEW_BEFORE_EXPIRY_MS = 10 * 60 * 1000;
 
 const createAbortError = () => new DOMException("Upload aborted", "AbortError");
 
@@ -179,16 +183,37 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
     partSizeBytes,
     onProgress,
     signal,
+    renewBeforeExpiryMs,
   }: UploadResumableParams): Promise<void> => {
     const fileSize = file.size;
     const totalParts = Math.ceil(fileSize / partSizeBytes);
     let completedParts: number[] = [];
+    let sessionExpiresAtMs: number | null = null;
+
+    const renewIfNeeded = async () => {
+      if (sessionExpiresAtMs === null) {
+        return;
+      }
+
+      const thresholdMs = renewBeforeExpiryMs ?? DEFAULT_RENEW_BEFORE_EXPIRY_MS;
+      if (sessionExpiresAtMs - Date.now() > thresholdMs) {
+        return;
+      }
+
+      const renewRes = await uploadApi.renewUploadSession(videoId, uploadId);
+      if (!renewRes.success || !renewRes.data) {
+        throw new Error(renewRes.message || "Failed to renew upload session");
+      }
+
+      sessionExpiresAtMs = new Date(renewRes.data.expiresAt).getTime();
+    };
 
     try {
       const statusRes = await uploadApi.getUploadStatus(videoId, uploadId);
       if (statusRes.success && statusRes.data) {
         assertFileMatchesUploadSession(file, statusRes.data.fileName, statusRes.data.fileSize);
         completedParts = statusRes.data.parts?.map(part => part.partNumber) ?? [];
+        sessionExpiresAtMs = new Date(statusRes.data.expiresAt).getTime();
       }
     } catch (err) {
       if (err instanceof Error && err.message.includes("không khớp với video ban đầu")) {
@@ -211,6 +236,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
     updateProgress();
 
     if (partsToUpload.length === 0) {
+      await renewIfNeeded();
       const completeRes = await uploadApi.completeUpload(videoId, uploadId);
       if (!completeRes.success) {
         throw new Error(completeRes.message || "Failed to complete upload session");
@@ -228,6 +254,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
       const chunk = file.slice(startByte, endByte);
       const chunkSize = chunk.size;
 
+      await renewIfNeeded();
       const urlRes = await uploadApi.getPartUrls(videoId, uploadId, [partNumber]);
       if (!urlRes.success || !urlRes.data?.parts?.length) {
         throw new Error(urlRes.message || `Failed to get upload URL for part ${partNumber}`);
@@ -249,6 +276,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
         },
       });
 
+      await renewIfNeeded();
       const completedRes = await uploadApi.completePart(videoId, uploadId, partNumber, {
         etag,
         sizeBytes: chunkSize,
@@ -263,6 +291,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
       throw createAbortError();
     }
 
+    await renewIfNeeded();
     const completeRes = await uploadApi.completeUpload(videoId, uploadId);
     if (!completeRes.success) {
       throw new Error(completeRes.message || "Failed to complete upload session");

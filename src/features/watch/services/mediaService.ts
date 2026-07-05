@@ -28,6 +28,7 @@ import type {
   PurchaseRequestOptions,
   PurchasedVideoResponse,
   RefreshPlaybackTokenResponse,
+  RenewUploadSessionResponse,
   SaveVideoProgressBody,
   SaveVideoProgressResponse,
   SearchMediaParams,
@@ -84,11 +85,20 @@ const completeUpload = async (videoId: string, uploadId: string) => {
   );
 };
 
+const renewUploadSession = async (videoId: string, uploadId: string) => {
+  return api.post<RenewUploadSessionResponse>(
+    `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/renew`,
+    undefined,
+    { requireAuth: true }
+  );
+};
+
 const uploadResumableVideoFile = createUploadResumableVideoFile({
   getUploadStatus,
   getPartUrls,
   completePart,
   completeUpload,
+  renewUploadSession,
 });
 
 function buildPurchaseHeaders(options: PurchaseRequestOptions) {
@@ -239,6 +249,7 @@ export const mediaService = {
   completePart,
   getUploadStatus,
   completeUpload,
+  renewUploadSession,
   submitUpload: async (videoId: string, uploadId: string, data: SubmitUploadBody) => {
     return api.post<SubmitUploadResponse>(
       `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/submit`,
