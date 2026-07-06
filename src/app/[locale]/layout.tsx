@@ -25,9 +25,14 @@ function isSupportedLocale(locale: string): locale is (typeof routing.locales)[n
 }
 
 export const metadata: Metadata = {
-  title: "Media Commerce Platform",
+  title: "Velvet Gallery",
   description: "The Cinematic Canvas",
   keywords: ["video monetization", "creator platform", "studio wallet", "media distribution"],
+  icons: {
+    icon: "/images/logo-no-text.jpg",
+    shortcut: "/images/logo-no-text.jpg",
+    apple: "/images/logo-no-text.jpg",
+  },
 };
 
 export function generateStaticParams() {

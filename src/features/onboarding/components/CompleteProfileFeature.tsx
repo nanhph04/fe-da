@@ -209,9 +209,11 @@ export function CompleteProfileFeature() {
 
     ctx.drawImage(cropImageRef.current, xCanvas, yCanvas, wCanvas, hCanvas);
 
+    const outputType = rawSelectedFile.type === "image/jpg" ? "image/jpeg" : rawSelectedFile.type;
+
     canvas.toBlob(blob => {
       if (blob) {
-        const croppedFile = new File([blob], rawSelectedFile.name, { type: rawSelectedFile.type });
+        const croppedFile = new File([blob], rawSelectedFile.name, { type: outputType });
         setAvatarFile(croppedFile);
         setShowCropModal(false);
         if (cropTargetUrl) {
@@ -219,7 +221,7 @@ export function CompleteProfileFeature() {
         }
         setCropTargetUrl(null);
       }
-    }, rawSelectedFile.type);
+    }, outputType);
   };
 
   const handleCancelCrop = () => {
@@ -292,9 +294,14 @@ export function CompleteProfileFeature() {
         birthday: data.birthday || undefined,
       });
       if (res.success) {
-        await uploadAvatarIfSelected();
-        await fetchProfile();
-        router.push("/library");
+        try {
+          await uploadAvatarIfSelected();
+          await fetchProfile();
+          router.push("/library");
+        } catch (avatarErr: unknown) {
+          setServerError(getErrorMessage(avatarErr, "Hồ sơ đã lưu nhưng không thể tải lên ảnh đại diện. Vui lòng thử ảnh khác."));
+          await fetchProfile(); // Still fetch profile so the rest of the app knows it's completed
+        }
       } else {
         setServerError(res.message || "Không thể cập nhật hồ sơ");
       }

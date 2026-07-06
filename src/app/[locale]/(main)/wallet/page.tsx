@@ -7,7 +7,7 @@ export default async function WalletPage() {
   await requireAuthenticatedUser("/wallet");
 
   const packagesResponse = await fetchServerApi<DepositPackage[]>("/api/deposits/packages", {
-    cache: "force-cache",
+    cache: "no-store",
   });
 
   return <WalletDashboard initialPackages={packagesResponse.data} />;

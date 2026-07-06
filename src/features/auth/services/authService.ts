@@ -118,7 +118,11 @@ export const authService = {
 
   uploadAvatar: async (file: File) => {
     const formData = new FormData();
-    formData.append("avatar", file);
+    let fileToUpload = file;
+    if (file.type === "image/jpg") {
+      fileToUpload = new File([file], file.name, { type: "image/jpeg" });
+    }
+    formData.append("avatar", fileToUpload);
 
     return api.post<UserProfileResponse>(
       "/api/user/users/profile/avatar/upload-url",

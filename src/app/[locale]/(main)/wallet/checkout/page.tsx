@@ -21,7 +21,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const packagesResponse = await fetchServerApi<DepositPackage[]>(
     "/api/deposits/packages",
     {
-      cache: "force-cache",
+      cache: "no-store",
     }
   );
 
