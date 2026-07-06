@@ -12,6 +12,7 @@ import {
   type CreatePackagePayload,
   type UpdatePackagePayload,
 } from "../services/adminDepositService";
+import { replaceDepositPackage } from "../utils/deposit-package-list";
 
 type PackageFormState = CreatePackagePayload;
 type FinanceTranslations = ReturnType<typeof useTranslations>;
@@ -232,6 +233,7 @@ export function AdminFinanceFeature() {
   const [packages, setPackages] = useState<DepositPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [updatingPackageIds, setUpdatingPackageIds] = useState<Set<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -365,12 +367,24 @@ export function AdminFinanceFeature() {
   };
 
   const togglePackageStatus = async (pkg: DepositPackage) => {
+    if (updatingPackageIds.has(pkg.id)) {
+      return;
+    }
+
     try {
       setError(null);
-      await AdminDepositService.updatePackage(pkg.id, { isActive: !(pkg.isActive ?? true) });
+      setUpdatingPackageIds(current => new Set(current).add(pkg.id));
+      const updatedPackage = await AdminDepositService.updatePackage(pkg.id, { isActive: !(pkg.isActive ?? true) });
+      setPackages(current => replaceDepositPackage(current, updatedPackage));
       await loadPackages();
     } catch (err) {
       setError(getErrorMessage(err, t("errors.updateStatus")));
+    } finally {
+      setUpdatingPackageIds(current => {
+        const next = new Set(current);
+        next.delete(pkg.id);
+        return next;
+      });
     }
   };
 
@@ -690,6 +704,7 @@ export function AdminFinanceFeature() {
               ) : (
                 packages.map(pkg => {
                   const isActive = pkg.isActive ?? true;
+                  const isUpdating = updatingPackageIds.has(pkg.id);
 
                   return (
                     <tr key={pkg.id} className="group transition-colors hover:bg-muted/40">
@@ -731,9 +746,10 @@ export function AdminFinanceFeature() {
                           <button
                             type="button"
                             onClick={() => void togglePackageStatus(pkg)}
+                            disabled={isUpdating}
                             className="rounded-sm border border-primary/30 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
                           >
-                            {isActive ? t("actions.disable") : t("actions.enable")}
+                            {isUpdating ? t("actions.saving") : isActive ? t("actions.disable") : t("actions.enable")}
                           </button>
                         </div>
                       </td>

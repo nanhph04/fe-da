@@ -6,8 +6,6 @@ export interface AdminWithdrawalSummary {
   pendingCount: number;
   pendingCoinAmount: number;
   pendingMoneyAmount: number;
-  approvedCount: number;
-  processingCount: number;
   completed30dMoneyAmount: number;
 }
 
@@ -17,7 +15,7 @@ export interface AdminWithdrawalListResponse {
 }
 
 export interface AdminWithdrawalListParams {
-  status?: "pending" | "approved" | "processing" | "completed" | "rejected" | "cancelled";
+  status?: "pending" | "completed" | "rejected" | "cancelled";
   userId?: string;
   page?: number;
   limit?: number;
@@ -71,11 +69,6 @@ export class AdminWithdrawalService {
 
   static async getWithdrawal(withdrawalId: string): Promise<Withdrawal> {
     const response = await api.get<Withdrawal>(`/api/withdrawals/admin/${withdrawalId}`, { requireAuth: true });
-    return response.data;
-  }
-
-  static async approveWithdrawal(withdrawalId: string, adminNote: string): Promise<Withdrawal> {
-    const response = await api.post<Withdrawal>(`/api/withdrawals/${withdrawalId}/approve`, { adminNote }, { requireAuth: true });
     return response.data;
   }
 

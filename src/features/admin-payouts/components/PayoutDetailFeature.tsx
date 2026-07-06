@@ -112,7 +112,7 @@ export function PayoutDetailFeature() {
     void loadWithdrawal();
   }, [loadWithdrawal]);
 
-  const runAction = async (action: "approve" | "reject" | "complete") => {
+  const runAction = async (action: "reject" | "complete") => {
     if (!withdrawal) {
       return;
     }
@@ -125,10 +125,7 @@ export function PayoutDetailFeature() {
       const note = adminNote.trim();
       let updated: Withdrawal;
 
-      if (action === "approve") {
-        updated = await AdminWithdrawalService.approveWithdrawal(withdrawal.id, note || t("defaults.approvedNote"));
-        setActionMessage(t("messages.approved"));
-      } else if (action === "reject") {
+      if (action === "reject") {
         updated = await AdminWithdrawalService.rejectWithdrawal(
           withdrawal.id,
           rejectReason.trim() || t("defaults.rejectedReason"),
@@ -153,9 +150,7 @@ export function PayoutDetailFeature() {
     }
   };
 
-  const canApprove = withdrawal?.status === "pending" || withdrawal?.status === "PENDING";
-  const canReject = withdrawal?.status === "pending" || withdrawal?.status === "PENDING" || withdrawal?.status === "approved" || withdrawal?.status === "APPROVED";
-  const canComplete = withdrawal?.status === "approved" || withdrawal?.status === "processing" || withdrawal?.status === "APPROVED";
+  const canReview = withdrawal?.status === "pending" || withdrawal?.status === "PENDING";
 
   return (
     <section className="space-y-8 animate-in fade-in duration-500">
@@ -321,15 +316,7 @@ export function PayoutDetailFeature() {
                 <div className="space-y-3 pt-2">
                   <button
                     type="button"
-                    disabled={!canApprove || isActionLoading}
-                    onClick={() => void runAction("approve")}
-                    className="flex w-full items-center justify-center gap-2 rounded-sm bg-secondary py-3 font-headline text-xs font-black uppercase tracking-widest text-black shadow-lg shadow-secondary/20 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {t("actions.approve")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!canComplete || isActionLoading}
+                    disabled={!canReview || isActionLoading}
                     onClick={() => void runAction("complete")}
                     className="flex w-full items-center justify-center gap-2 rounded-sm border border-emerald-500/40 bg-emerald-500/10 py-3 font-headline text-xs font-bold uppercase tracking-widest text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -337,7 +324,7 @@ export function PayoutDetailFeature() {
                   </button>
                   <button
                     type="button"
-                    disabled={!canReject || isActionLoading}
+                    disabled={!canReview || isActionLoading}
                     onClick={() => void runAction("reject")}
                     className="w-full rounded-sm border border-primary/40 bg-transparent py-3 font-headline text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40"
                   >
