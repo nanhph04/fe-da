@@ -32,6 +32,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [publishStage, setPublishStage] = useState<"idle" | "metadata" | "thumbnail" | "confirming">("idle");
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
 
   const canPublish = isChecked1 && isChecked2 && !!formData.draftUpload && formData.rawUploadCompleted;
   const activeDeclarationContent = activeDeclarationDialog === "guidelines"
@@ -110,6 +111,38 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
     } finally {
       setPublishStage("idle");
       setIsPublishing(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!formData.draftUpload) return;
+    setIsSavingDraft(true);
+    setError(null);
+    setPublishStage("metadata");
+
+    try {
+      await mediaService.updateVideoMetadata(formData.draftUpload.videoId, {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        categoryId: formData.categoryId,
+        tagIds: formData.tagIds,
+        visibility: formData.visibility,
+        price: formData.price,
+        requiredTierLevel: formData.requiredTierLevel,
+      });
+
+      try {
+        localStorage.removeItem("studio-upload-draft-form");
+      } catch (e) {
+        // Ignore
+      }
+
+      router.push("/studio/content");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Lỗi khi lưu bản nháp"));
+    } finally {
+      setIsSavingDraft(false);
+      setPublishStage("idle");
     }
   };
 
@@ -228,15 +261,29 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
             </div>
 
             <PublishActions
-              canPublish={canPublish}
+              canPublish={canPublish && !isSavingDraft}
               isPublishing={isPublishing}
               onPublish={handlePublish}
             />
 
             <button
               type="button"
+              onClick={handleSaveDraft}
+              disabled={isPublishing || isSavingDraft}
+              className="flex w-full items-center justify-center gap-2 rounded-sm border border-outline-variant/30 py-3 font-headline text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSavingDraft ? (
+                <span className="h-4 w-4 rounded-full border-2 border-on-surface-variant border-t-transparent animate-spin" />
+              ) : (
+                <span className="material-symbols-outlined text-lg">save</span>
+              )}
+              Lưu bản nháp
+            </button>
+
+            <button
+              type="button"
               onClick={onPrev}
-              disabled={isPublishing}
+              disabled={isPublishing || isSavingDraft}
               className="w-full rounded-sm border border-outline-variant/30 py-3 font-headline text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t("step3.actions.back")}
