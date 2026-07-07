@@ -21,12 +21,10 @@ interface EarningsOverviewProps {
   initialMonthly?: MonthlyEarnings;
 }
 
-const formatVND = (value: number) => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
+const formatCoin = (value: number) => {
+  return `${new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(value)} Coin`;
 };
 
 export function EarningsOverview({
@@ -109,13 +107,13 @@ export function EarningsOverview({
       <div className="relative z-10 grid gap-5 md:grid-cols-4 mb-5">
         <MetricCard
           label={t("wallet.analytics.metrics.total")}
-          value={formatVND(summary.totalEarnings)}
+          value={formatCoin(summary.totalEarnings)}
           icon={<Wallet className="h-5 w-5" />}
           primary
         />
         <MetricCard
           label={t("wallet.analytics.metrics.monthly")}
-          value={formatVND(monthly.payoutAmount)}
+          value={formatCoin(monthly.payoutAmount)}
           icon={<TrendingUp className="h-5 w-5" />}
         />
         <MetricCard
@@ -133,19 +131,19 @@ export function EarningsOverview({
       <div className="relative z-10 grid gap-5 md:grid-cols-3">
         <MetricCard
           label={t("wallet.analytics.metrics.pending")}
-          value={formatVND(summary.pendingEarnings)}
+          value={formatCoin(summary.pendingEarnings)}
           icon={<Clock className="h-5 w-5" />}
           tone="amber"
         />
         <MetricCard
           label={t("wallet.analytics.metrics.confirmed")}
-          value={formatVND(summary.confirmedEarnings)}
+          value={formatCoin(summary.confirmedEarnings)}
           icon={<CheckCircle2 className="h-5 w-5" />}
           tone="gold"
         />
         <MetricCard
           label={t("wallet.analytics.metrics.paid")}
-          value={formatVND(summary.paidEarnings)}
+          value={formatCoin(summary.paidEarnings)}
           icon={<Landmark className="h-5 w-5" />}
           tone="green"
         />
