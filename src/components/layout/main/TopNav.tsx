@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Form from "next/form";
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { StudioAccessLink } from "@/features/studio-access";
 import { WalletService } from "@/features/wallet/services/walletService";
 import { getErrorMessage } from "@/shared/api/client";
 import { ChevronDown, Search } from "lucide-react";
@@ -293,19 +294,31 @@ export function TopNav({ categories = [], searchAction = "/search" }: TopNavProp
                 isActive={pathname?.startsWith("/category")}
               />
 
-              {roleEntry ? (
-                <Link
-                  href={roleEntry.path!}
-                  aria-current={pathname?.startsWith(roleEntry.path!) ? "page" : undefined}
-                  className={`rounded-[4px] px-4 py-2 font-headline text-sm font-bold tracking-tight transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                    pathname?.startsWith(roleEntry.path!)
-                      ? "bg-white/10 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
-                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
-                  }`}
-                >
-                  {t(roleEntry.label)}
-                </Link>
-              ) : null}
+              {roleEntry ? (() => {
+                const roleEntryClassName = `rounded-[4px] px-4 py-2 font-headline text-sm font-bold tracking-tight transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  pathname?.startsWith(roleEntry.path!)
+                    ? "bg-white/10 text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                    : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                }`;
+
+                return roleEntry.path === "/studio" ? (
+                  <StudioAccessLink
+                    href={roleEntry.path}
+                    aria-current={pathname?.startsWith(roleEntry.path) ? "page" : undefined}
+                    className={roleEntryClassName}
+                  >
+                    {t(roleEntry.label)}
+                  </StudioAccessLink>
+                ) : (
+                  <Link
+                    href={roleEntry.path!}
+                    aria-current={pathname?.startsWith(roleEntry.path!) ? "page" : undefined}
+                    className={roleEntryClassName}
+                  >
+                    {t(roleEntry.label)}
+                  </Link>
+                );
+              })() : null}
             </div>
 
             <div className="relative flex items-center gap-3 md:gap-4">

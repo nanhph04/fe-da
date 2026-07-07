@@ -6,6 +6,7 @@ import {
   type PublicChannelDetail,
 } from "@/features/watch/services/publicMediaService";
 import { getServerUserProfile } from "@/shared/auth/server";
+import { isLockedChannelStatus } from "@/shared/auth/studio-access";
 import { ChannelHero } from "./ChannelHero";
 import { ChannelMembershipTiers } from "./ChannelMembershipTiers";
 import { ChannelVideoGrid } from "./ChannelVideoGrid";
@@ -73,6 +74,7 @@ export async function ChannelPage({ channelId }: ChannelPageProps) {
   } catch {
     // Người dùng chưa đăng nhập, bỏ qua lỗi (guest user)
   }
+  const isLockedOwner = isOwner && isLockedChannelStatus(channel.status);
 
   return (
     <main className="mx-auto min-h-screen max-w-[1700px] bg-background px-4 pt-24 pb-16 md:px-8 lg:pl-72">
@@ -82,7 +84,7 @@ export async function ChannelPage({ channelId }: ChannelPageProps) {
         </div>
       ) : null}
 
-      <ChannelHero channel={channel} isOwner={isOwner} />
+      <ChannelHero channel={channel} isOwner={isOwner} isLockedOwner={isLockedOwner} />
 
       <div className="mt-10 grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
         <ChannelVideoGrid videos={channel.publicVideos} channelName={channel.name} />

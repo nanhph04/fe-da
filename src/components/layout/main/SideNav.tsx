@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { StudioAccessLink } from "@/features/studio-access";
 import { useTranslations } from "next-intl";
 import {
   isNavItemVisible,
@@ -120,12 +121,21 @@ export function SideNav() {
           </div>
         </div>
         {roleEntry ? (
-          <Link
-            href={roleEntry.path!}
-            className="w-full mt-4 bg-accent hover:bg-accent/80 text-foreground text-xs font-bold py-2 rounded-lg transition-all inline-flex items-center justify-center"
-          >
-            {t(roleEntry.label)}
-          </Link>
+          roleEntry.path === "/studio" ? (
+            <StudioAccessLink
+              href={roleEntry.path}
+              className="w-full mt-4 bg-accent hover:bg-accent/80 text-foreground text-xs font-bold py-2 rounded-lg transition-all inline-flex items-center justify-center"
+            >
+              {t(roleEntry.label)}
+            </StudioAccessLink>
+          ) : (
+            <Link
+              href={roleEntry.path!}
+              className="w-full mt-4 bg-accent hover:bg-accent/80 text-foreground text-xs font-bold py-2 rounded-lg transition-all inline-flex items-center justify-center"
+            >
+              {t(roleEntry.label)}
+            </Link>
+          )
         ) : (
           <div className="w-full mt-4 bg-accent text-muted-foreground text-xs font-bold py-2 rounded-lg border border-dashed border-border/20 text-center">
             {t("signInForMore")}

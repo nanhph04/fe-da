@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { StudioAccessLink } from "@/features/studio-access";
 import { publicAuthLinks } from "@/shared/navigation/branding";
 import { AccountDropdown } from "@/components/layout/shared/AccountDropdown";
 
@@ -33,13 +34,23 @@ export function PublicHeaderAuthActions() {
 
     return (
       <div className="flex items-center gap-3">
-        <Link href={primaryAction.href} className={actionButtonClassName}>
-          <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_68%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <span className="material-symbols-outlined relative text-[18px]" aria-hidden="true">
-            {primaryAction.icon}
-          </span>
-          <span className="relative">{primaryAction.label}</span>
-        </Link>
+        {primaryAction.href === "/studio" ? (
+          <StudioAccessLink href={primaryAction.href} className={actionButtonClassName}>
+            <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_68%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <span className="material-symbols-outlined relative text-[18px]" aria-hidden="true">
+              {primaryAction.icon}
+            </span>
+            <span className="relative">{primaryAction.label}</span>
+          </StudioAccessLink>
+        ) : (
+          <Link href={primaryAction.href} className={actionButtonClassName}>
+            <span className="absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_68%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <span className="material-symbols-outlined relative text-[18px]" aria-hidden="true">
+              {primaryAction.icon}
+            </span>
+            <span className="relative">{primaryAction.label}</span>
+          </Link>
+        )}
         <AccountDropdown
           avatarLabel={avatarLabel}
           avatarUrl={user?.avatarUrl}

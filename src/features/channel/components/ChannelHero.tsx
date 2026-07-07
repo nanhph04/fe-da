@@ -10,6 +10,7 @@ import type { PublicChannelDetail } from "@/features/watch/services/publicMedia.
 interface ChannelHeroProps {
   channel: PublicChannelDetail;
   isOwner?: boolean;
+  isLockedOwner?: boolean;
 }
 
 function getInitials(value: string) {
@@ -21,11 +22,12 @@ function getInitials(value: string) {
   return cleaned.charAt(0).toUpperCase();
 }
 
-export function ChannelHero({ channel, isOwner }: ChannelHeroProps) {
+export function ChannelHero({ channel, isOwner, isLockedOwner }: ChannelHeroProps) {
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const totalVideos = channel.videoCount ?? channel.publicVideos.length;
   const totalViews = channel.membershipEligibility?.totalVideoViews ?? 0;
+  const canManageChannel = isOwner && !isLockedOwner;
 
   return (
     <section className="relative overflow-hidden rounded-lg border border-border/20 bg-card shadow-2xl">
@@ -64,7 +66,7 @@ export function ChannelHero({ channel, isOwner }: ChannelHeroProps) {
               </span>
             </div>
 
-            {isOwner && (
+            {canManageChannel && (
               <Button
                 onClick={() => setIsEditOpen(true)}
                 variant="outline"
@@ -92,12 +94,14 @@ export function ChannelHero({ channel, isOwner }: ChannelHeroProps) {
         </div>
       </div>
 
-      <EditChannelDialog
-        channel={channel}
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-        onSaved={() => router.refresh()}
-      />
+      {canManageChannel ? (
+        <EditChannelDialog
+          channel={channel}
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          onSaved={() => router.refresh()}
+        />
+      ) : null}
     </section>
   );
 }

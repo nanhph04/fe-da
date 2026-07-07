@@ -4,7 +4,9 @@ import type { ComponentProps, ReactNode } from "react";
 import { Suspense, useEffect } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
+import { StudioRedirectToast } from "@/features/studio-access";
 import { themeConfig } from "@/shared/config/theme";
+import { ToastProvider } from "@/shared/components/toast";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
 
 type AppProvidersProps = {
@@ -96,7 +98,10 @@ export function AppProviders({ children, locale, messages }: AppProvidersProps) 
           timeZone="Asia/Ho_Chi_Minh"
         >
           <Suspense fallback={null}>
-            <AuthProvider>{children}</AuthProvider>
+            <ToastProvider>
+              <StudioRedirectToast />
+              <AuthProvider>{children}</AuthProvider>
+            </ToastProvider>
           </Suspense>
         </NextIntlClientProvider>
       </ThemeProvider>

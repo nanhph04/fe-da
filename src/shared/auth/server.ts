@@ -1,7 +1,12 @@
 import { redirect } from "next/navigation";
+import { cookies, headers } from "next/headers";
 import "server-only";
 
-import { getServerSessionProfile } from "@/shared/api/server";
+import { fetchServerApi, getServerSessionProfile } from "@/shared/api/server";
+import {
+  buildLockedStudioRedirectPath,
+  isLockedChannelStatus,
+} from "@/shared/auth/studio-access";
 
 export interface ServerUserProfile {
   userId: string;
@@ -16,6 +21,45 @@ export interface ServerUserProfile {
   isCreator: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+type ServerCurrentChannel = {
+  channelId: string;
+  status: string;
+};
+
+async function getForwardedCookieHeader() {
+  const headerStore = await headers();
+  const headerCookie = headerStore.get("cookie");
+  if (headerCookie) {
+    return headerCookie;
+  }
+
+  const cookieStore = await cookies();
+  const serialized = cookieStore.toString();
+  return serialized || null;
+}
+
+async function getLockedStudioRedirectPath() {
+  const cookieHeader = await getForwardedCookieHeader();
+  if (!cookieHeader) {
+    return null;
+  }
+
+  try {
+    const channelResponse = await fetchServerApi<ServerCurrentChannel>("/api/media/me/channel", {
+      headers: { Cookie: cookieHeader },
+      cache: "no-store",
+    });
+
+    if (isLockedChannelStatus(channelResponse.data?.status)) {
+      return buildLockedStudioRedirectPath(channelResponse.data?.channelId);
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 export async function getServerUserProfile() {
@@ -66,6 +110,11 @@ export async function requireStudioAccess(redirectPath: string) {
     // Creator access can lag briefly after channel creation while auth state syncs.
     // Send users back to onboarding so the client-side sync flow can recover them.
     redirect("/onboarding?studioAccess=pending");
+  }
+
+  const lockedStudioRedirectPath = await getLockedStudioRedirectPath();
+  if (lockedStudioRedirectPath) {
+    redirect(lockedStudioRedirectPath);
   }
 
   return profile;
