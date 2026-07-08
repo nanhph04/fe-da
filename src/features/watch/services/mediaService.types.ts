@@ -203,6 +203,7 @@ export interface UploadResumableParams {
   onProgress?: (progress: number) => void;
   signal?: AbortSignal;
   renewBeforeExpiryMs?: number;
+  concurrency?: number;
 }
 
 export interface PlaybackInfoResponse {

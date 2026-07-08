@@ -5,6 +5,7 @@ import { api, fetchSSE, getHttpStatus, refreshAccessToken } from "@/shared/api/c
 import { authService } from "../services/authService";
 import { useRouter } from "@/i18n/routing";
 import { normalizeInternalPath } from "@/shared/utils/locale-path";
+import { getSessionRevocationReason } from "./session-events";
 
 import { UserProfileResponse } from "../services/authService";
 
@@ -121,12 +122,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     void fetchSSE(
       "/api/auth/session/events",
       { requireAuth: true, signal: controller.signal },
-      (_data, event) => {
-        if (event !== "session.revoked") {
+      (data, event) => {
+        const logoutReason = getSessionRevocationReason(data, event);
+        if (!logoutReason) {
           return;
         }
 
-        forceLogout("account-disabled");
+        forceLogout(logoutReason);
       },
       undefined,
       (error) => {

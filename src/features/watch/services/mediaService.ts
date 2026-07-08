@@ -1,7 +1,7 @@
 import { api } from "@/shared/api/client";
 import type { ApiResponse } from "@/shared/api/types";
+import { createUploadResumableVideoFile, uploadPresignedFile } from "@/features/studio-upload/services/resumableVideoUpload";
 import { buildQueryString, toCommaSeparated } from "./mediaService.helpers";
-import { createUploadResumableVideoFile, uploadPresignedFile } from "./mediaService.upload";
 import type {
   AutoRenewMembershipResponse,
   CategoryResponse,

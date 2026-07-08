@@ -8,7 +8,7 @@ import type {
   UploadRawVideoFileRequest,
   UploadResumableParams,
   UploadStatusResponse,
-} from "./mediaService.types";
+} from "@/features/watch/services/mediaService.types";
 
 interface ResumableUploadApi {
   getUploadStatus: (videoId: string, uploadId: string) => Promise<ApiResponse<UploadStatusResponse>>;
@@ -28,6 +28,7 @@ interface ResumableUploadApi {
 }
 
 const DEFAULT_RENEW_BEFORE_EXPIRY_MS = 10 * 60 * 1000;
+const DEFAULT_UPLOAD_CONCURRENCY = 4;
 
 const createAbortError = () => new DOMException("Upload aborted", "AbortError");
 
@@ -62,6 +63,14 @@ const getCompletedBytes = (completedParts: number[], totalParts: number, partSiz
   }, 0);
 };
 
+const normalizeConcurrency = (value?: number) => {
+  if (!Number.isFinite(value) || !value || value < 1) {
+    return DEFAULT_UPLOAD_CONCURRENCY;
+  }
+
+  return Math.floor(value);
+};
+
 const uploadChunk = ({
   uploadUrl,
   chunk,
@@ -83,7 +92,6 @@ const uploadChunk = ({
 
     const xhr = new XMLHttpRequest();
     let settled = false;
-    let lastLoadedBytes = 0;
 
     const cleanup = () => {
       signal?.removeEventListener("abort", handleAbort);
@@ -114,9 +122,7 @@ const uploadChunk = ({
         return;
       }
 
-      const delta = event.loaded - lastLoadedBytes;
-      lastLoadedBytes = event.loaded;
-      onProgress?.(delta);
+      onProgress?.(event.loaded);
     };
 
     xhr.onload = () => {
@@ -184,6 +190,7 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
     onProgress,
     signal,
     renewBeforeExpiryMs,
+    concurrency,
   }: UploadResumableParams): Promise<void> => {
     const fileSize = file.size;
     const totalParts = Math.ceil(fileSize / partSizeBytes);
@@ -225,10 +232,15 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
 
     const partsToUpload = getPendingPartNumbers(totalParts, completedParts);
     let uploadedBytes = getCompletedBytes(completedParts, totalParts, partSizeBytes, fileSize);
+    const activePartLoadedBytes = new Map<number, number>();
 
     const updateProgress = () => {
       if (onProgress) {
-        const percentage = Math.round((uploadedBytes / fileSize) * 100);
+        const activeLoadedBytes = Array.from(activePartLoadedBytes.values()).reduce(
+          (acc, loadedBytes) => acc + loadedBytes,
+          0
+        );
+        const percentage = Math.round(((uploadedBytes + activeLoadedBytes) / fileSize) * 100);
         onProgress(Math.min(percentage, 100));
       }
     };
@@ -244,15 +256,10 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
       return;
     }
 
-    for (const partNumber of partsToUpload) {
+    const uploadOnePart = async (partNumber: number) => {
       if (signal?.aborted) {
         throw createAbortError();
       }
-
-      const startByte = (partNumber - 1) * partSizeBytes;
-      const endByte = Math.min(partNumber * partSizeBytes, fileSize);
-      const chunk = file.slice(startByte, endByte);
-      const chunkSize = chunk.size;
 
       await renewIfNeeded();
       const urlRes = await uploadApi.getPartUrls(videoId, uploadId, [partNumber]);
@@ -265,16 +272,29 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
         throw new Error(`Upload URL for part ${partNumber} not found in response`);
       }
 
-      const etag = await uploadChunk({
-        uploadUrl: partInfo.uploadUrl,
-        chunk,
-        partNumber,
-        signal,
-        onProgress: delta => {
-          uploadedBytes += delta;
-          updateProgress();
-        },
-      });
+      const startByte = (partNumber - 1) * partSizeBytes;
+      const endByte = Math.min(partNumber * partSizeBytes, fileSize);
+      const chunk = file.slice(startByte, endByte);
+      const chunkSize = chunk.size;
+
+      let etag: string;
+      try {
+        etag = await uploadChunk({
+          uploadUrl: partInfo.uploadUrl,
+          chunk,
+          partNumber,
+          signal,
+          onProgress: loadedBytes => {
+            activePartLoadedBytes.set(partNumber, loadedBytes);
+            updateProgress();
+          },
+        });
+      } finally {
+        activePartLoadedBytes.delete(partNumber);
+      }
+
+      uploadedBytes += chunkSize;
+      updateProgress();
 
       await renewIfNeeded();
       const completedRes = await uploadApi.completePart(videoId, uploadId, partNumber, {
@@ -285,7 +305,25 @@ export const createUploadResumableVideoFile = (uploadApi: ResumableUploadApi) =>
       if (!completedRes.success) {
         throw new Error(completedRes.message || `Failed to register completion of part ${partNumber}`);
       }
-    }
+    };
+
+    let nextPartIndex = 0;
+    let hasUploadFailed = false;
+    const workerCount = Math.min(normalizeConcurrency(concurrency), partsToUpload.length);
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (!hasUploadFailed && nextPartIndex < partsToUpload.length) {
+        const partNumber = partsToUpload[nextPartIndex];
+        nextPartIndex += 1;
+        try {
+          await uploadOnePart(partNumber);
+        } catch (err) {
+          hasUploadFailed = true;
+          throw err;
+        }
+      }
+    });
+
+    await Promise.all(workers);
 
     if (signal?.aborted) {
       throw createAbortError();
