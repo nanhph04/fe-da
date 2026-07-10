@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import type { UploadFormData } from "./StudioUploadFeature";
-import { mediaService } from "@/features/watch/services/mediaService";
+import { studioUploadService } from "@/features/studio-upload/services/studioUploadService";
 import { getErrorMessage } from "@/shared/api/client";
 
 import { VideoSummaryCard } from "./upload-step-3/VideoSummaryCard";
@@ -56,7 +56,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       const draftUpload = formData.draftUpload;
 
       setPublishStage("metadata");
-      const metadataResponse = await mediaService.updateVideoMetadata(draftUpload.videoId, {
+      const metadataResponse = await studioUploadService.updateVideoMetadata(draftUpload.videoId, {
         title: formData.title.trim(),
         description: formData.description.trim(),
         categoryId: formData.categoryId,
@@ -80,14 +80,14 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
 
       if (formData.thumbnailFile && draftUpload.thumbnailUploadUrl) {
         setPublishStage("thumbnail");
-        await mediaService.uploadPresignedFile({
+        await studioUploadService.uploadPresignedFile({
           uploadUrl: draftUpload.thumbnailUploadUrl,
           file: formData.thumbnailFile,
         });
       }
 
       setPublishStage("confirming");
-      const confirmResponse = await mediaService.submitUpload(draftUpload.videoId, draftUpload.uploadId, {
+      const confirmResponse = await studioUploadService.submitUpload(draftUpload.videoId, draftUpload.uploadId, {
         resolutions: formData.resolutions,
         thumbnailObjectKey: thumbnailObjectKey ?? undefined,
       });
@@ -100,7 +100,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       setIsSuccess(true);
       try {
         localStorage.removeItem("studio-upload-draft-form");
-      } catch (e) {
+      } catch {
         // Ignore errors if localStorage is disabled
       }
       setTimeout(() => {
@@ -121,7 +121,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
     setPublishStage("metadata");
 
     try {
-      await mediaService.updateVideoMetadata(formData.draftUpload.videoId, {
+      await studioUploadService.updateVideoMetadata(formData.draftUpload.videoId, {
         title: formData.title.trim(),
         description: formData.description.trim(),
         categoryId: formData.categoryId,
@@ -133,7 +133,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
 
       try {
         localStorage.removeItem("studio-upload-draft-form");
-      } catch (e) {
+      } catch {
         // Ignore
       }
 

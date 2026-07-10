@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { UploadFormData } from "./StudioUploadFeature";
-import { mediaService, type MetadataSuggestionsResponse } from "@/features/watch/services/mediaService";
+import { studioUploadService } from "@/features/studio-upload/services/studioUploadService";
+import type { MetadataSuggestionsResponse } from "@/features/watch/services/mediaService.types";
 import { getErrorMessage } from "@/shared/api/client";
 import { CategorySection } from "./upload-step-1/CategorySection";
 import { ResolutionSection } from "./upload-step-1/ResolutionSection";
@@ -81,7 +82,7 @@ export function UploadStep1Details({
     setIsGeneratingSuggestions(true);
     setAiError(null);
     try {
-      const response = await mediaService.getMetadataSuggestions({
+      const response = await studioUploadService.getMetadataSuggestions({
         title: formData.title.trim(),
         description: formData.description.trim(),
         categoryId: formData.categoryId,
@@ -156,7 +157,7 @@ export function UploadStep1Details({
     }
 
     if (formData.draftUpload) {
-      void mediaService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId).catch(() => undefined);
+      void studioUploadService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId).catch(() => undefined);
     }
 
     updateFormData({
@@ -182,7 +183,7 @@ export function UploadStep1Details({
       setReplaceError(null);
 
       try {
-        const res = await mediaService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
+        const res = await studioUploadService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
         if (res.success) {
           updateFormData({ file: null, draftUpload: null, rawUploadCompleted: false });
           setUploadProgress(0);
@@ -211,7 +212,7 @@ export function UploadStep1Details({
 
     try {
       // Hủy session upload cũ của bản nháp trước khi đổi sang file mới
-      const res = await mediaService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
+      const res = await studioUploadService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
       if (res.success) {
         updateFormData({
           file,
@@ -262,7 +263,7 @@ export function UploadStep1Details({
           return;
         }
 
-        const initResponse = await mediaService.initUpload({
+        const initResponse = await studioUploadService.initUpload({
           title: formData.title.trim(),
           description: formData.description.trim(),
           categoryId: formData.categoryId,
@@ -285,7 +286,7 @@ export function UploadStep1Details({
         updateFormData({ draftUpload, rawUploadCompleted: false });
       }
 
-      await mediaService.uploadResumableVideoFile({
+      await studioUploadService.uploadResumableVideoFile({
         videoId: draftUpload.videoId,
         uploadId: draftUpload.uploadId,
         file: formData.file,

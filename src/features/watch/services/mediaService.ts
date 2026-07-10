@@ -1,20 +1,14 @@
 import { api } from "@/shared/api/client";
 import type { ApiResponse } from "@/shared/api/types";
-import { createUploadResumableVideoFile, uploadPresignedFile } from "@/features/studio-upload/services/resumableVideoUpload";
+import { studioUploadService } from "@/features/studio-upload/services/studioUploadService";
 import { buildQueryString, toCommaSeparated } from "./mediaService.helpers";
 import type {
   AutoRenewMembershipResponse,
   CategoryResponse,
   ChannelDetailResponse,
   ChannelResponse,
-  CompletePartBody,
-  CompletePartResponse,
-  CompleteUploadResponse,
   ContinueWatchingVideoResponse,
   DiscoveryVideoResponse,
-  GetPartUrlsResponse,
-  InitUploadBody,
-  InitUploadResponse,
   MembershipPurchaseResponse,
   MembershipStatusResponse,
   MembershipTierResponse,
@@ -28,23 +22,16 @@ import type {
   PurchaseRequestOptions,
   PurchasedVideoResponse,
   RefreshPlaybackTokenResponse,
-  RenewUploadSessionResponse,
   SaveVideoProgressBody,
   SaveVideoProgressResponse,
   SearchMediaParams,
   SearchMediaResponse,
-  SubmitUploadBody,
-  SubmitUploadResponse,
   TagResponse,
   TaxonomyListParams,
   TaxonomyListResponse,
-  UpdateVideoMetadataBody,
-  UploadStatusResponse,
   UserMembershipResponse,
   VideoMetadataResponse,
   VideoPurchaseResponse,
-  MetadataSuggestionsBody,
-  MetadataSuggestionsResponse,
 } from "./mediaService.types";
 
 export type * from "./mediaService.types";
@@ -53,53 +40,6 @@ export {
   getReadyPublicVideoThumbnailUrl,
   getReadyThumbnailUrl,
 } from "./mediaService.helpers";
-
-const getPartUrls = async (videoId: string, uploadId: string, partNumbers: number[]) => {
-  return api.post<GetPartUrlsResponse>(
-    `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/part-urls`,
-    { partNumbers },
-    { requireAuth: true }
-  );
-};
-
-const completePart = async (videoId: string, uploadId: string, partNumber: number, data: CompletePartBody) => {
-  return api.post<CompletePartResponse>(
-    `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/parts/${partNumber}/completed`,
-    data,
-    { requireAuth: true }
-  );
-};
-
-const getUploadStatus = async (videoId: string, uploadId: string) => {
-  return api.get<UploadStatusResponse>(
-    `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/status`,
-    { requireAuth: true }
-  );
-};
-
-const completeUpload = async (videoId: string, uploadId: string) => {
-  return api.post<CompleteUploadResponse>(
-    `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/complete`,
-    undefined,
-    { requireAuth: true }
-  );
-};
-
-const renewUploadSession = async (videoId: string, uploadId: string) => {
-  return api.post<RenewUploadSessionResponse>(
-    `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/renew`,
-    undefined,
-    { requireAuth: true }
-  );
-};
-
-const uploadResumableVideoFile = createUploadResumableVideoFile({
-  getUploadStatus,
-  getPartUrls,
-  completePart,
-  completeUpload,
-  renewUploadSession,
-});
 
 function buildPurchaseHeaders(options: PurchaseRequestOptions) {
   const headers: Record<string, string> = {
@@ -242,27 +182,14 @@ export const mediaService = {
   },
 
   // 4. VIDEO
-  initUpload: async (data: InitUploadBody) => {
-    return api.post<InitUploadResponse>("/api/media/studio/videos/uploads", data, { requireAuth: true });
-  },
-  getPartUrls,
-  completePart,
-  getUploadStatus,
-  completeUpload,
-  renewUploadSession,
-  submitUpload: async (videoId: string, uploadId: string, data: SubmitUploadBody) => {
-    return api.post<SubmitUploadResponse>(
-      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}/submit`,
-      data,
-      { requireAuth: true }
-    );
-  },
-  cancelUpload: async (videoId: string, uploadId: string) => {
-    return api.delete<{ videoId: string; cancelled: boolean }>(
-      `/api/media/studio/videos/${encodeURIComponent(videoId)}/uploads/${encodeURIComponent(uploadId)}`,
-      { requireAuth: true }
-    );
-  },
+  initUpload: studioUploadService.initUpload,
+  getPartUrls: studioUploadService.getPartUrls,
+  completePart: studioUploadService.completePart,
+  getUploadStatus: studioUploadService.getUploadStatus,
+  completeUpload: studioUploadService.completeUpload,
+  renewUploadSession: studioUploadService.renewUploadSession,
+  submitUpload: studioUploadService.submitUpload,
+  cancelUpload: studioUploadService.cancelUpload,
   deleteFailedUpload: async (id: string) => {
     return api.delete<{ videoId: string; deleted: boolean }>(
       `/api/media/studio/videos/${encodeURIComponent(id)}/failed-upload`,
@@ -275,8 +202,8 @@ export const mediaService = {
       { requireAuth: true }
     );
   },
-  uploadPresignedFile,
-  uploadResumableVideoFile,
+  uploadPresignedFile: studioUploadService.uploadPresignedFile,
+  uploadResumableVideoFile: studioUploadService.uploadResumableVideoFile,
   getPlaybackInfo: async (id: string) => {
     return api.get<PlaybackInfoResponse>(`/api/media/me/videos/${encodeURIComponent(id)}/play`, {
       requireAuth: true,
@@ -324,13 +251,7 @@ export const mediaService = {
       { requireAuth: true }
     );
   },
-  updateVideoMetadata: async (id: string, data: UpdateVideoMetadataBody) => {
-    return api.patch<VideoMetadataResponse>(
-      `/api/media/studio/videos/${encodeURIComponent(id)}/metadata`,
-      data,
-      { requireAuth: true }
-    );
-  },
+  updateVideoMetadata: studioUploadService.updateVideoMetadata,
 
   // 5. DISCOVERY & SEARCH
   getPublicVideos: async (params?: PublicVideosParams) => {
@@ -442,11 +363,5 @@ export const mediaService = {
   deleteTagAdmin: async (id: string) => {
     return api.delete<TagResponse>(`/api/media/admin/tags/${id}`, { requireAuth: true });
   },
-  getMetadataSuggestions: async (data: MetadataSuggestionsBody) => {
-    return api.post<MetadataSuggestionsResponse>(
-      "/api/media/studio/videos/metadata-suggestions",
-      data,
-      { requireAuth: true }
-    );
-  },
+  getMetadataSuggestions: studioUploadService.getMetadataSuggestions,
 };
