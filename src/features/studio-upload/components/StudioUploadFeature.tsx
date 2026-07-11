@@ -5,6 +5,13 @@ import { useTranslations } from "next-intl";
 import { UploadStep1Details } from "./UploadStep1Details";
 import { UploadStep2Monetization } from "./UploadStep2Monetization";
 import { UploadStep3Review } from "./UploadStep3Review";
+import { studioUploadService } from "../services/studioUploadService";
+import { getErrorMessage } from "@/shared/api/client";
+import {
+  createEmptyUploadDraftForm,
+  isEmptyUploadDraftForm,
+  UPLOAD_DRAFT_FORM_STORAGE_KEY,
+} from "../utils/upload-draft-storage";
 
 export type UploadResolution = "480p" | "720p" | "1080p";
 
@@ -37,17 +44,34 @@ export interface UploadFormData {
   rawUploadCompleted: boolean;
 }
 
+function getThumbnailExtension(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+
+  if (extension === "jpg" || extension === "jpeg" || extension === "png" || extension === "webp") {
+    return extension;
+  }
+
+  if (file.type === "image/jpeg") {
+    return "jpg";
+  }
+
+  if (file.type === "image/png") {
+    return "png";
+  }
+
+  if (file.type === "image/webp") {
+    return "webp";
+  }
+
+  return null;
+}
+
 export function StudioUploadFeature() {
   const t = useTranslations("Studio.upload");
   const [currentStep, setCurrentStep] = useState(1);
+  const emptyDraftForm = createEmptyUploadDraftForm();
   const [formData, setFormData] = useState<UploadFormData>({
-    title: "",
-    description: "",
-    categoryId: "",
-    tagIds: [],
-    resolutions: ["720p"],
-    visibility: "public",
-    price: 0,
+    ...emptyDraftForm,
     requiredTierLevel: null,
     file: null,
     thumbnailFile: null,
@@ -55,6 +79,10 @@ export function StudioUploadFeature() {
     draftUpload: null,
     rawUploadCompleted: false,
   });
+  const [isUploadingRaw, setIsUploadingRaw] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDraftPersistenceEnabled, setIsDraftPersistenceEnabled] = useState(true);
 
   useEffect(() => {
     return () => {
@@ -67,7 +95,7 @@ export function StudioUploadFeature() {
   // Khôi phục dữ liệu từ localStorage khi mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("studio-upload-draft-form");
+      const saved = localStorage.getItem(UPLOAD_DRAFT_FORM_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         setFormData(prev => ({
@@ -99,7 +127,12 @@ export function StudioUploadFeature() {
       price: formData.price,
       requiredTierLevel: formData.requiredTierLevel,
     };
-    localStorage.setItem("studio-upload-draft-form", JSON.stringify(dataToSave));
+    if (!isDraftPersistenceEnabled || isEmptyUploadDraftForm(dataToSave)) {
+      localStorage.removeItem(UPLOAD_DRAFT_FORM_STORAGE_KEY);
+      return;
+    }
+
+    localStorage.setItem(UPLOAD_DRAFT_FORM_STORAGE_KEY, JSON.stringify(dataToSave));
   }, [
     formData.title,
     formData.description,
@@ -109,6 +142,7 @@ export function StudioUploadFeature() {
     formData.visibility,
     formData.price,
     formData.requiredTierLevel,
+    isDraftPersistenceEnabled,
   ]);
 
   // Cảnh báo khi người dùng f5 hoặc đóng tab nếu đang có file hoặc đang tải lên
@@ -127,6 +161,98 @@ export function StudioUploadFeature() {
   const updateFormData = useCallback((data: Partial<UploadFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
   }, []);
+
+  const resetBackgroundUploadState = useCallback(() => {
+    setIsUploadingRaw(false);
+    setUploadProgress(0);
+    setUploadError(null);
+  }, []);
+
+  const clearUploadDraftFormStorage = useCallback(() => {
+    setIsDraftPersistenceEnabled(false);
+    localStorage.removeItem(UPLOAD_DRAFT_FORM_STORAGE_KEY);
+  }, []);
+
+  const startBackgroundUpload = useCallback(async () => {
+    if (!formData.file) {
+      return false;
+    }
+
+    if (formData.draftUpload && formData.rawUploadCompleted) {
+      return true;
+    }
+
+    if (isUploadingRaw) {
+      return true;
+    }
+
+    setIsUploadingRaw(true);
+    setUploadProgress(0);
+    setUploadError(null);
+
+    let draftUpload = formData.draftUpload;
+
+    if (!draftUpload) {
+      const thumbnailExtension = formData.thumbnailFile ? getThumbnailExtension(formData.thumbnailFile) : null;
+
+      if (formData.thumbnailFile && !thumbnailExtension) {
+        setIsUploadingRaw(false);
+        setUploadError(t("step1.errors.invalidThumbnailType"));
+        return false;
+      }
+
+      try {
+        const initResponse = await studioUploadService.initUpload({
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          categoryId: formData.categoryId,
+          tagIds: formData.tagIds,
+          visibility: formData.visibility,
+          price: formData.price,
+          requiredTierLevel: formData.requiredTierLevel,
+          fileName: formData.file.name,
+          fileSize: formData.file.size,
+          fileLastModified: new Date(formData.file.lastModified).toISOString(),
+          thumbnailExtension: thumbnailExtension ?? undefined,
+        });
+
+        if (!(initResponse.success || initResponse.statusCode === 201) || !initResponse.data) {
+          setIsUploadingRaw(false);
+          setUploadError(initResponse.message || t("step1.errors.createDraftFailed"));
+          return false;
+        }
+
+        draftUpload = initResponse.data;
+        updateFormData({ draftUpload, rawUploadCompleted: false });
+      } catch (err) {
+        setIsUploadingRaw(false);
+        setUploadError(getErrorMessage(err, t("step1.errors.createDraftFailed")));
+        return false;
+      }
+    }
+
+    const file = formData.file;
+    const activeDraftUpload = draftUpload;
+
+    void studioUploadService.uploadResumableVideoFile({
+      videoId: activeDraftUpload.videoId,
+      uploadId: activeDraftUpload.uploadId,
+      file,
+      partSizeBytes: activeDraftUpload.partSizeBytes,
+      onProgress: setUploadProgress,
+    }).then(() => {
+      updateFormData({ draftUpload: activeDraftUpload, rawUploadCompleted: true });
+      setUploadProgress(100);
+      setUploadError(null);
+    }).catch((err) => {
+      setUploadError(getErrorMessage(err, t("step1.errors.uploadVideoFailed")));
+      updateFormData({ rawUploadCompleted: false });
+    }).finally(() => {
+      setIsUploadingRaw(false);
+    });
+
+    return true;
+  }, [formData, isUploadingRaw, t, updateFormData]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,6 +283,11 @@ export function StudioUploadFeature() {
         <UploadStep1Details 
           formData={formData}
           updateFormData={updateFormData}
+          isUploadingRaw={isUploadingRaw}
+          uploadProgress={uploadProgress}
+          uploadError={uploadError}
+          onStartBackgroundUpload={startBackgroundUpload}
+          onResetBackgroundUploadState={resetBackgroundUploadState}
           onNext={() => setCurrentStep(2)} 
         />
       )}
@@ -165,6 +296,9 @@ export function StudioUploadFeature() {
         <UploadStep2Monetization 
           formData={formData}
           updateFormData={updateFormData}
+          isUploadingRaw={isUploadingRaw}
+          uploadProgress={uploadProgress}
+          uploadError={uploadError}
           onPrev={() => setCurrentStep(1)} 
           onNext={() => setCurrentStep(3)} 
         />
@@ -174,6 +308,10 @@ export function StudioUploadFeature() {
         <UploadStep3Review 
           formData={formData}
           updateFormData={updateFormData}
+          isUploadingRaw={isUploadingRaw}
+          uploadProgress={uploadProgress}
+          uploadError={uploadError}
+          onClearDraftStorage={clearUploadDraftFormStorage}
           onPrev={() => setCurrentStep(2)} 
         />
       )}

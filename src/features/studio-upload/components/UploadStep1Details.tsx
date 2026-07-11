@@ -15,34 +15,22 @@ import { useUploadStep1State } from "./upload-step-1/use-upload-step1-state";
 interface UploadStep1DetailsProps {
   formData: UploadFormData;
   updateFormData: (data: Partial<UploadFormData>) => void;
+  isUploadingRaw: boolean;
+  uploadProgress: number;
+  uploadError: string | null;
+  onStartBackgroundUpload: () => Promise<boolean>;
+  onResetBackgroundUploadState: () => void;
   onNext: () => void;
-}
-
-function getThumbnailExtension(file: File) {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-
-  if (extension === "jpg" || extension === "jpeg" || extension === "png" || extension === "webp") {
-    return extension;
-  }
-
-  if (file.type === "image/jpeg") {
-    return "jpg";
-  }
-
-  if (file.type === "image/png") {
-    return "png";
-  }
-
-  if (file.type === "image/webp") {
-    return "webp";
-  }
-
-  return null;
 }
 
 export function UploadStep1Details({
   formData,
   updateFormData,
+  isUploadingRaw,
+  uploadProgress,
+  uploadError,
+  onStartBackgroundUpload,
+  onResetBackgroundUploadState,
   onNext,
 }: UploadStep1DetailsProps) {
   const t = useTranslations("Studio.upload");
@@ -51,9 +39,6 @@ export function UploadStep1Details({
   const [isReplacingFile, setIsReplacingFile] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
   const [thumbnailError, setThumbnailError] = useState<string | null>(null);
-  const [isUploadingRaw, setIsUploadingRaw] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   
   // AI Suggestions States
   const locale = useLocale();
@@ -174,8 +159,7 @@ export function UploadStep1Details({
       if (!formData.draftUpload) {
         updateFormData({ file: null, rawUploadCompleted: false });
         setReplaceError(null);
-        setUploadError(null);
-        setUploadProgress(0);
+        onResetBackgroundUploadState();
         return;
       }
 
@@ -186,7 +170,7 @@ export function UploadStep1Details({
         const res = await studioUploadService.cancelUpload(formData.draftUpload.videoId, formData.draftUpload.uploadId);
         if (res.success) {
           updateFormData({ file: null, draftUpload: null, rawUploadCompleted: false });
-          setUploadProgress(0);
+          onResetBackgroundUploadState();
           return;
         }
 
@@ -202,8 +186,7 @@ export function UploadStep1Details({
     if (!formData.draftUpload) {
       updateFormData({ file, rawUploadCompleted: false });
       setReplaceError(null);
-      setUploadError(null);
-      setUploadProgress(0);
+      onResetBackgroundUploadState();
       return;
     }
 
@@ -219,8 +202,7 @@ export function UploadStep1Details({
           draftUpload: null,
           rawUploadCompleted: false,
         });
-        setUploadError(null);
-        setUploadProgress(0);
+        onResetBackgroundUploadState();
         return;
       }
 
@@ -239,68 +221,13 @@ export function UploadStep1Details({
     formData.resolutions.length > 0;
 
   const handleNext = async () => {
-    if (!canContinue || !formData.file || isUploadingRaw) {
+    if (!canContinue || !formData.file) {
       return;
     }
 
-    if (formData.draftUpload && formData.rawUploadCompleted) {
+    const canMoveNext = await onStartBackgroundUpload();
+    if (canMoveNext) {
       onNext();
-      return;
-    }
-
-    setIsUploadingRaw(true);
-    setUploadProgress(0);
-    setUploadError(null);
-
-    try {
-      let draftUpload = formData.draftUpload;
-
-      if (!draftUpload) {
-        const thumbnailExtension = formData.thumbnailFile ? getThumbnailExtension(formData.thumbnailFile) : null;
-
-        if (formData.thumbnailFile && !thumbnailExtension) {
-          setThumbnailError(t("step1.errors.invalidThumbnailType"));
-          return;
-        }
-
-        const initResponse = await studioUploadService.initUpload({
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          categoryId: formData.categoryId,
-          tagIds: formData.tagIds,
-          visibility: formData.visibility,
-          price: formData.price,
-          requiredTierLevel: formData.requiredTierLevel,
-          fileName: formData.file.name,
-          fileSize: formData.file.size,
-          fileLastModified: new Date(formData.file.lastModified).toISOString(),
-          thumbnailExtension: thumbnailExtension ?? undefined,
-        });
-
-        if (!(initResponse.success || initResponse.statusCode === 201) || !initResponse.data) {
-          setUploadError(initResponse.message || t("step1.errors.createDraftFailed"));
-          return;
-        }
-
-        draftUpload = initResponse.data;
-        updateFormData({ draftUpload, rawUploadCompleted: false });
-      }
-
-      await studioUploadService.uploadResumableVideoFile({
-        videoId: draftUpload.videoId,
-        uploadId: draftUpload.uploadId,
-        file: formData.file,
-        partSizeBytes: draftUpload.partSizeBytes,
-        onProgress: setUploadProgress,
-      });
-
-      updateFormData({ draftUpload, rawUploadCompleted: true });
-      onNext();
-    } catch (err) {
-      setUploadError(getErrorMessage(err, t("step1.errors.uploadVideoFailed")));
-      updateFormData({ rawUploadCompleted: false });
-    } finally {
-      setIsUploadingRaw(false);
     }
   };
 
@@ -475,16 +402,14 @@ export function UploadStep1Details({
           <button
             type="button"
             onClick={() => void handleNext()}
-            disabled={!canContinue || isUploadingRaw}
+            disabled={!canContinue}
             className={`rounded-sm px-8 py-2.5 text-sm font-bold transition-all active:scale-95 ${
-              canContinue && !isUploadingRaw
+              canContinue
                 ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:shadow-[0_0_20px_rgba(255,142,128,0.3)]"
                 : "pointer-events-none bg-muted text-muted-foreground"
             }`}
           >
-            {isUploadingRaw
-              ? t("step1.bottomBar.uploading", { progress: uploadProgress })
-              : formData.rawUploadCompleted
+            {formData.rawUploadCompleted || isUploadingRaw
                 ? t("step1.bottomBar.nextBtn")
                 : t("step1.bottomBar.uploadBtn")}
           </button>

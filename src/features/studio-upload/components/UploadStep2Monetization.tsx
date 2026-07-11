@@ -9,6 +9,9 @@ import type { UploadFormData } from "./StudioUploadFeature";
 interface UploadStep2MonetizationProps {
   formData: UploadFormData;
   updateFormData: (data: Partial<UploadFormData>) => void;
+  isUploadingRaw: boolean;
+  uploadProgress: number;
+  uploadError: string | null;
   onPrev: () => void;
   onNext: () => void;
 }
@@ -31,7 +34,15 @@ function formatTierOption(t: TFunction, locale: string, tier: MembershipTierResp
   return `Lv${tier.level} - ${tier.name} (${formatCoins(locale, tier.priceCoin)}, ${status})`;
 }
 
-export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNext }: UploadStep2MonetizationProps) {
+export function UploadStep2Monetization({
+  formData,
+  updateFormData,
+  isUploadingRaw,
+  uploadProgress,
+  uploadError,
+  onPrev,
+  onNext,
+}: UploadStep2MonetizationProps) {
   const t = useTranslations("Studio.upload");
   const locale = useLocale();
   const [membershipTiers, setMembershipTiers] = useState<MembershipTierResponse[]>([]);
@@ -248,6 +259,31 @@ export function UploadStep2Monetization({ formData, updateFormData, onPrev, onNe
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 flex h-20 items-center justify-between border-t border-border/30 bg-card/80 px-8 backdrop-blur-2xl md:left-64">
+        <div className="hidden min-w-0 flex-1 flex-col pr-6 sm:flex">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            {t("step1.bottomBar.status")}
+          </span>
+          <span className={`flex items-center gap-1 text-xs font-bold ${uploadError ? "text-destructive" : formData.rawUploadCompleted ? "text-secondary" : "text-green-500"}`}>
+            <span className={`material-symbols-outlined text-[14px] ${isUploadingRaw ? "animate-spin" : ""}`}>
+              {uploadError ? "error" : formData.rawUploadCompleted ? "cloud_done" : isUploadingRaw ? "progress_activity" : "check"}
+            </span>
+            {uploadError
+              ? uploadError
+              : formData.rawUploadCompleted
+                ? t("step1.bottomBar.rawUploaded")
+                : isUploadingRaw
+                  ? t("step1.bottomBar.uploading", { progress: uploadProgress })
+                  : t("step1.bottomBar.fileSelected")}
+          </span>
+          {isUploadingRaw || formData.rawUploadCompleted ? (
+            <div className="mt-1 h-1 max-w-xs overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-secondary transition-[width] duration-300"
+                style={{ width: `${formData.rawUploadCompleted ? 100 : uploadProgress}%` }}
+              />
+            </div>
+          ) : null}
+        </div>
         <button onClick={onPrev} className="px-6 py-2.5 font-headline text-sm font-bold text-muted-foreground transition-colors hover:text-foreground">
           {t("step2.buttons.back")}
         </button>

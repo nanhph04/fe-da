@@ -13,16 +13,29 @@ import { PublishActions } from "./upload-step-3/PublishActions";
 import { ScheduleRelease } from "./upload-step-3/ScheduleRelease";
 import { ProgressStepper } from "./upload-step-3/ProgressStepper";
 import { VisibilityOptions } from "./upload-step-3/VisibilityOptions";
+import { getUploadWizardStatus } from "../utils/upload-wizard-status";
 
 interface UploadStep3ReviewProps {
   formData: UploadFormData;
   updateFormData: (data: Partial<UploadFormData>) => void;
+  isUploadingRaw: boolean;
+  uploadProgress: number;
+  uploadError: string | null;
+  onClearDraftStorage: () => void;
   onPrev: () => void;
 }
 
 type DeclarationDialog = "guidelines" | "drm";
 
-export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadStep3ReviewProps) {
+export function UploadStep3Review({
+  formData,
+  updateFormData,
+  isUploadingRaw,
+  uploadProgress,
+  uploadError,
+  onClearDraftStorage,
+  onPrev,
+}: UploadStep3ReviewProps) {
   const t = useTranslations("Studio.upload");
   const router = useRouter();
   const [isChecked1, setIsChecked1] = useState(false);
@@ -34,7 +47,13 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
   const [publishStage, setPublishStage] = useState<"idle" | "metadata" | "thumbnail" | "confirming">("idle");
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-  const canPublish = isChecked1 && isChecked2 && !!formData.draftUpload && formData.rawUploadCompleted;
+  const uploadWizardStatus = getUploadWizardStatus({
+    hasDraftUpload: !!formData.draftUpload,
+    rawUploadCompleted: formData.rawUploadCompleted,
+    isUploadingRaw,
+    uploadError,
+  });
+  const canPublish = isChecked1 && isChecked2 && uploadWizardStatus.canConfirmUpload;
   const activeDeclarationContent = activeDeclarationDialog === "guidelines"
     ? {
         title: t("step3.declarations.guidelinesDialog.title"),
@@ -98,11 +117,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
       }
 
       setIsSuccess(true);
-      try {
-        localStorage.removeItem("studio-upload-draft-form");
-      } catch {
-        // Ignore errors if localStorage is disabled
-      }
+      onClearDraftStorage();
       setTimeout(() => {
         router.push("/studio/content");
       }, 2000);
@@ -131,11 +146,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
         requiredTierLevel: formData.requiredTierLevel,
       });
 
-      try {
-        localStorage.removeItem("studio-upload-draft-form");
-      } catch {
-        // Ignore
-      }
+      onClearDraftStorage();
 
       router.push("/studio/content");
     } catch (err: unknown) {
@@ -160,7 +171,7 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
   }
 
   return (
-    <div className="w-full animate-in fade-in slide-in-from-right-4 duration-500">
+    <div className="w-full animate-in fade-in slide-in-from-right-4 pb-28 duration-500">
       {/* Page Header */}
       <div className="px-12 py-10">
         <div className="mb-10 max-w-5xl mx-auto">
@@ -192,6 +203,16 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
             {!formData.file ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
                 {t("step3.errors.selectFileFirst")}
+              </div>
+            ) : null}
+
+            {formData.file && !uploadWizardStatus.canConfirmUpload ? (
+              <div className={`rounded-lg border p-4 text-sm ${uploadError ? "border-destructive/30 bg-destructive/10 text-destructive" : "border-secondary/30 bg-secondary/10 text-secondary"}`}>
+                {uploadError
+                  ? uploadError
+                  : isUploadingRaw
+                    ? t("step3.errors.waitForRawUpload", { progress: uploadProgress })
+                    : t("step3.errors.rawUploadNotReady")}
               </div>
             ) : null}
 
@@ -347,6 +368,34 @@ export function UploadStep3Review({ formData, updateFormData, onPrev }: UploadSt
           <p className="text-sm text-red-500 font-medium">{error}</p>
         </div>
       )}
+
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex h-20 items-center justify-between border-t border-border/30 bg-card/80 px-8 backdrop-blur-2xl md:left-64">
+        <div className="min-w-0 flex-1 pr-6">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            {t("step1.bottomBar.status")}
+          </span>
+          <span className={`mt-1 flex items-center gap-1 text-xs font-bold ${uploadError ? "text-destructive" : formData.rawUploadCompleted ? "text-secondary" : "text-green-500"}`}>
+            <span className={`material-symbols-outlined text-[14px] ${isUploadingRaw ? "animate-spin" : ""}`}>
+              {uploadError ? "error" : formData.rawUploadCompleted ? "cloud_done" : isUploadingRaw ? "progress_activity" : "check"}
+            </span>
+            {uploadError
+              ? uploadError
+              : formData.rawUploadCompleted
+                ? t("step1.bottomBar.rawUploaded")
+                : isUploadingRaw
+                  ? t("step1.bottomBar.uploading", { progress: uploadProgress })
+                  : t("step1.bottomBar.fileSelected")}
+          </span>
+          {isUploadingRaw || formData.rawUploadCompleted ? (
+            <div className="mt-1 h-1 max-w-sm overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-secondary transition-[width] duration-300"
+                style={{ width: `${formData.rawUploadCompleted ? 100 : uploadProgress}%` }}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

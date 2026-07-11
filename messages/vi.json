@@ -1021,7 +1021,9 @@
           "missingThumbnailUrl": "Dịch vụ media không trả về URL tải ảnh đại diện lên. Vui lòng xóa ảnh đại diện tùy chỉnh hoặc thử lại.",
           "submitUploadFailed": "Không thể xác nhận yêu cầu tải lên.",
           "genericUploadError": "Đã xảy ra lỗi trong quá trình tải lên.",
-          "selectFileFirst": "Vui lòng quay lại bước Chi tiết để chọn tệp video trước khi xuất bản."
+          "selectFileFirst": "Vui lòng quay lại bước Chi tiết để chọn tệp video trước khi xuất bản.",
+          "waitForRawUpload": "Video gốc đang tải lên {progress}%. Bạn có thể xem lại thông tin, nhưng chỉ xuất bản sau khi tải xong.",
+          "rawUploadNotReady": "Video gốc chưa tải lên xong. Vui lòng chờ hoặc quay lại bước Chi tiết để tiếp tục tải lên."
         },
         "declarations": {
           "title": "Điều khoản & Tuyên bố",

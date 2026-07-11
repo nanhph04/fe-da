@@ -1069,7 +1069,9 @@
           "missingThumbnailUrl": "Media service did not return a thumbnail upload URL. Remove the custom thumbnail or try again.",
           "submitUploadFailed": "Failed to submit upload.",
           "genericUploadError": "An error occurred during upload.",
-          "selectFileFirst": "Please go back to the Details step and choose a video file before publishing."
+          "selectFileFirst": "Please go back to the Details step and choose a video file before publishing.",
+          "waitForRawUpload": "Raw video is uploading {progress}%. You can review details now, but publishing unlocks after upload completes.",
+          "rawUploadNotReady": "Raw video upload is not complete yet. Please wait or return to Details to resume uploading."
         },
         "declarations": {
           "title": "Terms & Declarations",
