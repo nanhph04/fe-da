@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import {
   getVideoStatusFailureReason,
 } from "@/shared/hooks/use-video-status-events";
+import { getVideoJobStatusMessageUi } from "../utils/video-job-status-message-ui";
 
 interface ProcessingProgressTrackerProps {
   initialStatus: string;
@@ -35,6 +36,15 @@ function getToneClass(status: string) {
   return "border-border/40 bg-muted text-muted-foreground";
 }
 
+function translateJobStatusMessage(t: ReturnType<typeof useTranslations>, message?: string | null) {
+  if (!message) {
+    return null;
+  }
+
+  const messageUi = getVideoJobStatusMessageUi(message);
+  return messageUi.type === "translation" ? t(messageUi.key) : messageUi.message;
+}
+
 export function ProcessingProgressTracker({
   initialStatus,
   jobStatus,
@@ -50,9 +60,10 @@ export function ProcessingProgressTracker({
   const label = t(`content.status.${normalizedStatus}`);
   const isFailed = normalizedStatus === "failed" || normalizedStatus === "rejected";
   const isSucceeded = normalizedStatus === "succeeded";
+  const translatedJobStatusMessage = translateJobStatusMessage(t, jobStatusMessage);
   const message = isFailed
-    ? getVideoStatusFailureReason({ failureReason: failureReason ?? null, moderationDetails: moderationDetails ?? null }) || jobStatusMessage || t("content.preview.statusMessage.failed")
-    : jobStatusMessage || (isSucceeded ? t("content.preview.statusMessage.succeeded") : t("content.preview.statusMessage.processing"));
+    ? getVideoStatusFailureReason({ failureReason: failureReason ?? null, moderationDetails: moderationDetails ?? null }) || translatedJobStatusMessage || t("content.preview.statusMessage.failed")
+    : translatedJobStatusMessage || (isSucceeded ? t("content.preview.statusMessage.succeeded") : t("content.preview.statusMessage.processing"));
 
   return (
     <div className={`mt-3 max-w-sm rounded-md border p-3 text-xs ${toneClass}`}>

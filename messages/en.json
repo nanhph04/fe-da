@@ -807,6 +807,11 @@
         "public": "Public",
         "unknown": "Unknown"
       },
+      "uploadSessionStatus": {
+        "active": "Upload pending",
+        "completed": "Upload completed, awaiting confirmation",
+        "missing": "Missing upload session"
+      },
       "visibility": {
         "public": "Public",
         "private": "Private"
@@ -842,6 +847,9 @@
       },
       "notices": {
         "draftWarning": "Video will be deleted after 24 hours if you do not confirm upload. Click upload to replace draft file, then click checkmark to confirm-upload when ready to process.",
+        "draftUploadActive": "The upload session is open but the raw file is not complete yet. Click Resume upload to finish the file before confirming upload.",
+        "draftUploadCompleted": "The raw file upload is complete. Click Confirm upload to place this video in the processing queue.",
+        "draftUploadMissingSession": "No valid upload session was found for this draft. Upload the video file again to create a new session.",
         "failedWarning": "Video processing failed. You can delete the failed version and upload again.",
         "rejectedWarning": "Video rejected",
         "viewNotice": "View notice",
@@ -890,6 +898,7 @@
         "statusMessage": {
           "failed": "Video processing failed.",
           "processing": "Video is being processed. The system will automatically update when changes occur.",
+          "waitingForModeration": "Video is waiting for moderation.",
           "succeeded": "Video processing completed and ready to play.",
           "default": "Only READY videos can be played in Creator Studio. Complete upload and processing before opening the player."
         }

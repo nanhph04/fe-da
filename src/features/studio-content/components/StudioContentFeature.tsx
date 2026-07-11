@@ -17,6 +17,7 @@ import {
 import { EditVideoMetadataDialog } from "./EditVideoMetadataDialog";
 import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
+import { getDraftUploadSessionUiState } from "../utils/draft-upload-session-ui";
 
 const PROCESSING_STATUSES = new Set(["waiting", "processing", "pending_moderation", "moderating", "pending_manual_review"]);
 const FAILED_STATUSES = new Set(["failed", "rejected"]);
@@ -486,6 +487,7 @@ export function StudioContentFeature() {
             const statusTone = getStatusTone(displayStatus);
             const isNoticeExpanded = expandedNoticeVideoId === video.id;
             const hasInlineNotice = isDraft || isFailed;
+            const draftUploadSessionUi = isDraft ? getDraftUploadSessionUiState(video) : null;
             const previewHref = `/studio/content/${video.id}`;
             const noticePanelId = `content-notice-${video.id}`;
 
@@ -523,6 +525,11 @@ export function StudioContentFeature() {
                       <span className={`font-label text-xs ${statusTone}`}>
                         {statusLabel}
                       </span>
+                      {draftUploadSessionUi ? (
+                        <span className={`font-label text-xs ${draftUploadSessionUi.state === "completed" ? "text-emerald-400" : draftUploadSessionUi.state === "missing" ? "text-destructive" : "text-secondary"}`}>
+                          • {t(draftUploadSessionUi.statusKey)}
+                        </span>
+                      ) : null}
                       <span className="font-label text-xs text-muted-foreground">• {formattedDate}</span>
                       {hasInlineNotice ? (
                         <button
@@ -548,7 +555,7 @@ export function StudioContentFeature() {
                         role="note"
                         className="mt-2 max-w-sm rounded-md border border-secondary/30 bg-secondary/10 px-3 py-2 text-xs text-muted-foreground"
                       >
-                        {t("content.notices.draftWarning")}
+                        {draftUploadSessionUi ? t(draftUploadSessionUi.noticeKey) : t("content.notices.draftWarning")}
                       </div>
                     ) : null}
                     {isDraft && reuploadingVideoId === video.id ? (
@@ -640,9 +647,9 @@ export function StudioContentFeature() {
                         type="button"
                         variant="ghost"
                         onClick={() => draftFileInputRefs.current[video.id]?.click()}
-                        disabled={reuploadingVideoId === video.id || confirmingVideoId === video.id}
-                        title={t("content.actions.resumeUpload")}
-                        className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={!draftUploadSessionUi?.canResume || reuploadingVideoId === video.id || confirmingVideoId === video.id}
+                        title={draftUploadSessionUi ? t(draftUploadSessionUi.noticeKey) : t("content.actions.resumeUpload")}
+                        className={`h-8 w-8 rounded-full p-0 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${draftUploadSessionUi?.state === "completed" ? "text-muted-foreground hover:bg-muted hover:text-foreground" : "text-secondary hover:bg-secondary/10 hover:text-secondary"}`}
                         aria-label={`${t("content.actions.resumeUpload")} ${video.title}`}
                       >
                         <span className={`material-symbols-outlined text-[18px] ${reuploadingVideoId === video.id ? "animate-spin" : ""}`}>
@@ -653,10 +660,10 @@ export function StudioContentFeature() {
                         type="button"
                         variant="ghost"
                         onClick={() => void handleConfirmDraftUpload(video)}
-                        disabled={confirmingVideoId === video.id || reuploadingVideoId === video.id}
-                        title={t("content.notices.draftWarning")}
-                        className="h-8 w-8 rounded-full p-0 text-secondary transition-colors hover:bg-secondary/10 hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
-                        aria-label={`${t("content.actions.confirmUpload")} ${video.title}. Video will be deleted after 24 hours if you do not confirm upload.`}
+                        disabled={!draftUploadSessionUi?.canConfirm || confirmingVideoId === video.id || reuploadingVideoId === video.id}
+                        title={draftUploadSessionUi ? t(draftUploadSessionUi.noticeKey) : t("content.notices.draftWarning")}
+                        className={`h-8 w-8 rounded-full p-0 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${draftUploadSessionUi?.state === "completed" ? "text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                        aria-label={`${t("content.actions.confirmUpload")} ${video.title}. ${draftUploadSessionUi ? t(draftUploadSessionUi.noticeKey) : t("content.notices.draftWarning")}`}
                       >
                         <span className="material-symbols-outlined text-[18px]">
                           {confirmingVideoId === video.id ? "hourglass_top" : "check_circle"}

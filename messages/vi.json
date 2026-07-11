@@ -759,6 +759,11 @@
         "public": "Công khai",
         "unknown": "Không rõ"
       },
+      "uploadSessionStatus": {
+        "active": "Đang chờ upload",
+        "completed": "Đã upload xong, chờ xác nhận",
+        "missing": "Thiếu phiên upload"
+      },
       "visibility": {
         "public": "Công khai",
         "private": "Riêng tư"
@@ -794,6 +799,9 @@
       },
       "notices": {
         "draftWarning": "Video sẽ bị xóa sau 24 giờ nếu bạn không xác nhận tải lên. Bấm tải lên để thay tệp nháp, sau đó bấm dấu tích để xác nhận tải lên khi sẵn sàng xử lý.",
+        "draftUploadActive": "Phiên upload đang mở nhưng file gốc chưa hoàn tất. Hãy bấm Tiếp tục tải lên để hoàn tất file, sau đó mới xác nhận tải lên.",
+        "draftUploadCompleted": "File gốc đã upload xong. Bấm Xác nhận tải lên để đưa video vào hàng đợi xử lý.",
+        "draftUploadMissingSession": "Không tìm thấy phiên upload hợp lệ cho bản nháp này. Hãy tải lại file video để tạo phiên upload mới.",
         "failedWarning": "Video xử lý thất bại. Bạn có thể xóa bản lỗi và tải lên lại.",
         "rejectedWarning": "Video bị từ chối",
         "viewNotice": "Xem lưu ý",
@@ -842,6 +850,7 @@
         "statusMessage": {
           "failed": "Video xử lý thất bại.",
           "processing": "Video đang được xử lý. Hệ thống sẽ tự cập nhật khi có thay đổi.",
+          "waitingForModeration": "Video đang chờ kiểm duyệt.",
           "succeeded": "Video đã xử lý xong và sẵn sàng phát.",
           "default": "Chỉ video ở trạng thái SẴN SÀNG mới có thể phát trong Creator Studio. Hoàn thành tải lên và xử lý trước khi mở trình phát."
         }

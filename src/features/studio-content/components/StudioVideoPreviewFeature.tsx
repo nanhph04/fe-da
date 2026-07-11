@@ -10,6 +10,7 @@ import { getVideoStatusFailureReason, isVideoJobStatus, useVideoStatusEventSubsc
 import { ProcessingProgressTracker } from "./ProcessingProgressTracker";
 import { StudioVideoDraftActions } from "./StudioVideoDraftActions";
 import { VideoThumbnail } from "@/shared/components/VideoThumbnail";
+import { getVideoJobStatusMessageUi } from "../utils/video-job-status-message-ui";
 
 interface StudioVideoPreviewFeatureProps {
   videoId: string;
@@ -112,16 +113,27 @@ function getStatusClass(status: string) {
   return "border-border/40 bg-muted text-muted-foreground";
 }
 
+function translateJobStatusMessage(t: TFunction, message?: string | null) {
+  if (!message) {
+    return null;
+  }
+
+  const messageUi = getVideoJobStatusMessageUi(message);
+  return messageUi.type === "translation" ? t(messageUi.key) : messageUi.message;
+}
+
 function getVideoStatusMessage(t: TFunction, video: OwnerVideoDetailResponse, status: string) {
+  const translatedJobStatusMessage = translateJobStatusMessage(t, video.jobStatusMessage);
+
   if (status === "rejected" || status === "failed") {
     return getVideoStatusFailureReason({
       failureReason: video.failureReason || video.errorMessage || null,
       moderationDetails: video.moderationDetails,
-    }) || video.jobStatusMessage || t("content.preview.statusMessage.failed");
+    }) || translatedJobStatusMessage || t("content.preview.statusMessage.failed");
   }
 
   if (PROCESSING_STATUSES.has(status)) {
-    return video.jobStatusMessage || t("content.preview.statusMessage.processing");
+    return translatedJobStatusMessage || t("content.preview.statusMessage.processing");
   }
 
   if (status === "succeeded" || status === "ready") {

@@ -9,6 +9,7 @@ import {
   type OwnerVideoDetailResponse,
 } from "@/features/watch/services/mediaService";
 import { getErrorMessage } from "@/shared/api/client";
+import { getDraftUploadSessionUiState } from "../utils/draft-upload-session-ui";
 
 interface StudioVideoDraftActionsProps {
   video: OwnerVideoDetailResponse;
@@ -41,6 +42,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const isBusy = activeAction !== null;
+  const draftUploadSessionUi = getDraftUploadSessionUiState(video);
 
   const handleConfirmUpload = async () => {
     setActiveAction("confirm");
@@ -147,7 +149,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
             {t("content.draftActions.title")}
           </h2>
           <p className="font-body text-sm leading-6 text-muted-foreground">
-            {t("content.draftActions.description")}
+            {t(draftUploadSessionUi.noticeKey)}
           </p>
         </div>
 
@@ -167,7 +169,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isBusy}
+            disabled={isBusy || !draftUploadSessionUi.canResume}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm border border-secondary/40 px-4 font-headline text-sm font-bold text-secondary transition-colors hover:bg-secondary/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className={`material-symbols-outlined text-[18px] ${activeAction === "replace" ? "animate-spin" : ""}`} aria-hidden="true">
@@ -178,7 +180,7 @@ export function StudioVideoDraftActions({ video, onChanged }: StudioVideoDraftAc
           <button
             type="button"
             onClick={() => void handleConfirmUpload()}
-            disabled={isBusy}
+            disabled={isBusy || !draftUploadSessionUi.canConfirm}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-primary px-4 font-headline text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
